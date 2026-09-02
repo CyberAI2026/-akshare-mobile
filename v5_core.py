@@ -1024,8 +1024,49 @@ def _limit_flags(code: str, name: str, pct) -> tuple[bool,bool,str]:
     return bool(up),bool(down),board
 
 
+def _public_market_activity_legu() -> tuple[dict, str]:
+    """直接读取公开市场赚钱效应统计，不用逐股涨跌幅推算涨停/跌停。"""
+    raw = ak.stock_market_activity_legu()
+    if raw is None or raw.empty:
+        raise RuntimeError("乐咕市场赚钱效应为空")
+    cols = list(raw.columns)
+    if "item" in cols and "value" in cols:
+        items = raw[["item","value"]].copy()
+    elif len(cols) >= 2:
+        items = raw.iloc[:, :2].copy()
+        items.columns = ["item","value"]
+    else:
+        raise RuntimeError(f"乐咕返回字段异常: {cols}")
+    d = {}
+    for _, r in items.iterrows():
+        k = str(r["item"]).strip()
+        v = r["value"]
+        d[k] = v
+    required = ["上涨","下跌","涨停","跌停"]
+    miss = [k for k in required if k not in d]
+    if miss:
+        raise RuntimeError(f"乐咕缺少字段: {miss}")
+    return d, "legulegu_public_market_activity"
+
+
+def _to_count(v):
+    try:
+        if pd.isna(v): return np.nan
+        s=str(v).replace(",","").replace("%","").strip()
+        return int(round(float(s)))
+    except Exception:
+        return np.nan
+
+
 def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """盘后市场数据层。先保存客观数据，不在foundation版内自动改策略。"""
+    """市场数据层。
+
+    规则：
+    1) 上涨/下跌/平盘/涨停/跌停优先直接读取公开市场统计；
+    2) 不再用个股涨跌幅阈值推算涨停/跌停；
+    3) 全市场逐股快照仅用于成交额、涨5%/跌5%等补充字段；
+    4) 若公开涨跌停统计失败，涨停/跌停留空并在 QA 中报错，绝不伪装成正式口径。
+    """
     idx_rows=[]; qa=[]
     for name,symbol in INDEX_SYMBOLS.items():
         d,src,errs=fetch_index_history(symbol,days)
@@ -1033,43 +1074,75 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
             d.insert(0,"指数名称",name); d.insert(0,"指数代码",symbol); idx_rows.append(d)
         qa.append({"对象":name,"代码":symbol,"状态":"成功" if not d.empty else "失败","数据源":src,"交易日数":len(d),"错误":" | ".join(errs[-4:])})
     indices=pd.concat(idx_rows,ignore_index=True) if idx_rows else pd.DataFrame()
-    breadth=pd.DataFrame()
-    # 全市场快照优先东财，失败回退新浪。只保存客观环境字段。
+
+    # A. 公开市场统计：正式数量口径
+    activity={}
+    activity_src=""
+    try:
+        activity, activity_src = _public_market_activity_legu()
+        qa.append({"对象":"市场涨跌家数/涨跌停公开统计","代码":"","状态":"成功","数据源":activity_src,"交易日数":1,"错误":""})
+    except Exception as e:
+        qa.append({"对象":"市场涨跌家数/涨跌停公开统计","代码":"","状态":"失败","数据源":"legulegu","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+
+    # B. 直接涨停池/跌停池交叉核验（能取到就记录；失败不影响主口径）
+    today=datetime.now().strftime("%Y%m%d")
+    for label, fn in [
+        ("公开涨停股池", lambda: ak.stock_zt_pool_em(date=today)),
+        ("公开跌停股池", lambda: ak.stock_zt_pool_dtgc_em(date=today)),
+    ]:
+        try:
+            p=fn()
+            qa.append({"对象":label,"代码":"","状态":"成功","数据源":"eastmoney_public_pool","交易日数":len(p),"错误":""})
+        except Exception as e:
+            qa.append({"对象":label,"代码":"","状态":"失败","数据源":"eastmoney_public_pool","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+
+    # C. 全市场快照：只补成交额等，不负责正式涨跌停计数
+    spot=pd.DataFrame(); spot_src=""
     for src,fn in [("eastmoney",lambda: ak.stock_zh_a_spot_em()),("sina",lambda: ak.stock_zh_a_spot())]:
         try:
             raw=fn(); spot=_std_spot(raw)
             if spot.empty: raise RuntimeError("空快照")
-            pct=pd.to_numeric(spot.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce")
-            amt=pd.to_numeric(spot.get("截至当前成交额",pd.Series(dtype=float)),errors="coerce")
-            codes=spot.get("股票代码",pd.Series([""]*len(spot))).astype(str)
-            names=spot.get("股票名称",pd.Series([""]*len(spot))).astype(str)
-            flags=[_limit_flags(c,n,p) for c,n,p in zip(codes,names,pct)]
-            up_lim=pd.Series([f[0] for f in flags],index=spot.index)
-            dn_lim=pd.Series([f[1] for f in flags],index=spot.index)
-            boards=pd.Series([f[2] for f in flags],index=spot.index)
-            valid=int(pct.notna().sum()); ups=int((pct>0).sum()); downs=int((pct<0).sum()); flats=int((pct==0).sum())
-            row={
-                "日期":datetime.now().strftime("%Y-%m-%d"),"数据时间":datetime.now().strftime("%Y-%m-%d %H:%M:%S"),"数据源":src,
-                "股票数":valid,"上涨家数":ups,"下跌家数":downs,"平盘家数":flats,
-                "上涨比例":ups/valid if valid else np.nan,"下跌比例":downs/valid if valid else np.nan,"净上涨家数":ups-downs,
-                "涨停家数":int(up_lim.sum()),"跌停家数":int(dn_lim.sum()),
-                "主板涨停家数":int((up_lim & (boards=="沪深主板10%")).sum()),
-                "创业板涨停家数":int((up_lim & (boards=="创业板20%")).sum()),
-                "科创板涨停家数":int((up_lim & (boards=="科创板20%")).sum()),
-                "北交所涨停家数":int((up_lim & (boards=="北交所30%")).sum()),
-                "ST涨停家数":int((up_lim & (boards=="ST/*ST 5%")).sum()),
-                "主板跌停家数":int((dn_lim & (boards=="沪深主板10%")).sum()),
-                "创业板跌停家数":int((dn_lim & (boards=="创业板20%")).sum()),
-                "科创板跌停家数":int((dn_lim & (boards=="科创板20%")).sum()),
-                "北交所跌停家数":int((dn_lim & (boards=="北交所30%")).sum()),
-                "ST跌停家数":int((dn_lim & (boards=="ST/*ST 5%")).sum()),
-                "涨5%以上家数":int((pct>=5).sum()),"跌5%以上家数":int((pct<=-5).sum()),
-                "全市场成交额":float(amt.sum()) if amt.notna().any() else np.nan,
-                "说明":"涨跌停按常规板块规则识别：主板10%、创业板/科创板20%、北交所30%、ST 5%，识别阈值取规则幅度-0.2个百分点；IPO/恢复上市等特殊无涨跌幅限制日不保证完全覆盖。"
-            }
-            # 兼容旧字段名，但含义已经升级为按板块规则识别。
-            row["涨停近似家数"]=row["涨停家数"]; row["跌停近似家数"]=row["跌停家数"]
-            breadth=pd.DataFrame([row]); break
+            spot_src=src
+            qa.append({"对象":"全市场逐股快照","代码":"","状态":"成功","数据源":src,"交易日数":len(spot),"错误":""})
+            break
         except Exception as e:
-            qa.append({"对象":"全市场快照","代码":"","状态":"失败","数据源":src,"交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+            qa.append({"对象":"全市场逐股快照","代码":"","状态":"失败","数据源":src,"交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+
+    pct=pd.to_numeric(spot.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce") if not spot.empty else pd.Series(dtype=float)
+    amt=pd.to_numeric(spot.get("截至当前成交额",pd.Series(dtype=float)),errors="coerce") if not spot.empty else pd.Series(dtype=float)
+
+    ups=_to_count(activity.get("上涨"))
+    downs=_to_count(activity.get("下跌"))
+    flats=_to_count(activity.get("平盘"))
+    up_limit=_to_count(activity.get("涨停"))
+    down_limit=_to_count(activity.get("跌停"))
+    suspended=_to_count(activity.get("停牌"))
+    stat_date=str(activity.get("统计日期","")).strip()
+    counts=[x for x in [ups,downs,flats] if pd.notna(x)]
+    valid=int(sum(counts)) if len(counts)==3 else (int(pct.notna().sum()) if not pct.empty else np.nan)
+
+    row={
+        "日期":datetime.now().strftime("%Y-%m-%d"),
+        "数据时间":stat_date if stat_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "数据源":activity_src if activity_src else "公开市场统计不可用",
+        "快照数据源":spot_src,
+        "股票数":valid,
+        "上涨家数":ups,"下跌家数":downs,"平盘家数":flats,"停牌家数":suspended,
+        "上涨比例":(ups/valid if pd.notna(ups) and valid else np.nan),
+        "下跌比例":(downs/valid if pd.notna(downs) and valid else np.nan),
+        "净上涨家数":(ups-downs if pd.notna(ups) and pd.notna(downs) else np.nan),
+        "涨停家数":up_limit,"跌停家数":down_limit,
+        "真实涨停家数":_to_count(activity.get("真实涨停")),
+        "真实跌停家数":_to_count(activity.get("真实跌停")),
+        "ST涨停家数":_to_count(activity.get("st st*涨停", activity.get("ST ST*涨停"))),
+        "ST跌停家数":_to_count(activity.get("st st*跌停", activity.get("ST ST*跌停"))),
+        "涨5%以上家数":int((pct>=5).sum()) if not pct.empty else np.nan,
+        "跌5%以上家数":int((pct<=-5).sum()) if not pct.empty else np.nan,
+        "全市场成交额":float(amt.sum()) if not amt.empty and amt.notna().any() else np.nan,
+        "说明":"上涨/下跌/平盘/涨停/跌停直接读取公开市场赚钱效应统计；不再按涨跌幅阈值推算涨停跌停。逐股快照仅补充成交额及涨跌幅分布。若公开统计失败，正式涨跌停字段留空并记录QA。"
+    }
+    # 旧字段保留兼容，但不再叫“近似”：数值直接等于公开统计；若公开源失败则为空。
+    row["涨停近似家数"]=row["涨停家数"]
+    row["跌停近似家数"]=row["跌停家数"]
+    breadth=pd.DataFrame([row])
     return indices,breadth,pd.DataFrame(qa)
