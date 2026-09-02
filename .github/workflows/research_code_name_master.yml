@@ -1,0 +1,30 @@
+name: Research A-Share Code-Name Master
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "research/code_name_master_only.py"
+      - ".github/workflows/research_code_name_master.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-master:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python research/code_name_master_only.py
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-code-name-master-${{ github.run_id }}
+          path: research_code_name_master/
+          retention-days: 7
