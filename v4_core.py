@@ -17,7 +17,7 @@ import pandas as pd
 import requests
 
 APP_VERSION = "V4"
-STRATEGY_VERSION = "research_v0.4.1"
+STRATEGY_VERSION = "research_v0.5-evidence-aligned"
 
 MODE_DAYS = {"25日粗筛": 25, "120日结构筛选": 120, "250日生命周期筛选": 250}
 
@@ -318,7 +318,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         if len(vals) >= 2:
             robust_upper = vals[1]
     return {
-        "最新收盘": last, "ret10": ret(10), "ret20": ret(20), "ret40": ret(40), "ret60": ret(60), "ret120": ret(120),
+        "最新收盘": last, "ret1": ret(1), "ret10": ret(10), "ret20": ret(20), "ret40": ret(40), "ret60": ret(60), "ret120": ret(120),
         "amp5": amp5, "距20日高点": last / hi20 - 1 if hi20 else np.nan,
         "距250日高点": last / hi250 - 1 if hi250 else np.nan,
         "250日位置": (last - lo250) / (hi250 - lo250) if hi250 > lo250 else np.nan,
@@ -368,75 +368,115 @@ def _rank_and_audit(x: pd.DataFrame, score_col: str, max_n: int, eligible_col: s
 
 
 def stage1_rank(metrics: pd.DataFrame, max_n: int = 150, return_audit: bool = False):
-    """25日：宽松粗筛。仅保留一个非常宽松的最低资格条件，其余以排序压缩样本。"""
+    """25日一级：宽松粗筛，只做方向性压缩，不把弱证据写成硬门槛。
+
+    研究约束：
+    - 不使用“距20日高点越近越好”作为核心得分；
+    - 不使用精确MA20距离作为资格线；
+    - 5日振幅只用于识别仍然极端的短波动，不假设某个固定振幅最优；
+    - 本层不是买点判断，只把明显弱/乱的状态排到后面。
+    """
     x = metrics.copy()
     if x.empty:
         return (x, x) if return_audit else x
-    for c in ["ret20", "amp5", "距20日高点", "MA20距离"]:
+    for c in ["ret10", "ret20", "amp5", "MA20距离", "距稳健5日上沿"]:
         x[c] = pd.to_numeric(x[c], errors="coerce")
-    x["20日动量贡献"] = x["ret20"].clip(-0.2, 0.5).fillna(-0.2) * 35
-    x["距20日高点贡献"] = (x["距20日高点"].clip(-0.3, 0).fillna(-0.3) + 0.3) * 25
-    x["MA20位置贡献"] = x["MA20距离"].clip(-0.15, 0.3).fillna(-0.15) * 20
-    x["短波动惩罚"] = (x["amp5"].fillna(0.5) - 0.18).clip(lower=0) * 25
-    x["阶段1分"] = x["20日动量贡献"] + x["距20日高点贡献"] + x["MA20位置贡献"] - x["短波动惩罚"]
-    # 只作为粗筛最低资格，不把尚未验证的细参数硬编码。
-    x["阶段1通过"] = (x["最新收盘"] > 0) & (x["MA20距离"] > -0.08)
-    x["阶段1风险提示"] = np.where(x["amp5"] > 0.18, "近5日波动偏大", "")
+
+    x["20日方向证据"] = (x["ret20"] >= 0).astype(int) * 2
+    x["MA20上方证据"] = (x["MA20距离"] >= 0).astype(int) * 2
+    x["短波动非极端证据"] = (x["amp5"] <= 0.18).astype(int)
+    x["10日不过热证据"] = (x["ret10"] <= 0.20).astype(int)
+    x["10日非急跌证据"] = (x["ret10"] >= -0.12).astype(int)
+    # 仅作为很宽的结构辅助，不使用20日最高点距离做核心排序。
+    x["短沿附近辅助"] = x["距稳健5日上沿"].between(-0.10, 0.06, inclusive="both").astype(int)
+    x["阶段1分"] = x[["20日方向证据", "MA20上方证据", "短波动非极端证据", "10日不过热证据", "10日非急跌证据", "短沿附近辅助"]].sum(axis=1)
+    x["阶段1通过"] = x["最新收盘"].notna() & (x["最新收盘"] > 0)
+    x["阶段1风险提示"] = np.select(
+        [x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret20"] < 0],
+        ["近5日波动仍偏大", "近10日速度偏快", "20日方向仍偏弱"], default="")
+    x["阶段1规则说明"] = "宽松粗筛：方向/非极端波动/不过热；不以精确MA距离或距20日高点为硬规则"
     selected, audit = _rank_and_audit(x, "阶段1分", max_n, "阶段1通过", "一级粗筛")
     return (selected, audit) if return_audit else selected
 
 
 def stage2_rank(metrics: pd.DataFrame, max_n: int = 30, return_audit: bool = False):
-    """120日：整理成熟+趋势仍活。当前版本以排序为主，不把研究中的弱证据做成硬淘汰线。"""
+    """120日二级：核心研究层——整理成熟 + 中期趋势仍活 + 接近稳健5日上沿。
+
+    强证据用于资格/主排序；信号日2%-6%重新加速仅作中等证据加分，绝不作为稳定胜率承诺。
+    """
     x = metrics.copy()
     if x.empty:
         return (x, x) if return_audit else x
-    for c in ["ret10", "ret40", "amp5", "MA20距离", "MA30_5日斜率", "距稳健5日上沿"]:
+    for c in ["ret1", "ret10", "ret40", "amp5", "MA20距离", "MA30_5日斜率", "距稳健5日上沿"]:
         x[c] = pd.to_numeric(x[c], errors="coerce")
-    near_upper = 1 - ((x["距稳健5日上沿"].fillna(-0.2) - 0.005).abs() / 0.08).clip(0, 1)
-    mature = 1 - ((x["amp5"].fillna(0.4) - 0.12).abs() / 0.20).clip(0, 1)
-    trend_alive = x["ret40"].clip(-0.25, 0.6).fillna(-0.25)
-    x["稳健上沿贡献"] = near_upper * 30
-    x["整理成熟贡献"] = mature * 15
-    x["40日趋势贡献"] = trend_alive * 35
-    x["MA30斜率贡献"] = x["MA30_5日斜率"].clip(-0.1, 0.15).fillna(-0.1) * 80
-    x["阶段2分"] = x["稳健上沿贡献"] + x["整理成熟贡献"] + x["40日趋势贡献"] + x["MA30斜率贡献"]
+
+    x["整理成熟"] = (x["amp5"] <= 0.18) & (x["ret10"] <= 0.20)
+    x["中期趋势仍活"] = x["ret40"] >= 0
+    x["均线趋势辅助"] = (x["MA20距离"] > 0) & (x["MA30_5日斜率"] > 0)
+    x["稳健上沿核心区"] = x["距稳健5日上沿"].between(-0.02, 0.03, inclusive="both")
+    x["稳健上沿宽区"] = x["距稳健5日上沿"].between(-0.05, 0.05, inclusive="both")
+    x["适度重新加速"] = x["ret1"].between(0.02, 0.06, inclusive="both")
+
+    x["整理成熟贡献"] = x["整理成熟"].astype(int) * 3
+    x["40日趋势贡献"] = x["中期趋势仍活"].astype(int) * 3
+    x["均线趋势辅助贡献"] = x["均线趋势辅助"].astype(int)
+    x["稳健上沿贡献"] = np.select([x["稳健上沿核心区"], x["稳健上沿宽区"]], [4, 2], default=0)
+    x["重新加速辅助贡献"] = x["适度重新加速"].astype(int)  # 中等证据，权重低于结构证据
+    x["阶段2分"] = x[["整理成熟贡献", "40日趋势贡献", "均线趋势辅助贡献", "稳健上沿贡献", "重新加速辅助贡献"]].sum(axis=1)
+
+    # 只把反复验证较强的“成熟+趋势仍活”作为最低资格；上沿距离和重新加速用于排序，不做绝对门槛。
+    x["阶段2通过"] = x["整理成熟"] & x["中期趋势仍活"]
     x["阶段2风险提示"] = np.select(
-        [x["amp5"] > 0.18, x["ret40"] < 0, x["距稳健5日上沿"].abs() > 0.08],
-        ["短波动偏大", "40日趋势偏弱", "距离短周期稳健上沿较远"], default="")
-    selected, audit = _rank_and_audit(x, "阶段2分", max_n, None, "二级结构筛选")
+        [x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret40"] < 0, x["距稳健5日上沿"].abs() > 0.08],
+        ["短波动仍偏大", "10日速度仍偏快，整理可能未完成", "40日趋势偏弱", "距离短周期稳健上沿较远"], default="")
+    x["阶段2规则说明"] = "核心：整理成熟+40日趋势仍活+稳健5日上沿；2%-6%单日加速仅为中等证据"
+    selected, audit = _rank_and_audit(x, "阶段2分", max_n, "阶段2通过", "二级结构筛选")
     return (selected, audit) if return_audit else selected
 
 
 def stage3_rank(metrics: pd.DataFrame, max_n: int = 10, return_audit: bool = False):
-    """250日：生命周期。高位/长趋势优先，并显式展示过热与长期低位修复惩罚。"""
+    """250日三级：生命周期否决/修正层，而不是“越靠250日最高点越好”。
+
+    主要任务：识别长期下降趋势修复，避免把修复反弹误判成右上角二次启动；
+    40日累计涨幅过大只做风险提示，不因累计涨幅单独判定趋势末端。
+    若传入阶段2分，则保留二级结构排序作为三级的连续性证据。
+    """
     x = metrics.copy()
     if x.empty:
         return (x, x) if return_audit else x
-    for c in ["250日位置", "距250日高点", "ret40", "ret120", "MA60_10日斜率", "MA120_20日斜率"]:
+    for c in ["250日位置", "距250日高点", "ret40", "ret120", "MA60_10日斜率", "MA120_20日斜率", "阶段2分"]:
+        if c not in x.columns:
+            x[c] = np.nan
         x[c] = pd.to_numeric(x[c], errors="coerce")
-    pos = x["250日位置"].clip(0, 1).fillna(0)
-    near_hi = (1 + x["距250日高点"].clip(-1, 0).fillna(-1)).clip(0, 1)
-    longtrend = x["ret120"].clip(-0.6, 1.2).fillna(-0.6)
-    midtrend = x["ret40"].clip(-0.4, 0.8).fillna(-0.4)
-    slope = x["MA120_20日斜率"].clip(-0.15, 0.20).fillna(-0.15)
-    overheat = (x["ret40"].fillna(0) - 0.45).clip(lower=0)
-    low_rebound = (0.45 - pos).clip(lower=0)
-    x["250日位置贡献"] = pos * 35
-    x["接近250日高点贡献"] = near_hi * 25
-    x["120日趋势贡献"] = longtrend * 12
-    x["40日趋势贡献"] = midtrend * 12
-    x["MA120斜率贡献"] = slope * 60
-    x["近期过热惩罚"] = overheat * 25
-    x["长期低位反弹惩罚"] = low_rebound * 30
-    x["阶段3分"] = x["250日位置贡献"] + x["接近250日高点贡献"] + x["120日趋势贡献"] + x["40日趋势贡献"] + x["MA120斜率贡献"] - x["近期过热惩罚"] - x["长期低位反弹惩罚"]
+
+    pos = x["250日位置"]
+    long_ok = (x["ret120"] >= 0) & (x["MA120_20日斜率"] >= 0)
+    clear_down_rebound = (pos < 0.45) & (x["ret120"] < 0) & (x["MA120_20日斜率"] < 0)
+    right_upper = (pos >= 0.65) & long_ok
+    mid_up = long_ok & ~right_upper
+
+    x["长期趋势证据"] = long_ok.astype(int) * 3
+    x["右上角位置证据"] = right_upper.astype(int) * 2
+    x["40日仍活证据"] = (x["ret40"] >= 0).astype(int)
+    x["长期下降修复惩罚"] = clear_down_rebound.astype(int) * 6
+
+    # 保留二级排序连续性；不让250日层用一套任意权重彻底洗牌。
+    if x["阶段2分"].notna().any():
+        pct = x["阶段2分"].rank(method="average", pct=True)
+        x["二级结构延续贡献"] = pct * 3
+    else:
+        x["二级结构延续贡献"] = 0.0
+
+    x["阶段3分"] = x["长期趋势证据"] + x["右上角位置证据"] + x["40日仍活证据"] + x["二级结构延续贡献"] - x["长期下降修复惩罚"]
     x["生命周期标签"] = np.select(
-        [pos < 0.45, x["ret40"] > 0.45, pos >= 0.75],
-        ["长期低位修复", "近期加速偏大", "右上角/高位趋势"], default="中段/待确认")
+        [clear_down_rebound, right_upper, mid_up],
+        ["长期下降趋势修复", "右上角/高位趋势", "中期上升趋势延续"], default="中段/待确认")
+    x["阶段3通过"] = ~clear_down_rebound
     x["阶段3风险提示"] = np.select(
-        [pos < 0.45, x["ret40"] > 0.45, x["ret120"] < 0],
-        ["长期位置偏低，警惕下降趋势修复", "40日加速偏大，警惕趋势成熟", "120日趋势仍偏弱"], default="")
-    selected, audit = _rank_and_audit(x, "阶段3分", max_n, None, "三级生命周期筛选")
+        [clear_down_rebound, x["ret40"] > 0.50, x["ret120"] < 0],
+        ["长期下降趋势中的修复/反弹，降级", "40日加速较大：仅作趋势成熟风险提示，不单独判尾端", "120日趋势偏弱"], default="")
+    x["阶段3规则说明"] = "生命周期否决/修正：重点排除长期下降修复；不把接近250日高点或累计涨幅本身当成越高越好"
+    selected, audit = _rank_and_audit(x, "阶段3分", max_n, "阶段3通过", "三级生命周期筛选")
     return (selected, audit) if return_audit else selected
 
 

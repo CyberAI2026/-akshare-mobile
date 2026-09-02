@@ -82,7 +82,8 @@ with t1:
 
     if not pool.empty:
         st.success(f"已识别 {len(pool)} 只股票；代码已统一为6位并去重。")
-        st.dataframe(pool.head(50), use_container_width=True, height=280)
+        st.caption(f"下表为完整股票池，共 {len(pool)} 只；表格内部可滚动查看。此前版本仅预览前50只，并不代表只识别50只。")
+        st.dataframe(pool, use_container_width=True, height=420, hide_index=True)
     else:
         st.info("500只以上建议直接上传Excel/CSV；程序会自动识别股票代码和名称。")
 

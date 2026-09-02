@@ -61,12 +61,17 @@ def run_full(pool_path: str):
     save_bytes(base/"120d"/"result.xlsx",to_excel_bytes({"120日日线":d120,"质量校验":q120,"结构指标":m120,"筛选审计":a2,"二级结果":s2}))
 
     cp250=checkpoint_factory(base/"250d")
-    d250,q250=fetch_pool_history(p2,250,lambda d,t,c,q:(cp250(d,t,c,q), git_commit(f"V4 checkpoint 250d {d}/{t}") if d%10==0 else None), cache_dir=base/"250d"/"cache"); m250=build_metrics(d250); s3,a3=stage3_rank(m250,10,return_audit=True)
+    d250,q250=fetch_pool_history(p2,250,lambda d,t,c,q:(cp250(d,t,c,q), git_commit(f"V4 checkpoint 250d {d}/{t}") if d%10==0 else None), cache_dir=base/"250d"/"cache"); m250=build_metrics(d250)
+    # 三级生命周期层保留二级结构排序连续性，避免用250日启发式参数完全重新洗牌。
+    if not s2.empty and "阶段2分" in s2.columns:
+        prior=s2[["股票代码","阶段2分"]].copy()
+        m250=m250.merge(prior,on="股票代码",how="left")
+    s3,a3=stage3_rank(m250,10,return_audit=True)
     p3=s3[["股票代码","股票名称"]].copy(); save_df(base/"250d"/"observation_pool.csv",p3); save_df(base/"250d"/"stage_audit.csv",a3)
     save_bytes(base/"250d"/"result.xlsx",to_excel_bytes({"250日日线":d250,"质量校验":q250,"生命周期指标":m250,"筛选审计":a3,"三级结果":s3}))
 
     latest=ROOT/"latest"; latest.mkdir(parents=True,exist_ok=True); save_df(latest/"observation_pool.csv",p3)
-    summary={"strategy":STRATEGY_VERSION,"engine":"V4.1-auditable","initial":len(pool),"stage1":len(p1),"stage2":len(p2),"stage3":len(p3),"stage1_codes":p1["股票代码"].astype(str).tolist(),"stage2_codes":p2["股票代码"].astype(str).tolist(),"stage3_codes":p3["股票代码"].astype(str).tolist(),"completed":datetime.now().isoformat(),"folder":str(base)}
+    summary={"strategy":STRATEGY_VERSION,"engine":"V4.2-evidence-aligned","initial":len(pool),"stage1":len(p1),"stage2":len(p2),"stage3":len(p3),"stage1_codes":p1["股票代码"].astype(str).tolist(),"stage2_codes":p2["股票代码"].astype(str).tolist(),"stage3_codes":p3["股票代码"].astype(str).tolist(),"completed":datetime.now().isoformat(),"folder":str(base)}
     try:
         summary["ai_precheck"]=openai_analyze("三级生命周期筛选复核",{"stage3":s3.to_dict("records")})
     except Exception as e: summary["ai_precheck"]=f"AI调用失败:{e}"
