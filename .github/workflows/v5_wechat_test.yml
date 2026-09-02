@@ -1,0 +1,51 @@
+name: V5 WeChat Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wechat-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Send PushPlus WeChat test
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+
+          token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token:
+              raise SystemExit("PUSHPLUS_TOKEN is missing")
+
+          payload = {
+              "token": token,
+              "title": "A股二次启动系统｜微信测试成功",
+              "content": (
+                  "这是一条 V5.2.1 PushPlus 微信链路测试消息。<br>"
+                  "如果你在微信里看到这条消息，说明 GitHub Actions → PushPlus → 微信 已经打通。<br>"
+                  "后续盘后研究和14:45尾盘决策会使用同一条通知链路。"
+              ),
+              "template": "html",
+              "channel": "wechat",
+          }
+
+          req = urllib.request.Request(
+              "https://www.pushplus.plus/send",
+              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=20) as resp:
+              body = resp.read().decode("utf-8", errors="replace")
+              print(body)
+              data = json.loads(body)
+              if int(data.get("code", -1)) != 200:
+                  raise SystemExit(f"PushPlus returned failure: {body}")
+          print("WECHAT_TEST_OK")
+          PY
