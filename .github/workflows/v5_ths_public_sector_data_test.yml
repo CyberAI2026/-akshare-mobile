@@ -1,0 +1,93 @@
+name: V5 THS Public Sector Data Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ths-sector-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+
+      - name: Test THS public concept and industry fund-flow data
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, traceback
+          import pandas as pd
+          import akshare as ak
+
+          out=Path("ths_public_sector_test")
+          out.mkdir(exist_ok=True)
+          qa=[]
+          summary={}
+
+          tests=[
+            ("concept_now", lambda: ak.stock_fund_flow_concept(symbol="即时")),
+            ("concept_3d", lambda: ak.stock_fund_flow_concept(symbol="3日排行")),
+            ("concept_5d", lambda: ak.stock_fund_flow_concept(symbol="5日排行")),
+            ("concept_10d", lambda: ak.stock_fund_flow_concept(symbol="10日排行")),
+            ("concept_20d", lambda: ak.stock_fund_flow_concept(symbol="20日排行")),
+            ("industry_now", lambda: ak.stock_fund_flow_industry(symbol="即时")),
+            ("industry_3d", lambda: ak.stock_fund_flow_industry(symbol="3日排行")),
+            ("industry_5d", lambda: ak.stock_fund_flow_industry(symbol="5日排行")),
+            ("industry_10d", lambda: ak.stock_fund_flow_industry(symbol="10日排行")),
+            ("industry_20d", lambda: ak.stock_fund_flow_industry(symbol="20日排行")),
+          ]
+
+          for name,fn in tests:
+            try:
+              df=fn()
+              if df is None: df=pd.DataFrame()
+              df.to_csv(out/f"{name}.csv",index=False,encoding="utf-8-sig")
+              qa.append({"测试":name,"状态":"成功" if not df.empty else "空数据","行数":len(df),
+                         "字段":" | ".join(map(str,df.columns)),"错误":""})
+              summary[name]={"rows":int(len(df)),"columns":list(map(str,df.columns))}
+            except Exception as e:
+              qa.append({"测试":name,"状态":"失败","行数":0,"字段":"",
+                         "错误":f"{type(e).__name__}: {e}"})
+              summary[name]={"rows":0,"error":f"{type(e).__name__}: {e}"}
+
+          q=pd.DataFrame(qa)
+          q.to_csv(out/"qa.csv",index=False,encoding="utf-8-sig")
+
+          # 生成轻量榜单，便于人工验收，不进入正式策略。
+          for src in ["concept_now","industry_now"]:
+            p=out/f"{src}.csv"
+            if not p.exists(): continue
+            df=pd.read_csv(p)
+            if df.empty: continue
+            net_col=next((c for c in df.columns if str(c).strip()=="净额"),None)
+            pct_col=next((c for c in df.columns if "涨跌幅" in str(c) and "领涨股" not in str(c)),None)
+            if net_col:
+              df["_净额数"]=pd.to_numeric(df[net_col].astype(str).str.replace("亿","",regex=False).str.replace("万","",regex=False),errors="coerce")
+              df.sort_values("_净额数",ascending=False).head(20).drop(columns=["_净额数"]).to_csv(out/f"{src}_top20_netin.csv",index=False,encoding="utf-8-sig")
+            if pct_col:
+              df["_涨幅数"]=pd.to_numeric(df[pct_col].astype(str).str.replace("%","",regex=False),errors="coerce")
+              df.sort_values("_涨幅数",ascending=False).head(20).drop(columns=["_涨幅数"]).to_csv(out/f"{src}_top20_gain.csv",index=False,encoding="utf-8-sig")
+
+          (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(q.to_string(index=False))
+
+          success=sum(x["状态"]=="成功" for x in qa)
+          if success==0:
+              raise SystemExit("FAIL: GitHub 云端无法取得任何同花顺公开板块资金数据")
+          print(f"THS_PUBLIC_SECTOR_TEST_OK success={success}/{len(qa)}")
+          PY
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-THS-public-sector-data-test
+          path: ths_public_sector_test/
+          retention-days: 7
