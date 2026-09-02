@@ -2,6 +2,13 @@ name: V5 THS Public Sector Data Test
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "v5_core.py"
+      - "v5_cli.py"
+      - "tests/test_v5_data_layers.py"
+      - ".github/workflows/v5_ths_public_sector_data_test.yml"
 
 permissions:
   contents: read

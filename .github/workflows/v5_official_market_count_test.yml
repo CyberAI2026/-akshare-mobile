@@ -2,6 +2,12 @@ name: V5 Official Market Count Test
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "v5_core.py"
+      - "tests/test_v5_data_layers.py"
+      - ".github/workflows/v5_official_market_count_test.yml"
 
 permissions:
   contents: read
