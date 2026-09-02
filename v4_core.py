@@ -36,15 +36,19 @@ def _norm_code(value) -> str:
 
 
 def _find_col(columns: Iterable[str], aliases: list[str]) -> str | None:
-    cols = [str(c).strip() for c in columns]
-    norm = {re.sub(r"[\s_\-]+", "", c).lower(): c for c in cols}
+    # 比较时清理空格/下划线/连字符，但返回 DataFrame 中“真实原始列名”。
+    # 这对“    名称”这类行情软件导出表头尤其重要。
+    original = list(columns)
+    pairs = [(c, str(c).strip()) for c in original]
+    norm = {re.sub(r"[\s_\-]+", "", cleaned).lower(): c for c, cleaned in pairs}
     for a in aliases:
         k = re.sub(r"[\s_\-]+", "", a).lower()
         if k in norm:
             return norm[k]
-    for c in cols:
-        nk = re.sub(r"[\s_\-]+", "", c).lower()
-        if any(re.sub(r"[\s_\-]+", "", a).lower() in nk for a in aliases):
+    alias_norm = [re.sub(r"[\s_\-]+", "", a).lower() for a in aliases]
+    for c, cleaned in pairs:
+        nk = re.sub(r"[\s_\-]+", "", cleaned).lower()
+        if any(a in nk for a in alias_norm):
             return c
     return None
 
@@ -64,34 +68,86 @@ def pool_from_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def pool_from_upload(file_name: str, data: bytes) -> pd.DataFrame:
-    lower = file_name.lower()
-    bio = io.BytesIO(data)
-    if lower.endswith(".csv"):
+def _read_delimited_stock_file(data: bytes) -> pd.DataFrame:
+    """读取 CSV/TSV/文本导出的“伪 .xls”。不少行情软件把制表符文本保存成 .xls 扩展名。"""
+    last_err = None
+    for enc in ("utf-8-sig", "gb18030", "gbk", "utf-16"):
         try:
-            df = pd.read_csv(bio, dtype=str, encoding="utf-8-sig")
-        except UnicodeDecodeError:
-            bio.seek(0)
-            df = pd.read_csv(bio, dtype=str, encoding="gb18030")
-        return pool_from_dataframe(df)
-    if lower.endswith((".xlsx", ".xls")):
-        book = pd.ExcelFile(bio)
-        best = None
-        best_score = -1
-        for sheet in book.sheet_names:
-            tmp = pd.read_excel(book, sheet_name=sheet, dtype=str)
-            score = 0
-            if _find_col(tmp.columns, ["股票代码", "证券代码", "代码", "code", "symbol"]):
-                score += 10
-            if _find_col(tmp.columns, ["股票名称", "证券简称", "名称", "name"]):
-                score += 2
-            score += min(len(tmp), 1000) / 1000
-            if score > best_score:
-                best, best_score = tmp, score
-        if best is None:
-            raise ValueError("Excel 中没有可读取的工作表。")
-        return pool_from_dataframe(best)
-    raise ValueError("仅支持 .xlsx/.xls/.csv 股票池文件。")
+            text = data.decode(enc)
+            # 部分行情软件导出的“xls”其实是仅使用 CR 的制表符文本；统一换行后再交给 pandas。
+            text = text.replace("\r\n", "\n").replace("\r", "\n")
+        except Exception as e:
+            last_err = e
+            continue
+        # 优先制表符；再让 pandas 自动嗅探常见分隔符。
+        for sep in ("\t", None, ",", ";", "|"):
+            try:
+                kwargs = dict(dtype=str)
+                if sep is None:
+                    tmp = pd.read_csv(io.StringIO(text), sep=None, engine="python", **kwargs)
+                else:
+                    tmp = pd.read_csv(io.StringIO(text), sep=sep, engine="python", **kwargs)
+                if tmp is not None and len(tmp.columns) >= 1 and len(tmp) >= 1:
+                    # 至少应能识别到代码列，否则继续尝试。
+                    if _find_col(tmp.columns, ["股票代码", "证券代码", "代码", "stockcode", "code", "symbol"]):
+                        return tmp
+            except Exception as e:
+                last_err = e
+    raise ValueError(f"无法按文本/CSV/TSV格式读取文件：{last_err}")
+
+
+def _read_excel_best_sheet(data: bytes, engine: str | None = None) -> pd.DataFrame:
+    bio = io.BytesIO(data)
+    book = pd.ExcelFile(bio, engine=engine)
+    best = None
+    best_score = -1
+    for sheet in book.sheet_names:
+        tmp = pd.read_excel(book, sheet_name=sheet, dtype=str)
+        score = 0
+        if _find_col(tmp.columns, ["股票代码", "证券代码", "代码", "stockcode", "code", "symbol"]):
+            score += 10
+        if _find_col(tmp.columns, ["股票名称", "证券名称", "证券简称", "股票简称", "名称", "name", "stockname"]):
+            score += 2
+        score += min(len(tmp), 1000) / 1000
+        if score > best_score:
+            best, best_score = tmp, score
+    if best is None:
+        raise ValueError("Excel 中没有可读取的工作表。")
+    return best
+
+
+def pool_from_upload(file_name: str, data: bytes) -> pd.DataFrame:
+    lower = (file_name or "").lower()
+    if not data:
+        raise ValueError("上传文件为空。")
+
+    # 不只相信扩展名，先根据文件签名识别真实格式。
+    is_xlsx_zip = data[:4] == b"PK\x03\x04"
+    is_ole_xls = data[:8] == bytes.fromhex("D0CF11E0A1B11AE1")
+
+    try:
+        if is_xlsx_zip:
+            return pool_from_dataframe(_read_excel_best_sheet(data, engine="openpyxl"))
+        if is_ole_xls:
+            return pool_from_dataframe(_read_excel_best_sheet(data, engine="xlrd"))
+
+        if lower.endswith(".xlsx"):
+            return pool_from_dataframe(_read_excel_best_sheet(data, engine="openpyxl"))
+        if lower.endswith(".xls"):
+            # 真 .xls 用 xlrd；若其实是行情软件导出的制表符文本，则自动回退到文本读取。
+            try:
+                return pool_from_dataframe(_read_excel_best_sheet(data, engine="xlrd"))
+            except Exception:
+                return pool_from_dataframe(_read_delimited_stock_file(data))
+        if lower.endswith((".csv", ".txt", ".tsv")):
+            return pool_from_dataframe(_read_delimited_stock_file(data))
+
+        # 未知扩展名也尝试文本嗅探，提升兼容性。
+        return pool_from_dataframe(_read_delimited_stock_file(data))
+    except Exception as e:
+        raise ValueError(
+            f"无法识别股票池文件 {file_name!r}。支持标准 XLSX、标准 XLS，以及行情软件导出的制表符/CSV文本。详细错误：{e}"
+        ) from e
 
 
 def pool_from_text(text: str) -> pd.DataFrame:
