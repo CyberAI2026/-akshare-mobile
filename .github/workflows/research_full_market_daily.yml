@@ -1,0 +1,39 @@
+name: Research Full-Market Daily Data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "research/full_market_data_fetch.py"
+      - ".github/workflows/research_full_market_daily.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-public-market-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Fetch full-market public daily history
+        run: |
+          python research/full_market_data_fetch.py \
+            --start 20240101 \
+            --end 20260902 \
+            --workers 12 \
+            --retries 3 \
+            --output research_public_market_data
+      - name: Upload research data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-full-market-daily-${{ github.run_id }}
+          path: research_public_market_data/
+          retention-days: 7
+          compression-level: 6
