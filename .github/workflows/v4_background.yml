@@ -1,87 +1,32 @@
-name: V4 Background Automation
+name: V4 Background Automation (Legacy - Manual Only)
 
 on:
   workflow_dispatch:
     inputs:
       job:
-        description: full or 1445
+        description: 'Legacy V4 manual job only'
         required: true
-        default: full
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - 1445
       pool_path:
-        description: repository path of uploaded pool csv
+        description: 'Legacy V4 pool path'
         required: false
-        default: v4_data/inbox/latest_pool.csv
-
-  schedule:
-    # UTC 06:40 = 北京时间 14:40
-    # 后台程序会等待到 14:45 再抓实时确认数据
-    - cron: '40 6 * * 1-5'
+        default: ''
+        type: string
 
 permissions:
   contents: write
 
 jobs:
-  run-v4:
+  legacy-manual-only:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
-
+    env:
+      TZ: Asia/Shanghai
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Setup Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run full pipeline
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'full'
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
-        run: |
-          python v4_cli.py full --pool "${{ github.event.inputs.pool_path }}"
-
-      - name: Run 14:45 confirmation
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == '1445')
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
-        run: |
-          python v4_cli.py 1445
-
-      - name: Commit remaining V4 results
-        if: always()
-        run: |
-          git config user.name "V4 Automation"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          if [ -d "v4_data" ]; then
-            git add v4_data
-
-            if ! git diff --cached --quiet; then
-              git commit -m "V4 save results run ${{ github.run_number }}"
-              git pull --rebase origin main
-              git push origin main
-            else
-              echo "No additional repository changes."
-            fi
-          else
-            echo "v4_data directory does not exist."
-          fi
-
-      - name: Upload V4 results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: V4-results-${{ github.run_number }}
-          path: |
-            v4_data/**
-          if-no-files-found: warn
-          retention-days: 30
+      - uses: actions/checkout@v4
+      - run: |
+          echo "V4 legacy workflow is manual-only. V5 owns all new automation."
+          echo "No scheduled V4 task will run."

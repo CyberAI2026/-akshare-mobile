@@ -1,0 +1,40 @@
+name: V5 Weekly Master-Pool Backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Friday 09:30 UTC = Friday 17:30 China time. Backup timing is non-critical.
+    - cron: '30 9 * * 5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  weekly-backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: Asia/Shanghai
+      GITHUB_REPO: ${{ github.repository }}
+      GITHUB_BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Save weekly backup
+        run: python v5_cli.py backup

@@ -1,0 +1,59 @@
+name: V5 After-Close Research
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_path:
+        description: 'Path to daily strong-stock batch CSV; leave empty to maintain existing master pool only'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  after-close:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      TZ: Asia/Shanghai
+      GITHUB_REPO: ${{ github.repository }}
+      GITHUB_BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run V5 after-close pipeline
+        shell: bash
+        run: |
+          BATCH='${{ inputs.batch_path }}'
+          if [ -n "$BATCH" ]; then
+            python v5_cli.py after_close --batch "$BATCH"
+          else
+            python v5_cli.py after_close
+          fi
+
+      - name: Upload V5 result artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-after-close-${{ github.run_number }}
+          path: v5_data/
+          if-no-files-found: warn
+          retention-days: 14

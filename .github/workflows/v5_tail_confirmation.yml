@@ -1,0 +1,56 @@
+name: V5 Tail Confirmation
+
+on:
+  workflow_dispatch:
+    inputs:
+      manual:
+        description: 'Manual fallback trigger'
+        required: false
+        default: 'true'
+        type: string
+  schedule:
+    # GitHub cron uses UTC. 06:40 UTC = 14:40 China Standard Time (UTC+8).
+    - cron: '40 6 * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  tail-confirmation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TZ: Asia/Shanghai
+      GITHUB_REPO: ${{ github.repository }}
+      GITHUB_BRANCH: ${{ github.ref_name }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run safe 14:40 / 14:45 tail package
+        run: python v5_cli.py tail
+
+      - name: Upload tail artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-tail-${{ github.run_number }}
+          path: v5_data/tail/
+          if-no-files-found: ignore
+          retention-days: 14
