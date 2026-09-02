@@ -1,6 +1,10 @@
 {
-  "status": "running",
+  "status": "completed",
   "strategy": "research_v0.5-evidence-aligned",
   "started": "2026-09-02T11:00:35.409365",
-  "initial_count": 536
+  "initial_count": 536,
+  "completed": "2026-09-02T11:52:21.523915",
+  "stage1": 150,
+  "stage2": 30,
+  "stage3": 10
 }
