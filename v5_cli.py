@@ -6,6 +6,8 @@ import os
 import shutil
 import subprocess
 import time
+import urllib.request
+import urllib.error
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -60,6 +62,107 @@ def save_df(path: Path, df: pd.DataFrame):
 def save_json(path: Path, obj: dict):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, default=str, indent=2), encoding="utf-8")
+
+
+def pushplus_notify(title: str, content: str, template: str = "html") -> bool:
+    """通过 PushPlus 推送到普通微信。通知失败只记录日志，不影响研究主流程。"""
+    token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
+    if not token:
+        print("PushPlus skipped: PUSHPLUS_TOKEN not configured")
+        return False
+    payload = json.dumps({
+        "token": token,
+        "title": str(title)[:100],
+        "content": str(content),
+        "template": template,
+        "channel": "wechat",
+    }, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        "https://www.pushplus.plus/send",
+        data=payload,
+        headers={"Content-Type": "application/json; charset=utf-8", "User-Agent": "AStock-V5.2.1"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+        ok = False
+        try:
+            obj = json.loads(body)
+            ok = str(obj.get("code", "")) == "200"
+        except Exception:
+            ok = "200" in body
+        print("PushPlus:", "success" if ok else f"unexpected response: {body[:300]}")
+        return ok
+    except Exception as e:
+        print(f"PushPlus warning: {type(e).__name__}: {e}")
+        return False
+
+
+def _fmt_pct(x):
+    try:
+        return f"{float(x):.1f}%"
+    except Exception:
+        return "—"
+
+
+def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict):
+    ma = obs_meta.get("market_assessment", {}) or {}
+    lines = [
+        f"<b>目标交易日：</b>{summary.get('target_trade_date','—')}",
+        f"<b>主池：</b>{summary.get('master_count','—')}只 → 一级 {summary.get('stage1','—')}只 → 研究池 {summary.get('stage2_research_pool','—')}只",
+        f"<b>OpenAI观察池：</b>{summary.get('observation_pool_count',0)}只",
+        f"<b>市场风险：</b>{ma.get('risk_level','—')}｜{ma.get('next_day_aggressiveness','—')}",
+    ]
+    if ma.get("summary"):
+        lines.append(f"<b>市场判断：</b>{ma.get('summary')}")
+    if obs is not None and not obs.empty:
+        lines.append("<br><b>次日观察池：</b>")
+        for _, r in obs.sort_values("AI优先级", na_position="last").iterrows():
+            code=str(r.get("股票代码","")).zfill(6); name=str(r.get("股票名称","") or "")
+            pri=r.get("AI优先级","")
+            ev=str(r.get("AI核心证据","") or "")
+            risk=str(r.get("AI主要风险","") or "")
+            lines.append(f"{pri}. <b>{code} {name}</b><br>证据：{ev}<br>风险：{risk}<br>")
+    else:
+        lines.append("<br><b>结论：</b>今日OpenAI未选出次日观察标的（0只）。")
+    lines.append("<br><small>盘后观察池不是买入名单，需次日14:40–14:45再次确认。</small>")
+    pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
+
+
+def notify_tail_success(final_df: pd.DataFrame, meta: dict):
+    ma=meta.get("market_assessment",{}) or {}
+    selected=set(str(x).zfill(6) for x in meta.get("selected_codes",[]) or [])
+    lines=[
+        f"<b>交易日：</b>{meta.get('trade_date','—')}",
+        f"<b>实时市场：</b>{ma.get('risk_level','—')}｜相对昨收 {ma.get('change_vs_previous_close','—')}",
+        f"<b>总体新仓上限：</b>{_fmt_pct(ma.get('overall_new_position_cap_pct'))}",
+        f"<b>最终候选：</b>{meta.get('selected_count',0)}只",
+    ]
+    if ma.get("summary"): lines.append(f"<b>市场判断：</b>{ma.get('summary')}")
+    if selected and final_df is not None and not final_df.empty:
+        lines.append("<br><b>14:45最终结果：</b>")
+        for _,r in final_df.iterrows():
+            code=str(r.get("股票代码","")).zfill(6)
+            if code not in selected: continue
+            name=str(r.get("股票名称","") or "")
+            lo=r.get("买入区间下沿"); hi=r.get("买入区间上沿"); pos=r.get("建议仓位占总资金%")
+            stop=r.get("结构止损参考"); risk=r.get("结构风险距离")
+            try: risk_txt=f"{float(risk)*100:.1f}%"
+            except Exception: risk_txt="—"
+            lines.append(f"<b>{code} {name}</b><br>买入区间：{lo}–{hi}<br>建议仓位：{_fmt_pct(pos)}｜结构止损：{stop}｜结构风险：{risk_txt}<br>证据：{r.get('核心证据','')}<br>风险：{r.get('主要风险','')}<br>")
+    else:
+        lines.append("<br><b>结论：</b>14:45没有符合条件的交易标的（0只）。")
+    if meta.get("portfolio_note"): lines.append(f"<b>组合说明：</b>{meta.get('portfolio_note')}")
+    lines.append("<br><small>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</small>")
+    pushplus_notify("A股二次启动｜14:45尾盘决策", "<br>".join(lines))
+
+
+def notify_failure(stage: str, err: Exception | str):
+    pushplus_notify(
+        f"A股二次启动｜{stage}失败",
+        f"<b>时间：</b>{now_cn().isoformat()}<br><b>错误：</b>{type(err).__name__ if isinstance(err, Exception) else 'Error'}: {str(err)}<br><br>本次失败不会被当作‘0只候选’，请检查 GitHub Actions。"
+    )
 
 
 def git_commit(message: str):
@@ -483,6 +586,7 @@ def run_after_close(batch_path: str | None):
         save_json(base/"summary.json",fail_summary); save_json(LATEST/"latest_after_close.json",fail_summary)
         meta.update(fail_summary); save_json(base/"meta.json",meta)
         git_commit(f"V5.2 AI failed {stamp}")
+        notify_failure("盘后OpenAI研究", e)
         raise
 
     completed = now_cn()
@@ -506,6 +610,7 @@ def run_after_close(batch_path: str | None):
     save_json(LATEST / "latest_after_close.json", summary)
     meta.update(summary); save_json(base / "meta.json", meta)
     git_commit(f"V5.2 after-close + AI completed {stamp}")
+    notify_after_close_success(summary, obs, obs_meta)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
@@ -663,10 +768,12 @@ def run_tail():
         payload["status"]="completed"; payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
         save_json(base/"tail_summary.json",payload); save_json(LATEST/"last_tail_summary.json",payload)
         git_commit(f"V5.2 tail AI completed {today}")
+        notify_tail_success(final_decisions, final_meta)
     except Exception as e:
         err={"status":"tail_ai_failed","trade_date":str(today),"time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),"rule":"失败时不生成伪0-2结果"}
         save_json(base/"tail_ai_error.json",err); save_json(LATEST/"last_tail_ai_error.json",err)
         git_commit(f"V5.2 tail AI failed {today}")
+        notify_failure("14:45尾盘OpenAI确认", e)
         raise
     print(json.dumps(payload, ensure_ascii=False, default=str, indent=2))
 
