@@ -1,0 +1,25 @@
+{
+  "status": "completed",
+  "engine": "V5-foundation-1",
+  "strategy": "research_v0.5-evidence-aligned+pool-v0.1",
+  "started_cn": "2026-09-02T20:39:26.252609+08:00",
+  "completed_cn": "2026-09-02T20:50:52.548026+08:00",
+  "elapsed_minutes": 11.44,
+  "batch_count": 0,
+  "master_count": 532,
+  "eliminated_count": 0,
+  "stage1": 150,
+  "stage2_research_pool": 30,
+  "python_final": "30只研究包（不再机械生成前10）",
+  "stock_qa_25_success": 532,
+  "stock_qa_120_success": 150,
+  "stock_qa_250_success": 30,
+  "isolated_index_count": 0,
+  "cache_seed": {
+    "seeded": 535,
+    "scanned": 772,
+    "available": 535
+  },
+  "folder": "v5_data/runs/20260902_203926",
+  "next_step": "下一阶段接OpenAI API：读取research_pool_30.csv -> 0~10只观察池"
+}
