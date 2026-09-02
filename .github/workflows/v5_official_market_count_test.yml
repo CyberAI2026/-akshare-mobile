@@ -1,0 +1,46 @@
+name: V5 Official Market Count Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  market-count-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Test public market counts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import v5_core as core
+          out=Path("market_count_test"); out.mkdir(exist_ok=True)
+          idx, breadth, qa = core.fetch_market_review(180)
+          breadth.to_csv(out/"market_breadth.csv", index=False, encoding="utf-8-sig")
+          qa.to_csv(out/"market_qa.csv", index=False, encoding="utf-8-sig")
+          idx.to_csv(out/"market_indices_180d.csv", index=False, encoding="utf-8-sig")
+          print(breadth.to_string(index=False))
+          print(qa.to_string(index=False))
+          if breadth.empty:
+              raise SystemExit("FAIL: market breadth empty")
+          r=breadth.iloc[0]
+          for c in ["上涨家数","下跌家数","涨停家数","跌停家数"]:
+              if c not in breadth.columns or str(r[c]) in ("nan","None",""):
+                  raise SystemExit(f"FAIL: public field missing: {c}")
+          print("OFFICIAL_MARKET_COUNT_TEST_OK")
+          PY
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-official-market-count-test
+          path: market_count_test/
+          retention-days: 7
