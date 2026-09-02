@@ -1,415 +1,110 @@
-import streamlit as st
+import os
+from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
-import numpy as np
-import akshare as ak
-from datetime import datetime, timedelta
-from io import BytesIO
-import time
-import random
-import re
+import streamlit as st
 
-st.set_page_config(page_title='A股行情抓取与校验 V3', page_icon='📈', layout='wide')
-st.title('A股行情抓取与数据质量校验 V3')
-st.caption('手机端操作 · 云端运行 · 多数据源回退 · 前复权+未复权双口径 · 自动质量校验')
+from v4_core import (
+    APP_VERSION, GithubConfig, gh_dispatch, gh_list_results, gh_put_bytes, gh_raw_url,
+    pool_from_text, pool_from_upload
+)
 
-MODE_CONFIG = {
-    '25日粗筛': 25,
-    '120日结构筛选': 120,
-    '250日生命周期筛选': 250,
-}
-
-DEFAULT_CODES = '''002365 永安药业
-002724 海洋王
-600801 华新水泥
-603188 亚邦股份
-600712 南宁百货
-002702 海欣食品
-000723 美锦能源
-000428 华天酒店
-000523 红棉股份
-002582 好想你
-000735 罗牛山
-600857 宁波中百
-603217 元利科技
-601579 会稽山
-002322 理工能科
-605388 均瑶健康
-002882 金龙羽
-603716 塞力医疗
-603912 佳力图
-002973 侨银股份
-600536 中国软件
-600698 湖南天雁
-603797 联泰环保
-601002 晋亿实业
-600368 五洲交通
-300515 三德科技
-601609 金田股份
-300805 电声股份
-603122 合富中国
-600833 第一医药'''
-
-mode = st.selectbox('抓取层级', list(MODE_CONFIG))
-code_text = st.text_area('股票代码列表（每行一个代码，可附股票名称）', value=DEFAULT_CODES, height=360)
-include_indices = st.checkbox('120日模式同时抓取主要指数', value=True)
-
-with st.expander('V3 抓取设置（一般无需修改）'):
-    retry_count = st.slider('单数据源最大重试次数', 1, 4, 2)
-    min_pause = st.slider('每次请求最短等待（秒）', 0.2, 2.0, 0.6, 0.1)
-    max_pause = st.slider('每次请求最长等待（秒）', 0.5, 4.0, 1.4, 0.1)
-    include_raw = st.checkbox('同时抓取未复权OHLC并计算前复权比例系数', value=True)
+st.set_page_config(page_title="A股二次启动自动研究系统 V4",page_icon="📈",layout="wide")
+st.title("A股强势股二次启动自动研究系统 V4")
+st.caption("一次上传股票池 → 云端后台完成25/120/250三阶段 → 次日14:45实时+5分钟确认 → 可选OpenAI最终分析")
 
 
-def parse_input(text: str):
-    rows = []
-    for line in text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        parts = line.replace(',', ' ').replace('，', ' ').split()
-        code = ''.join(ch for ch in parts[0] if ch.isdigit())
-        if len(code) != 6:
-            continue
-        name = ' '.join(parts[1:]).strip() if len(parts) > 1 else ''
-        rows.append((code, name))
-    seen, out = set(), []
-    for row in rows:
-        if row[0] not in seen:
-            out.append(row)
-            seen.add(row[0])
-    return out
+def secret(name,default=""):
+    try: return str(st.secrets.get(name,default)).strip()
+    except Exception: return os.getenv(name,default).strip()
 
 
-def normalize_name(name: str) -> str:
-    if not name:
-        return ''
-    # 名称仅用于提示，不作为行情抓取阻断条件
-    return re.sub(r'\s+', '', str(name)).replace('*', '').replace('ＳＴ', 'ST').upper()
+def cfg():
+    token=secret("GITHUB_PAT"); repo=secret("GITHUB_REPO","CyberAI2026/-akshare-mobile"); branch=secret("GITHUB_BRANCH","main")
+    return GithubConfig(token,repo,branch) if token and repo else None
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def get_name_map():
+def merge_pools(a,b):
+    parts=[x for x in (a,b) if x is not None and not x.empty]
+    if not parts: return pd.DataFrame(columns=["股票代码","股票名称"])
+    return pd.concat(parts,ignore_index=True).drop_duplicates("股票代码",keep="first")
+
+
+t1,t2,t3,t4=st.tabs(["🚀 全流程", "⚡ 14:45确认", "☁️ 云端任务", "⚙️ 一次性设置"])
+
+with t1:
+    st.subheader("上传一次初始股票池")
+    up=st.file_uploader("Excel/CSV（自动识别股票代码、股票名称列）",type=["xlsx","xls","csv"],key="fullpool")
+    text=st.text_area("少量股票也可直接粘贴（每行：代码 名称）",height=120,placeholder="600368 五洲交通\n601609 金田股份")
+    pool=pd.DataFrame(columns=["股票代码","股票名称"])
+    err=""
     try:
-        df = ak.stock_info_a_code_name()
-        df['code'] = df['code'].astype(str).str.zfill(6)
-        return dict(zip(df['code'], df['name']))
-    except Exception:
-        return {}
+        a=pool_from_upload(up.name,up.getvalue()) if up else None
+        b=pool_from_text(text) if text.strip() else None
+        pool=merge_pools(a,b)
+    except Exception as e: err=str(e)
+    if err: st.error(err)
+    if not pool.empty:
+        st.success(f"已识别 {len(pool)} 只股票；代码自动保留6位并去重。")
+        st.dataframe(pool.head(30),use_container_width=True,height=260)
+    else: st.info("上传股票池后即可提交。500只以上建议直接上传Excel/CSV。")
 
-
-def market_prefix(code: str) -> str:
-    if code.startswith(('5', '6', '9')):
-        return 'sh' + code
-    if code.startswith(('0', '1', '2', '3')):
-        return 'sz' + code
-    if code.startswith(('4', '8')):
-        return 'bj' + code
-    return code
-
-
-def calc_date_range(days: int):
-    # 用较长自然日窗口覆盖停牌、节假日，并给120日模式预留5日预热
-    need = days + (5 if days == 120 else 0)
-    end_dt = datetime.now()
-    calendar_days = max(120, int(need * 2.2) + 60)
-    start_dt = end_dt - timedelta(days=calendar_days)
-    return start_dt.strftime('%Y%m%d'), end_dt.strftime('%Y%m%d')
-
-
-def standardize_eastmoney(df: pd.DataFrame) -> pd.DataFrame:
-    ren = {
-        '日期': '日期', '开盘': '开盘价', '最高': '最高价', '最低': '最低价', '收盘': '收盘价',
-        '成交量': '成交量', '成交额': '成交额', '换手率': '换手率'
-    }
-    keep = [c for c in ren if c in df.columns]
-    out = df[keep].rename(columns=ren).copy()
-    if '日期' in out:
-        out['日期'] = pd.to_datetime(out['日期'])
-    return out
-
-
-def standardize_sina(df: pd.DataFrame) -> pd.DataFrame:
-    ren = {
-        'date': '日期', 'open': '开盘价', 'high': '最高价', 'low': '最低价', 'close': '收盘价',
-        'volume': '成交量', 'amount': '成交额', 'turnover': '换手率'
-    }
-    keep = [c for c in ren if c in df.columns]
-    out = df[keep].rename(columns=ren).copy()
-    if '日期' in out:
-        out['日期'] = pd.to_datetime(out['日期'])
-    if '换手率' not in out.columns:
-        out['换手率'] = np.nan
-    return out
-
-
-def fetch_em(code: str, start: str, end: str, adjust: str = 'qfq') -> pd.DataFrame:
-    df = ak.stock_zh_a_hist(symbol=code, period='daily', start_date=start, end_date=end, adjust=adjust)
-    if df is None or df.empty:
-        return pd.DataFrame()
-    return standardize_eastmoney(df)
-
-
-def fetch_sina(code: str, start: str, end: str, adjust: str = 'qfq') -> pd.DataFrame:
-    symbol = market_prefix(code)
-    df = ak.stock_zh_a_daily(symbol=symbol, start_date=start, end_date=end, adjust=adjust)
-    if df is None or df.empty:
-        return pd.DataFrame()
-    return standardize_sina(df)
-
-
-def fetch_with_fallback(code: str, days: int, retries: int, pmin: float, pmax: float):
-    start, end = calc_date_range(days)
-    sources = [
-        ('东方财富_stock_zh_a_hist', lambda c, s, e: fetch_em(c, s, e, 'qfq')),
-        ('新浪_stock_zh_a_daily', lambda c, s, e: fetch_sina(c, s, e, 'qfq')),
-    ]
-    errors = []
-    need = days + (5 if days == 120 else 0)
-
-    for source_name, fn in sources:
-        for attempt in range(1, retries + 1):
-            try:
-                time.sleep(random.uniform(pmin, pmax))
-                df = fn(code, start, end)
-                if df is None or df.empty:
-                    raise RuntimeError('接口返回空数据')
-                df = df.sort_values('日期').drop_duplicates('日期', keep='last').reset_index(drop=True)
-                if len(df) < min(10, need):
-                    raise RuntimeError(f'返回交易日过少：{len(df)}')
-                return df.tail(need).reset_index(drop=True), source_name, errors
-            except Exception as e:
-                errors.append(f'{source_name} 第{attempt}次: {type(e).__name__}: {e}')
-                time.sleep(random.uniform(pmin, pmax))
-    return pd.DataFrame(), '', errors
-
-
-def fetch_raw_with_fallback(code: str, days: int, preferred_source: str, retries: int, pmin: float, pmax: float):
-    start, end = calc_date_range(days)
-    source_map = {
-        '东方财富_stock_zh_a_hist': lambda c, s, e: fetch_em(c, s, e, ''),
-        '新浪_stock_zh_a_daily': lambda c, s, e: fetch_sina(c, s, e, ''),
-    }
-    order = [preferred_source] + [x for x in source_map if x != preferred_source]
-    errors = []
-    need = days + (5 if days == 120 else 0)
-    for source_name in order:
-        fn = source_map[source_name]
-        for attempt in range(1, retries + 1):
-            try:
-                time.sleep(random.uniform(pmin, pmax))
-                df = fn(code, start, end)
-                if df is None or df.empty:
-                    raise RuntimeError('接口返回空数据')
-                df = df.sort_values('日期').drop_duplicates('日期', keep='last').reset_index(drop=True)
-                return df.tail(need).reset_index(drop=True), source_name, errors
-            except Exception as e:
-                errors.append(f'{source_name} 未复权第{attempt}次: {type(e).__name__}: {e}')
-                time.sleep(random.uniform(pmin, pmax))
-    return pd.DataFrame(), '', errors
-
-
-def merge_raw_prices(qfq: pd.DataFrame, raw: pd.DataFrame):
-    if qfq.empty or raw.empty:
-        return qfq.copy(), 0
-    cols = ['日期', '开盘价', '最高价', '最低价', '收盘价']
-    r = raw[[c for c in cols if c in raw.columns]].copy()
-    r = r.rename(columns={
-        '开盘价':'未复权开盘价','最高价':'未复权最高价',
-        '最低价':'未复权最低价','收盘价':'未复权收盘价'
-    })
-    out = qfq.merge(r, on='日期', how='left')
-    matched = int(out['未复权收盘价'].notna().sum()) if '未复权收盘价' in out.columns else 0
-    if '未复权收盘价' in out.columns:
-        raw_close = pd.to_numeric(out['未复权收盘价'], errors='coerce')
-        qfq_close = pd.to_numeric(out['收盘价'], errors='coerce')
-        out['前复权比例系数'] = qfq_close / raw_close.replace(0, np.nan)
-    return out, matched
-
-
-def validate_ohlc(df):
-    needed = {'开盘价', '最高价', '最低价', '收盘价'}
-    if df.empty or not needed.issubset(df.columns):
-        return 0
-    high_ref = df[['开盘价', '收盘价', '最低价']].max(axis=1)
-    low_ref = df[['开盘价', '收盘价', '最高价']].min(axis=1)
-    return int(((df['最高价'] < high_ref) | (df['最低价'] > low_ref)).sum())
-
-
-def add_vol5(df):
-    x = df.copy()
-    prev5 = pd.to_numeric(x['成交量'], errors='coerce').shift(1).rolling(5).mean()
-    x['5日成交量比'] = pd.to_numeric(x['成交量'], errors='coerce') / prev5
-    return x
-
-
-def fetch_indices(days=120):
-    specs = [
-        ('sh000001', '上证指数', '000001'),
-        ('sz399001', '深证成指', '399001'),
-        ('sz399006', '创业板指', '399006'),
-        ('sh000688', '科创50', '000688'),
-        ('bj899050', '北证50', '899050'),
-    ]
-    out = []
-    start, end = calc_date_range(days)
-    for code, name, pure in specs:
-        try:
-            time.sleep(random.uniform(min_pause, max_pause))
-            df = ak.index_zh_a_hist(symbol=pure, period='daily', start_date=start, end_date=end)
-            if df is None or df.empty:
-                continue
-            ren = {'日期':'日期','开盘':'开盘价','最高':'最高价','最低':'最低价','收盘':'收盘价','成交量':'成交量','成交额':'成交额'}
-            df = df[[c for c in ren if c in df.columns]].rename(columns=ren).copy()
-            df['日期'] = pd.to_datetime(df['日期'])
-            df = df.sort_values('日期').tail(days)
-            df.insert(0, '指数名称', name)
-            df.insert(0, '指数代码', code)
-            out.append(df)
-        except Exception:
-            continue
-    return pd.concat(out, ignore_index=True) if out else pd.DataFrame()
-
-
-def get_static_info(code: str, name: str):
-    # V2 先保证日线抓取稳定；静态属性尽力获取，失败不阻断主流程
-    return {'股票代码': code, '股票名称': name, '所属行业': '', '最新流通市值': np.nan}
-
-
-def to_excel(sheets: dict):
-    bio = BytesIO()
-    with pd.ExcelWriter(bio, engine='openpyxl') as writer:
-        for name, df in sheets.items():
-            df.to_excel(writer, sheet_name=name[:31], index=False)
-    return bio.getvalue()
-
-
-if st.button('开始抓取并生成Excel', type='primary', use_container_width=True):
-    rows = parse_input(code_text)
-    if not rows:
-        st.error('没有解析到有效的6位股票代码。')
-        st.stop()
-
-    days = MODE_CONFIG[mode]
-    name_map = get_name_map()
-
-    data_parts, qa, static = [], [], []
-    progress = st.progress(0)
-    status = st.empty()
-
-    for i, (code, input_name) in enumerate(rows, start=1):
-        actual_name = name_map.get(code, '')
-        display_name = actual_name or input_name
-        name_match = (
-            '未知' if not actual_name or not input_name
-            else ('是' if normalize_name(actual_name) == normalize_name(input_name) else '否（仅提示，不阻断）')
-        )
-
-        df, source, errors = fetch_with_fallback(code, days, retry_count, min_pause, max_pause)
-        err = ''
-        raw_source = ''
-        raw_matched = 0
-        raw_errors = []
-        if df.empty:
-            err = ' | '.join(errors[-4:]) if errors else '未抓取到日线数据'
+    c=cfg()
+    if st.button("提交全流程云端任务",type="primary",use_container_width=True,disabled=pool.empty):
+        if not c:
+            st.error("尚未配置 GITHUB_PAT。V4正式后台模式需要一次性配置；请到“⚙️ 一次性设置”查看。")
         else:
-            if include_raw:
-                raw_df, raw_source, raw_errors = fetch_raw_with_fallback(
-                    code, days, source, retry_count, min_pause, max_pause
-                )
-                if not raw_df.empty:
-                    df, raw_matched = merge_raw_prices(df, raw_df)
-            if days == 120:
-                df = add_vol5(df).tail(120).reset_index(drop=True)
-            else:
-                df = df.tail(days).reset_index(drop=True)
-            df.insert(0, '股票名称', display_name)
-            df.insert(0, '股票代码', code)
-            data_parts.append(df)
-            static.append(get_static_info(code, display_name))
-            if include_raw and raw_matched == 0 and raw_errors:
-                err = '未复权OHLC抓取失败，不影响前复权主数据；' + ' | '.join(raw_errors[-2:])
+            stamp=datetime.now().strftime("%Y%m%d_%H%M%S")
+            path=f"v4_data/inbox/pool_{stamp}.csv"
+            data=pool.to_csv(index=False).encode("utf-8-sig")
+            gh_put_bytes(c,path,data,f"V4 upload pool {stamp}")
+            gh_put_bytes(c,"v4_data/inbox/latest_pool.csv",data,f"V4 latest pool {stamp}")
+            gh_dispatch(c,"v4_automation.yml",{"job":"full","pool_path":path})
+            st.success("任务已交给 GitHub 云端独立执行。现在可以关闭Safari、锁屏或去做别的事情；浏览器不再维持任务。")
+            st.write(f"股票数：{len(pool)}；任务输入：`{path}`")
 
-        if not df.empty:
-            first = df['日期'].min().date().isoformat()
-            last = df['日期'].max().date().isoformat()
-            n = len(df)
-            dup = int(df.duplicated(['股票代码', '日期']).sum())
-            ohlc = validate_ohlc(df)
-            zero_vol = int((pd.to_numeric(df['成交量'], errors='coerce').fillna(0) <= 0).sum()) if '成交量' in df else None
-            zero_amt = int((pd.to_numeric(df['成交额'], errors='coerce').fillna(0) <= 0).sum()) if '成交额' in df else None
-            turnover_source = '行情源历史字段' if ('换手率' in df and df['换手率'].notna().any()) else '缺失'
-            amount_source = '行情源真实字段' if ('成交额' in df and df['成交额'].notna().any()) else '缺失'
+with t2:
+    st.subheader("第二个交易日 14:45 实时确认")
+    st.write("正式自动化由云端定时任务触发：读取上一轮≤10只观察池，抓取14:45实时快照与当天5分钟K线，再执行最终0–2只确认。")
+    c=cfg()
+    if st.button("现在手动触发一次14:45确认",use_container_width=True):
+        if not c: st.error("尚未配置 GITHUB_PAT。")
         else:
-            first = last = ''
-            n = dup = ohlc = 0
-            zero_vol = zero_amt = None
-            turnover_source = amount_source = ''
+            gh_dispatch(c,"v4_automation.yml",{"job":"1445","pool_path":""})
+            st.success("已提交。任务在云端运行，页面可关闭。")
+    st.caption("GitHub定时任务采用北京时间14:40预启动，脚本若提前启动会等待到14:45；GitHub Actions本身不承诺秒级准时，因此交易级严格定时后续可无缝迁移到专用Cron服务。")
 
-        qa.append({
-            '输入股票代码': code,
-            '输入股票名称': input_name,
-            '实际抓取股票代码': code if n else '',
-            '实际抓取股票名称': actual_name or input_name,
-            '代码是否有效': '是' if (actual_name or n) else '待核验',
-            '名称是否一致': name_match,
-            '实际交易日数量': n,
-            '最早日期': first,
-            '最新日期': last,
-            '是否包含市场最新交易日': '需结合停牌情况复核' if n else '',
-            '实际使用数据源': source,
-            '未复权数据源': raw_source if n else '',
-            '未复权匹配交易日数量': raw_matched if n else 0,
-            '成交量单位': '以当前AKShare接口原始口径为准；使用前请抽样核验',
-            '成交额来源': amount_source,
-            '换手率来源': turnover_source,
-            '重复代码+日期数量': dup,
-            'OHLC逻辑异常数量': ohlc,
-            '成交量<=0数量': zero_vol,
-            '成交额<=0数量': zero_amt,
-            '名称差异说明': (f'输入“{input_name}”，行情代码表名称“{actual_name}”' if input_name and actual_name and normalize_name(input_name) != normalize_name(actual_name) else ''),
-            '异常说明': err,
-        })
-
-        progress.progress(i / len(rows))
-        status.text(f'正在处理 {i}/{len(rows)}：{code} {display_name}')
-
-    data = pd.concat(data_parts, ignore_index=True) if data_parts else pd.DataFrame()
-    qa_df = pd.DataFrame(qa)
-    sheets = {}
-
-    if days == 25:
-        sheets['个股25日日线数据'] = data
-    elif days == 120:
-        sheets['个股日线动态数据'] = data
-        sheets['个股静态属性数据'] = pd.DataFrame(static).drop_duplicates('股票代码') if static else pd.DataFrame(columns=['股票代码','股票名称','所属行业','最新流通市值'])
-        if include_indices:
-            sheets['指数日线数据'] = fetch_indices(120)
+with t3:
+    st.subheader("云端结果")
+    c=cfg()
+    if not c:
+        st.warning("配置GITHUB_PAT后，这里可以直接检查云端任务。")
     else:
-        sheets['个股250日日线数据'] = data
+        st.markdown(f"**仓库：** `{c.repo}`　**分支：** `{c.branch}`")
+        st.link_button("打开 GitHub Actions",f"https://github.com/{c.repo}/actions",use_container_width=True)
+        st.link_button("查看最新观察池",gh_raw_url(c,"v4_data/latest/observation_pool.csv"),use_container_width=True)
+        st.link_button("查看最新14:45分析",gh_raw_url(c,"v4_data/latest/last_1445_analysis.md"),use_container_width=True)
+        if st.button("刷新云端目录"):
+            items=gh_list_results(c,"v4_data")
+            st.json([{"name":x.get("name"),"type":x.get("type"),"url":x.get("html_url")} for x in items])
 
-    sheets['数据质量校验表'] = qa_df
+with t4:
+    st.subheader("一次性配置")
+    st.markdown("""
+V4 的核心变化是：**真正执行任务的是 GitHub Actions，不是手机 Safari 会话。** 因此你点完以后可以离开半小时，任务仍继续。
 
-    ok = qa_df['实际交易日数量'] > 0
-    st.success(f'完成：输入 {len(rows)} 只，成功 {int(ok.sum())} 只，异常 {int((~ok).sum())} 只。')
-    if (~ok).any():
-        st.warning('仍有失败股票。请重点查看“实际使用数据源”“未复权数据源”和“异常说明”；V3 不会因股票名称变化而阻断代码行情抓取。')
-    st.dataframe(qa_df, use_container_width=True, hide_index=True)
+在 Streamlit 的 **Manage app → Settings → Secrets** 增加：
+```toml
+GITHUB_PAT = "你的GitHub Personal Access Token"
+GITHUB_REPO = "CyberAI2026/-akshare-mobile"
+GITHUB_BRANCH = "main"
+```
+`GITHUB_PAT` 需要对这个仓库具有 Contents 写入和 Actions 触发权限。不要把 Token 写进代码或公开上传。
 
-    excel = to_excel(sheets)
-    fname = f'A股行情_{days}日_V3_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
-    st.download_button(
-        '下载Excel结果', data=excel, file_name=fname,
-        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        use_container_width=True
-    )
+如果要让云端最终自动调用 OpenAI，在 GitHub 仓库 **Settings → Secrets and variables → Actions** 增加：
+`OPENAI_API_KEY`。模型默认 `gpt-5.6-terra`，也可增加 `OPENAI_MODEL` 覆盖。
 
-st.divider()
-st.markdown('''**V3 说明**
-
-- 股票代码始终是唯一行情查询主键；名称只做提示性校验。
-- 前复权行情继续作为趋势、结构和生命周期分析的主序列。
-- 可同步抓取未复权OHLC，并按日期与前复权序列对齐；`前复权比例系数 = 前复权收盘价 ÷ 未复权收盘价`，用于复权口径交叉核验，不宣称等同于交易所官方复权因子。
-- 主行情默认先尝试东方财富，失败自动回退新浪；未复权行情优先沿用主行情已成功的数据源，再尝试备用源。
-- 质量校验表增加“未复权数据源”和“未复权匹配交易日数量”。未复权抓取失败不会污染前复权主数据，只会记录异常。
-- 成交额和换手率仍优先保留行情源历史真实字段；不使用最新流通股本伪造历史换手率。
-- 历史涨停状态暂不在V3中硬算：代码可确定常规板块涨跌幅上限，但历史ST状态、新股无涨跌幅限制日等需要更可靠的逐日证券状态，后续单独加入。''')
+V4 把筛选规则放在 `v4_core.py`，抓取/任务基础设施与策略分离。以后规则研究更新，只升级 Strategy Version，不需要重新改整套网站。
+""")
+    st.info("第一次部署V4还需要把 app.py、v4_core.py、v4_cli.py、requirements.txt 和 .github/workflows/v4_automation.yml 一起放进仓库。")
