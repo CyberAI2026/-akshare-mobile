@@ -17,7 +17,7 @@ import pandas as pd
 import requests
 
 APP_VERSION = "V4"
-STRATEGY_VERSION = "research_v0.4"
+STRATEGY_VERSION = "research_v0.4.1"
 
 MODE_DAYS = {"25日粗筛": 25, "120日结构筛选": 120, "250日生命周期筛选": 250}
 
@@ -285,41 +285,78 @@ def build_metrics(data: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def stage1_rank(metrics: pd.DataFrame, max_n: int = 150) -> pd.DataFrame:
-    """25日：宽松粗筛。这里只做可复现的排序，不把尚未证实的细规则硬编码成淘汰条件。"""
+def _rank_and_audit(x: pd.DataFrame, score_col: str, max_n: int, eligible_col: str | None = None, stage: str = "") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """返回正式入选结果 + 全样本审计表。审计表保留每只股票为什么入选/未入选。"""
+    z = x.copy()
+    if z.empty:
+        return z, z
+    z["阶段排名"] = z[score_col].rank(method="first", ascending=False).astype("Int64")
+    if eligible_col and eligible_col in z.columns:
+        eligible = z[eligible_col].fillna(False).astype(bool)
+    else:
+        eligible = pd.Series(True, index=z.index)
+    eligible_sorted = z[eligible].sort_values(score_col, ascending=False)
+    selected_codes = set(eligible_sorted.head(max_n)["股票代码"].astype(str))
+    z["本阶段入选"] = z["股票代码"].astype(str).isin(selected_codes)
+    cap_note = f"；本阶段上限{max_n}只"
+    def reason(r):
+        if not bool(r.get(eligible_col, True)) if eligible_col else False:
+            return f"未入选：未满足{stage}最低资格条件"
+        if bool(r["本阶段入选"]):
+            return f"入选：按{score_col}排序第{int(r['阶段排名'])}名{cap_note}"
+        return f"未入选：满足基础条件，但排名第{int(r['阶段排名'])}名，超出{max_n}只上限"
+    z["决策说明"] = z.apply(reason, axis=1)
+    selected = z[z["本阶段入选"]].sort_values(score_col, ascending=False).reset_index(drop=True)
+    audit = z.sort_values(["本阶段入选", score_col], ascending=[False, False]).reset_index(drop=True)
+    return selected, audit
+
+
+def stage1_rank(metrics: pd.DataFrame, max_n: int = 150, return_audit: bool = False):
+    """25日：宽松粗筛。仅保留一个非常宽松的最低资格条件，其余以排序压缩样本。"""
     x = metrics.copy()
-    if x.empty: return x
+    if x.empty:
+        return (x, x) if return_audit else x
     for c in ["ret20", "amp5", "距20日高点", "MA20距离"]:
         x[c] = pd.to_numeric(x[c], errors="coerce")
-    x["阶段1分"] = (
-        x["ret20"].clip(-0.2, 0.5).fillna(-0.2) * 35
-        + (x["距20日高点"].clip(-0.3, 0).fillna(-0.3) + 0.3) * 25
-        + x["MA20距离"].clip(-0.15, 0.3).fillna(-0.15) * 20
-        - (x["amp5"].fillna(0.5) - 0.18).clip(lower=0) * 25
-    )
+    x["20日动量贡献"] = x["ret20"].clip(-0.2, 0.5).fillna(-0.2) * 35
+    x["距20日高点贡献"] = (x["距20日高点"].clip(-0.3, 0).fillna(-0.3) + 0.3) * 25
+    x["MA20位置贡献"] = x["MA20距离"].clip(-0.15, 0.3).fillna(-0.15) * 20
+    x["短波动惩罚"] = (x["amp5"].fillna(0.5) - 0.18).clip(lower=0) * 25
+    x["阶段1分"] = x["20日动量贡献"] + x["距20日高点贡献"] + x["MA20位置贡献"] - x["短波动惩罚"]
+    # 只作为粗筛最低资格，不把尚未验证的细参数硬编码。
     x["阶段1通过"] = (x["最新收盘"] > 0) & (x["MA20距离"] > -0.08)
-    y = pd.concat([x[x["阶段1通过"]], x[~x["阶段1通过"]]]).drop_duplicates("股票代码")
-    return y.sort_values("阶段1分", ascending=False).head(max_n).reset_index(drop=True)
+    x["阶段1风险提示"] = np.where(x["amp5"] > 0.18, "近5日波动偏大", "")
+    selected, audit = _rank_and_audit(x, "阶段1分", max_n, "阶段1通过", "一级粗筛")
+    return (selected, audit) if return_audit else selected
 
 
-def stage2_rank(metrics: pd.DataFrame, max_n: int = 30) -> pd.DataFrame:
-    """120日：整理成熟+趋势仍活。吸收已验证方向，但以排序为主，避免过拟合硬阈值。"""
+def stage2_rank(metrics: pd.DataFrame, max_n: int = 30, return_audit: bool = False):
+    """120日：整理成熟+趋势仍活。当前版本以排序为主，不把研究中的弱证据做成硬淘汰线。"""
     x = metrics.copy()
-    if x.empty: return x
+    if x.empty:
+        return (x, x) if return_audit else x
     for c in ["ret10", "ret40", "amp5", "MA20距离", "MA30_5日斜率", "距稳健5日上沿"]:
         x[c] = pd.to_numeric(x[c], errors="coerce")
     near_upper = 1 - ((x["距稳健5日上沿"].fillna(-0.2) - 0.005).abs() / 0.08).clip(0, 1)
     mature = 1 - ((x["amp5"].fillna(0.4) - 0.12).abs() / 0.20).clip(0, 1)
     trend_alive = x["ret40"].clip(-0.25, 0.6).fillna(-0.25)
-    x["阶段2分"] = near_upper * 30 + mature * 15 + trend_alive * 35 + x["MA30_5日斜率"].clip(-0.1, 0.15).fillna(-0.1) * 80
-    x["阶段2风险提示"] = np.where(x["amp5"] > 0.18, "短波动偏大", "")
-    return x.sort_values("阶段2分", ascending=False).head(max_n).reset_index(drop=True)
+    x["稳健上沿贡献"] = near_upper * 30
+    x["整理成熟贡献"] = mature * 15
+    x["40日趋势贡献"] = trend_alive * 35
+    x["MA30斜率贡献"] = x["MA30_5日斜率"].clip(-0.1, 0.15).fillna(-0.1) * 80
+    x["阶段2分"] = x["稳健上沿贡献"] + x["整理成熟贡献"] + x["40日趋势贡献"] + x["MA30斜率贡献"]
+    x["阶段2风险提示"] = np.select(
+        [x["amp5"] > 0.18, x["ret40"] < 0, x["距稳健5日上沿"].abs() > 0.08],
+        ["短波动偏大", "40日趋势偏弱", "距离短周期稳健上沿较远"], default="")
+    selected, audit = _rank_and_audit(x, "阶段2分", max_n, None, "二级结构筛选")
+    return (selected, audit) if return_audit else selected
 
 
-def stage3_rank(metrics: pd.DataFrame, max_n: int = 10) -> pd.DataFrame:
-    """250日：生命周期。高位/长趋势优先，惩罚长期低位反弹和近期极端加速。"""
+def stage3_rank(metrics: pd.DataFrame, max_n: int = 10, return_audit: bool = False):
+    """250日：生命周期。高位/长趋势优先，并显式展示过热与长期低位修复惩罚。"""
     x = metrics.copy()
-    if x.empty: return x
+    if x.empty:
+        return (x, x) if return_audit else x
     for c in ["250日位置", "距250日高点", "ret40", "ret120", "MA60_10日斜率", "MA120_20日斜率"]:
         x[c] = pd.to_numeric(x[c], errors="coerce")
     pos = x["250日位置"].clip(0, 1).fillna(0)
@@ -329,11 +366,22 @@ def stage3_rank(metrics: pd.DataFrame, max_n: int = 10) -> pd.DataFrame:
     slope = x["MA120_20日斜率"].clip(-0.15, 0.20).fillna(-0.15)
     overheat = (x["ret40"].fillna(0) - 0.45).clip(lower=0)
     low_rebound = (0.45 - pos).clip(lower=0)
-    x["阶段3分"] = pos*35 + near_hi*25 + longtrend*12 + midtrend*12 + slope*60 - overheat*25 - low_rebound*30
+    x["250日位置贡献"] = pos * 35
+    x["接近250日高点贡献"] = near_hi * 25
+    x["120日趋势贡献"] = longtrend * 12
+    x["40日趋势贡献"] = midtrend * 12
+    x["MA120斜率贡献"] = slope * 60
+    x["近期过热惩罚"] = overheat * 25
+    x["长期低位反弹惩罚"] = low_rebound * 30
+    x["阶段3分"] = x["250日位置贡献"] + x["接近250日高点贡献"] + x["120日趋势贡献"] + x["40日趋势贡献"] + x["MA120斜率贡献"] - x["近期过热惩罚"] - x["长期低位反弹惩罚"]
     x["生命周期标签"] = np.select(
-        [pos >= 0.75, pos < 0.45, x["ret40"] > 0.45],
-        ["右上角/高位趋势", "长期低位修复", "近期加速偏大"], default="中段/待确认")
-    return x.sort_values("阶段3分", ascending=False).head(max_n).reset_index(drop=True)
+        [pos < 0.45, x["ret40"] > 0.45, pos >= 0.75],
+        ["长期低位修复", "近期加速偏大", "右上角/高位趋势"], default="中段/待确认")
+    x["阶段3风险提示"] = np.select(
+        [pos < 0.45, x["ret40"] > 0.45, x["ret120"] < 0],
+        ["长期位置偏低，警惕下降趋势修复", "40日加速偏大，警惕趋势成熟", "120日趋势仍偏弱"], default="")
+    selected, audit = _rank_and_audit(x, "阶段3分", max_n, None, "三级生命周期筛选")
+    return (selected, audit) if return_audit else selected
 
 
 # ---------- 14:45 实时 + 5分钟 ----------

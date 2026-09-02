@@ -51,22 +51,22 @@ def run_full(pool_path: str):
     meta_path.write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
 
     cp25=checkpoint_factory(base/"25d")
-    d25,q25=fetch_pool_history(pool,25,lambda d,t,c,q:(cp25(d,t,c,q), git_commit(f"V4 checkpoint 25d {d}/{t}") if d%10==0 else None), cache_dir=base/"25d"/"cache"); m25=build_metrics(d25); s1=stage1_rank(m25,150)
-    p1=s1[["股票代码","股票名称"]].copy(); save_df(base/"25d"/"pool_150.csv",p1)
-    save_bytes(base/"25d"/"result.xlsx",to_excel_bytes({"25日日线":d25,"质量校验":q25,"粗筛指标":m25,"一级结果":s1}))
+    d25,q25=fetch_pool_history(pool,25,lambda d,t,c,q:(cp25(d,t,c,q), git_commit(f"V4 checkpoint 25d {d}/{t}") if d%10==0 else None), cache_dir=base/"25d"/"cache"); m25=build_metrics(d25); s1,a1=stage1_rank(m25,150,return_audit=True)
+    p1=s1[["股票代码","股票名称"]].copy(); save_df(base/"25d"/"pool_150.csv",p1); save_df(base/"25d"/"stage_audit.csv",a1)
+    save_bytes(base/"25d"/"result.xlsx",to_excel_bytes({"25日日线":d25,"质量校验":q25,"粗筛指标":m25,"筛选审计":a1,"一级结果":s1}))
 
     cp120=checkpoint_factory(base/"120d")
-    d120,q120=fetch_pool_history(p1,120,lambda d,t,c,q:(cp120(d,t,c,q), git_commit(f"V4 checkpoint 120d {d}/{t}") if d%10==0 else None), cache_dir=base/"120d"/"cache"); m120=build_metrics(d120); s2=stage2_rank(m120,30)
-    p2=s2[["股票代码","股票名称"]].copy(); save_df(base/"120d"/"pool_30.csv",p2)
-    save_bytes(base/"120d"/"result.xlsx",to_excel_bytes({"120日日线":d120,"质量校验":q120,"结构指标":m120,"二级结果":s2}))
+    d120,q120=fetch_pool_history(p1,120,lambda d,t,c,q:(cp120(d,t,c,q), git_commit(f"V4 checkpoint 120d {d}/{t}") if d%10==0 else None), cache_dir=base/"120d"/"cache"); m120=build_metrics(d120); s2,a2=stage2_rank(m120,30,return_audit=True)
+    p2=s2[["股票代码","股票名称"]].copy(); save_df(base/"120d"/"pool_30.csv",p2); save_df(base/"120d"/"stage_audit.csv",a2)
+    save_bytes(base/"120d"/"result.xlsx",to_excel_bytes({"120日日线":d120,"质量校验":q120,"结构指标":m120,"筛选审计":a2,"二级结果":s2}))
 
     cp250=checkpoint_factory(base/"250d")
-    d250,q250=fetch_pool_history(p2,250,lambda d,t,c,q:(cp250(d,t,c,q), git_commit(f"V4 checkpoint 250d {d}/{t}") if d%10==0 else None), cache_dir=base/"250d"/"cache"); m250=build_metrics(d250); s3=stage3_rank(m250,10)
-    p3=s3[["股票代码","股票名称"]].copy(); save_df(base/"250d"/"observation_pool.csv",p3)
-    save_bytes(base/"250d"/"result.xlsx",to_excel_bytes({"250日日线":d250,"质量校验":q250,"生命周期指标":m250,"三级结果":s3}))
+    d250,q250=fetch_pool_history(p2,250,lambda d,t,c,q:(cp250(d,t,c,q), git_commit(f"V4 checkpoint 250d {d}/{t}") if d%10==0 else None), cache_dir=base/"250d"/"cache"); m250=build_metrics(d250); s3,a3=stage3_rank(m250,10,return_audit=True)
+    p3=s3[["股票代码","股票名称"]].copy(); save_df(base/"250d"/"observation_pool.csv",p3); save_df(base/"250d"/"stage_audit.csv",a3)
+    save_bytes(base/"250d"/"result.xlsx",to_excel_bytes({"250日日线":d250,"质量校验":q250,"生命周期指标":m250,"筛选审计":a3,"三级结果":s3}))
 
     latest=ROOT/"latest"; latest.mkdir(parents=True,exist_ok=True); save_df(latest/"observation_pool.csv",p3)
-    summary={"strategy":STRATEGY_VERSION,"initial":len(pool),"stage1":len(p1),"stage2":len(p2),"stage3":len(p3),"completed":datetime.now().isoformat(),"folder":str(base)}
+    summary={"strategy":STRATEGY_VERSION,"engine":"V4.1-auditable","initial":len(pool),"stage1":len(p1),"stage2":len(p2),"stage3":len(p3),"stage1_codes":p1["股票代码"].astype(str).tolist(),"stage2_codes":p2["股票代码"].astype(str).tolist(),"stage3_codes":p3["股票代码"].astype(str).tolist(),"completed":datetime.now().isoformat(),"folder":str(base)}
     try:
         summary["ai_precheck"]=openai_analyze("三级生命周期筛选复核",{"stage3":s3.to_dict("records")})
     except Exception as e: summary["ai_precheck"]=f"AI调用失败:{e}"
