@@ -920,6 +920,14 @@ def maintain_master_pool(master: pd.DataFrame, metrics120: pd.DataFrame | None, 
         return master, pd.DataFrame()
     asof_ts = pd.Timestamp(asof or datetime.now().date())
     x = master.copy()
+    # CSV/Excel round-trips may infer all-empty text columns such as 淘汰日期/淘汰原因 as float64 (NaN).
+    # Force registry text fields to object before assigning date/reason strings, otherwise pandas>=2.2
+    # can raise: TypeError: Invalid value 'YYYY-MM-DD' for dtype 'float64'.
+    for c in ["股票代码", "股票名称", "首次进入日期", "最近提交日期", "当前状态", "淘汰日期", "淘汰原因"]:
+        if c not in x.columns:
+            x[c] = ""
+        x[c] = x[c].astype("object")
+        x[c] = x[c].where(pd.notna(x[c]), "")
     met = metrics120.copy() if metrics120 is not None else pd.DataFrame()
     if not met.empty:
         keepcols=[c for c in ["股票代码","ret20","ret40","ret120","MA20距离","MA30_5日斜率","amp5","ret10"] if c in met.columns]
