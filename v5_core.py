@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 import requests
 
-APP_VERSION = "V5-foundation"
-STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.1"
+APP_VERSION = "V5.1-openai-research"
+STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.2+ai-v0.1"
 
 MODE_DAYS = {"25日粗筛": 25, "120日结构筛选": 120, "250日生命周期筛选": 250}
 
@@ -587,23 +587,46 @@ def to_excel_bytes(sheets: dict[str,pd.DataFrame]) -> bytes:
     return bio.getvalue()
 
 
-# ---------- OpenAI 分析（可选） ----------
+# ---------- OpenAI 分析 ----------
 def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
+    """调用 Responses API。API 不继承聊天上下文，因此研究边界必须显式写入提示词。"""
     key=os.getenv("OPENAI_API_KEY","").strip()
     if not key:
-        return "OPENAI_API_KEY 未配置；本次仅完成数据与机械排序。"
+        raise RuntimeError("OPENAI_API_KEY 未配置；V5.1不会伪造AI观察池。")
     from openai import OpenAI
     client=OpenAI(api_key=key)
     model=model or os.getenv("OPENAI_MODEL") or "gpt-5.6-terra"
-    system=(
-        "你是A股强势股二次启动研究系统的分析模块。目标是寻找已经证明强势、整理成熟后重新点火的候选，避免未整理完成和趋势尾端。"
-        "必须把计算事实与判断分开；不能为了凑数而推荐；最终确认允许0到2只。"
-        "已验证方向：中期趋势仍活、短周期波动降温、接近稳健4-5日上沿、适度重新加速有帮助；固定MA距离、固定量缩、固定距20日高点等不作为硬规则。"
-        "交易受A股T+1约束，14:45确认重点看当天实时量价与5分钟结构。"
+    common=(
+        "你是A股强势股二次启动研究系统的研究层。只分析输入数据，不使用外部行情，不臆造缺失字段。"
+        "研究目标：已知强势股在整理成熟后寻找真正的二次启动点，避免整理未完成时过早介入，也避免趋势成熟/尾端追高。"
+        "证据层级：较强证据包括短周期波动已降温、10日速度不过热、中期趋势仍活、靠近稳健4-5日上沿；"
+        "中等证据包括适度重新加速与避免极端结构风险；弱或已否定规则不得升级成硬条件，包括固定MA距离、固定量缩比、"
+        "固定距20日高点、固定等待天数、固定市场宽度阈值、累计涨幅直接代表趋势年龄。"
+        "市场环境只作为风险与仓位上下文，不得使用未经验证的固定阈值一票否决。"
+        "必须区分计算事实和研究判断；允许空结果，禁止为了凑数而选股。"
     )
-    prompt=system+"\n任务类型:"+kind+"\n数据(JSON):\n"+json.dumps(payload,ensure_ascii=False,default=str)
-    resp=client.responses.create(model=model,input=prompt)
-    return resp.output_text
+    if "盘后" in kind or "观察池" in kind:
+        task=(
+            "当前任务是盘后30只研究池筛选到次日0-10只观察池，不是最终买入推荐。"
+            "必须优先排除明显长期下降趋势修复、趋势尾端/近期加速极端、结构尚未成熟者；"
+            "同时允许仍需次日14:40-14:45验证的候选进入观察池。"
+        )
+    elif "尾盘" in kind or "14:45" in kind:
+        task=(
+            "当前任务是次日14:45尾盘确认，最多0-2只；受A股T+1约束。"
+            "结构止损距离不是保证最大亏损，隔夜跳空可能造成更大损失。"
+        )
+    else:
+        task="按任务数据完成研究，不扩展到输入之外。"
+    output_rule=(
+        "只输出一个合法JSON对象，不要Markdown代码围栏，不要JSON前后解释文字。严格遵守任务数据中给定的输出格式。"
+    )
+    prompt=common+task+output_rule+"\n任务类型:"+kind+"\n数据(JSON):\n"+json.dumps(payload,ensure_ascii=False,default=str,allow_nan=False)
+    resp=client.responses.create(model=model,input=prompt,max_output_tokens=12000)
+    text=(resp.output_text or "").strip()
+    if not text:
+        raise RuntimeError("OpenAI 返回空文本。")
+    return text
 
 
 # ---------- GitHub 云端存储与任务触发 ----------

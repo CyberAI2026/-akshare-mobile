@@ -12,9 +12,9 @@ AFTER_CLOSE_WORKFLOW = "v5_after_close.yml"
 TAIL_WORKFLOW = "v5_tail_confirmation.yml"
 BACKUP_WORKFLOW = "v5_weekly_backup.yml"
 
-st.set_page_config(page_title="A股二次启动研究系统 V5", page_icon="📈", layout="wide")
-st.title("A股强势股二次启动研究系统 V5｜基础架构版")
-st.caption("每日只提交当天发现的强势股 → 云端主池自动合并/去重/维护 → Python筛到30只研究包；OpenAI 30→≤10将在下一阶段接入")
+st.set_page_config(page_title="A股二次启动研究系统 V5.1", page_icon="📈", layout="wide")
+st.title("A股强势股二次启动研究系统 V5.1｜OpenAI研究层")
+st.caption("每日提交强势股 → 云端主池维护 → Python约500→150→30 → OpenAI研究层30→0–10只次日观察池")
 
 
 def secret(name, default=""):
@@ -106,7 +106,7 @@ with t1:
                 gh_put_bytes(c, path, data, f"V5 daily strong batch {stamp}")
                 gh_put_bytes(c, "v5_data/inbox/latest_daily_batch.csv", data, f"V5 latest daily batch {stamp}")
                 gh_dispatch(c, AFTER_CLOSE_WORKFLOW, {"batch_path": path})
-                st.success("已提交。可以关闭Safari；后台会维护主池并生成30只研究包。")
+                st.success("已提交。可以关闭Safari；后台会维护主池、生成30只研究包，并调用OpenAI形成0–10只次日观察池。")
                 st.link_button("查看盘后任务", actions_url(c, AFTER_CLOSE_WORKFLOW), use_container_width=True)
             except Exception as e: st.error(f"提交失败：{e}")
 
@@ -115,7 +115,7 @@ with t1:
         else:
             try:
                 gh_dispatch(c, AFTER_CLOSE_WORKFLOW, {"batch_path": ""})
-                st.success("已启动现有主池的盘后研究。")
+                st.success("已启动现有主池的盘后研究；完成30只研究包后会继续调用OpenAI。")
                 st.link_button("查看盘后任务", actions_url(c, AFTER_CLOSE_WORKFLOW), use_container_width=True)
             except Exception as e: st.error(f"触发失败：{e}")
 
@@ -130,13 +130,15 @@ with t2:
         summary = gh_get_json(c, "v5_data/latest/latest_after_close.json")
         master = gh_get_csv(c, "v5_data/latest/current_master_pool.csv")
         pool30 = gh_get_csv(c, "v5_data/latest/research_pool_30.csv")
+        obs = gh_get_csv(c, "v5_data/latest/observation_pool.csv")
+        obs_meta = gh_get_json(c, "v5_data/latest/observation_pool_meta.json")
         if summary:
             a,b,c1,d = st.columns(4)
             a.metric("当前云端主池", summary.get("master_count", "-"))
             b.metric("一级", summary.get("stage1", "-"))
             c1.metric("30只研究包", summary.get("stage2_research_pool", "-"))
-            d.metric("本次耗时(分钟)", summary.get("elapsed_minutes", "-"))
-            st.caption(f"完成时间：{summary.get('completed_cn','-')}｜{summary.get('engine','-')}｜Python正式停在30只")
+            d.metric("AI观察池", summary.get("observation_pool_count", "-"))
+            st.caption(f"完成时间：{summary.get('completed_cn','-')}｜{summary.get('engine','-')}｜耗时 {summary.get('elapsed_minutes','-')} 分钟｜Python停在30只，OpenAI再形成观察池")
         else:
             st.info("尚未生成V5盘后结果。")
         if not master.empty:
@@ -144,14 +146,24 @@ with t2:
             st.dataframe(master, use_container_width=True, height=330, hide_index=True)
         if not pool30.empty:
             st.markdown(f"#### 最新AI研究输入池（{len(pool30)}只）")
-            st.caption("这30只不是最终推荐。下一阶段接OpenAI API后，由研究层从这里形成0–10只次日观察池。")
-            st.dataframe(pool30, use_container_width=True, height=400, hide_index=True)
+            st.caption("这30只是OpenAI研究输入，不是买入名单。")
+            st.dataframe(pool30, use_container_width=True, height=360, hide_index=True)
+        if obs_meta:
+            st.markdown(f"#### 次日AI观察池（{obs_meta.get('observation_count', 0)}只）")
+            st.caption(f"生成交易日：{obs_meta.get('generated_trade_date','-')} → 适用交易日：{obs_meta.get('target_trade_date','-')}｜模型：{obs_meta.get('model','-')}")
+            ma=obs_meta.get("market_assessment",{}) or {}
+            if ma:
+                st.info(f"市场风险：{ma.get('risk_level','-')}｜{ma.get('next_day_aggressiveness','-')}｜{ma.get('summary','')}")
+            if not obs.empty:
+                st.dataframe(obs, use_container_width=True, height=360, hide_index=True)
+            else:
+                st.warning("OpenAI本次选择0只，属于允许结果，不会强行凑数。")
         st.link_button("打开GitHub结果目录", f"https://github.com/{c.repo}/tree/{c.branch}/v5_data", use_container_width=True)
 
 with t3:
     st.subheader("14:40 / 14:45 尾盘任务")
     st.write("V5已把尾盘任务从盘后研究中彻底拆开。定时任务只负责读取‘明确标记给今天使用’的≤10只观察池；没有有效观察池或日期不符就安全退出。")
-    st.info("当前基础架构版尚未接OpenAI，因此不会伪造≤10只观察池。接入API后，盘后AI会生成带目标交易日期的观察池，第二天14:40才会自动运行。")
+    st.info("V5.1盘后OpenAI会生成带目标交易日期的0–10只观察池。尾盘任务只接受日期锁验证通过的观察池；当前版本14:45仍以数据包/机械确认指标为主，最终0–2 OpenAI确认将在下一小版本接入。")
     c = cfg()
     if c:
         if st.button("手动测试尾盘任务（安全校验）", use_container_width=True):
@@ -175,7 +187,7 @@ with t4:
 - 尾盘任务增加交易日、目标日期、上一交易日来源、池大小等安全锁。
 - 每周五自动备份主池到GitHub。
 
-**尚未接入：OpenAI API、30→≤10、14:45 0→2、微信推送。** 这些在基础架构验收稳定后再接，避免把数据/定时/API问题混在一起。
+**已接入：OpenAI API盘后30→0–10。尚未接入：14:45 OpenAI最终0→2、微信推送。**
 """)
     st.code('''Streamlit Secrets 保持现有：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"''')
     st.warning("旧的 v4_background.yml 必须去掉 schedule；V5安装包中已提供一个‘仅手动兼容版’覆盖文件，防止再次出现#9那种晚上误触发。")

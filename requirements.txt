@@ -1,8 +1,8 @@
-streamlit>=1.37
-akshare>=1.18.0
-pandas>=2.0
-numpy>=1.24
-openpyxl>=3.1
-requests>=2.31
-openai>=1.0
-xlrd>=2.0
+streamlit
+akshare
+pandas
+numpy
+openpyxl
+xlrd
+requests
+openai>=1.40.0

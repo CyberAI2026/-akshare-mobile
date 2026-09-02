@@ -23,6 +23,7 @@ from v5_core import (
     load_master_pool,
     maintain_master_pool,
     merge_master_pool,
+    openai_analyze,
     seed_global_cache_from_old_runs,
     split_stock_and_indices,
     stage1_rank,
@@ -154,6 +155,167 @@ def _mark_master_stage(registry: pd.DataFrame, p1: pd.DataFrame, p2: pd.DataFram
     return x
 
 
+
+def _json_clean(obj):
+    """把 pandas/numpy 的 NaN/时间类型转成 API 可接受的标准 JSON 数据。"""
+    if isinstance(obj, pd.DataFrame):
+        return _json_clean(obj.to_dict("records"))
+    if isinstance(obj, pd.Series):
+        return _json_clean(obj.to_dict())
+    if isinstance(obj, dict):
+        return {str(k): _json_clean(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_json_clean(v) for v in obj]
+    if pd.isna(obj) if not isinstance(obj, (str, bytes, dict, list, tuple)) else False:
+        return None
+    if hasattr(obj, "item"):
+        try:
+            return obj.item()
+        except Exception:
+            pass
+    if isinstance(obj, (datetime,)):
+        return obj.isoformat()
+    return obj
+
+
+def _parse_json_object(text: str) -> dict:
+    text=(text or "").strip()
+    if text.startswith("```"):
+        text=text.strip("`").strip()
+        if text.lower().startswith("json"):
+            text=text[4:].strip()
+    try:
+        obj=json.loads(text)
+        if isinstance(obj, dict): return obj
+    except Exception:
+        pass
+    a=text.find("{"); b=text.rfind("}")
+    if a>=0 and b>a:
+        obj=json.loads(text[a:b+1])
+        if isinstance(obj, dict): return obj
+    raise ValueError("OpenAI输出不是合法JSON对象")
+
+
+def next_trade_day(d):
+    dates=[x for x in _trade_dates() if x>d]
+    if dates:
+        return dates[0]
+    probe=d+timedelta(days=1)
+    for _ in range(15):
+        if is_trade_day(probe): return probe
+        probe += timedelta(days=1)
+    raise RuntimeError("无法确定下一交易日")
+
+
+def _market_payload(indices: pd.DataFrame, breadth: pd.DataFrame) -> dict:
+    idx=[]
+    if indices is not None and not indices.empty:
+        for name,g in indices.groupby("指数名称", sort=False):
+            g=g.sort_values("日期").copy()
+            c=pd.to_numeric(g.get("收盘价"),errors="coerce")
+            last=float(c.iloc[-1]) if len(c) and pd.notna(c.iloc[-1]) else None
+            def r(n):
+                if len(c)>n and pd.notna(c.iloc[-n-1]) and c.iloc[-n-1]!=0:
+                    return float(c.iloc[-1]/c.iloc[-n-1]-1)
+                return None
+            idx.append({"指数名称":name,"最新收盘":last,"ret5":r(5),"ret20":r(20),"ret60":r(60),"最新日期":str(g["日期"].iloc[-1])[:10]})
+    br=breadth.to_dict("records") if breadth is not None and not breadth.empty else []
+    return _json_clean({"指数摘要":idx,"市场宽度":br})
+
+
+def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict) -> tuple[pd.DataFrame, dict, dict]:
+    """30 -> 0~10。严格验证代码集合、数量和日期，失败时绝不留下旧观察池冒充新结果。"""
+    LATEST.mkdir(parents=True, exist_ok=True)
+    for stale in [LATEST/"observation_pool.csv", LATEST/"observation_pool_meta.json", LATEST/"observation_pool_analysis.json"]:
+        try:
+            if stale.exists(): stale.unlink()
+        except Exception:
+            pass
+    if research_pack is None or research_pack.empty:
+        raise RuntimeError("30只研究包为空，不能调用OpenAI。")
+    allowed={str(x).zfill(6) for x in research_pack["股票代码"].astype(str)}
+    target=next_trade_day(generated_trade_date)
+    schema={
+        "market_assessment": {"risk_level":"低/中/高", "summary":"基于输入市场数据的简洁判断", "next_day_aggressiveness":"偏防守/中性/偏积极"},
+        "selected_codes":["最多10个、必须来自输入30只的6位股票代码"],
+        "decisions":[{
+            "股票代码":"6位代码","股票名称":"输入名称","decision":"SELECT/WAIT/REJECT",
+            "priority":1,"evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么"
+        }],
+        "portfolio_note":"只描述观察池层面的风险偏好，不给最终买入仓位"
+    }
+    payload={
+        "generated_trade_date":str(generated_trade_date),
+        "target_trade_date":str(target),
+        "candidate_count":int(len(research_pack)),
+        "candidates":_json_clean(research_pack.to_dict("records")),
+        "market":_market_payload(indices,breadth),
+        "hard_constraints":[
+            "selected_codes只能来自candidates，最多10只，可以0只",
+            "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
+            "本阶段只形成次日观察池，不得声称已经出现14:45买点",
+            "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
+            "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当硬规则",
+            "若证据不足，宁可WAIT/REJECT，不要凑数"
+        ],
+        "required_output_schema":schema,
+    }
+    raw=openai_analyze("盘后30→0~10次日观察池", payload)
+    result=_parse_json_object(raw)
+    selected=[str(x).zfill(6) for x in result.get("selected_codes",[]) if str(x).strip()]
+    if len(selected)!=len(set(selected)):
+        raise ValueError("OpenAI selected_codes存在重复代码")
+    if len(selected)>10:
+        raise ValueError(f"OpenAI选择了{len(selected)}只，超过10只上限")
+    bad=[x for x in selected if x not in allowed]
+    if bad:
+        raise ValueError(f"OpenAI选择了输入30只之外的代码: {bad}")
+    decisions=result.get("decisions",[])
+    if not isinstance(decisions,list):
+        raise ValueError("OpenAI decisions不是数组")
+    decision_by_code={}
+    for d in decisions:
+        if not isinstance(d,dict): continue
+        code=str(d.get("股票代码","")).zfill(6)
+        if code in allowed: decision_by_code[code]=d
+    missing=sorted(allowed-set(decision_by_code))
+    if missing:
+        raise ValueError(f"OpenAI decisions未覆盖全部30只，缺少{len(missing)}只: {missing[:8]}")
+    for code in selected:
+        if str(decision_by_code[code].get("decision","")).upper()!="SELECT":
+            raise ValueError(f"selected_codes与decisions不一致: {code}不是SELECT")
+    # 观察池保留原始量化证据 + AI判断，便于次日尾盘继续分析。
+    rows=[]
+    base_map={str(r["股票代码"]).zfill(6):r for r in research_pack.to_dict("records")}
+    for code in selected:
+        r=dict(base_map[code]); d=decision_by_code[code]
+        r.update({
+            "AI优先级":d.get("priority"),"AI核心证据":d.get("evidence",""),"AI主要风险":d.get("risk",""),
+            "次日尾盘观察重点":d.get("next_day_watch",""),
+        })
+        rows.append(r)
+    obs=pd.DataFrame(rows) if rows else research_pack.head(0).copy()
+    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点"]:
+        if c not in obs.columns: obs[c]=pd.Series(dtype="object")
+    if not obs.empty and "AI优先级" in obs.columns:
+        obs=obs.sort_values("AI优先级",na_position="last").reset_index(drop=True)
+    model=os.getenv("OPENAI_MODEL") or "gpt-5.6-terra"
+    meta={
+        "status":"valid","generated_trade_date":str(generated_trade_date),"target_trade_date":str(target),
+        "generated_at_cn":now_cn().isoformat(),"source_candidate_count":len(research_pack),"observation_count":len(obs),
+        "model":model,"strategy":STRATEGY_VERSION,"source_run":source_summary.get("folder",""),
+        "market_assessment":result.get("market_assessment",{}),"portfolio_note":result.get("portfolio_note",""),
+        "rule":"仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单",
+    }
+    save_df(base/"ai"/"observation_pool.csv",obs)
+    save_json(base/"ai"/"observation_pool_meta.json",meta)
+    save_json(base/"ai"/"observation_pool_analysis.json",result)
+    (base/"ai"/"openai_raw.txt").write_text(raw,encoding="utf-8")
+    save_df(LATEST/"observation_pool.csv",obs)
+    save_json(LATEST/"observation_pool_meta.json",meta)
+    save_json(LATEST/"observation_pool_analysis.json",result)
+    return obs,meta,result
+
 def run_after_close(batch_path: str | None):
     started = now_cn()
     stamp = started.strftime("%Y%m%d_%H%M%S")
@@ -178,7 +340,7 @@ def run_after_close(batch_path: str | None):
         save_df(base / "隔离指数.csv", registry_indices)
 
     meta = {
-        "status": "running", "engine": "V5-foundation-1", "strategy": STRATEGY_VERSION,
+        "status": "running", "engine": "V5.1-openai-research", "strategy": STRATEGY_VERSION,
         "started_cn": started.isoformat(), "batch_count": len(daily),
         "master_before_screen": len(active_input), "bootstrapped_from_v4": bootstrapped,
         "cache_seed": seed_info,
@@ -237,25 +399,56 @@ def run_after_close(batch_path: str | None):
     save_df(LATEST / "research_pool_30.csv", research_pack)
     save_df(LATEST / "current_master_pool.csv", current)
     save_bytes(LATEST / "market_review.xlsx", to_excel_bytes({"五大指数120日": idx, "市场宽度快照": breadth, "质量校验": market_qa}))
+    # 先持久化全部客观数据，再调用API；即使API报错，研究数据也不会丢。
+    git_commit(f"V5.1 data ready before AI {stamp}")
+
+    if d250.empty or "日期" not in d250.columns:
+        raise RuntimeError("250日数据缺少日期，无法确定观察池生成交易日。")
+    generated_trade_date = pd.to_datetime(d250["日期"], errors="coerce").max().date()
+    pre_summary={"folder":str(base)}
+    try:
+        obs, obs_meta, ai_result = run_openai_after_close(
+            research_pack, idx, breadth, base, generated_trade_date, pre_summary
+        )
+    except Exception as e:
+        err={
+            "status":"ai_failed","engine":"V5.1-openai-research","strategy":STRATEGY_VERSION,
+            "time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),
+            "generated_trade_date":str(generated_trade_date),"source_candidate_count":len(research_pack),
+            "rule":"AI失败时不生成观察池，也不保留旧观察池。"
+        }
+        save_json(base/"ai"/"ai_error.json",err)
+        save_json(LATEST/"latest_ai_error.json",err)
+        fail_summary={
+            "status":"completed_ai_failed","engine":"V5.1-openai-research","strategy":STRATEGY_VERSION,
+            "started_cn":started.isoformat(),"completed_cn":now_cn().isoformat(),"batch_count":len(daily),
+            "master_count":len(current),"eliminated_count":len(eliminated),"stage1":len(p1),"stage2_research_pool":len(p2),
+            "observation_pool_count":0,"ai_error":str(e),"folder":str(base)
+        }
+        save_json(base/"summary.json",fail_summary); save_json(LATEST/"latest_after_close.json",fail_summary)
+        git_commit(f"V5.1 AI failed {stamp}")
+        raise
 
     completed = now_cn()
     summary = {
-        "status": "completed", "engine": "V5-foundation-1", "strategy": STRATEGY_VERSION,
+        "status": "completed", "engine": "V5.1-openai-research", "strategy": STRATEGY_VERSION,
         "started_cn": started.isoformat(), "completed_cn": completed.isoformat(),
         "elapsed_minutes": round((completed - started).total_seconds() / 60, 2),
         "batch_count": len(daily), "master_count": len(current), "eliminated_count": len(eliminated),
         "stage1": len(p1), "stage2_research_pool": len(p2),
-        "python_final": "30只研究包（不再机械生成前10）",
+        "python_final": "30只研究包（不机械生成前10）",
+        "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
+        "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment",{}),
         "stock_qa_25_success": int((q25.get("状态") == "成功").sum()) if not q25.empty else 0,
         "stock_qa_120_success": int((q120.get("状态") == "成功").sum()) if not q120.empty else 0,
         "stock_qa_250_success": int((q250.get("状态") == "成功").sum()) if not q250.empty else 0,
         "isolated_index_count": len(registry_indices), "cache_seed": seed_info,
         "folder": str(base),
-        "next_step": "下一阶段接OpenAI API：读取research_pool_30.csv -> 0~10只观察池",
+        "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~2确认",
     }
     save_json(base / "summary.json", summary)
     save_json(LATEST / "latest_after_close.json", summary)
-    git_commit(f"V5 after-close completed {stamp}")
+    git_commit(f"V5.1 after-close + AI completed {stamp}")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
