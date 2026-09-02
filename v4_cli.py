@@ -46,7 +46,9 @@ def run_full(pool_path: str):
     pool=pd.read_csv(pool_path,dtype={"股票代码":str}); pool["股票代码"]=pool["股票代码"].str.zfill(6)
     stamp=Path(pool_path).stem.replace("pool_", ""); base=ROOT/"runs"/stamp
     base.mkdir(parents=True,exist_ok=True)
-    (base/"meta.json").write_text(json.dumps({"status":"running","strategy":STRATEGY_VERSION,"started":datetime.now().isoformat(),"initial_count":len(pool)},ensure_ascii=False,indent=2),encoding="utf-8")
+    meta_path=base/"meta.json"
+    meta={"status":"running","strategy":STRATEGY_VERSION,"started":datetime.now().isoformat(),"initial_count":len(pool)}
+    meta_path.write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
 
     cp25=checkpoint_factory(base/"25d")
     d25,q25=fetch_pool_history(pool,25,lambda d,t,c,q:(cp25(d,t,c,q), git_commit(f"V4 checkpoint 25d {d}/{t}") if d%10==0 else None), cache_dir=base/"25d"/"cache"); m25=build_metrics(d25); s1=stage1_rank(m25,150)
@@ -70,6 +72,8 @@ def run_full(pool_path: str):
     except Exception as e: summary["ai_precheck"]=f"AI调用失败:{e}"
     (base/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,default=str,indent=2),encoding="utf-8")
     (latest/"latest_run.json").write_text(json.dumps(summary,ensure_ascii=False,default=str,indent=2),encoding="utf-8")
+    meta.update({"status":"completed","completed":summary["completed"],"stage1":len(p1),"stage2":len(p2),"stage3":len(p3)})
+    meta_path.write_text(json.dumps(meta,ensure_ascii=False,default=str,indent=2),encoding="utf-8")
     git_commit(f"V4 full pipeline {stamp}")
     print(json.dumps(summary,ensure_ascii=False,indent=2))
 
