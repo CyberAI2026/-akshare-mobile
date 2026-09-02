@@ -24,6 +24,8 @@ jobs:
       TZ: Asia/Shanghai
       GITHUB_REPO: ${{ github.repository }}
       GITHUB_BRANCH: ${{ github.ref_name }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
     steps:
       - name: Checkout
         uses: actions/checkout@v4
