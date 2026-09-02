@@ -1,0 +1,32 @@
+name: Research Market and Sector Context
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "research/market_sector_context_fetch.py"
+      - ".github/workflows/research_market_sector_context.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-public-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Fetch public index and sector context
+        run: python research/market_sector_context_fetch.py
+      - name: Upload context artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-market-sector-context-${{ github.run_id }}
+          path: research_market_sector_context/
+          retention-days: 7
