@@ -1,0 +1,14 @@
+{
+  "status": "running",
+  "engine": "V5.1-openai-research",
+  "strategy": "research_v0.5-evidence-aligned+pool-v0.2+ai-v0.1",
+  "started_cn": "2026-09-02T21:55:38.688900+08:00",
+  "batch_count": 0,
+  "master_before_screen": 532,
+  "bootstrapped_from_v4": false,
+  "cache_seed": {
+    "seeded": 0,
+    "scanned": 772,
+    "available": 535
+  }
+}
