@@ -1,0 +1,18 @@
+{
+  "status": "valid",
+  "generated_trade_date": "2026-09-02",
+  "target_trade_date": "2026-09-03",
+  "generated_at_cn": "2026-09-02T22:31:41.238659+08:00",
+  "source_candidate_count": 30,
+  "observation_count": 5,
+  "model": "gpt-5.6-terra",
+  "strategy": "research_v0.5-evidence-aligned+pool-v0.2+ai-v0.1",
+  "source_run": "v5_data/runs/20260902_222036",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：全市场下跌3900家、上涨1541家；深证成指、创业板指及科创50的5日、20日收益均为负，且创业板指60日跌幅较大；涨停近似67家、跌停近似13家，仍有局部强势但广度偏弱。研究判断：市场风险偏好分化且偏防守，二次启动候选须强调尾盘承接与突破有效性，避免盘中追逐。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "portfolio_note": "观察池仅保留5只具备中期趋势支撑、短周期相对降温或接近稳健5日上沿的验证型候选。市场环境偏弱，次日仅在14:40-14:45确认尾盘承接、有效上沿突破及非冲高回落后再评估；不将观察池等同于买入信号。",
+  "rule": "仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单"
+}
