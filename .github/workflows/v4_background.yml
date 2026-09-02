@@ -1,0 +1,54 @@
+name: V4 Background Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: full or 1445
+        required: true
+        default: full
+      pool_path:
+        description: repository path of uploaded pool csv
+        required: false
+        default: v4_data/inbox/latest_pool.csv
+
+  schedule:
+    # 北京时间工作日14:40预启动；
+    # Python脚本内部会等待到14:45再正式抓取实时数据。
+    - cron: '40 6 * * 1-5'
+
+permissions:
+  contents: write
+
+jobs:
+  run-v4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full pipeline
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'full'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+        run: python v4_cli.py full --pool "${{ github.event.inputs.pool_path }}"
+
+      - name: Run 14:45 confirmation
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.job == '1445')
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+        run: python v4_cli.py 1445
