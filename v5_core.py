@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 import requests
 
-APP_VERSION = "V5.1-openai-research"
-STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.2+ai-v0.1"
+APP_VERSION = "V5.2-adaptive-market-tail-ai"
+STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.3+market-v0.2+ai-v0.2"
 
 MODE_DAYS = {"25日粗筛": 25, "120日结构筛选": 120, "250日生命周期筛选": 250}
 
@@ -317,6 +317,8 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         vals = sorted(pd.to_numeric(h.iloc[-6:-1], errors="coerce").dropna().tolist(), reverse=True)
         if len(vals) >= 2:
             robust_upper = vals[1]
+    lo5 = float(l.tail(min(5, len(l))).min()) if len(l) else np.nan
+    lo10 = float(l.tail(min(10, len(l))).min()) if len(l) else np.nan
     return {
         "最新收盘": last, "ret1": ret(1), "ret10": ret(10), "ret20": ret(20), "ret40": ret(40), "ret60": ret(60), "ret120": ret(120),
         "amp5": amp5, "距20日高点": last / hi20 - 1 if hi20 else np.nan,
@@ -327,6 +329,9 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         "MA60_10日斜率": ma60.iloc[-1] / ma60.iloc[-11] - 1 if len(ma60) >= 70 and pd.notna(ma60.iloc[-11]) else np.nan,
         "MA120_20日斜率": ma120.iloc[-1] / ma120.iloc[-21] - 1 if len(ma120) >= 140 and pd.notna(ma120.iloc[-21]) else np.nan,
         "距稳健5日上沿": last / robust_upper - 1 if robust_upper and robust_upper > 0 else np.nan,
+        "近5日低点": lo5, "近10日低点": lo10,
+        "距近5日低点": last / lo5 - 1 if pd.notna(lo5) and lo5 > 0 else np.nan,
+        "距近10日低点": last / lo10 - 1 if pd.notna(lo10) and lo10 > 0 else np.nan,
     }
 
 
@@ -341,33 +346,49 @@ def build_metrics(data: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _rank_and_audit(x: pd.DataFrame, score_col: str, max_n: int, eligible_col: str | None = None, stage: str = "") -> tuple[pd.DataFrame, pd.DataFrame]:
-    """返回正式入选结果 + 全样本审计表。审计表保留每只股票为什么入选/未入选。"""
+def _rank_and_audit(x: pd.DataFrame, score_col: str, min_n: int, max_n: int, eligible_col: str | None = None, stage: str = "") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """软容量筛选：不是死卡一个数字。
+
+    先保证最低研究容量 min_n；如果 min_n 边界出现同分，则把同分组一起纳入，
+    但最多到 max_n。若合格样本本来少于 min_n，则不为凑数降低资格线。
+    """
     z = x.copy()
     if z.empty:
         return z, z
-    z["阶段排名"] = z[score_col].rank(method="first", ascending=False).astype("Int64")
     if eligible_col and eligible_col in z.columns:
         eligible = z[eligible_col].fillna(False).astype(bool)
     else:
         eligible = pd.Series(True, index=z.index)
-    eligible_sorted = z[eligible].sort_values(score_col, ascending=False)
-    selected_codes = set(eligible_sorted.head(max_n)["股票代码"].astype(str))
+    # 主排序只使用既有研究分；代码只用于完全同分时保证结果可复现，不代表策略证据。
+    eligible_sorted = z[eligible].sort_values([score_col, "股票代码"], ascending=[False, True]).copy()
+    if eligible_sorted.empty:
+        selected_codes=set(); cutoff=np.nan; selected_n=0
+    elif len(eligible_sorted) <= min_n:
+        selected_n=len(eligible_sorted); cutoff=eligible_sorted[score_col].min()
+        selected_codes=set(eligible_sorted["股票代码"].astype(str))
+    else:
+        cutoff=eligible_sorted.iloc[min_n-1][score_col]
+        natural_n=int((eligible_sorted[score_col] >= cutoff).sum())
+        selected_n=min(max_n, max(min_n, natural_n))
+        selected_codes=set(eligible_sorted.head(selected_n)["股票代码"].astype(str))
+    z["阶段排名"] = z[score_col].rank(method="min", ascending=False).astype("Int64")
     z["本阶段入选"] = z["股票代码"].astype(str).isin(selected_codes)
-    cap_note = f"；本阶段上限{max_n}只"
+    z["阶段软容量下限"] = min_n
+    z["阶段软容量上限"] = max_n
+    z["实际入选数"] = selected_n
+    z["边界分数"] = cutoff
     def reason(r):
-        if not bool(r.get(eligible_col, True)) if eligible_col else False:
+        if eligible_col and not bool(r.get(eligible_col, False)):
             return f"未入选：未满足{stage}最低资格条件"
         if bool(r["本阶段入选"]):
-            return f"入选：按{score_col}排序第{int(r['阶段排名'])}名{cap_note}"
-        return f"未入选：满足基础条件，但排名第{int(r['阶段排名'])}名，超出{max_n}只上限"
+            return f"入选：{score_col}={r.get(score_col)}；软容量{min_n}-{max_n}只，本次实际{selected_n}只"
+        return f"未入选：满足基础条件，但位于本次软容量边界之外（{min_n}-{max_n}只）"
     z["决策说明"] = z.apply(reason, axis=1)
-    selected = z[z["本阶段入选"]].sort_values(score_col, ascending=False).reset_index(drop=True)
-    audit = z.sort_values(["本阶段入选", score_col], ascending=[False, False]).reset_index(drop=True)
+    selected = z[z["本阶段入选"]].sort_values([score_col, "股票代码"], ascending=[False, True]).reset_index(drop=True)
+    audit = z.sort_values(["本阶段入选", score_col, "股票代码"], ascending=[False, False, True]).reset_index(drop=True)
     return selected, audit
 
-
-def stage1_rank(metrics: pd.DataFrame, max_n: int = 150, return_audit: bool = False):
+def stage1_rank(metrics: pd.DataFrame, min_n: int = 150, max_n: int = 200, return_audit: bool = False):
     """25日一级：宽松粗筛，只做方向性压缩，不把弱证据写成硬门槛。
 
     研究约束：
@@ -395,11 +416,11 @@ def stage1_rank(metrics: pd.DataFrame, max_n: int = 150, return_audit: bool = Fa
         [x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret20"] < 0],
         ["近5日波动仍偏大", "近10日速度偏快", "20日方向仍偏弱"], default="")
     x["阶段1规则说明"] = "宽松粗筛：方向/非极端波动/不过热；不以精确MA距离或距20日高点为硬规则"
-    selected, audit = _rank_and_audit(x, "阶段1分", max_n, "阶段1通过", "一级粗筛")
+    selected, audit = _rank_and_audit(x, "阶段1分", min_n, max_n, "阶段1通过", "一级粗筛")
     return (selected, audit) if return_audit else selected
 
 
-def stage2_rank(metrics: pd.DataFrame, max_n: int = 30, return_audit: bool = False):
+def stage2_rank(metrics: pd.DataFrame, min_n: int = 30, max_n: int = 40, return_audit: bool = False):
     """120日二级：核心研究层——整理成熟 + 中期趋势仍活 + 接近稳健5日上沿。
 
     强证据用于资格/主排序；信号日2%-6%重新加速仅作中等证据加分，绝不作为稳定胜率承诺。
@@ -430,7 +451,7 @@ def stage2_rank(metrics: pd.DataFrame, max_n: int = 30, return_audit: bool = Fal
         [x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret40"] < 0, x["距稳健5日上沿"].abs() > 0.08],
         ["短波动仍偏大", "10日速度仍偏快，整理可能未完成", "40日趋势偏弱", "距离短周期稳健上沿较远"], default="")
     x["阶段2规则说明"] = "核心：整理成熟+40日趋势仍活+稳健5日上沿；2%-6%单日加速仅为中等证据"
-    selected, audit = _rank_and_audit(x, "阶段2分", max_n, "阶段2通过", "二级结构筛选")
+    selected, audit = _rank_and_audit(x, "阶段2分", min_n, max_n, "阶段2通过", "二级结构筛选")
     return (selected, audit) if return_audit else selected
 
 
@@ -476,7 +497,7 @@ def stage3_rank(metrics: pd.DataFrame, max_n: int = 10, return_audit: bool = Fal
         [clear_down_rebound, x["ret40"] > 0.50, x["ret120"] < 0],
         ["长期下降趋势中的修复/反弹，降级", "40日加速较大：仅作趋势成熟风险提示，不单独判尾端", "120日趋势偏弱"], default="")
     x["阶段3规则说明"] = "生命周期否决/修正：重点排除长期下降修复；不把接近250日高点或累计涨幅本身当成越高越好"
-    selected, audit = _rank_and_audit(x, "阶段3分", max_n, "阶段3通过", "三级生命周期筛选")
+    selected, audit = _rank_and_audit(x, "阶段3分", max_n, max_n, "阶段3通过", "三级生命周期筛选")
     return (selected, audit) if return_audit else selected
 
 
@@ -975,7 +996,35 @@ def fetch_index_history(symbol: str, days: int = 120) -> tuple[pd.DataFrame, str
     return pd.DataFrame(),"",errors
 
 
-def fetch_market_review(days: int = 120) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def _price_limit_rule(code: str, name: str = "") -> tuple[float, str]:
+    """按代码板块 + ST 名称给出常规日涨跌幅限制。
+
+    仅用于市场生态统计；IPO/恢复上市等无涨跌幅限制日不强行归入涨停。
+    """
+    code=_norm_code(code); name=str(name or "").upper().replace(" ", "")
+    if "ST" in name:
+        return 5.0, "ST/*ST 5%"
+    if code.startswith(("300","301")):
+        return 20.0, "创业板20%"
+    if code.startswith(("688","689")):
+        return 20.0, "科创板20%"
+    if code.startswith(("4","8","920")):
+        return 30.0, "北交所30%"
+    return 10.0, "沪深主板10%"
+
+
+def _limit_flags(code: str, name: str, pct) -> tuple[bool,bool,str]:
+    try: p=float(pct)
+    except Exception: return False,False,"未知"
+    limit,board=_price_limit_rule(code,name)
+    # 用规则幅度-0.2个百分点作为识别门槛，同时限制上界，避免把新股无涨跌幅限制的大涨误算成涨停。
+    near=max(0.1, limit-0.2)
+    up=(p >= near) and (p <= limit+0.8)
+    down=(p <= -near) and (p >= -(limit+0.8))
+    return bool(up),bool(down),board
+
+
+def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """盘后市场数据层。先保存客观数据，不在foundation版内自动改策略。"""
     idx_rows=[]; qa=[]
     for name,symbol in INDEX_SYMBOLS.items():
@@ -992,13 +1041,35 @@ def fetch_market_review(days: int = 120) -> tuple[pd.DataFrame, pd.DataFrame, pd
             if spot.empty: raise RuntimeError("空快照")
             pct=pd.to_numeric(spot.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce")
             amt=pd.to_numeric(spot.get("截至当前成交额",pd.Series(dtype=float)),errors="coerce")
-            breadth=pd.DataFrame([{
+            codes=spot.get("股票代码",pd.Series([""]*len(spot))).astype(str)
+            names=spot.get("股票名称",pd.Series([""]*len(spot))).astype(str)
+            flags=[_limit_flags(c,n,p) for c,n,p in zip(codes,names,pct)]
+            up_lim=pd.Series([f[0] for f in flags],index=spot.index)
+            dn_lim=pd.Series([f[1] for f in flags],index=spot.index)
+            boards=pd.Series([f[2] for f in flags],index=spot.index)
+            valid=int(pct.notna().sum()); ups=int((pct>0).sum()); downs=int((pct<0).sum()); flats=int((pct==0).sum())
+            row={
                 "日期":datetime.now().strftime("%Y-%m-%d"),"数据时间":datetime.now().strftime("%Y-%m-%d %H:%M:%S"),"数据源":src,
-                "股票数":int(pct.notna().sum()),"上涨家数":int((pct>0).sum()),"下跌家数":int((pct<0).sum()),"平盘家数":int((pct==0).sum()),
-                "涨停近似家数":int((pct>=9.8).sum()),"跌停近似家数":int((pct<=-9.8).sum()),"涨5%以上家数":int((pct>=5).sum()),"跌5%以上家数":int((pct<=-5).sum()),
+                "股票数":valid,"上涨家数":ups,"下跌家数":downs,"平盘家数":flats,
+                "上涨比例":ups/valid if valid else np.nan,"下跌比例":downs/valid if valid else np.nan,"净上涨家数":ups-downs,
+                "涨停家数":int(up_lim.sum()),"跌停家数":int(dn_lim.sum()),
+                "主板涨停家数":int((up_lim & (boards=="沪深主板10%")).sum()),
+                "创业板涨停家数":int((up_lim & (boards=="创业板20%")).sum()),
+                "科创板涨停家数":int((up_lim & (boards=="科创板20%")).sum()),
+                "北交所涨停家数":int((up_lim & (boards=="北交所30%")).sum()),
+                "ST涨停家数":int((up_lim & (boards=="ST/*ST 5%")).sum()),
+                "主板跌停家数":int((dn_lim & (boards=="沪深主板10%")).sum()),
+                "创业板跌停家数":int((dn_lim & (boards=="创业板20%")).sum()),
+                "科创板跌停家数":int((dn_lim & (boards=="科创板20%")).sum()),
+                "北交所跌停家数":int((dn_lim & (boards=="北交所30%")).sum()),
+                "ST跌停家数":int((dn_lim & (boards=="ST/*ST 5%")).sum()),
+                "涨5%以上家数":int((pct>=5).sum()),"跌5%以上家数":int((pct<=-5).sum()),
                 "全市场成交额":float(amt.sum()) if amt.notna().any() else np.nan,
-                "说明":"涨跌停为统一9.8%近似统计，仅用于市场生态观察；不同板块涨跌幅限制不同，后续版本可进一步精细化。"
-            }]); break
+                "说明":"涨跌停按常规板块规则识别：主板10%、创业板/科创板20%、北交所30%、ST 5%，识别阈值取规则幅度-0.2个百分点；IPO/恢复上市等特殊无涨跌幅限制日不保证完全覆盖。"
+            }
+            # 兼容旧字段名，但含义已经升级为按板块规则识别。
+            row["涨停近似家数"]=row["涨停家数"]; row["跌停近似家数"]=row["跌停家数"]
+            breadth=pd.DataFrame([row]); break
         except Exception as e:
             qa.append({"对象":"全市场快照","代码":"","状态":"失败","数据源":src,"交易日数":0,"错误":f"{type(e).__name__}:{e}"})
     return indices,breadth,pd.DataFrame(qa)
