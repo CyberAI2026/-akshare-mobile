@@ -61,15 +61,44 @@ def fetch_symbol(code: str, start: str, end: str, output_dir: Path, retries: int
 
 
 def fetch_name_tables(output_dir: Path) -> pd.DataFrame:
-    master = ak.stock_info_a_code_name().copy()
+    master = pd.DataFrame()
+    source_errors: list[str] = []
+    # Exchange information endpoints occasionally reset TLS from hosted runners.
+    # The same full-market quote endpoints already used by V5 are the primary
+    # source here; the exchange aggregation endpoint remains a fallback.
+    for source, function in (
+        ("eastmoney_spot", ak.stock_zh_a_spot_em),
+        ("sina_spot", ak.stock_zh_a_spot),
+        ("exchange_code_name", ak.stock_info_a_code_name),
+    ):
+        for attempt in range(1, 4):
+            try:
+                candidate = function()
+                if candidate is None or candidate.empty:
+                    raise RuntimeError("empty code-name table")
+                master = candidate.copy()
+                break
+            except Exception as exc:  # noqa: BLE001
+                source_errors.append(f"{source}/{attempt}:{type(exc).__name__}:{exc}")
+                time.sleep((1.5 ** attempt) + random.uniform(0.2, 0.8))
+        if not master.empty:
+            break
+    if master.empty:
+        raise RuntimeError("all code-name sources failed: " + " | ".join(source_errors))
     master.columns = [str(column).strip() for column in master.columns]
     code_col = next(column for column in master.columns if "code" in column.lower() or "代码" in column)
-    name_col = next(column for column in master.columns if "name" in column.lower() or "名称" in column)
+    name_col = next(
+        column for column in master.columns
+        if "name" in column.lower() or "名称" in column or "简称" in column
+    )
     master = master[[code_col, name_col]].rename(columns={code_col: "股票代码", name_col: "股票名称"})
     master["股票代码"] = master["股票代码"].astype(str).str.extract(r"(\d{6})", expand=False)
     master["股票名称"] = master["股票名称"].astype(str).str.strip()
     master = master.dropna().drop_duplicates("股票代码").sort_values("股票代码").reset_index(drop=True)
     master.to_csv(output_dir / "a_share_code_name.csv", index=False, encoding="utf-8-sig")
+    (output_dir / "code_name_source_audit.txt").write_text(
+        "\n".join(source_errors) + "\n", encoding="utf-8"
+    )
 
     try:
         changes = ak.stock_info_change_name(symbol="all")
