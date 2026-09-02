@@ -19,6 +19,7 @@ from v5_core import (
     build_metrics,
     confirmation_metrics,
     fetch_market_review,
+    fetch_public_sector_flow,
     fetch_pool_history_incremental,
     fetch_realtime_package,
     is_trade_day,
@@ -80,7 +81,7 @@ def pushplus_notify(title: str, content: str, template: str = "html") -> bool:
     req = urllib.request.Request(
         "https://www.pushplus.plus/send",
         data=payload,
-        headers={"Content-Type": "application/json; charset=utf-8", "User-Agent": "AStock-V5.2.1"},
+        headers={"Content-Type": "application/json; charset=utf-8", "User-Agent": "AStock-V5.3"},
         method="POST",
     )
     try:
@@ -376,7 +377,21 @@ def _market_payload(indices: pd.DataFrame, breadth: pd.DataFrame, history: pd.Da
     return _json_clean({"指数摘要":idx,"市场宽度当日":br,"市场宽度历史最近60记录日":hist,"市场滚动上下文":ctx})
 
 
-def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict) -> tuple[pd.DataFrame, dict, dict]:
+def _sector_payload(sector_tables: dict[str,pd.DataFrame] | None) -> dict:
+    """只向AI提供轻量榜单；板块资金是增强证据，不替代个股结构。"""
+    out={}
+    for key,df in (sector_tables or {}).items():
+        if df is None or df.empty:
+            continue
+        pct_col="行业-涨跌幅" if "行业-涨跌幅" in df else "阶段涨跌幅" if "阶段涨跌幅" in df else None
+        cols=[c for c in ["行业","板块类型","周期",pct_col,"净额","公司家数","交易日期","资金单位"] if c and c in df]
+        leaders=df.sort_values(pct_col,ascending=False).head(15)[cols] if pct_col else df.head(15)[cols]
+        net=df.sort_values("净额",ascending=False).head(15)[cols] if "净额" in df else pd.DataFrame()
+        out[key]={"涨幅前15":leaders.to_dict("records"),"净流入前15":net.to_dict("records")}
+    return _json_clean(out)
+
+
+def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict, sector_tables: dict[str,pd.DataFrame] | None = None) -> tuple[pd.DataFrame, dict, dict]:
     """30 -> 0~10。严格验证代码集合、数量和日期，失败时绝不留下旧观察池冒充新结果。"""
     LATEST.mkdir(parents=True, exist_ok=True)
     for stale in [LATEST/"observation_pool.csv", LATEST/"observation_pool_meta.json", LATEST/"observation_pool_analysis.json"]:
@@ -403,12 +418,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "candidate_count":int(len(research_pack)),
         "candidates":_json_clean(research_pack.to_dict("records")),
         "market":_market_payload(indices,breadth,market_history,market_context),
+        "sector_fund_flow_enhancement":_sector_payload(sector_tables),
         "hard_constraints":[
             "selected_codes只能来自candidates，最多10只，可以0只",
             "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
             "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当硬规则",
+            "板块/题材/资金只作为增强证据，不能替代个股结构，也不能单独生成候选",
             "若证据不足，宁可WAIT/REJECT，不要凑数"
         ],
         "required_output_schema":schema,
@@ -493,7 +510,7 @@ def run_after_close(batch_path: str | None):
         save_df(base / "隔离指数.csv", registry_indices)
 
     meta = {
-        "status": "running", "engine": "V5.2-adaptive-market-tail-ai", "strategy": STRATEGY_VERSION,
+        "status": "running", "engine": "V5.3-auditable-market-sector-layer", "strategy": STRATEGY_VERSION,
         "started_cn": started.isoformat(), "batch_count": len(daily),
         "master_before_screen": len(active_input), "bootstrapped_from_v4": bootstrapped,
         "cache_seed": seed_info,
@@ -548,17 +565,21 @@ def run_after_close(batch_path: str | None):
 
     # 盘后市场层：指数直接保留180日；全市场宽度从系统运行日起逐日积累真实快照，最多180记录日。
     idx, breadth, market_qa = fetch_market_review(180)
+    sector_tables, sector_qa = fetch_public_sector_flow(fetched_at=started)
     market_history, market_context = update_market_history(breadth, phase="盘后", keep_days=180)
     market_sheets=_market_review_sheets(idx,breadth,market_history,market_context,market_qa)
+    sector_sheets={**sector_tables,"板块质量校验":sector_qa}
     save_bytes(base / "market_review.xlsx", to_excel_bytes(market_sheets))
+    save_bytes(base / "sector_fund_flow.xlsx", to_excel_bytes(sector_sheets))
 
     LATEST.mkdir(parents=True, exist_ok=True)
     save_df(LATEST / "research_pool_30_40.csv", research_pack)
     save_df(LATEST / "research_pool_30.csv", research_pack)  # 兼容前端
     save_df(LATEST / "current_master_pool.csv", current)
     save_bytes(LATEST / "market_review.xlsx", to_excel_bytes(market_sheets))
+    save_bytes(LATEST / "sector_fund_flow.xlsx", to_excel_bytes(sector_sheets))
     # 先持久化全部客观数据，再调用API；即使API报错，研究数据也不会丢。
-    git_commit(f"V5.2 data ready before AI {stamp}")
+    git_commit(f"V5.3 data ready before AI {stamp}")
 
     if d250.empty or "日期" not in d250.columns:
         raise RuntimeError("250日数据缺少日期，无法确定观察池生成交易日。")
@@ -566,11 +587,11 @@ def run_after_close(batch_path: str | None):
     pre_summary={"folder":str(base)}
     try:
         obs, obs_meta, ai_result = run_openai_after_close(
-            research_pack, idx, breadth, market_history, market_context, base, generated_trade_date, pre_summary
+            research_pack, idx, breadth, market_history, market_context, base, generated_trade_date, pre_summary, sector_tables
         )
     except Exception as e:
         err={
-            "status":"ai_failed","engine":"V5.2-adaptive-market-tail-ai","strategy":STRATEGY_VERSION,
+            "status":"ai_failed","engine":"V5.3-auditable-market-sector-layer","strategy":STRATEGY_VERSION,
             "time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),
             "generated_trade_date":str(generated_trade_date),"source_candidate_count":len(research_pack),
             "rule":"AI失败时不生成观察池，也不保留旧观察池。"
@@ -578,20 +599,20 @@ def run_after_close(batch_path: str | None):
         save_json(base/"ai"/"ai_error.json",err)
         save_json(LATEST/"latest_ai_error.json",err)
         fail_summary={
-            "status":"completed_ai_failed","engine":"V5.2-adaptive-market-tail-ai","strategy":STRATEGY_VERSION,
+            "status":"completed_ai_failed","engine":"V5.3-auditable-market-sector-layer","strategy":STRATEGY_VERSION,
             "started_cn":started.isoformat(),"completed_cn":now_cn().isoformat(),"batch_count":len(daily),
             "master_count":len(current),"eliminated_count":len(eliminated),"stage1":len(p1),"stage2_research_pool":len(p2),
             "observation_pool_count":0,"ai_error":str(e),"folder":str(base)
         }
         save_json(base/"summary.json",fail_summary); save_json(LATEST/"latest_after_close.json",fail_summary)
         meta.update(fail_summary); save_json(base/"meta.json",meta)
-        git_commit(f"V5.2 AI failed {stamp}")
+        git_commit(f"V5.3 AI failed {stamp}")
         notify_failure("盘后OpenAI研究", e)
         raise
 
     completed = now_cn()
     summary = {
-        "status": "completed", "engine": "V5.2-adaptive-market-tail-ai", "strategy": STRATEGY_VERSION,
+        "status": "completed", "engine": "V5.3-auditable-market-sector-layer", "strategy": STRATEGY_VERSION,
         "started_cn": started.isoformat(), "completed_cn": completed.isoformat(),
         "elapsed_minutes": round((completed - started).total_seconds() / 60, 2),
         "batch_count": len(daily), "master_count": len(current), "eliminated_count": len(eliminated),
@@ -609,7 +630,7 @@ def run_after_close(batch_path: str | None):
     save_json(base / "summary.json", summary)
     save_json(LATEST / "latest_after_close.json", summary)
     meta.update(summary); save_json(base / "meta.json", meta)
-    git_commit(f"V5.2 after-close + AI completed {stamp}")
+    git_commit(f"V5.3 after-close + AI completed {stamp}")
     notify_after_close_success(summary, obs, obs_meta)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
@@ -767,12 +788,12 @@ def run_tail():
         final_decisions, final_meta = run_openai_tail(pool,snap40,snap45,min45,conf,idx,breadth,market_history,market_context,obs_meta,base)
         payload["status"]="completed"; payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
         save_json(base/"tail_summary.json",payload); save_json(LATEST/"last_tail_summary.json",payload)
-        git_commit(f"V5.2 tail AI completed {today}")
+        git_commit(f"V5.3 tail AI completed {today}")
         notify_tail_success(final_decisions, final_meta)
     except Exception as e:
         err={"status":"tail_ai_failed","trade_date":str(today),"time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),"rule":"失败时不生成伪0-2结果"}
         save_json(base/"tail_ai_error.json",err); save_json(LATEST/"last_tail_ai_error.json",err)
-        git_commit(f"V5.2 tail AI failed {today}")
+        git_commit(f"V5.3 tail AI failed {today}")
         notify_failure("14:45尾盘OpenAI确认", e)
         raise
     print(json.dumps(payload, ensure_ascii=False, default=str, indent=2))

@@ -12,8 +12,8 @@ AFTER_CLOSE_WORKFLOW = "v5_after_close.yml"
 TAIL_WORKFLOW = "v5_tail_confirmation.yml"
 BACKUP_WORKFLOW = "v5_weekly_backup.yml"
 
-st.set_page_config(page_title="A股二次启动研究系统 V5.2", page_icon="📈", layout="wide")
-st.title("A股强势股二次启动研究系统 V5.2｜自适应容量 + 市场历史 + 尾盘AI")
+st.set_page_config(page_title="A股二次启动研究系统 V5.3", page_icon="📈", layout="wide")
+st.title("A股强势股二次启动研究系统 V5.3｜可审计市场口径 + 板块增强 + 尾盘AI")
 st.caption("每日提交强势股 → 云端主池维护 → Python约500→150–200→30–40 → OpenAI研究层30–40→0–10只次日观察池")
 
 
@@ -162,8 +162,8 @@ with t2:
 
 with t3:
     st.subheader("14:40 / 14:45 尾盘任务")
-    st.write("V5.2已把尾盘任务从盘后研究中彻底拆开。定时任务只负责读取‘明确标记给今天使用’的≤10只观察池；没有有效观察池或日期不符就安全退出。")
-    st.info("V5.2盘后OpenAI生成带目标交易日期的0–10只观察池；尾盘任务只接受日期锁通过的观察池，并在14:45调用OpenAI做最终0–2确认，输出买入区间、总体/个股仓位和结构止损参考。")
+    st.write("V5.3已把尾盘任务从盘后研究中彻底拆开。定时任务只负责读取‘明确标记给今天使用’的≤10只观察池；没有有效观察池或日期不符就安全退出。")
+    st.info("V5.3盘后OpenAI生成带目标交易日期的0–10只观察池；尾盘任务只接受日期锁通过的观察池，并在14:45调用OpenAI做最终0–2确认，输出买入区间、总体/个股仓位和结构止损参考。")
     c = cfg()
     if c:
         if st.button("手动测试尾盘任务（安全校验）", use_container_width=True):

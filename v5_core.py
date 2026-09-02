@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 import requests
 
-APP_VERSION = "V5.2-adaptive-market-tail-ai"
-STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.3+market-v0.2+ai-v0.2"
+APP_VERSION = "V5.3-auditable-market-sector-layer"
+STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2"
 
 MODE_DAYS = {"25日粗筛": 25, "120日结构筛选": 120, "250日生命周期筛选": 250}
 
@@ -1058,14 +1058,40 @@ def _to_count(v):
         return np.nan
 
 
+def _count_spot_breadth(spot: pd.DataFrame) -> dict:
+    """按逐股快照的涨跌幅符号统计市场宽度，不推算涨跌停。"""
+    if spot is None or spot.empty or "当日涨跌幅" not in spot:
+        return {}
+    pct = pd.to_numeric(spot["当日涨跌幅"], errors="coerce")
+    valid = pct.notna()
+    if not valid.any():
+        return {}
+    return {
+        "股票数": int(valid.sum()),
+        "上涨": int((pct[valid] > 0).sum()),
+        "下跌": int((pct[valid] < 0).sum()),
+        "平盘": int((pct[valid] == 0).sum()),
+    }
+
+
+def _pool_codes(pool: pd.DataFrame) -> str:
+    if pool is None or pool.empty:
+        return ""
+    code_col = _find_col(pool.columns, ["代码", "股票代码", "证券代码"])
+    if code_col is None:
+        return ""
+    codes = pool[code_col].map(_norm_code)
+    return "|".join(sorted(set(c for c in codes if c)))
+
+
 def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """市场数据层。
 
     规则：
-    1) 上涨/下跌/平盘/涨停/跌停优先直接读取公开市场统计；
-    2) 不再用个股涨跌幅阈值推算涨停/跌停；
-    3) 全市场逐股快照仅用于成交额、涨5%/跌5%等补充字段；
-    4) 若公开涨跌停统计失败，涨停/跌停留空并在 QA 中报错，绝不伪装成正式口径。
+    1) 上涨/下跌/平盘由覆盖完整的逐股快照按涨跌幅正负直接计数；
+    2) 涨停/跌停直接读取东方财富公开涨跌停池，不用涨跌幅阈值推算；
+    3) 乐咕市场活跃度仅用于独立交叉核验，不再覆盖正式口径；
+    4) 正式源失败时允许降级，但必须在 QA 和数据源字段中明确标记。
     """
     idx_rows=[]; qa=[]
     for name,symbol in INDEX_SYMBOLS.items():
@@ -1075,56 +1101,81 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         qa.append({"对象":name,"代码":symbol,"状态":"成功" if not d.empty else "失败","数据源":src,"交易日数":len(d),"错误":" | ".join(errs[-4:])})
     indices=pd.concat(idx_rows,ignore_index=True) if idx_rows else pd.DataFrame()
 
-    # A. 公开市场统计：正式数量口径
+    # A. 乐咕公开市场统计：只做交叉核验
     activity={}
     activity_src=""
     try:
         activity, activity_src = _public_market_activity_legu()
-        qa.append({"对象":"市场涨跌家数/涨跌停公开统计","代码":"","状态":"成功","数据源":activity_src,"交易日数":1,"错误":""})
+        qa.append({"对象":"市场统计交叉核验（非正式口径）","代码":"","状态":"成功","数据源":activity_src,"交易日数":1,"错误":""})
     except Exception as e:
-        qa.append({"对象":"市场涨跌家数/涨跌停公开统计","代码":"","状态":"失败","数据源":"legulegu","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+        qa.append({"对象":"市场统计交叉核验（非正式口径）","代码":"","状态":"失败","数据源":"legulegu","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
 
-    # B. 直接涨停池/跌停池交叉核验（能取到就记录；失败不影响主口径）
+    # B. 东方财富公开涨停池/跌停池：正式涨跌停口径
     today=datetime.now().strftime("%Y%m%d")
+    limit_pools={}
     for label, fn in [
         ("公开涨停股池", lambda: ak.stock_zt_pool_em(date=today)),
         ("公开跌停股池", lambda: ak.stock_zt_pool_dtgc_em(date=today)),
     ]:
         try:
             p=fn()
+            if p is None:
+                raise RuntimeError("公开股池返回None")
+            limit_pools[label]=p.copy()
             qa.append({"对象":label,"代码":"","状态":"成功","数据源":"eastmoney_public_pool","交易日数":len(p),"错误":""})
         except Exception as e:
             qa.append({"对象":label,"代码":"","状态":"失败","数据源":"eastmoney_public_pool","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
 
-    # C. 全市场快照：只补成交额等，不负责正式涨跌停计数
-    spot=pd.DataFrame(); spot_src=""
+    # C. 全市场快照：正式上涨/下跌/平盘口径，同时补充成交额和涨跌幅分布
+    spot=pd.DataFrame(); spot_src=""; spot_candidates=[]
     for src,fn in [("eastmoney",lambda: ak.stock_zh_a_spot_em()),("sina",lambda: ak.stock_zh_a_spot())]:
         try:
-            raw=fn(); spot=_std_spot(raw)
-            if spot.empty: raise RuntimeError("空快照")
-            spot_src=src
-            qa.append({"对象":"全市场逐股快照","代码":"","状态":"成功","数据源":src,"交易日数":len(spot),"错误":""})
-            break
+            raw=fn(); candidate=_std_spot(raw)
+            if candidate.empty: raise RuntimeError("空快照")
+            valid_pct=int(pd.to_numeric(candidate.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce").notna().sum())
+            if valid_pct==0: raise RuntimeError("快照缺少有效涨跌幅")
+            spot_candidates.append((valid_pct,len(candidate),src,candidate))
+            qa.append({"对象":"全市场逐股快照候选","代码":"","状态":"成功","数据源":src,"交易日数":len(candidate),"错误":f"有效涨跌幅={valid_pct}"})
         except Exception as e:
-            qa.append({"对象":"全市场逐股快照","代码":"","状态":"失败","数据源":src,"交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+            qa.append({"对象":"全市场逐股快照候选","代码":"","状态":"失败","数据源":src,"交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+    if spot_candidates:
+        _,_,spot_src,spot=max(spot_candidates,key=lambda x:(x[0],x[1]))
+        qa.append({"对象":"全市场逐股快照正式源","代码":"","状态":"成功","数据源":spot_src,"交易日数":len(spot),"错误":"按有效涨跌幅覆盖数择优"})
 
     pct=pd.to_numeric(spot.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce") if not spot.empty else pd.Series(dtype=float)
     amt=pd.to_numeric(spot.get("截至当前成交额",pd.Series(dtype=float)),errors="coerce") if not spot.empty else pd.Series(dtype=float)
 
-    ups=_to_count(activity.get("上涨"))
-    downs=_to_count(activity.get("下跌"))
-    flats=_to_count(activity.get("平盘"))
-    up_limit=_to_count(activity.get("涨停"))
-    down_limit=_to_count(activity.get("跌停"))
+    spot_counts=_count_spot_breadth(spot)
+    # 快照不可用时才降级到乐咕，并明确标记，避免把降级值伪装成正式快照口径。
+    degraded_breadth=not bool(spot_counts)
+    ups=spot_counts.get("上涨", _to_count(activity.get("上涨")))
+    downs=spot_counts.get("下跌", _to_count(activity.get("下跌")))
+    flats=spot_counts.get("平盘", _to_count(activity.get("平盘")))
+    up_pool=limit_pools.get("公开涨停股池", pd.DataFrame())
+    down_pool=limit_pools.get("公开跌停股池", pd.DataFrame())
+    up_pool_ok="公开涨停股池" in limit_pools
+    down_pool_ok="公开跌停股池" in limit_pools
+    degraded_limits=not (up_pool_ok and down_pool_ok)
+    up_limit=int(len(up_pool)) if up_pool_ok else _to_count(activity.get("涨停"))
+    down_limit=int(len(down_pool)) if down_pool_ok else _to_count(activity.get("跌停"))
     suspended=_to_count(activity.get("停牌"))
     stat_date=str(activity.get("统计日期","")).strip()
     counts=[x for x in [ups,downs,flats] if pd.notna(x)]
-    valid=int(sum(counts)) if len(counts)==3 else (int(pct.notna().sum()) if not pct.empty else np.nan)
+    valid=spot_counts.get("股票数", int(sum(counts)) if len(counts)==3 else np.nan)
+    breadth_source=(spot_src or "legulegu_fallback") + "+" + ("eastmoney_public_pool" if not degraded_limits else "legulegu_limit_fallback")
+
+    if activity:
+        diffs=[]
+        for label,formal_key,legu_key in [("上涨",ups,"上涨"),("下跌",downs,"下跌"),("平盘",flats,"平盘"),("涨停",up_limit,"涨停"),("跌停",down_limit,"跌停")]:
+            other=_to_count(activity.get(legu_key))
+            if pd.notna(formal_key) and pd.notna(other) and int(formal_key)!=int(other):
+                diffs.append(f"{label}:正式{int(formal_key)}/乐咕{int(other)}")
+        qa.append({"对象":"正式口径与乐咕差异","代码":"","状态":"警告" if diffs else "一致","数据源":breadth_source,"交易日数":1,"错误":" | ".join(diffs)})
 
     row={
         "日期":datetime.now().strftime("%Y-%m-%d"),
-        "数据时间":stat_date if stat_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "数据源":activity_src if activity_src else "公开市场统计不可用",
+        "数据时间":datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "数据源":breadth_source,
         "快照数据源":spot_src,
         "股票数":valid,
         "上涨家数":ups,"下跌家数":downs,"平盘家数":flats,"停牌家数":suspended,
@@ -1132,17 +1183,111 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         "下跌比例":(downs/valid if pd.notna(downs) and valid else np.nan),
         "净上涨家数":(ups-downs if pd.notna(ups) and pd.notna(downs) else np.nan),
         "涨停家数":up_limit,"跌停家数":down_limit,
+        "涨停股池代码":_pool_codes(up_pool),"跌停股池代码":_pool_codes(down_pool),
+        "市场宽度是否降级":degraded_breadth,"涨跌停是否降级":degraded_limits,
         "真实涨停家数":_to_count(activity.get("真实涨停")),
         "真实跌停家数":_to_count(activity.get("真实跌停")),
         "ST涨停家数":_to_count(activity.get("st st*涨停", activity.get("ST ST*涨停"))),
         "ST跌停家数":_to_count(activity.get("st st*跌停", activity.get("ST ST*跌停"))),
+        "乐咕统计时间":stat_date,
+        "乐咕上涨家数":_to_count(activity.get("上涨")),"乐咕下跌家数":_to_count(activity.get("下跌")),
+        "乐咕平盘家数":_to_count(activity.get("平盘")),"乐咕涨停家数":_to_count(activity.get("涨停")),"乐咕跌停家数":_to_count(activity.get("跌停")),
         "涨5%以上家数":int((pct>=5).sum()) if not pct.empty else np.nan,
         "跌5%以上家数":int((pct<=-5).sum()) if not pct.empty else np.nan,
         "全市场成交额":float(amt.sum()) if not amt.empty and amt.notna().any() else np.nan,
-        "说明":"上涨/下跌/平盘/涨停/跌停直接读取公开市场赚钱效应统计；不再按涨跌幅阈值推算涨停跌停。逐股快照仅补充成交额及涨跌幅分布。若公开统计失败，正式涨跌停字段留空并记录QA。"
+        "说明":"上涨/下跌/平盘由逐股快照按涨跌幅正负计数；涨停/跌停直接读取东方财富公开股池；乐咕只做交叉QA。正式源失败时才降级并显式标记。"
     }
     # 旧字段保留兼容，但不再叫“近似”：数值直接等于公开统计；若公开源失败则为空。
     row["涨停近似家数"]=row["涨停家数"]
     row["跌停近似家数"]=row["跌停家数"]
     breadth=pd.DataFrame([row])
     return indices,breadth,pd.DataFrame(qa)
+
+
+SECTOR_PERIODS = {
+    "now": "即时",
+    "3d": "3日排行",
+    "5d": "5日排行",
+    "10d": "10日排行",
+    "20d": "20日排行",
+}
+
+
+def _normalize_sector_flow(raw: pd.DataFrame, sector_type: str, period: str,
+                           fetched_at: datetime, trade_date) -> tuple[pd.DataFrame, list[str]]:
+    """标准化同花顺公开板块资金数据，并返回质量警告。"""
+    if raw is None or raw.empty:
+        return pd.DataFrame(), ["空数据"]
+    x=raw.copy()
+    warnings=[]
+    name_col=_find_col(x.columns,["行业","板块名称","概念名称"])
+    if name_col is None:
+        return pd.DataFrame(), [f"缺少板块名称字段: {list(x.columns)}"]
+    if name_col != "行业":
+        x=x.rename(columns={name_col:"行业"})
+    x["行业"]=x["行业"].astype(str).str.strip()
+    x=x[x["行业"].ne("") & x["行业"].ne("nan")].copy()
+    duplicate_names=x.loc[x["行业"].duplicated(keep=False),"行业"].drop_duplicates().tolist()
+    if duplicate_names:
+        warnings.append("重复板块已去重:"+"|".join(duplicate_names))
+        x=x.drop_duplicates("行业",keep="first").copy()
+    for c in ["行业指数","行业-涨跌幅","阶段涨跌幅","流入资金","流出资金","净额","公司家数","领涨股-涨跌幅","当前价"]:
+        if c in x:
+            x[c]=pd.to_numeric(x[c].astype(str).str.replace("%","",regex=False).str.replace("亿","",regex=False).str.replace("万","",regex=False),errors="coerce")
+    if all(c in x for c in ["流入资金","流出资金","净额"]):
+        bad=((x["流入资金"]-x["流出资金"]-x["净额"]).abs()>0.021).sum()
+        if bad:
+            warnings.append(f"资金净额算术不一致:{int(bad)}行")
+    x.insert(0,"周期",period)
+    x.insert(0,"板块类型",sector_type)
+    x.insert(0,"抓取时间",fetched_at.strftime("%Y-%m-%d %H:%M:%S"))
+    x.insert(0,"交易日期",str(trade_date))
+    x["资金单位"]="亿元"
+    x["数据源"]="同花顺公开板块资金/AKShare"
+    x["数据源URL"]="https://data.10jqka.com.cn/funds/gnzjl/" if sector_type=="概念" else "https://data.10jqka.com.cn/funds/hyzjl/"
+    return x.reset_index(drop=True), warnings
+
+
+def fetch_public_sector_flow(fetched_at: datetime | None = None) -> tuple[dict[str,pd.DataFrame], pd.DataFrame]:
+    """获取同花顺概念/行业即时及多周期资金数据，作为增强层而非个股结构替代。"""
+    fetched_at=fetched_at or datetime.now()
+    trade_date=fetched_at.date()
+    if fetched_at.hour < 15:
+        trade_date-=timedelta(days=1)
+    try:
+        for _ in range(10):
+            if is_trade_day(trade_date): break
+            trade_date-=timedelta(days=1)
+    except Exception:
+        pass
+    tables={}; qa=[]
+    for sector_type,fn in [
+        ("概念",ak.stock_fund_flow_concept),
+        ("行业",ak.stock_fund_flow_industry),
+    ]:
+        for period,symbol in SECTOR_PERIODS.items():
+            key=("concept" if sector_type=="概念" else "industry")+"_"+period
+            try:
+                raw=fn(symbol=symbol)
+                x,warnings=_normalize_sector_flow(raw,sector_type,period,fetched_at,trade_date)
+                if x.empty:
+                    raise RuntimeError("标准化后为空; "+" | ".join(warnings))
+                tables[key]=x
+                qa.append({"测试":key,"状态":"警告" if warnings else "成功","行数":len(x),"重复数":max(0,len(raw)-len(x)),"数据源":"同花顺公开板块资金/AKShare","交易日期":str(trade_date),"错误":" | ".join(warnings)})
+            except Exception as e:
+                qa.append({"测试":key,"状态":"失败","行数":0,"重复数":0,"数据源":"同花顺公开板块资金/AKShare","交易日期":str(trade_date),"错误":f"{type(e).__name__}: {e}"})
+    for prefix in ["concept","industry"]:
+        now=tables.get(prefix+"_now")
+        if now is None or now.empty:
+            continue
+        now_names=set(now["行业"])
+        for period in ["3d","5d","10d","20d"]:
+            other=tables.get(prefix+"_"+period)
+            if other is None or other.empty:
+                continue
+            other_names=set(other["行业"])
+            missing=sorted(other_names-now_names)
+            extra=sorted(now_names-other_names)
+            if missing or extra:
+                qa.append({"测试":f"{prefix}_now_vs_{period}","状态":"警告","行数":len(now_names),"重复数":0,"数据源":"cross_period_qa","交易日期":str(trade_date),"错误":f"即时缺少:{'|'.join(missing)}; 即时独有:{'|'.join(extra)}"})
+    return tables,pd.DataFrame(qa)

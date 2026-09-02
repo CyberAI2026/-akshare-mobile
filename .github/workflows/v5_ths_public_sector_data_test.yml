@@ -22,42 +22,17 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import json, traceback
+          import json
           import pandas as pd
-          import akshare as ak
+          import v5_core as core
 
           out=Path("ths_public_sector_test")
           out.mkdir(exist_ok=True)
-          qa=[]
+          tables,q=core.fetch_public_sector_flow()
           summary={}
-
-          tests=[
-            ("concept_now", lambda: ak.stock_fund_flow_concept(symbol="即时")),
-            ("concept_3d", lambda: ak.stock_fund_flow_concept(symbol="3日排行")),
-            ("concept_5d", lambda: ak.stock_fund_flow_concept(symbol="5日排行")),
-            ("concept_10d", lambda: ak.stock_fund_flow_concept(symbol="10日排行")),
-            ("concept_20d", lambda: ak.stock_fund_flow_concept(symbol="20日排行")),
-            ("industry_now", lambda: ak.stock_fund_flow_industry(symbol="即时")),
-            ("industry_3d", lambda: ak.stock_fund_flow_industry(symbol="3日排行")),
-            ("industry_5d", lambda: ak.stock_fund_flow_industry(symbol="5日排行")),
-            ("industry_10d", lambda: ak.stock_fund_flow_industry(symbol="10日排行")),
-            ("industry_20d", lambda: ak.stock_fund_flow_industry(symbol="20日排行")),
-          ]
-
-          for name,fn in tests:
-            try:
-              df=fn()
-              if df is None: df=pd.DataFrame()
-              df.to_csv(out/f"{name}.csv",index=False,encoding="utf-8-sig")
-              qa.append({"测试":name,"状态":"成功" if not df.empty else "空数据","行数":len(df),
-                         "字段":" | ".join(map(str,df.columns)),"错误":""})
-              summary[name]={"rows":int(len(df)),"columns":list(map(str,df.columns))}
-            except Exception as e:
-              qa.append({"测试":name,"状态":"失败","行数":0,"字段":"",
-                         "错误":f"{type(e).__name__}: {e}"})
-              summary[name]={"rows":0,"error":f"{type(e).__name__}: {e}"}
-
-          q=pd.DataFrame(qa)
+          for name,df in tables.items():
+            df.to_csv(out/f"{name}.csv",index=False,encoding="utf-8-sig")
+            summary[name]={"rows":int(len(df)),"columns":list(map(str,df.columns))}
           q.to_csv(out/"qa.csv",index=False,encoding="utf-8-sig")
 
           # 生成轻量榜单，便于人工验收，不进入正式策略。
@@ -78,10 +53,10 @@ jobs:
           (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
           print(q.to_string(index=False))
 
-          success=sum(x["状态"]=="成功" for x in qa)
-          if success==0:
-              raise SystemExit("FAIL: GitHub 云端无法取得任何同花顺公开板块资金数据")
-          print(f"THS_PUBLIC_SECTOR_TEST_OK success={success}/{len(qa)}")
+          failures=q[q["状态"]=="失败"] if not q.empty else q
+          if len(tables)!=10 or not failures.empty:
+              raise SystemExit(f"FAIL: 同花顺板块主表不完整 tables={len(tables)}/10 failures={len(failures)}")
+          print(f"THS_PUBLIC_SECTOR_TEST_OK tables={len(tables)}/10 warnings={(q['状态']=='警告').sum()}")
           PY
 
       - name: Upload artifact

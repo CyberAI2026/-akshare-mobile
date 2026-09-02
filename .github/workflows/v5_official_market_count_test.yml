@@ -35,6 +35,16 @@ jobs:
           for c in ["上涨家数","下跌家数","涨停家数","跌停家数"]:
               if c not in breadth.columns or str(r[c]) in ("nan","None",""):
                   raise SystemExit(f"FAIL: public field missing: {c}")
+          if bool(r.get("市场宽度是否降级", True)):
+              raise SystemExit("FAIL: 市场宽度正式逐股快照不可用，已发生降级")
+          if bool(r.get("涨跌停是否降级", True)):
+              raise SystemExit("FAIL: 东方财富公开涨跌停池不可用，已发生降级")
+          if int(r["上涨家数"])+int(r["下跌家数"])+int(r["平盘家数"]) != int(r["股票数"]):
+              raise SystemExit("FAIL: 上涨+下跌+平盘与正式股票数不一致")
+          up_codes=[x for x in str(r.get("涨停股池代码","")).split("|") if x]
+          down_codes=[x for x in str(r.get("跌停股池代码","")).split("|") if x]
+          if len(up_codes)!=int(r["涨停家数"]) or len(down_codes)!=int(r["跌停家数"]):
+              raise SystemExit("FAIL: 涨跌停成分代码数量与正式计数不一致")
           print("OFFICIAL_MARKET_COUNT_TEST_OK")
           PY
       - name: Upload artifact
