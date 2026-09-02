@@ -17,42 +17,78 @@ EXPECTED_COLUMNS = [
 ]
 
 
+def market_prefix(code: str) -> str:
+    if code.startswith(("4", "8")):
+        return "bj" + code
+    if code.startswith(("5", "6", "9")):
+        return "sh" + code
+    return "sz" + code
+
+
+def standardize_history(frame: pd.DataFrame, code: str, source: str) -> pd.DataFrame:
+    if source == "sina":
+        frame = frame.rename(columns={
+            "date": "日期", "open": "开盘", "close": "收盘", "high": "最高",
+            "low": "最低", "volume": "成交量", "amount": "成交额", "turnover": "换手率",
+        })
+        frame.insert(1 if "日期" in frame.columns else 0, "股票代码", code)
+    for column in ("开盘", "收盘", "最高", "最低", "成交量", "成交额", "换手率"):
+        if column not in frame.columns:
+            frame[column] = np.nan
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    if "涨跌幅" not in frame.columns:
+        frame["涨跌幅"] = frame["收盘"].pct_change() * 100
+    if "涨跌额" not in frame.columns:
+        frame["涨跌额"] = frame["收盘"].diff()
+    if "振幅" not in frame.columns:
+        previous = frame["收盘"].shift(1)
+        frame["振幅"] = (frame["最高"] - frame["最低"]) / previous * 100
+    if "股票代码" not in frame.columns:
+        frame.insert(1 if "日期" in frame.columns else 0, "股票代码", code)
+    return frame
+
+
 def fetch_symbol(code: str, start: str, end: str, output_dir: Path, retries: int) -> dict:
     target = output_dir / f"{code}.csv.gz"
     errors: list[str] = []
-    for attempt in range(1, retries + 1):
-        try:
-            frame = ak.stock_zh_a_hist(
-                symbol=code,
-                period="daily",
-                start_date=start,
-                end_date=end,
-                adjust="qfq",
-            )
-            if frame is None or frame.empty:
-                raise RuntimeError("empty history")
-            missing = [column for column in EXPECTED_COLUMNS if column not in frame.columns]
-            if missing:
-                raise RuntimeError(f"missing columns: {missing}")
-            frame = frame[EXPECTED_COLUMNS].copy()
-            frame["日期"] = pd.to_datetime(frame["日期"], errors="coerce")
-            frame = frame.dropna(subset=["日期"]).sort_values("日期").drop_duplicates("日期")
-            frame.to_csv(target, index=False, encoding="utf-8-sig", compression="gzip")
-            return {
-                "股票代码": code,
-                "状态": "ok",
-                "行数": len(frame),
-                "首日": frame["日期"].min().date().isoformat(),
-                "末日": frame["日期"].max().date().isoformat(),
-                "错误": " | ".join(errors),
-            }
-        except Exception as exc:  # noqa: BLE001 - provider errors must be audited
-            errors.append(f"attempt={attempt}:{type(exc).__name__}:{exc}")
-            if attempt < retries:
-                time.sleep((1.4 ** attempt) + random.uniform(0.2, 0.8))
+    for source in ("sina", "eastmoney"):
+        for attempt in range(1, retries + 1):
+            try:
+                if source == "sina":
+                    frame = ak.stock_zh_a_daily(
+                        symbol=market_prefix(code), start_date=start, end_date=end, adjust="qfq"
+                    )
+                else:
+                    frame = ak.stock_zh_a_hist(
+                        symbol=code, period="daily", start_date=start, end_date=end, adjust="qfq"
+                    )
+                if frame is None or frame.empty:
+                    raise RuntimeError("empty history")
+                frame = standardize_history(frame.copy(), code, source)
+                missing = [column for column in EXPECTED_COLUMNS if column not in frame.columns]
+                if missing:
+                    raise RuntimeError(f"missing columns: {missing}")
+                frame = frame[EXPECTED_COLUMNS].copy()
+                frame["日期"] = pd.to_datetime(frame["日期"], errors="coerce")
+                frame = frame.dropna(subset=["日期"]).sort_values("日期").drop_duplicates("日期")
+                frame.to_csv(target, index=False, encoding="utf-8-sig", compression="gzip")
+                return {
+                    "股票代码": code,
+                    "状态": "ok",
+                    "数据源": source,
+                    "行数": len(frame),
+                    "首日": frame["日期"].min().date().isoformat(),
+                    "末日": frame["日期"].max().date().isoformat(),
+                    "错误": " | ".join(errors),
+                }
+            except Exception as exc:  # noqa: BLE001 - provider errors must be audited
+                errors.append(f"{source}/attempt={attempt}:{type(exc).__name__}:{exc}")
+                if attempt < retries:
+                    time.sleep((1.4 ** attempt) + random.uniform(0.2, 0.8))
     return {
         "股票代码": code,
         "状态": "failed",
+        "数据源": "",
         "行数": 0,
         "首日": "",
         "末日": "",
