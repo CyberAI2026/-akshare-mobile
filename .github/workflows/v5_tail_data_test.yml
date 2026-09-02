@@ -1,0 +1,135 @@
+name: V5 Tail Data Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tail-data-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Test realtime snapshot, 5m bars and market state
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from datetime import datetime
+          import json
+          import pandas as pd
+          import v5_core as core
+
+          out = Path("tail_data_test_output")
+          out.mkdir(parents=True, exist_ok=True)
+
+          candidates = [
+              Path("v5_data/latest/observation_pool.csv"),
+              Path("v5_data/latest/observation_pool_10.csv"),
+          ]
+          pool_path = next((p for p in candidates if p.exists()), None)
+          if pool_path is None:
+              raise SystemExit("找不到 v5_data/latest/observation_pool.csv；请先完成一次盘后研究。")
+
+          pool = pd.read_csv(pool_path, dtype={"股票代码": str})
+          if pool.empty:
+              raise SystemExit("观察池为空，无法测试个股实时行情和5分钟K。")
+          pool["股票代码"] = pool["股票代码"].astype(str).str.zfill(6)
+
+          print(f"Observation pool: {len(pool)} stocks")
+          print(pool[["股票代码","股票名称"]].to_string(index=False))
+
+          snap, minute, qa = core.fetch_realtime_package(pool)
+          indices, breadth, market_qa = core.fetch_market_review(days=180)
+
+          # 保存原始测试数据
+          snap.to_csv(out/"realtime_snapshot.csv", index=False, encoding="utf-8-sig")
+          minute.to_csv(out/"minute_5m.csv", index=False, encoding="utf-8-sig")
+          qa.to_csv(out/"stock_realtime_qa.csv", index=False, encoding="utf-8-sig")
+          indices.to_csv(out/"market_indices_180d.csv", index=False, encoding="utf-8-sig")
+          breadth.to_csv(out/"market_breadth_snapshot.csv", index=False, encoding="utf-8-sig")
+          market_qa.to_csv(out/"market_qa.csv", index=False, encoding="utf-8-sig")
+
+          # 每只股票5分钟K首尾时间
+          minute_summary = []
+          for _, r in pool.iterrows():
+              code = r["股票代码"]
+              name = r.get("股票名称", "")
+              m = minute[minute["股票代码"].astype(str).str.zfill(6) == code].copy() if not minute.empty else pd.DataFrame()
+              if not m.empty and "时间" in m.columns:
+                  tt = pd.to_datetime(m["时间"], errors="coerce").dropna()
+                  first_t = str(tt.min()) if not tt.empty else ""
+                  last_t = str(tt.max()) if not tt.empty else ""
+              else:
+                  first_t = last_t = ""
+              minute_summary.append({
+                  "股票代码": code,
+                  "股票名称": name,
+                  "5分钟K行数": len(m),
+                  "首根时间": first_t,
+                  "末根时间": last_t,
+              })
+          ms = pd.DataFrame(minute_summary)
+          ms.to_csv(out/"minute_5m_summary.csv", index=False, encoding="utf-8-sig")
+
+          snap_codes = set(snap["股票代码"].astype(str).str.zfill(6)) if not snap.empty else set()
+          pool_codes = set(pool["股票代码"])
+          missing_snap = sorted(pool_codes - snap_codes)
+
+          summary = {
+              "test_time_runner": datetime.now().isoformat(timespec="seconds"),
+              "observation_pool_count": int(len(pool)),
+              "snapshot_rows": int(len(snap)),
+              "snapshot_missing_codes": missing_snap,
+              "stocks_with_5m": int((ms["5分钟K行数"] > 0).sum()),
+              "stocks_without_5m": ms.loc[ms["5分钟K行数"] == 0, "股票代码"].tolist(),
+              "total_5m_rows": int(len(minute)),
+              "index_rows": int(len(indices)),
+              "index_symbols": int(indices["指数代码"].nunique()) if not indices.empty and "指数代码" in indices else 0,
+              "breadth_rows": int(len(breadth)),
+              "breadth_source": str(breadth.iloc[0].get("数据源","")) if not breadth.empty else "",
+              "breadth_stock_count": int(breadth.iloc[0].get("股票数",0)) if not breadth.empty else 0,
+              "breadth_up": int(breadth.iloc[0].get("上涨家数",0)) if not breadth.empty else 0,
+              "breadth_down": int(breadth.iloc[0].get("下跌家数",0)) if not breadth.empty else 0,
+              "breadth_limit_up": int(breadth.iloc[0].get("涨停家数",0)) if not breadth.empty else 0,
+              "breadth_limit_down": int(breadth.iloc[0].get("跌停家数",0)) if not breadth.empty else 0,
+              "note": "收盘后测试只验证接口可用性与今日5分钟K/收盘快照；不能替代真实14:40和14:45交易时点验证。"
+          }
+          (out/"summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+          # 严格但不过度：只要三大模块都拿到数据即通过。
+          if len(snap) == 0:
+              raise SystemExit("FAIL: 实时/收盘快照为空")
+          if int((ms["5分钟K行数"] > 0).sum()) == 0:
+              raise SystemExit("FAIL: 所有观察股5分钟K均为空")
+          if len(breadth) == 0:
+              raise SystemExit("FAIL: 全市场状态为空")
+          if len(indices) == 0:
+              raise SystemExit("FAIL: 指数历史为空")
+
+          print("TAIL_DATA_TEST_OK")
+          PY
+
+      - name: Upload test artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-tail-data-test
+          path: tail_data_test_output/
+          if-no-files-found: warn
+          retention-days: 7
