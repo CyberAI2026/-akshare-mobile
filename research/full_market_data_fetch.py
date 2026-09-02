@@ -137,14 +137,6 @@ def fetch_name_tables(output_dir: Path) -> pd.DataFrame:
         "\n".join(source_errors) + "\n", encoding="utf-8"
     )
 
-    try:
-        changes = ak.stock_info_change_name(symbol="all")
-        if changes is not None and not changes.empty:
-            changes.to_csv(output_dir / "a_share_name_changes.csv", index=False, encoding="utf-8-sig")
-    except Exception as exc:  # noqa: BLE001
-        (output_dir / "name_changes_error.txt").write_text(
-            f"{type(exc).__name__}: {exc}\n", encoding="utf-8"
-        )
     return master
 
 
