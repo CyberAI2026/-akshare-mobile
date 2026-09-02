@@ -1,0 +1,14 @@
+{
+  "status": "running",
+  "engine": "V5-foundation-1",
+  "strategy": "research_v0.5-evidence-aligned+pool-v0.1",
+  "started_cn": "2026-09-02T20:39:26.252609+08:00",
+  "batch_count": 0,
+  "master_before_screen": 532,
+  "bootstrapped_from_v4": true,
+  "cache_seed": {
+    "seeded": 535,
+    "scanned": 772,
+    "available": 535
+  }
+}
