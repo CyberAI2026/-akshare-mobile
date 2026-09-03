@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-import akshare as ak
 import pandas as pd
 
 TZ = ZoneInfo("Asia/Shanghai")
@@ -131,6 +130,8 @@ def register_tail_recommendations(final_decisions: pd.DataFrame, final_meta: dic
 
 
 def fetch_bars(code: str, start_date: str, end_date: str) -> pd.DataFrame:
+    import akshare as ak
+
     cache = Path("v5_data/cache/history") / f"{code}.csv"
     cached = pd.DataFrame()
     if cache.exists():
