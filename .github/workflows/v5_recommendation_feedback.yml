@@ -42,8 +42,14 @@ jobs:
           python -m py_compile research/recommendation_feedback.py research/stock_sector_attribution.py
           python -m unittest tests/test_recommendation_feedback.py
       - name: Update recommendation cohorts after close
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '35 7 * * 1-5'
-        run: python research/recommendation_feedback.py update
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '35 7 * * 1-5'
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python research/recommendation_feedback.py update --no-notify
+          else
+            python research/recommendation_feedback.py update
+          fi
       - name: Build stock-to-multiple-sector attribution
         if: github.event_name == 'workflow_dispatch' || github.event.schedule == '40 11 * * 1-5'
         run: |
