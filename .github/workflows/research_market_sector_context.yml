@@ -43,12 +43,15 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             python research/market_sector_context_fetch.py \
               --master-pool v5_data/master/current_master_pool.csv \
-              --output-root sector_membership_run
+              --output-root sector_membership_run \
+              --shards 20
           else
             python research/market_sector_context_fetch.py \
               --master-pool v5_data/master/current_master_pool.csv \
               --output-root sector_membership_run \
               --persist-root v5_data/context/sector_membership \
+              --previous-mapping v5_data/context/sector_membership/working.csv.gz \
+              --shards 5 \
               --skip-non-trading-day
           fi
       - name: Commit daily online snapshot
