@@ -2,6 +2,7 @@ import unittest
 import sys
 from unittest.mock import MagicMock
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from unittest.mock import patch
 
 import pandas as pd
@@ -9,6 +10,7 @@ import pandas as pd
 sys.modules.setdefault("akshare",MagicMock())
 sys.modules.setdefault("requests",MagicMock())
 import v5_core as core
+import v5_cli as cli
 
 
 class MarketReviewTests(unittest.TestCase):
@@ -70,6 +72,34 @@ class SectorFlowTests(unittest.TestCase):
         self.assertEqual(tables["concept_now"].iloc[0]["资金单位"],"亿元")
         self.assertTrue((qa["测试"]=="concept_now").any())
         self.assertTrue(qa["错误"].str.contains("自由贸易港",na=False).any())
+        self.assertEqual(tables["concept_now"].iloc[0]["业务时区"],"Asia/Shanghai")
+        self.assertTrue(str(tables["concept_now"].iloc[0]["抓取时间"]).endswith("+0800"))
+
+    def test_sector_flow_converts_aware_utc_to_china_business_date(self):
+        table=self._table(["军工"])
+        now_table=table.rename(columns={"阶段涨跌幅":"行业-涨跌幅"})
+        def source(symbol):
+            return now_table if symbol=="即时" else table
+        with patch.object(core.ak,"stock_fund_flow_concept",side_effect=source), \
+             patch.object(core.ak,"stock_fund_flow_industry",side_effect=source), \
+             patch.object(core,"is_trade_day",return_value=True):
+            tables,_=core.fetch_public_sector_flow(datetime(2026,9,3,8,0,tzinfo=ZoneInfo("UTC")))
+        row=tables["concept_now"].iloc[0]
+        self.assertEqual(row["交易日期"],"2026-09-03")
+        self.assertEqual(row["抓取时间"],"2026-09-03 16:00:00+0800")
+
+
+class NotificationTests(unittest.TestCase):
+    def test_pushplus_retries_then_succeeds(self):
+        response=MagicMock()
+        response.__enter__.return_value.read.return_value=b'{"code":200}'
+        with patch.dict(cli.os.environ,{"PUSHPLUS_TOKEN":"test-token"}), \
+             patch.object(cli.urllib.request,"urlopen",side_effect=[RuntimeError("temporary"),response]) as mocked, \
+             patch.object(cli.time,"sleep") as sleeper:
+            ok=cli.pushplus_notify("title","body",attempts=3)
+        self.assertTrue(ok)
+        self.assertEqual(mocked.call_count,2)
+        sleeper.assert_called_once_with(2)
 
 
 if __name__ == "__main__":

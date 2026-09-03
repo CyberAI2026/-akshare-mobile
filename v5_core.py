@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Iterable
+from zoneinfo import ZoneInfo
 
 import akshare as ak
 import numpy as np
@@ -18,6 +19,21 @@ import requests
 
 APP_VERSION = "V5.3-auditable-market-sector-layer"
 STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2"
+CN_TZ = ZoneInfo("Asia/Shanghai")
+
+
+def now_cn() -> datetime:
+    return datetime.now(CN_TZ)
+
+
+def _as_cn_time(value: datetime | None = None) -> datetime:
+    """统一业务时钟为北京时间；无时区时间按北京时间解释以兼容旧调用。"""
+    if value is None:
+        return now_cn()
+    if value.tzinfo is None:
+        return value.replace(tzinfo=CN_TZ)
+    return value.astimezone(CN_TZ)
+
 
 MODE_DAYS = {"25日粗筛": 25, "120日结构筛选": 120, "250日生命周期筛选": 250}
 
@@ -177,7 +193,7 @@ def market_prefix(code: str) -> str:
 
 def _date_range(days: int) -> tuple[str, str]:
     need = days + (5 if days == 120 else 0)
-    end_dt = datetime.now()
+    end_dt = now_cn()
     start_dt = end_dt - timedelta(days=max(120, int(need * 2.25) + 80))
     return start_dt.strftime("%Y%m%d"), end_dt.strftime("%Y%m%d")
 
@@ -531,8 +547,9 @@ def fetch_spot_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, str, list[str]]:
         return pd.DataFrame(), used, errors
     want=set(pool["股票代码"].astype(str))
     out=spot[spot["股票代码"].isin(want)].copy()
-    out["日期"] = datetime.now().strftime("%Y-%m-%d")
-    out["数据时间"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    captured_at = _as_cn_time()
+    out["日期"] = captured_at.strftime("%Y-%m-%d")
+    out["数据时间"] = captured_at.strftime("%Y-%m-%d %H:%M:%S%z")
     cols=["股票代码","股票名称","日期","数据时间","今日开盘价","当前价","今日最高价","今日最低价","截至当前成交量","截至当前成交额","换手率","实时量比","当日涨跌幅","昨收"]
     for c in cols:
         if c not in out: out[c]=np.nan
@@ -549,7 +566,7 @@ def _std_minute(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def fetch_5m(code: str) -> tuple[pd.DataFrame, str, list[str]]:
-    errors=[]; today=datetime.now().date()
+    errors=[]; today=now_cn().date()
     try:
         raw=ak.stock_zh_a_minute(symbol=market_prefix(code), period="5", adjust="")
         x=_std_minute(raw)
@@ -1111,7 +1128,8 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         qa.append({"对象":"市场统计交叉核验（非正式口径）","代码":"","状态":"失败","数据源":"legulegu","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
 
     # B. 东方财富公开涨停池/跌停池：正式涨跌停口径
-    today=datetime.now().strftime("%Y%m%d")
+    captured_at=_as_cn_time()
+    today=captured_at.strftime("%Y%m%d")
     limit_pools={}
     for label, fn in [
         ("公开涨停股池", lambda: ak.stock_zt_pool_em(date=today)),
@@ -1173,8 +1191,9 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         qa.append({"对象":"正式口径与乐咕差异","代码":"","状态":"警告" if diffs else "一致","数据源":breadth_source,"交易日数":1,"错误":" | ".join(diffs)})
 
     row={
-        "日期":datetime.now().strftime("%Y-%m-%d"),
-        "数据时间":datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "日期":captured_at.strftime("%Y-%m-%d"),
+        "数据时间":captured_at.strftime("%Y-%m-%d %H:%M:%S%z"),
+        "业务时区":"Asia/Shanghai",
         "数据源":breadth_source,
         "快照数据源":spot_src,
         "股票数":valid,
@@ -1240,7 +1259,8 @@ def _normalize_sector_flow(raw: pd.DataFrame, sector_type: str, period: str,
             warnings.append(f"资金净额算术不一致:{int(bad)}行")
     x.insert(0,"周期",period)
     x.insert(0,"板块类型",sector_type)
-    x.insert(0,"抓取时间",fetched_at.strftime("%Y-%m-%d %H:%M:%S"))
+    x.insert(0,"抓取时间",fetched_at.strftime("%Y-%m-%d %H:%M:%S%z"))
+    x.insert(0,"业务时区","Asia/Shanghai")
     x.insert(0,"交易日期",str(trade_date))
     x["资金单位"]="亿元"
     x["数据源"]="同花顺公开板块资金/AKShare"
@@ -1250,7 +1270,7 @@ def _normalize_sector_flow(raw: pd.DataFrame, sector_type: str, period: str,
 
 def fetch_public_sector_flow(fetched_at: datetime | None = None) -> tuple[dict[str,pd.DataFrame], pd.DataFrame]:
     """获取同花顺概念/行业即时及多周期资金数据，作为增强层而非个股结构替代。"""
-    fetched_at=fetched_at or datetime.now()
+    fetched_at=_as_cn_time(fetched_at)
     trade_date=fetched_at.date()
     if fetched_at.hour < 15:
         trade_date-=timedelta(days=1)
