@@ -87,14 +87,42 @@ def pool_from_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 def _read_delimited_stock_file(data: bytes) -> pd.DataFrame:
     """读取 CSV/TSV/文本导出的“伪 .xls”。不少行情软件把制表符文本保存成 .xls 扩展名。"""
     last_err = None
-    for enc in ("utf-8-sig", "gb18030", "gbk", "utf-16"):
+    # 部分行情软件会把 UTF-16LE 制表符文本命名为 .xls，且文件末尾可能带单个
+    # 残缺字节。先严格解码；仅对能由 BOM/NUL 分布确认的 UTF-16 文本允许
+    # 忽略最后一个残缺字节，避免把真正的二进制 Excel 静默当成文本。
+    looks_utf16_le = data.startswith(b"\\xff\\xfe") or (
+        len(data) >= 8 and data[1:8:2].count(0) >= 3
+    )
+    looks_utf16_be = data.startswith(b"\\xfe\\xff") or (
+        len(data) >= 8 and data[0:8:2].count(0) >= 3
+    )
+    encodings = ["utf-8-sig", "gb18030", "gbk"]
+    if looks_utf16_le:
+        encodings.extend(["utf-16", "utf-16-le"])
+    elif looks_utf16_be:
+        encodings.extend(["utf-16", "utf-16-be"])
+    else:
+        encodings.append("utf-16")
+
+    for enc in encodings:
         try:
             text = data.decode(enc)
-            # 部分行情软件导出的“xls”其实是仅使用 CR 的制表符文本；统一换行后再交给 pandas。
-            text = text.replace("\r\n", "\n").replace("\r", "\n")
+        except UnicodeDecodeError as e:
+            last_err = e
+            if enc.startswith("utf-16") and (looks_utf16_le or looks_utf16_be):
+                try:
+                    usable = data[:-1] if len(data) % 2 else data
+                    text = usable.decode(enc, errors="strict")
+                except Exception as retry_error:
+                    last_err = retry_error
+                    continue
+            else:
+                continue
         except Exception as e:
             last_err = e
             continue
+        # 部分行情软件导出的“xls”其实是仅使用 CR 的制表符文本；统一换行后再交给 pandas。
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
         # 优先制表符；再让 pandas 自动嗅探常见分隔符。
         for sep in ("\t", None, ",", ";", "|"):
             try:
