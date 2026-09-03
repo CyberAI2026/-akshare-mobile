@@ -2,6 +2,8 @@ name: V5 THS Public Sector Data Test
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -57,13 +59,24 @@ jobs:
               df["_涨幅数"]=pd.to_numeric(df[pct_col].astype(str).str.replace("%","",regex=False),errors="coerce")
               df.sort_values("_涨幅数",ascending=False).head(20).drop(columns=["_涨幅数"]).to_csv(out/f"{src}_top20_gain.csv",index=False,encoding="utf-8-sig")
 
-          (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
           print(q.to_string(index=False))
 
           failures=q[q["状态"]=="失败"] if not q.empty else q
-          if len(tables)!=10 or not failures.empty:
-              raise SystemExit(f"FAIL: 同花顺板块主表不完整 tables={len(tables)}/10 failures={len(failures)}")
-          print(f"THS_PUBLIC_SECTOR_TEST_OK tables={len(tables)}/10 warnings={(q['状态']=='警告').sum()}")
+          required={"交易日期","业务时区","抓取时间","板块类型","周期","资金单位","数据源","数据源URL","行业"}
+          metadata_bad=[name for name,df in tables.items() if not required.issubset(set(df.columns))]
+          duplicate_bad=[name for name,df in tables.items() if df["行业"].astype(str).duplicated().any()]
+          timezone_bad=[name for name,df in tables.items() if not (df["业务时区"].eq("Asia/Shanghai").all() and df["抓取时间"].astype(str).str.endswith("+0800").all())]
+          warnings=q[q["状态"]=="警告"] if not q.empty else q
+          if len(tables)!=10 or not failures.empty or metadata_bad or duplicate_bad or timezone_bad:
+              raise SystemExit(
+                  f"FAIL: 板块数据不满足结构门槛 tables={len(tables)}/10 failures={len(failures)} "
+                  f"metadata_bad={metadata_bad} duplicate_bad={duplicate_bad} timezone_bad={timezone_bad}"
+              )
+          status="正式可用" if warnings.empty else "实验性有警告"
+          summary["validation_status"]=status
+          summary["warning_count"]=int(len(warnings))
+          (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(f"THS_PUBLIC_SECTOR_TEST_{'OK' if warnings.empty else 'PROVISIONAL'} tables={len(tables)}/10 warnings={len(warnings)} status={status}")
           PY
 
       - name: Upload artifact
