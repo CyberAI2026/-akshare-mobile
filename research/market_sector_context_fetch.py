@@ -119,6 +119,66 @@ def normalize_constituents(frame: pd.DataFrame, board_type: str, board_name: str
     return out
 
 
+
+def normalize_individual_industry(frame: pd.DataFrame, code: str, stock_name: str,
+                                  captured_at: datetime) -> pd.DataFrame:
+    """将东财个股资料中的行业字段规范为一条主池行业映射。"""
+    if frame is None or frame.empty:
+        return pd.DataFrame()
+    item_col=find_col(frame.columns,["item","项目","指标"])
+    value_col=find_col(frame.columns,["value","值","内容"])
+    if item_col is None or value_col is None:
+        raise ValueError(f"individual info columns missing: {list(frame.columns)}")
+    items=frame[item_col].astype(str).str.strip()
+    rows=frame.loc[items.eq("行业")]
+    if rows.empty:
+        return pd.DataFrame()
+    industry=str(rows.iloc[-1][value_col]).strip()
+    if not industry or industry.lower() in {"nan","none","-"}:
+        return pd.DataFrame()
+    return pd.DataFrame([{
+        "快照日期":captured_at.strftime("%Y-%m-%d"),
+        "业务时区":"Asia/Shanghai",
+        "抓取时间":captured_at.strftime("%Y-%m-%d %H:%M:%S%z"),
+        "板块类型":"行业",
+        "板块名称":industry,
+        "股票代码":code,
+        "股票名称_板块源":stock_name,
+        "数据源":"eastmoney_individual_info_via_akshare",
+        "数据源URL":"https://quote.eastmoney.com/",
+        "映射口径":"采集当日公开个股资料行业字段；不可用于倒推此前日期",
+        "版本":VERSION,
+    }])
+
+
+def fetch_individual_industries(master: pd.DataFrame, captured_at: datetime, workers: int = 6):
+    """按动态主池增量友好的个股接口抓行业；不依赖已失效的板块目录接口。"""
+    qa=[];frames=[]
+    def one(row):
+        code=row["股票代码"];name=row["股票名称"]
+        raw,errors=retry(lambda:ak.stock_individual_info_em(symbol=code),f"行业:{code}",2)
+        if raw.empty:
+            return code,pd.DataFrame(),errors
+        try:
+            return code,normalize_individual_industry(raw,code,name,captured_at),errors
+        except Exception as exc:
+            errors.append(f"normalize:{type(exc).__name__}:{exc}")
+            return code,pd.DataFrame(),errors
+    records=master.to_dict(orient="records")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures=[executor.submit(one,row) for row in records]
+        for number,future in enumerate(concurrent.futures.as_completed(futures),1):
+            code,matched,errors=future.result()
+            status="失败" if matched.empty else "警告" if errors else "成功"
+            qa.append({"板块类型":"行业","板块名称":code,"状态":status,
+                       "匹配主池数":len(matched),"错误":" | ".join(errors)})
+            if not matched.empty:
+                frames.append(matched)
+            if number%100==0 or number==len(records):
+                print(f"行业 progress={number}/{len(records)}",flush=True)
+    result=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
+    return result,qa,len(records)
+
 def fetch_type(board_type: str, list_fn, cons_fn, wanted: set[str],
                captured_at: datetime, workers: int = 6, max_boards: int | None = None):
     board_frame,list_errors=retry(list_fn,f"{board_type}:list",4)
@@ -206,16 +266,21 @@ def main():
         return
     master=load_master(Path(args.master_pool))
     wanted=set(master["股票代码"])
-    specs=[
-        ("行业",ak.stock_board_industry_summary_ths,ak.stock_board_industry_cons_ths),
-        ("概念",ak.stock_board_concept_name_em,ak.stock_board_concept_cons_em),
-    ]
     frames=[];qa_rows=[];board_counts={}
-    for board_type,list_fn,cons_fn in specs:
-        frame,qa,count=fetch_type(board_type,list_fn,cons_fn,wanted,captured,args.workers,args.max_boards or None)
-        if not frame.empty:
-            frames.append(frame)
-        qa_rows.extend(qa);board_counts[board_type]=count
+    industry_frame,industry_qa,industry_count=fetch_individual_industries(
+        master,captured,max(1,args.workers)
+    )
+    if not industry_frame.empty:
+        frames.append(industry_frame)
+    qa_rows.extend(industry_qa);board_counts["行业"]=industry_count
+
+    concept_frame,concept_qa,concept_count=fetch_type(
+        "概念",ak.stock_board_concept_name_em,ak.stock_board_concept_cons_em,
+        wanted,captured,args.workers,args.max_boards or None
+    )
+    if not concept_frame.empty:
+        frames.append(concept_frame)
+    qa_rows.extend(concept_qa);board_counts["概念"]=concept_count
     mapping=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
     if not mapping.empty:
         mapping=mapping.merge(master,on="股票代码",how="left")
@@ -228,7 +293,7 @@ def main():
     concept=set(mapping.loc[mapping["板块类型"]=="概念","股票代码"]) if not mapping.empty else set()
     total=len(master)
     failures=int((qa.get("状态",pd.Series(dtype=str))=="失败").sum())
-    board_rows=max(1,len(qa)-2)
+    board_rows=max(1,len(qa)-1)
     failure_rate=failures/board_rows
     any_coverage=len(mapped_any)/total if total else 0
     industry_coverage=len(industry)/total if total else 0
