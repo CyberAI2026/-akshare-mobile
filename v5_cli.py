@@ -66,6 +66,25 @@ def save_json(path: Path, obj: dict):
     path.write_text(json.dumps(obj, ensure_ascii=False, default=str, indent=2), encoding="utf-8")
 
 
+def load_market_opinion_context(trade_date) -> dict:
+    """读取同交易日的正文挖掘衍生观点；不读取或保存第三方原文。"""
+    path = Path("v5_data/opinion/latest.json")
+    if not path.exists():
+        return {"status": "unavailable", "reason": "当日正文观点挖掘尚未完成"}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if str(data.get("trade_date", "")) != str(trade_date):
+            return {"status": "stale", "source_trade_date": data.get("trade_date"), "reason": "观点日期与行情日期不一致"}
+        return {
+            "status": "available",
+            "trade_date": data.get("trade_date"),
+            "article_count": len(data.get("sources", []) or []),
+            "daily_consensus": data.get("daily_consensus", {}),
+        }
+    except Exception as exc:
+        return {"status": "invalid", "reason": f"{type(exc).__name__}: {exc}"}
+
+
 def pushplus_notify(title: str, content: str, template: str = "html", attempts: int = 3) -> bool:
     """通过 PushPlus 推送到普通微信；短暂故障自动重试，研究结果始终保存在GitHub。"""
     token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
@@ -141,6 +160,11 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     lines.append(f"<b>板块数据：</b>{sv.get('status','—')}｜AI启用：{'是' if sv.get('ai_enabled') else '否'}")
     if sa.get("summary"):
         lines.append(f"<b>板块判断：</b>{sa.get('summary')}")
+    oa = obs_meta.get("opinion_assessment", {}) or {}
+    oc = obs_meta.get("opinion_context", {}) or {}
+    lines.append(f"<b>正文观点层：</b>{oc.get('status','—')}｜样本 {oc.get('article_count',0)}篇")
+    if oa.get("summary"):
+        lines.append(f"<b>观点共识：</b>{oa.get('summary')}")
     if obs is not None and not obs.empty:
         lines.append("<br><b>次日观察池：</b>")
         for _, r in obs.sort_values("AI优先级", na_position="last").iterrows():
@@ -454,6 +478,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
     schema={
         "market_assessment": {"risk_level":"低/中/高", "summary":"基于输入市场数据的简洁判断", "next_day_aggressiveness":"偏防守/中性/偏积极"},
         "sector_assessment": {"status":"正式可用/实验性未启用", "summary":"板块环境判断；无正式数据时明确写未启用"},
+        "opinion_assessment": {"status":"可用/未启用", "summary":"公开复盘正文挖掘形成的市场与板块观点共识；明确其不是行情事实"},
         "selected_codes":["最多10个、必须来自输入30只的6位股票代码"],
         "decisions":[{
             "股票代码":"6位代码","股票名称":"输入名称","decision":"SELECT/WAIT/REJECT",
@@ -461,6 +486,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         }],
         "portfolio_note":"只描述观察池层面的风险偏好，不给最终买入仓位"
     }
+    opinion_context = load_market_opinion_context(generated_trade_date)
     payload={
         "generated_trade_date":str(generated_trade_date),
         "target_trade_date":str(target),
@@ -469,6 +495,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_data_status":"正式可用" if sector_tables else "实验性未启用",
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
+        "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
             "selected_codes只能来自candidates，最多10只，可以0只",
             "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
@@ -477,6 +504,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当硬规则",
             "板块/题材/资金只作为增强证据，不能替代个股结构，也不能单独生成候选",
             "sector_data_status为实验性未启用时，不得臆测板块结论，sector_assessment必须明确数据未启用",
+            "market_opinion_text_mining只是公开复盘正文的聚合观点，不是行情事实；可作风险提醒和共识/分歧证据，不得单独生成候选",
             "若证据不足，宁可WAIT/REJECT，不要凑数"
         ],
         "required_output_schema":schema,
@@ -526,6 +554,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "generated_at_cn":now_cn().isoformat(),"source_candidate_count":len(research_pack),"observation_count":len(obs),
         "model":model,"strategy":STRATEGY_VERSION,"source_run":source_summary.get("folder",""),
         "market_assessment":result.get("market_assessment",{}),"sector_assessment":result.get("sector_assessment",{}),
+        "opinion_assessment":result.get("opinion_assessment",{}),"opinion_context":opinion_context,
         "portfolio_note":result.get("portfolio_note",""),
         "rule":"仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单",
     }
