@@ -180,13 +180,16 @@ def fetch_individual_industries(master: pd.DataFrame, captured_at: datetime, wor
     return result,qa,len(records)
 
 def fetch_type(board_type: str, list_fn, cons_fn, wanted: set[str],
-               captured_at: datetime, workers: int = 6, max_boards: int | None = None):
+               captured_at: datetime, workers: int = 6, max_boards: int | None = None,
+               shard_index: int = 0, shard_count: int = 1):
     board_frame,list_errors=retry(list_fn,f"{board_type}:list",4)
     qa=[]
     if board_frame.empty:
         qa.append({"板块类型":board_type,"板块名称":"__LIST__","状态":"失败","匹配主池数":0,"错误":" | ".join(list_errors)})
         return pd.DataFrame(),qa,0
     names=normalize_board_names(board_frame)
+    if shard_count>1:
+        names=[name for name in names if zlib.crc32(name.encode("utf-8"))%shard_count==shard_index]
     if max_boards:
         names=names[:max_boards]
     qa.append({"板块类型":board_type,"板块名称":"__LIST__","状态":"成功","匹配主池数":0,
@@ -256,6 +259,9 @@ def main():
     parser.add_argument("--persist-root",default="")
     parser.add_argument("--workers",type=int,default=3)
     parser.add_argument("--max-boards",type=int,default=0)
+    parser.add_argument("--previous-mapping",default="")
+    parser.add_argument("--shards",type=int,default=1)
+    parser.add_argument("--require-formal",action="store_true")
     parser.add_argument("--skip-non-trading-day",action="store_true")
     args=parser.parse_args()
 
@@ -266,9 +272,22 @@ def main():
         return
     master=load_master(Path(args.master_pool))
     wanted=set(master["股票代码"])
+    shard_count=max(1,args.shards)
+    shard_index=captured.date().toordinal()%shard_count
+    previous=pd.DataFrame()
+    if args.previous_mapping and Path(args.previous_mapping).exists():
+        previous=pd.read_csv(args.previous_mapping,dtype={"股票代码":str})
+        previous["股票代码"]=previous["股票代码"].map(norm_code)
+        previous=previous[previous["股票代码"].isin(wanted)].copy()
+        if "股票名称_板块源" not in previous:
+            previous["股票名称_板块源"]=previous.get("股票名称","")
+        previous=previous.drop(columns=["股票名称"],errors="ignore")
+    industry_target=master[
+        master["股票代码"].map(lambda code:int(code)%shard_count==shard_index)
+    ].copy() if shard_count>1 else master
     frames=[];qa_rows=[];board_counts={}
     industry_frame,industry_qa,industry_count=fetch_individual_industries(
-        master,captured,max(8,args.workers)
+        industry_target,captured,max(2,args.workers)
     )
     if not industry_frame.empty:
         frames.append(industry_frame)
@@ -276,11 +295,22 @@ def main():
 
     concept_frame,concept_qa,concept_count=fetch_type(
         "概念",ak.stock_board_concept_name_em,ak.stock_board_concept_cons_em,
-        wanted,captured,args.workers,args.max_boards or None
+        wanted,captured,args.workers,args.max_boards or None,shard_index,shard_count
     )
     if not concept_frame.empty:
         frames.append(concept_frame)
     qa_rows.extend(concept_qa);board_counts["概念"]=concept_count
+
+    if not previous.empty:
+        industry_ok={str(row["板块名称"]) for row in industry_qa if row["状态"]!="失败"}
+        concept_ok={str(row["板块名称"]) for row in concept_qa
+                    if row["板块名称"]!="__LIST__" and row["状态"]!="失败"}
+        keep=previous[
+            ((previous["板块类型"]=="行业") & ~previous["股票代码"].isin(industry_ok)) |
+            ((previous["板块类型"]=="概念") & ~previous["板块名称"].isin(concept_ok))
+        ].copy()
+        if not keep.empty:
+            frames.append(keep)
     mapping=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
     if not mapping.empty:
         mapping=mapping.merge(master,on="股票代码",how="left")
@@ -309,6 +339,8 @@ def main():
         "board_counts":board_counts,"failed_board_requests":failures,"board_failure_rate":round(failure_rate,6),
         "formal_ready":formal_ready,
         "ai_enabled":False,"http_timeout_seconds":HTTP_TIMEOUT_SECONDS,
+        "shard_index":shard_index,"shard_count":shard_count,
+        "previous_cache_used":bool(not previous.empty),
         "point_in_time_warning":"本快照只代表采集当日公开分类，不得倒推此前日期。",
     }
     output=Path(args.output_root)
