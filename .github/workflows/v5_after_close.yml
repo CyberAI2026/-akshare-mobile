@@ -30,6 +30,9 @@ jobs:
       GITHUB_BRANCH: ${{ github.ref_name }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: gpt-5.6-terra
+      OPINION_OPENAI_MODEL: gpt-5.6-terra
+      OPINION_ARTICLE_LIMIT: "20"
+      OPINION_BATCH_SIZE: "4"
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
     steps:
       - name: Checkout
@@ -45,6 +48,12 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Build same-day full-text market opinion context
+        run: python research/market_opinion_mining.py
+
+      - name: Refresh checkout after opinion commit
+        run: git pull --ff-only
 
       - name: Run V5 after-close pipeline
         shell: bash
