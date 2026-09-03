@@ -2,6 +2,8 @@ name: Research A-Share Code-Name Master
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "15 12 * * 1-5"
   push:
     branches: [main]
     paths:
@@ -9,7 +11,7 @@ on:
       - ".github/workflows/research_code_name_master.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   fetch-master:
@@ -22,6 +24,15 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements.txt
       - run: python research/code_name_master_only.py
+      - name: Persist latest code-name reference
+        run: |
+          mkdir -p v5_data/reference
+          cp research_code_name_master/a_share_code_name.csv v5_data/reference/a_share_code_name_master.csv
+          git config user.name "V5 Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add v5_data/reference/a_share_code_name_master.csv
+          git diff --cached --quiet || git commit -m "Refresh A-share code-name reference"
+          git push
       - if: always()
         uses: actions/upload-artifact@v4
         with:
