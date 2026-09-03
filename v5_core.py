@@ -998,6 +998,10 @@ def merge_master_pool(master: pd.DataFrame, daily: pd.DataFrame, asof=None) -> t
         m = pd.DataFrame(columns=["股票代码", "股票名称", "首次进入日期", "最近提交日期", "提交次数", "当前状态", "淘汰日期", "淘汰原因"])
     for c in ["股票代码", "股票名称", "首次进入日期", "最近提交日期", "提交次数", "当前状态", "淘汰日期", "淘汰原因"]:
         if c not in m: m[c] = ""
+    # pandas 3 对把字符串写入全空且被推断为 float64 的列改为硬错误。
+    # 主池状态/日期/说明列在任何赋值前统一为字符串对象，兼容历史 CSV 空列。
+    for c in ["股票代码", "股票名称", "首次进入日期", "最近提交日期", "当前状态", "淘汰日期", "淘汰原因"]:
+        m[c] = m[c].fillna("").astype("object")
     m["股票代码"] = m["股票代码"].map(_norm_code)
     m = m.drop_duplicates("股票代码", keep="last").set_index("股票代码", drop=False)
     changes=[]
