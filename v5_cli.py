@@ -317,8 +317,27 @@ def update_market_history(snapshot: pd.DataFrame, phase: str = "盘后", keep_da
     return z,pd.DataFrame([ctx])
 
 
+def _market_sentiment_components(breadth: pd.DataFrame) -> pd.DataFrame:
+    rows=[]
+    if breadth is None or breadth.empty:
+        return pd.DataFrame(columns=["日期","成分类型","股票代码"])
+    r=breadth.iloc[0]
+    mapping={
+        "涨停":"涨停股池代码","跌停":"跌停股池代码","炸板":"炸板股池代码",
+        "昨日涨停":"昨日涨停股池代码","强势股":"强势股池代码",
+    }
+    for kind,col in mapping.items():
+        for code in str(r.get(col,"") or "").split("|"):
+            code=code.strip()
+            if code:
+                rows.append({"日期":r.get("日期"),"数据时间":r.get("数据时间"),"成分类型":kind,"股票代码":code,
+                             "数据源":"eastmoney_public_pool","阶段":"第一阶段影子记录"})
+    return pd.DataFrame(rows)
+
+
 def _market_review_sheets(indices: pd.DataFrame, breadth: pd.DataFrame, history: pd.DataFrame, context: pd.DataFrame, qa: pd.DataFrame) -> dict:
-    return {"五大指数180日":indices,"市场宽度当日":breadth,"市场宽度历史180":history,"市场滚动上下文":context,"质量校验":qa}
+    return {"五大指数180日":indices,"市场宽度当日":breadth,"市场情绪成分影子层":_market_sentiment_components(breadth),
+            "市场宽度历史180":history,"市场滚动上下文":context,"质量校验":qa}
 
 
 def _json_clean(obj):
@@ -384,7 +403,13 @@ def _market_payload(indices: pd.DataFrame, breadth: pd.DataFrame, history: pd.Da
                     return float(c.iloc[-1]/c.iloc[-n-1]-1)
                 return None
             idx.append({"指数名称":name,"最新收盘":last,"ret5":r(5),"ret20":r(20),"ret60":r(60),"最新日期":str(g["日期"].iloc[-1])[:10]})
-    br=breadth.to_dict("records") if breadth is not None and not breadth.empty else []
+    br=[]
+    if breadth is not None and not breadth.empty:
+        # 第一阶段新增的市场情绪字段先影子运行，不送入OpenAI，待连续验收后再正式启用。
+        approved=[x for x in ["日期","数据时间","数据源","快照数据源","股票数","上涨家数","下跌家数","平盘家数",
+                              "上涨比例","下跌比例","净上涨家数","涨停家数","跌停家数","涨5%以上家数",
+                              "跌5%以上家数","全市场成交额","市场宽度是否降级","涨跌停是否降级"] if x in breadth.columns]
+        br=breadth[approved].to_dict("records")
     hist=[]
     if history is not None and not history.empty:
         cols=[c for c in ["日期","上涨家数","下跌家数","平盘家数","上涨比例","下跌比例","净上涨家数","涨停家数","跌停家数","全市场成交额","记录阶段"] if c in history.columns]
