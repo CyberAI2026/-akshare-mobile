@@ -155,6 +155,17 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     ]
     if ma.get("summary"):
         lines.append(f"<b>市场判断：</b>{ma.get('summary')}")
+    feedback_path = Path("v5_data/feedback/latest_daily.json")
+    if feedback_path.exists():
+        try:
+            fb = json.loads(feedback_path.read_text(encoding="utf-8"))
+            if str(fb.get("asof", "")) == str(summary.get("generated_trade_date", summary.get("completed_cn", "")))[0:10]:
+                lines.append(f"<b>推荐跟踪：</b>累计{fb.get('total_recommendations', 0)}只｜D+10完成{fb.get('completed_d10', 0)}只")
+                for horizon, cohort in (fb.get("due_cohorts", {}) or {}).items():
+                    for item in cohort:
+                        lines.append(f"{horizon}到期：{item.get('股票代码','')} {item.get('股票名称','')}｜{item.get(horizon+'涨跌幅%','—')}%")
+        except Exception as exc:
+            print("feedback summary warning:", exc)
     sa = obs_meta.get("sector_assessment", {}) or {}
     sv = summary.get("sector_validation", {}) or {}
     lines.append(f"<b>板块数据：</b>{sv.get('status','—')}｜AI启用：{'是' if sv.get('ai_enabled') else '否'}")
@@ -463,6 +474,37 @@ def _sector_payload(sector_tables: dict[str,pd.DataFrame] | None) -> dict:
     return _json_clean(out)
 
 
+def _stock_sector_attribution_payload(candidates: pd.DataFrame) -> dict:
+    """逐股加载一股多概念与主导板块候选；保留快照日期和时点限制供AI审计。"""
+    path = Path("v5_data/stock_sector_attribution/latest.csv")
+    if not path.exists() or candidates is None or candidates.empty:
+        return {"status": "unavailable", "stocks": []}
+    try:
+        frame = pd.read_csv(path, dtype={"股票代码": str})
+        frame["股票代码"] = frame["股票代码"].astype(str).str.zfill(6)
+        allowed = set(candidates["股票代码"].astype(str).str.zfill(6))
+        frame = frame[frame["股票代码"].isin(allowed)]
+        rows = []
+        for code, group in frame.groupby("股票代码", sort=False):
+            ranked = group.sort_values("归因得分", ascending=False)
+            primary = ranked.iloc[0]
+            concepts = ranked.loc[ranked["板块类型"].astype(str) == "概念", "板块名称"].astype(str).tolist()
+            rows.append({
+                "股票代码": code, "股票名称": primary.get("股票名称", ""),
+                "主导板块候选": primary.get("板块名称", ""),
+                "全部概念": list(dict.fromkeys(concepts)),
+                "归因得分": primary.get("归因得分"), "归因证据": primary.get("归因证据", ""),
+                "快照日期": primary.get("快照日期", ""), "强势观察日期": primary.get("强势观察日期", ""),
+                "时点一致": primary.get("时点一致", False), "时点限制": primary.get("时点限制", ""),
+            })
+        return {
+            "status": "available" if rows else "unavailable", "stocks": _json_clean(rows),
+            "method": "板块成分×同日行情/资金×正文观点；是关联归因，不是确定因果",
+        }
+    except Exception as exc:
+        return {"status": "invalid", "error": f"{type(exc).__name__}: {exc}", "stocks": []}
+
+
 def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict, sector_tables: dict[str,pd.DataFrame] | None = None) -> tuple[pd.DataFrame, dict, dict]:
     """30 -> 0~10。严格验证代码集合、数量和日期，失败时绝不留下旧观察池冒充新结果。"""
     LATEST.mkdir(parents=True, exist_ok=True)
@@ -495,6 +537,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_data_status":"正式可用" if sector_tables else "实验性未启用",
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
+        "candidate_stock_sector_attribution":_stock_sector_attribution_payload(research_pack),
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
             "selected_codes只能来自candidates，最多10只，可以0只",
@@ -797,6 +840,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_validation":_json_clean(sector_validation or {}),
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
+        "candidate_stock_sector_attribution":_stock_sector_attribution_payload(pool),
         "hard_constraints":[
             "selected_codes最多5只且只能来自观察池，可以0只，不得凑数",
             "decisions必须覆盖全部观察池；selected_codes对应decision必须为TRADE",
