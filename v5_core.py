@@ -79,6 +79,32 @@ def _resolve_codes_by_name(names: pd.Series) -> pd.DataFrame:
     ]
     errors = []
     tables = []
+
+    # 每日手工上传优先使用仓库内的代码—名称快照，避免交易所/行情接口
+    # 临时不可达时，只有名称的通达信/同花顺导出文件无法提交。
+    local_candidates = [
+        Path("v5_data/reference/a_share_code_name_master.csv"),
+        Path(__file__).resolve().parent / "v5_data/reference/a_share_code_name_master.csv",
+    ]
+    for local_path in local_candidates:
+        if not local_path.exists():
+            continue
+        try:
+            raw = pd.read_csv(local_path, dtype=str, encoding="utf-8-sig")
+            code_col = _find_col(raw.columns, ["股票代码", "证券代码", "代码", "code", "symbol"])
+            name_col = _find_col(raw.columns, ["股票名称", "证券名称", "证券简称", "名称", "name"])
+            if code_col is None or name_col is None:
+                raise RuntimeError(f"本地代码表字段异常: {list(raw.columns)}")
+            x = pd.DataFrame({
+                "股票代码": raw[code_col].map(_norm_code),
+                "股票名称": raw[name_col].astype(str).str.strip(),
+            })
+            x = x[x["股票代码"].str.fullmatch(r"\d{6}", na=False) & x["股票名称"].ne("")]
+            if not x.empty:
+                tables.append(x)
+                break
+        except Exception as e:
+            errors.append(f"local_code_name:{type(e).__name__}:{e}")
     for source, fetcher in sources:
         try:
             raw = fetcher()
@@ -726,7 +752,7 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
         )
     elif "尾盘" in kind or "14:45" in kind:
         task=(
-            "当前任务是次日14:45尾盘确认，最多0-2只；受A股T+1约束。"
+            "当前任务是次日14:45尾盘确认，最多0-5只；受A股T+1约束。"
             "结构止损距离不是保证最大亏损，隔夜跳空可能造成更大损失。"
         )
     else:
@@ -735,10 +761,21 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
         "只输出一个合法JSON对象，不要Markdown代码围栏，不要JSON前后解释文字。严格遵守任务数据中给定的输出格式。"
     )
     prompt=common+task+output_rule+"\n任务类型:"+kind+"\n数据(JSON):\n"+json.dumps(payload,ensure_ascii=False,default=str,allow_nan=False)
+    requested_at = now_cn().isoformat()
     resp=client.responses.create(model=model,input=prompt,max_output_tokens=12000)
     text=(resp.output_text or "").strip()
     if not text:
         raise RuntimeError("OpenAI 返回空文本。")
+    usage = getattr(resp, "usage", None)
+    input_tokens = getattr(usage, "input_tokens", None) if usage else None
+    output_tokens = getattr(usage, "output_tokens", None) if usage else None
+    total_tokens = getattr(usage, "total_tokens", None) if usage else None
+    print(
+        "OPENAI_API_CALL_OK "
+        f"requested_at={requested_at} response_id={getattr(resp, 'id', None)} "
+        f"model={getattr(resp, 'model', model)} "
+        f"input_tokens={input_tokens} output_tokens={output_tokens} total_tokens={total_tokens}"
+    )
     return text
 
 
