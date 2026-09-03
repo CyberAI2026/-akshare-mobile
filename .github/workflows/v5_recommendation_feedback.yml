@@ -2,6 +2,13 @@ name: V5 Recommendation Feedback and Sector Attribution
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "research/recommendation_feedback.py"
+      - "research/stock_sector_attribution.py"
+      - "tests/test_recommendation_feedback.py"
+      - ".github/workflows/v5_recommendation_feedback.yml"
   schedule:
     # 15:35 and 19:40 Beijing time on weekdays.
     - cron: "35 7 * * 1-5"
