@@ -1,32 +1,75 @@
-name: Research Market and Sector Context
+name: V5 Daily Sector Membership Library
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches: [main]
     paths:
       - "research/market_sector_context_fetch.py"
+      - "tests/test_sector_membership_library.py"
       - ".github/workflows/research_market_sector_context.yml"
+  schedule:
+    # Weekdays 11:15 UTC = 19:15 Beijing time; the script skips non-trading days.
+    - cron: "15 11 * * 1-5"
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  fetch-public-context:
+  sector-membership-library:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      TZ: Asia/Shanghai
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
       - run: pip install -r requirements.txt
-      - name: Fetch public index and sector context
-        run: python research/market_sector_context_fetch.py
-      - name: Upload context artifact
+      - name: Run deterministic mapping tests
+        run: |
+          python -m py_compile research/market_sector_context_fetch.py
+          python -m unittest tests/test_sector_membership_library.py
+      - name: Build daily master-pool sector mapping
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python research/market_sector_context_fetch.py \
+              --master-pool v5_data/master/current_master_pool.csv \
+              --output-root sector_membership_run \
+              --shards 20
+          else
+            python research/market_sector_context_fetch.py \
+              --master-pool v5_data/master/current_master_pool.csv \
+              --output-root sector_membership_run \
+              --persist-root v5_data/context/sector_membership \
+              --previous-mapping v5_data/context/sector_membership/working.csv.gz \
+              --shards 5 \
+              --skip-non-trading-day
+          fi
+      - name: Commit daily online snapshot
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "V5 Sector Library"
+          git config user.email "actions@users.noreply.github.com"
+          git add v5_data/context/sector_membership
+          if git diff --cached --quiet; then
+            echo "No sector membership changes to commit"
+          else
+            git commit -m "V5 daily sector membership snapshot $(date +%F)"
+            git push
+          fi
+      - name: Upload audit artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: research-market-sector-context-${{ github.run_id }}
-          path: research_market_sector_context/
-          retention-days: 7
+          name: V5-sector-membership-${{ github.run_id }}
+          path: sector_membership_run/
+          retention-days: 30
