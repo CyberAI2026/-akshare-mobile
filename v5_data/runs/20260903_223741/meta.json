@@ -1,5 +1,5 @@
 {
-  "status": "running",
+  "status": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2",
   "started_cn": "2026-09-03T22:37:41.453652+08:00",
@@ -10,5 +10,52 @@
     "seeded": 0,
     "scanned": 772,
     "available": 535
-  }
+  },
+  "completed_cn": "2026-09-03T22:55:22.062789+08:00",
+  "elapsed_minutes": 17.68,
+  "master_count": 559,
+  "eliminated_count": 0,
+  "daily_new_count": 27,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 0,
+  "cooling_count": 0,
+  "master_pool_capacity_note": "动态证据池；不按固定500只硬砍，按长期未提交且趋势同步转弱可逆淘汰",
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 553,
+      "总数": 559
+    },
+    "120日": {
+      "命中或增量": 163,
+      "总数": 163
+    },
+    "250日": {
+      "命中或增量": 40,
+      "总数": 40
+    }
+  },
+  "stage1": 163,
+  "stage2_research_pool": 40,
+  "python_final": "30-40只软容量研究包（不机械生成前10）",
+  "observation_pool_count": 4,
+  "target_trade_date": "2026-09-04",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：当日全市场上涨比例33.22%、下跌比例64.28%、净上涨家数-1725；深成指、创业板指、科创50近5日和近20日均为负。研究判断：市场风险偏好偏弱，次日仅适合保留结构相对成熟且需尾盘确认的少量观察对象，不宜扩张观察池。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "sector_validation": {
+    "status": "实验性有警告",
+    "table_count": 6,
+    "failure_count": 4,
+    "warning_count": 0,
+    "ai_enabled": false
+  },
+  "stock_qa_25_success": 553,
+  "stock_qa_120_success": 163,
+  "stock_qa_250_success": 40,
+  "isolated_index_count": 0,
+  "folder": "v5_data/runs/20260903_223741",
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~2确认"
 }
