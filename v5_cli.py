@@ -279,7 +279,7 @@ def _mark_master_stage(registry: pd.DataFrame, p1: pd.DataFrame, p2: pd.DataFram
     p1c = set(p1["股票代码"].astype(str)) if not p1.empty else set()
     p2c = set(p2["股票代码"].astype(str)) if not p2.empty else set()
     x.loc[active & x["股票代码"].astype(str).isin(p1c), "当前状态"] = "一级活跃"
-    x.loc[active & x["股票代码"].astype(str).isin(p2c), "当前状态"] = "进入30-40只研究池"
+    x.loc[active & x["股票代码"].astype(str).isin(p2c), "当前状态"] = "进入30-50只研究池"
     return x
 
 
@@ -584,15 +584,15 @@ def run_after_close(batch_path: str | None):
     # 二级：150 -> 30。
     d120, q120 = fetch_pool_history_incremental(p1, 120, CACHE, checkpoint_factory(base / "120d"))
     m120 = build_metrics(d120)
-    s2, a2 = stage2_rank(m120, 30, 40, return_audit=True)
+    s2, a2 = stage2_rank(m120, 30, 50, return_audit=True)
     p2 = s2[["股票代码", "股票名称"]].copy()
-    save_df(base / "120d" / "research_pool_30_40.csv", p2)
+    save_df(base / "120d" / "research_pool_30_50.csv", p2)
     save_df(base / "120d" / "research_pool_30.csv", p2)  # 兼容旧前端/历史工具
     save_df(base / "120d" / "stage_audit.csv", a2)
-    save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级30-40只": s2}))
+    save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级30-50只": s2}))
     git_commit(f"V5 after-close 120d {stamp}")
 
-    # 三级：只给这30-40只补250日生命周期档案；不再由Python截前10。
+    # 三级：只给这30-50只补250日生命周期档案；不再由Python截前10。
     d250, q250 = fetch_pool_history_incremental(p2, 250, CACHE, checkpoint_factory(base / "250d"))
     m250 = build_metrics(d250)
     if not s2.empty and "阶段2分" in s2.columns:
@@ -602,7 +602,7 @@ def run_after_close(batch_path: str | None):
     research_pack = p2.merge(lifecycle_audit, on=["股票代码", "股票名称"], how="left")
     save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
     save_df(base / "250d" / "lifecycle_audit.csv", lifecycle_audit)
-    save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI研究输入30-40只": research_pack}))
+    save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI研究输入30-50只": research_pack}))
 
     # 主池维护：仅自动淘汰“较久未再次提交 + 趋势同步转弱”；淘汰可被以后再次提交重新激活。
     cache_metrics = _cache_metrics_for_master(registry)
@@ -637,7 +637,7 @@ def run_after_close(batch_path: str | None):
     save_bytes(base / "sector_fund_flow.xlsx", to_excel_bytes(sector_sheets))
 
     LATEST.mkdir(parents=True, exist_ok=True)
-    save_df(LATEST / "research_pool_30_40.csv", research_pack)
+    save_df(LATEST / "research_pool_30_50.csv", research_pack)
     save_df(LATEST / "research_pool_30.csv", research_pack)  # 兼容前端
     save_df(LATEST / "current_master_pool.csv", current)
     save_bytes(LATEST / "market_review.xlsx", to_excel_bytes(market_sheets))
@@ -698,7 +698,7 @@ def run_after_close(batch_path: str | None):
         "master_pool_capacity_note": "动态证据池；不按固定500只硬砍，按长期未提交且趋势同步转弱可逆淘汰",
         "cache_summary": cache_summary,
         "stage1": len(p1), "stage2_research_pool": len(p2),
-        "python_final": "30-40只软容量研究包（不机械生成前10）",
+        "python_final": "30-50只软容量研究包（不机械生成前10）",
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment",{}),
         "sector_validation": sector_validation,
@@ -707,7 +707,7 @@ def run_after_close(batch_path: str | None):
         "stock_qa_250_success": int((q250.get("状态") == "成功").sum()) if not q250.empty else 0,
         "isolated_index_count": len(registry_indices), "cache_seed": seed_info,
         "folder": str(base),
-        "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~2确认",
+        "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
     }
     save_json(base / "summary.json", summary)
     save_json(LATEST / "latest_after_close.json", summary)
@@ -746,7 +746,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
                     market_history: pd.DataFrame, market_context: pd.DataFrame,
                     obs_meta: dict, base: Path, sector_tables: dict[str,pd.DataFrame] | None = None,
                     sector_validation: dict | None = None) -> tuple[pd.DataFrame, dict]:
-    """14:45：观察池 -> 0~2，输出买入区间/仓位/结构止损；严格验证且允许0只。"""
+    """14:45：观察池 -> 0~5，输出买入区间/仓位/结构止损；严格验证且允许0只。"""
     allowed={str(x).zfill(6) for x in pool["股票代码"].astype(str)}
     if not allowed: raise RuntimeError("尾盘观察池为空")
     merged=pool.copy(); merged["股票代码"]=merged["股票代码"].astype(str).str.zfill(6)
@@ -758,7 +758,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
     schema={
         "market_assessment":{"risk_level":"低/中/高","change_vs_previous_close":"改善/接近/恶化","summary":"实时市场判断","overall_new_position_cap_pct":0},
         "sector_assessment":{"status":"正式可用/实验性未启用","summary":"14:45板块环境判断；无正式数据时明确写未启用"},
-        "selected_codes":["最多2个，必须来自观察池；可以为空"],
+        "selected_codes":["最多5个，必须来自观察池；可以为空"],
         "decisions":[{"股票代码":"6位代码","decision":"TRADE/WAIT/REJECT","buy_zone_low":0,"buy_zone_high":0,"position_pct_total_capital":0,"structure_stop_price":0,"evidence":"关键证据","risk":"主要风险"}],
         "portfolio_note":"组合与T+1风险说明"
     }
@@ -769,7 +769,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
         "sector_validation":_json_clean(sector_validation or {}),
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
         "hard_constraints":[
-            "selected_codes最多2只且只能来自观察池，可以0只，不得凑数",
+            "selected_codes最多5只且只能来自观察池，可以0只，不得凑数",
             "decisions必须覆盖全部观察池；selected_codes对应decision必须为TRADE",
             "market_assessment.overall_new_position_cap_pct范围0-100；所有TRADE仓位合计不得超过该上限",
             "买入区间必须基于14:40-14:45输入价格与结构证据；不得使用输入之外行情",
@@ -779,10 +779,10 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             "板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论"
         ],"required_output_schema":schema
     }
-    raw=openai_analyze("14:45尾盘0-2最终确认",payload)
+    raw=openai_analyze("14:45尾盘0-5最终确认",payload)
     result=_parse_json_object(raw)
     selected=[str(x).zfill(6) for x in result.get("selected_codes",[]) if str(x).strip()]
-    if len(selected)!=len(set(selected)) or len(selected)>2: raise ValueError("尾盘selected_codes重复或超过2只")
+    if len(selected)!=len(set(selected)) or len(selected)>5: raise ValueError("尾盘selected_codes重复或超过5只")
     bad=[x for x in selected if x not in allowed]
     if bad: raise ValueError(f"尾盘选择了观察池之外代码: {bad}")
     decisions=result.get("decisions",[])
@@ -823,7 +823,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
 
 
 def run_tail():
-    """安全的14:40/14:45尾盘确认：严格日期锁 + 实时/5分钟 + 市场历史上下文 + OpenAI 0~2。"""
+    """安全的14:40/14:45尾盘确认：严格日期锁 + 实时/5分钟 + 市场历史上下文 + OpenAI 0~5。"""
     now0 = now_cn()
     today = now0.date()
     if not is_trade_day(today):
@@ -897,7 +897,7 @@ def run_tail():
         git_commit(f"V5.3 tail AI completed {today}")
         notify_tail_success(final_decisions, final_meta)
     except Exception as e:
-        err={"status":"tail_ai_failed","trade_date":str(today),"time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),"rule":"失败时不生成伪0-2结果"}
+        err={"status":"tail_ai_failed","trade_date":str(today),"time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),"rule":"失败时不生成伪0-5结果"}
         save_json(base/"tail_ai_error.json",err); save_json(LATEST/"last_tail_ai_error.json",err)
         git_commit(f"V5.3 tail AI failed {today}")
         notify_failure("14:45尾盘OpenAI确认", e)
