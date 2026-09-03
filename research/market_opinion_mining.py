@@ -264,7 +264,18 @@ def commit() -> None:
     changed = subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0
     if changed:
         subprocess.run(["git", "commit", "-m", f"Update 25-day market opinion database {now_cn():%Y-%m-%d}"], check=True)
-        subprocess.run(["git", "push"], check=True)
+        # 研究期间主分支可能有并行维护提交；先变基再推送，避免非快进导致数据产物只留在artifact。
+        for attempt in range(1, 4):
+            pull = subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
+            if pull.returncode != 0:
+                subprocess.run(["git", "rebase", "--abort"], check=False)
+                raise RuntimeError("观点数据库保存前rebase失败")
+            push = subprocess.run(["git", "push", "origin", "HEAD:main"], check=False)
+            if push.returncode == 0:
+                return
+            print(f"OPINION_GIT_PUSH_RETRY attempt={attempt}")
+            time.sleep(attempt * 2)
+        raise RuntimeError("观点数据库连续3次推送失败")
 
 
 def main() -> None:
