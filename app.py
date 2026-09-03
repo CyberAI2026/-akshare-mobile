@@ -139,6 +139,12 @@ with t2:
             c1.metric("30–40只研究包", summary.get("stage2_research_pool", "-"))
             d.metric("AI观察池", summary.get("observation_pool_count", "-"))
             st.caption(f"完成时间：{summary.get('completed_cn','-')}｜{summary.get('engine','-')}｜耗时 {summary.get('elapsed_minutes','-')} 分钟｜Python采用30–40只软容量，OpenAI再形成观察池")
+            st.caption(
+                f"本次主池：新增 {summary.get('daily_new_count',0)}｜重新激活 {summary.get('daily_reactivated_count',0)}｜"
+                f"新淘汰 {summary.get('daily_eliminated_count',0)}｜冷却 {summary.get('cooling_count',0)}"
+            )
+            sv=summary.get("sector_validation",{}) or {}
+            st.caption(f"板块数据：{sv.get('status','-')}｜送入AI：{'是' if sv.get('ai_enabled') else '否'}｜缓存：{summary.get('cache_summary',{})}")
         else:
             st.info("尚未生成V5盘后结果。")
         if not master.empty:
