@@ -7,7 +7,7 @@ import re
 import subprocess
 import time
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urljoin
 from zoneinfo import ZoneInfo
@@ -33,6 +33,14 @@ def now_cn() -> datetime:
     return datetime.now(TZ)
 
 
+def target_trade_date():
+    current = now_cn()
+    day = current.date() - timedelta(days=1) if current.hour < 6 else current.date()
+    while day.weekday() >= 5:
+        day -= timedelta(days=1)
+    return day
+
+
 def fetch_html(url: str) -> str:
     r = requests.get(
         url,
@@ -53,7 +61,12 @@ def clean_text(text: str) -> str:
 def discover_articles() -> list[dict]:
     seen: set[str] = set()
     rows: list[dict] = []
-    today = now_cn().strftime("%m-%d")
+    target = target_trade_date()
+    date_tokens = {
+        target.strftime("%m-%d"), target.strftime("%m.%d"),
+        f"{target.month}-{target.day}", f"{target.month}.{target.day}",
+        f"{target.month}月{target.day}日",
+    }
     for list_url in LIST_URLS:
         html = fetch_html(list_url)
         soup = BeautifulSoup(html, "html.parser")
@@ -62,11 +75,19 @@ def discover_articles() -> list[dict]:
             title = clean_text(a.get_text(" ", strip=True))
             if not href or href in seen or len(title) < 6:
                 continue
-            context = clean_text(a.parent.get_text(" ", strip=True) if a.parent else title)
-            # 当日复盘优先；列表未展示日期时保留，由文章页二次判断。
+            node = a
+            contexts = [title]
+            for _ in range(4):
+                node = node.parent if node else None
+                if node:
+                    contexts.append(clean_text(node.get_text(" ", strip=True)))
+            context = min((x for x in contexts if any(t in x for t in date_tokens)), key=len, default=contexts[-1])
+            # 必须能在标题或邻近列表项中确认目标交易日，避免把旧文章混入当日共识。
+            if not any(t in context or t in title for t in date_tokens):
+                continue
             score = 0
             score += 4 if any(k in title for k in ["复盘", "收盘", "市场", "情绪", "板块", "明日"]) else 0
-            score += 2 if today in context else 0
+            score += 2
             reads = re.search(r"(\d+)\s*阅读", context)
             read_count = int(reads.group(1)) if reads else 0
             score += min(5, int(read_count >= 100) + int(read_count >= 500) + int(read_count >= 1000) + int(read_count >= 3000))
@@ -194,7 +215,7 @@ def aggregate(client: OpenAI, model: str, mined: list[dict], source_rows: list[d
 
 
 def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None:
-    day = now_cn().strftime("%Y-%m-%d")
+    day = target_trade_date().isoformat()
     daily = ROOT / "daily"
     daily.mkdir(parents=True, exist_ok=True)
     # 只保存元数据、哈希和本系统生成的结构化观点；不保存正文。
@@ -263,7 +284,7 @@ def commit() -> None:
     subprocess.run(["git", "add", "v5_data/opinion"], check=True)
     changed = subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0
     if changed:
-        subprocess.run(["git", "commit", "-m", f"Update 25-day market opinion database {now_cn():%Y-%m-%d}"], check=True)
+        subprocess.run(["git", "commit", "-m", f"Update 25-day market opinion database {target_trade_date().isoformat()}"], check=True)
         # 研究期间主分支可能有并行维护提交；先变基再推送，避免非快进导致数据产物只留在artifact。
         for attempt in range(1, 4):
             pull = subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
