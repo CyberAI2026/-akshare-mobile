@@ -12,10 +12,24 @@ from zoneinfo import ZoneInfo
 
 import akshare as ak
 import pandas as pd
+import requests
 
 TZ = ZoneInfo("Asia/Shanghai")
 VERSION = "sector-membership-shadow-v0.2"
 SOURCE = "eastmoney_board_membership_via_akshare"
+HTTP_TIMEOUT_SECONDS = 15
+
+
+def install_default_http_timeout():
+    """AKShare上游部分接口未显式设置超时；为本任务统一加有限网络时限。"""
+    original=requests.sessions.Session.request
+    if getattr(original,"_v5_sector_timeout_wrapped",False):
+        return
+    def bounded(self,method,url,**kwargs):
+        kwargs.setdefault("timeout",HTTP_TIMEOUT_SECONDS)
+        return original(self,method,url,**kwargs)
+    bounded._v5_sector_timeout_wrapped=True
+    requests.sessions.Session.request=bounded
 
 
 def now_cn() -> datetime:
@@ -119,7 +133,7 @@ def fetch_type(board_type: str, list_fn, cons_fn, wanted: set[str],
                "板块总数":len(names),"错误":" | ".join(list_errors)})
     frames=[]
     def one(name):
-        raw,errors=retry(lambda:cons_fn(symbol=name),f"{board_type}:{name}",3)
+        raw,errors=retry(lambda:cons_fn(symbol=name),f"{board_type}:{name}",2)
         if raw.empty:
             return name,pd.DataFrame(),errors
         try:
@@ -185,6 +199,7 @@ def main():
     parser.add_argument("--skip-non-trading-day",action="store_true")
     args=parser.parse_args()
 
+    install_default_http_timeout()
     captured=now_cn()
     if args.skip_non_trading_day and not is_trade_day(captured.date()):
         print("Non-trading day; safe skip.")
@@ -228,7 +243,7 @@ def main():
         "industry_coverage":round(industry_coverage,6),"concept_coverage":round(concept_coverage,6),
         "board_counts":board_counts,"failed_board_requests":failures,"board_failure_rate":round(failure_rate,6),
         "formal_ready":formal_ready,
-        "ai_enabled":False,
+        "ai_enabled":False,"http_timeout_seconds":HTTP_TIMEOUT_SECONDS,
         "point_in_time_warning":"本快照只代表采集当日公开分类，不得倒推此前日期。",
     }
     output=Path(args.output_root)
