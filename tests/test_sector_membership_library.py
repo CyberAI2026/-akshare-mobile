@@ -27,6 +27,14 @@ class SectorMembershipTests(unittest.TestCase):
         raw=pd.DataFrame({"板块名称":["人工智能"," 机器人 ","人工智能",None]})
         self.assertEqual(mod.normalize_board_names(raw),["人工智能","机器人"])
 
+    def test_normalize_individual_industry(self):
+        raw=pd.DataFrame({"item":["总市值","行业"],"value":["100亿","软件开发"]})
+        captured=datetime(2026,9,3,19,15,tzinfo=ZoneInfo("Asia/Shanghai"))
+        out=mod.normalize_individual_industry(raw,"000001","测试股",captured)
+        self.assertEqual(out.iloc[0]["板块类型"],"行业")
+        self.assertEqual(out.iloc[0]["板块名称"],"软件开发")
+        self.assertEqual(out.iloc[0]["股票代码"],"000001")
+
     def test_formal_latest_only_updates_when_ready(self):
         self.assertEqual(mod.norm_code("SZ000001"),"000001")
         self.assertEqual(mod.norm_code(600000.0),"600000")
