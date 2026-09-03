@@ -156,7 +156,7 @@ def fetch_individual_industries(master: pd.DataFrame, captured_at: datetime, wor
     qa=[];frames=[]
     def one(row):
         code=row["股票代码"];name=row["股票名称"]
-        raw,errors=retry(lambda:ak.stock_individual_info_em(symbol=code),f"行业:{code}",2)
+        raw,errors=retry(lambda:ak.stock_individual_info_em(symbol=code,timeout=HTTP_TIMEOUT_SECONDS),f"行业:{code}",2)
         if raw.empty:
             return code,pd.DataFrame(),errors
         try:
