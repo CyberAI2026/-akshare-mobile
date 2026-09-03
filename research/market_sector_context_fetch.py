@@ -15,8 +15,8 @@ import pandas as pd
 import requests
 
 TZ = ZoneInfo("Asia/Shanghai")
-VERSION = "sector-membership-shadow-v0.2"
-SOURCE = "eastmoney_board_membership_via_akshare"
+VERSION = "sector-membership-shadow-v0.3"
+SOURCE = "public_board_membership_via_akshare"
 HTTP_TIMEOUT_SECONDS = 15
 
 
@@ -88,7 +88,7 @@ def load_master(path: Path) -> pd.DataFrame:
 
 
 def normalize_board_names(frame: pd.DataFrame) -> list[str]:
-    col=find_col(frame.columns,["板块名称","概念名称","行业名称","名称"])
+    col=find_col(frame.columns,["板块名称","概念名称","行业名称","板块","名称"])
     if col is None:
         raise ValueError(f"board name column missing: {list(frame.columns)}")
     return frame[col].dropna().astype(str).str.strip().loc[lambda x:x.ne("")].drop_duplicates().tolist()
@@ -133,7 +133,7 @@ def fetch_type(board_type: str, list_fn, cons_fn, wanted: set[str],
                "板块总数":len(names),"错误":" | ".join(list_errors)})
     frames=[]
     def one(name):
-        raw,errors=retry(lambda:cons_fn(symbol=name),f"{board_type}:{name}",2)
+        raw,errors=retry(lambda:cons_fn(symbol=name),f"{board_type}:{name}",3)
         if raw.empty:
             return name,pd.DataFrame(),errors
         try:
@@ -194,7 +194,7 @@ def main():
     parser.add_argument("--master-pool",default="v5_data/master/current_master_pool.csv")
     parser.add_argument("--output-root",default="sector_membership_run")
     parser.add_argument("--persist-root",default="")
-    parser.add_argument("--workers",type=int,default=6)
+    parser.add_argument("--workers",type=int,default=3)
     parser.add_argument("--max-boards",type=int,default=0)
     parser.add_argument("--skip-non-trading-day",action="store_true")
     args=parser.parse_args()
@@ -207,7 +207,7 @@ def main():
     master=load_master(Path(args.master_pool))
     wanted=set(master["股票代码"])
     specs=[
-        ("行业",ak.stock_board_industry_name_em,ak.stock_board_industry_cons_em),
+        ("行业",ak.stock_board_industry_summary_ths,ak.stock_board_industry_cons_ths),
         ("概念",ak.stock_board_concept_name_em,ak.stock_board_concept_cons_em),
     ]
     frames=[];qa_rows=[];board_counts={}
@@ -233,7 +233,7 @@ def main():
     any_coverage=len(mapped_any)/total if total else 0
     industry_coverage=len(industry)/total if total else 0
     concept_coverage=len(concept)/total if total else 0
-    formal_ready=bool(total and any_coverage>=0.95 and industry_coverage>=0.90 and failure_rate<=0.10)
+    formal_ready=bool(total and any_coverage>=0.95 and industry_coverage>=0.90 and concept_coverage>=0.90 and failure_rate<=0.20)
     summary={
         "status":"FORMAL_READY" if formal_ready else "PROVISIONAL",
         "phase":"第二阶段板块映射影子库","version":VERSION,
