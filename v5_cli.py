@@ -27,6 +27,7 @@ from v5_core import (
     maintain_master_pool,
     merge_master_pool,
     openai_analyze,
+    pool_from_dataframe,
     seed_global_cache_from_old_runs,
     split_stock_and_indices,
     stage1_rank,
@@ -212,12 +213,8 @@ def _read_pool(path: str | Path | None) -> pd.DataFrame:
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"找不到提交文件: {p}")
-    x = pd.read_csv(p, dtype={"股票代码": str})
-    for c in ["股票代码", "股票名称"]:
-        if c not in x:
-            raise ValueError(f"提交文件缺少列: {c}")
-    x["股票代码"] = x["股票代码"].astype(str).str.extract(r"(\d{6})", expand=False).fillna("")
-    return x[["股票代码", "股票名称"]]
+    x = pd.read_csv(p, dtype=str)
+    return pool_from_dataframe(x)
 
 
 def _bootstrap_registry_from_v4() -> pd.DataFrame:
