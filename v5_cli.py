@@ -921,6 +921,13 @@ def run_tail():
             pool,snap40,snap45,min45,conf,idx,breadth,market_history,market_context,
             obs_meta,base,sector_tables_for_ai,sector_validation
         )
+        # 尾盘一旦产生TRADE即写入独立推荐登记簿。14:45价格仅作参考，
+        # 推荐日正式收盘价由15:35反馈任务回填，避免把未收盘价格冒充锚点。
+        from research.recommendation_feedback import register_tail_recommendations
+        feedback_registration = register_tail_recommendations(
+            final_decisions, final_meta, snap45=snap45, obs_meta=obs_meta
+        )
+        payload["feedback_registration"] = feedback_registration
         payload["status"]="completed"; payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
         save_json(base/"tail_summary.json",payload); save_json(LATEST/"last_tail_summary.json",payload)
         git_commit(f"V5.3 tail AI completed {today}")
