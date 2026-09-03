@@ -10,6 +10,7 @@ import pandas as pd
 sys.modules.setdefault("akshare",MagicMock())
 sys.modules.setdefault("requests",MagicMock())
 import v5_core as core
+import v5_cli as cli
 
 
 class MarketReviewTests(unittest.TestCase):
@@ -86,6 +87,19 @@ class SectorFlowTests(unittest.TestCase):
         row=tables["concept_now"].iloc[0]
         self.assertEqual(row["交易日期"],"2026-09-03")
         self.assertEqual(row["抓取时间"],"2026-09-03 16:00:00+0800")
+
+
+class NotificationTests(unittest.TestCase):
+    def test_pushplus_retries_then_succeeds(self):
+        response=MagicMock()
+        response.__enter__.return_value.read.return_value=b'{"code":200}'
+        with patch.dict(cli.os.environ,{"PUSHPLUS_TOKEN":"test-token"}), \
+             patch.object(cli.urllib.request,"urlopen",side_effect=[RuntimeError("temporary"),response]) as mocked, \
+             patch.object(cli.time,"sleep") as sleeper:
+            ok=cli.pushplus_notify("title","body",attempts=3)
+        self.assertTrue(ok)
+        self.assertEqual(mocked.call_count,2)
+        sleeper.assert_called_once_with(2)
 
 
 if __name__ == "__main__":
