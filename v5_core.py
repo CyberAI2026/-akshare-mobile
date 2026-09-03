@@ -205,8 +205,10 @@ def _read_delimited_stock_file(data: bytes) -> pd.DataFrame:
                 else:
                     tmp = pd.read_csv(io.StringIO(text), sep=sep, engine="python", **kwargs)
                 if tmp is not None and len(tmp.columns) >= 1 and len(tmp) >= 1:
-                    # 至少应能识别到代码列，否则继续尝试。
-                    if _find_col(tmp.columns, ["股票代码", "证券代码", "代码", "stockcode", "code", "symbol"]):
+                    # 名单可能只有“名称”列；代码可由本地代码—名称快照补全。
+                    has_code = _find_col(tmp.columns, ["股票代码", "证券代码", "代码", "stockcode", "code", "symbol"])
+                    has_name = _find_col(tmp.columns, ["股票名称", "证券名称", "证券简称", "名称", "name", "stockname"])
+                    if has_code or has_name:
                         return tmp
             except Exception as e:
                 last_err = e
