@@ -93,6 +93,25 @@ class SectorFlowTests(unittest.TestCase):
         self.assertEqual(tables["concept_now"].iloc[0]["业务时区"],"Asia/Shanghai")
         self.assertTrue(str(tables["concept_now"].iloc[0]["抓取时间"]).endswith("+0800"))
 
+    def test_high_attention_sector_crosses_opinion_with_market_fact(self):
+        concept_now = pd.DataFrame({
+            "行业": ["机器人", "液冷", "农业", "低位题材"],
+            "板块类型": ["概念"] * 4,
+            "行业-涨跌幅": [4.0, 2.0, 1.0, -1.0],
+            "净额": [5.0, 2.0, -1.0, -2.0],
+        })
+        opinion = {"daily_consensus": {"sector_consensus": [
+            {"sector": "农业", "mention_count": 10, "stance": "退潮"},
+            {"sector": "机器人", "mention_count": 8, "stance": "加强"},
+            {"sector": "液冷", "mention_count": 6, "stance": "分化"},
+            {"sector": "不存在", "mention_count": 4, "stance": "活跃"},
+        ]}}
+        out = cli._attention_sector_market_groups({"concept_now": concept_now}, opinion)
+        self.assertEqual(out["groups"]["高关注且观点退潮"][0]["板块"], "农业")
+        self.assertEqual(out["groups"]["高关注且涨幅靠前"][0]["板块"], "机器人")
+        self.assertEqual(out["groups"]["高关注但活跃分化"][0]["板块"], "液冷")
+        self.assertEqual(out["groups"]["高关注但行情未核验"][0]["板块"], "不存在")
+
     def test_sector_flow_converts_aware_utc_to_china_business_date(self):
         table=self._table(["军工"])
         now_table=table.rename(columns={"阶段涨跌幅":"行业-涨跌幅"})
