@@ -69,13 +69,60 @@ def _find_col(columns: Iterable[str], aliases: list[str]) -> str | None:
     return None
 
 
+def _resolve_codes_by_name(names: pd.Series) -> pd.DataFrame:
+    """为只有股票名称的行情软件导出表补全A股代码；歧义或缺失时拒绝静默猜测。"""
+    requested = names.astype(str).str.strip()
+    requested = requested[requested.ne("") & requested.ne("nan")].drop_duplicates()
+    sources = [
+        ("stock_info_a_code_name", lambda: ak.stock_info_a_code_name()),
+        ("stock_zh_a_spot_em", lambda: ak.stock_zh_a_spot_em()),
+    ]
+    errors = []
+    tables = []
+    for source, fetcher in sources:
+        try:
+            raw = fetcher()
+            if raw is None or raw.empty:
+                raise RuntimeError("空数据")
+            code_col = _find_col(raw.columns, ["股票代码", "证券代码", "代码", "code", "symbol"])
+            name_col = _find_col(raw.columns, ["股票名称", "证券名称", "证券简称", "名称", "name"])
+            if code_col is None or name_col is None:
+                raise RuntimeError(f"字段异常: {list(raw.columns)}")
+            x = pd.DataFrame({
+                "股票代码": raw[code_col].map(_norm_code),
+                "股票名称": raw[name_col].astype(str).str.strip(),
+            })
+            x = x[x["股票代码"].str.fullmatch(r"\d{6}", na=False) & x["股票名称"].ne("")]
+            tables.append(x)
+        except Exception as e:
+            errors.append(f"{source}:{type(e).__name__}:{e}")
+    if not tables:
+        raise ValueError("文件只有股票名称，但在线代码—名称表获取失败：" + " | ".join(errors))
+
+    master = pd.concat(tables, ignore_index=True).drop_duplicates()
+    ambiguous = set(master.loc[master["股票名称"].duplicated(keep=False), "股票名称"])
+    master = master[~master["股票名称"].isin(ambiguous)].drop_duplicates("股票名称")
+    code_map = master.set_index("股票名称")["股票代码"]
+    missing = [name for name in requested if name not in code_map.index]
+    if missing:
+        shown = "、".join(missing[:12])
+        more = f"等共{len(missing)}只" if len(missing) > 12 else ""
+        raise ValueError(f"仅有名称的文件中有股票无法唯一匹配代码：{shown}{more}。请补充代码后重试。")
+    return pd.DataFrame({
+        "股票代码": [code_map[name] for name in requested],
+        "股票名称": list(requested),
+    }).reset_index(drop=True)
+
+
 def pool_from_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     if df is None or df.empty:
         return pd.DataFrame(columns=["股票代码", "股票名称"])
     code_col = _find_col(df.columns, ["股票代码", "证券代码", "代码", "stockcode", "code", "symbol"])
     name_col = _find_col(df.columns, ["股票名称", "证券名称", "证券简称", "名称", "name", "stockname"])
     if code_col is None:
-        raise ValueError("没有识别到股票代码列。请至少包含“股票代码/证券代码/代码/code”之一。")
+        if name_col is None:
+            raise ValueError("没有识别到股票代码或股票名称列。")
+        return _resolve_codes_by_name(df[name_col])
     out = pd.DataFrame()
     out["股票代码"] = df[code_col].map(_norm_code)
     out["股票名称"] = df[name_col].astype(str).str.strip() if name_col else ""
