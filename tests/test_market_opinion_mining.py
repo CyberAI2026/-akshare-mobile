@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import sys
 import unittest
+from unittest.mock import MagicMock
+
+sys.modules.setdefault("bs4", MagicMock())
+sys.modules.setdefault("openai", MagicMock())
 
 from research.market_opinion_mining import group_attention_sectors
 
