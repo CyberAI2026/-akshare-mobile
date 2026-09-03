@@ -118,7 +118,8 @@ def register_tail_recommendations(final_decisions: pd.DataFrame, final_meta: dic
             "OpenAI模型": final_meta.get("model", ""), "数据状态": "等待推荐日正式收盘",
         })
     if rows:
-        combined = pd.concat([old, pd.DataFrame(rows)], ignore_index=True, sort=False)
+        incoming = pd.DataFrame(rows)
+        combined = incoming if old.empty else pd.concat([old, incoming], ignore_index=True, sort=False)
         combined = combined.drop_duplicates("推荐ID", keep="last")
     else:
         combined = old
