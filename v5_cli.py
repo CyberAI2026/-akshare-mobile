@@ -171,6 +171,25 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     lines.append(f"<b>板块数据：</b>{sv.get('status','—')}｜AI启用：{'是' if sv.get('ai_enabled') else '否'}")
     if sa.get("summary"):
         lines.append(f"<b>板块判断：</b>{sa.get('summary')}")
+    sector_groups = ((summary.get("high_attention_sector_market", {}) or {}).get("groups", {}) or {})
+    labels = [
+        ("高关注且涨幅靠前", "高关注·涨幅靠前"),
+        ("高关注但活跃分化", "高关注·活跃/分化"),
+        ("高关注且观点退潮", "高关注·观点退潮"),
+        ("高关注但行情未核验", "高关注·行情未核验"),
+    ]
+    for key, label in labels:
+        items = sector_groups.get(key, []) or []
+        if not items:
+            continue
+        rendered = []
+        for item in items[:6]:
+            pct = item.get("当日涨跌幅%")
+            rank = item.get("当日涨幅排名")
+            total = item.get("同类板块数")
+            fact = f"；{pct:+.2f}%，排名{rank}/{total}" if isinstance(pct, (int, float)) else ""
+            rendered.append(f"{item.get('板块','')}（提及{item.get('文章提及数',0)}篇；{item.get('观点状态','不明确')}{fact}）")
+        lines.append(f"<b>{label}：</b>" + "、".join(rendered))
     oa = obs_meta.get("opinion_assessment", {}) or {}
     oc = obs_meta.get("opinion_context", {}) or {}
     lines.append(f"<b>正文观点层：</b>{oc.get('status','—')}｜样本 {oc.get('article_count',0)}篇")
@@ -474,6 +493,62 @@ def _sector_payload(sector_tables: dict[str,pd.DataFrame] | None) -> dict:
     return _json_clean(out)
 
 
+def _attention_sector_market_groups(sector_tables: dict[str, pd.DataFrame] | None, opinion_context: dict | None) -> dict:
+    """在高关注板块内部交叉标注客观涨幅与观点阶段，避免把热度等同于强势。"""
+    consensus = (((opinion_context or {}).get("daily_consensus", {}) or {}).get("sector_consensus", []) or [])
+    ranked_attention = sorted(
+        [x for x in consensus if str(x.get("sector", "")).strip()],
+        key=lambda x: int(x.get("mention_count", 0) or 0),
+        reverse=True,
+    )[:10]
+    facts = {}
+    for key in ["concept_now", "industry_now"]:
+        frame = (sector_tables or {}).get(key)
+        if frame is None or frame.empty or "行业" not in frame:
+            continue
+        pct_col = "行业-涨跌幅" if "行业-涨跌幅" in frame else "阶段涨跌幅" if "阶段涨跌幅" in frame else None
+        if pct_col is None:
+            continue
+        x = frame.copy()
+        x[pct_col] = pd.to_numeric(x[pct_col], errors="coerce")
+        x = x.dropna(subset=[pct_col]).sort_values(pct_col, ascending=False).reset_index(drop=True)
+        total = max(1, len(x))
+        for i, row in x.iterrows():
+            name = str(row.get("行业", "")).strip()
+            if not name:
+                continue
+            facts[name] = {
+                "板块类型": row.get("板块类型", ""),
+                "当日涨跌幅%": round(float(row[pct_col]), 4),
+                "当日涨幅排名": int(i + 1),
+                "同类板块数": total,
+                "净额亿元": _json_clean(row.get("净额")) if "净额" in row else None,
+            }
+    groups = {"高关注且涨幅靠前": [], "高关注但活跃分化": [], "高关注且观点退潮": [], "高关注但行情未核验": []}
+    for item in ranked_attention:
+        name = str(item.get("sector", "")).strip()
+        stance = str(item.get("stance", "") or "不明确")
+        fact = facts.get(name)
+        row = {
+            "板块": name, "文章提及数": int(item.get("mention_count", 0) or 0),
+            "观点状态": stance, **(fact or {}),
+        }
+        if any(k in stance for k in ["退潮", "走弱", "弱化", "冰点"]):
+            bucket = "高关注且观点退潮"
+        elif fact and fact["当日涨跌幅%"] > 0 and fact["当日涨幅排名"] / fact["同类板块数"] <= 0.25:
+            bucket = "高关注且涨幅靠前"
+        elif fact:
+            bucket = "高关注但活跃分化"
+        else:
+            bucket = "高关注但行情未核验"
+        groups[bucket].append(row)
+    return {
+        "status": "available" if ranked_attention else "unavailable",
+        "groups": groups,
+        "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。",
+    }
+
+
 def _stock_sector_attribution_payload(candidates: pd.DataFrame) -> dict:
     """逐股加载一股多概念与主导板块候选；保留快照日期和时点限制供AI审计。"""
     path = Path("v5_data/stock_sector_attribution/latest.csv")
@@ -774,6 +849,9 @@ def run_after_close(batch_path: str | None):
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment",{}),
         "sector_validation": sector_validation,
+        "high_attention_sector_market": _attention_sector_market_groups(
+            sector_tables_for_ai, obs_meta.get("opinion_context", {})
+        ),
         "stock_qa_25_success": int((q25.get("状态") == "成功").sum()) if not q25.empty else 0,
         "stock_qa_120_success": int((q120.get("状态") == "成功").sum()) if not q120.empty else 0,
         "stock_qa_250_success": int((q250.get("状态") == "成功").sum()) if not q250.empty else 0,
