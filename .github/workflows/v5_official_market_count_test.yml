@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - "v5_core.py"
+      - "v5_cli.py"
       - "tests/test_v5_data_layers.py"
       - ".github/workflows/v5_official_market_count_test.yml"
 
@@ -33,12 +34,15 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          import pandas as pd
           import v5_core as core
+          import v5_cli as cli
           out=Path("market_count_test"); out.mkdir(exist_ok=True)
           idx, breadth, qa = core.fetch_market_review(180)
           breadth.to_csv(out/"market_breadth.csv", index=False, encoding="utf-8-sig")
           qa.to_csv(out/"market_qa.csv", index=False, encoding="utf-8-sig")
           idx.to_csv(out/"market_indices_180d.csv", index=False, encoding="utf-8-sig")
+          cli._market_sentiment_components(breadth).to_csv(out/"market_sentiment_components_shadow.csv",index=False,encoding="utf-8-sig")
           print(breadth.to_string(index=False))
           print(qa.to_string(index=False))
           if breadth.empty:
@@ -61,7 +65,24 @@ jobs:
           down_codes=[x for x in str(r.get("跌停股池代码","")).split("|") if x]
           if len(up_codes)!=int(r["涨停家数"]) or len(down_codes)!=int(r["跌停家数"]):
               raise SystemExit("FAIL: 涨跌停成分代码数量与正式计数不一致")
-          print("OFFICIAL_MARKET_COUNT_TEST_OK")
+          shadow_fields=["炸板家数","触板家数","封板成功率","最高连板数","昨日涨停平均溢价","昨日涨停红盘率","强势股池家数"]
+          missing_shadow=[x for x in shadow_fields if x not in breadth.columns]
+          if missing_shadow:
+              raise SystemExit(f"FAIL: 市场情绪影子字段缺失 {missing_shadow}")
+          for count_col,codes_col in [("炸板家数","炸板股池代码"),("昨日涨停家数","昨日涨停股池代码"),("强势股池家数","强势股池代码")]:
+              if pd.notna(r[count_col]):
+                  codes=[x for x in str(r.get(codes_col,"")).split("|") if x]
+                  if len(codes)!=int(r[count_col]):
+                      raise SystemExit(f"FAIL: {count_col}与{codes_col}数量不一致")
+          shadow_status="READY" if bool(r.get("市场情绪影子层可用",False)) else "DEGRADED"
+          (out/"summary.json").write_text(json.dumps({
+              "official_status":"OK","shadow_status":shadow_status,
+              "stock_count":int(r["股票数"]),"up":int(r["上涨家数"]),"down":int(r["下跌家数"]),
+              "limit_up":int(r["涨停家数"]),"limit_down":int(r["跌停家数"]),
+              "broken_limit":None if pd.isna(r["炸板家数"]) else int(r["炸板家数"]),
+              "seal_success_rate":None if pd.isna(r["封板成功率"]) else float(r["封板成功率"]),
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+          print(f"OFFICIAL_MARKET_COUNT_TEST_OK sentiment_shadow={shadow_status}")
           PY
       - name: Upload artifact
         if: always()
