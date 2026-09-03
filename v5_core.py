@@ -1101,6 +1101,15 @@ def _pool_codes(pool: pd.DataFrame) -> str:
     return "|".join(sorted(set(c for c in codes if c)))
 
 
+def _pool_numeric(pool: pd.DataFrame, aliases: list[str]) -> pd.Series:
+    if pool is None or pool.empty:
+        return pd.Series(dtype=float)
+    col=_find_col(pool.columns,aliases)
+    if col is None:
+        return pd.Series(dtype=float)
+    return pd.to_numeric(pool[col].astype(str).str.replace("%","",regex=False).str.replace(",","",regex=False),errors="coerce").dropna()
+
+
 def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """市场数据层。
 
@@ -1127,13 +1136,16 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
     except Exception as e:
         qa.append({"对象":"市场统计交叉核验（非正式口径）","代码":"","状态":"失败","数据源":"legulegu","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
 
-    # B. 东方财富公开涨停池/跌停池：正式涨跌停口径
+    # B. 东方财富公开池：涨停/跌停为正式计数；炸板、昨日涨停、强势股为第一阶段影子情绪层。
     captured_at=_as_cn_time()
     today=captured_at.strftime("%Y%m%d")
     limit_pools={}
     for label, fn in [
         ("公开涨停股池", lambda: ak.stock_zt_pool_em(date=today)),
         ("公开跌停股池", lambda: ak.stock_zt_pool_dtgc_em(date=today)),
+        ("公开炸板股池", lambda: ak.stock_zt_pool_zbgc_em(date=today)),
+        ("昨日涨停股池", lambda: ak.stock_zt_pool_previous_em(date=today)),
+        ("公开强势股池", lambda: ak.stock_zt_pool_strong_em(date=today)),
     ]:
         try:
             p=fn()
@@ -1176,6 +1188,20 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
     degraded_limits=not (up_pool_ok and down_pool_ok)
     up_limit=int(len(up_pool)) if up_pool_ok else _to_count(activity.get("涨停"))
     down_limit=int(len(down_pool)) if down_pool_ok else _to_count(activity.get("跌停"))
+    broken_pool=limit_pools.get("公开炸板股池",pd.DataFrame())
+    previous_pool=limit_pools.get("昨日涨停股池",pd.DataFrame())
+    strong_pool=limit_pools.get("公开强势股池",pd.DataFrame())
+    broken_count=int(len(broken_pool)) if "公开炸板股池" in limit_pools else np.nan
+    touched_count=(up_limit+broken_count) if pd.notna(up_limit) and pd.notna(broken_count) else np.nan
+    seal_success_rate=(up_limit/touched_count) if pd.notna(touched_count) and touched_count else np.nan
+    streaks=_pool_numeric(up_pool,["连板数","连续涨停天数","几天几板"])
+    highest_streak=int(streaks.max()) if not streaks.empty else np.nan
+    previous_pct=_pool_numeric(previous_pool,["涨跌幅","当日涨跌幅","涨幅"])
+    previous_premium_mean=float(previous_pct.mean()) if not previous_pct.empty else np.nan
+    previous_positive_rate=float((previous_pct>0).mean()) if not previous_pct.empty else np.nan
+    broken_pct=_pool_numeric(broken_pool,["涨跌幅","当日涨跌幅","涨幅"])
+    broken_close_mean=float(broken_pct.mean()) if not broken_pct.empty else np.nan
+    sentiment_shadow_ready=all(k in limit_pools for k in ["公开炸板股池","昨日涨停股池","公开强势股池"])
     suspended=_to_count(activity.get("停牌"))
     stat_date=str(activity.get("统计日期","")).strip()
     counts=[x for x in [ups,downs,flats] if pd.notna(x)]
@@ -1202,7 +1228,14 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         "下跌比例":(downs/valid if pd.notna(downs) and valid else np.nan),
         "净上涨家数":(ups-downs if pd.notna(ups) and pd.notna(downs) else np.nan),
         "涨停家数":up_limit,"跌停家数":down_limit,
+        "炸板家数":broken_count,"触板家数":touched_count,"封板成功率":seal_success_rate,
+        "最高连板数":highest_streak,"昨日涨停家数":int(len(previous_pool)) if "昨日涨停股池" in limit_pools else np.nan,
+        "昨日涨停平均溢价":previous_premium_mean,"昨日涨停红盘率":previous_positive_rate,
+        "炸板股平均收盘涨幅":broken_close_mean,"强势股池家数":int(len(strong_pool)) if "公开强势股池" in limit_pools else np.nan,
+        "市场情绪影子层可用":sentiment_shadow_ready,
         "涨停股池代码":_pool_codes(up_pool),"跌停股池代码":_pool_codes(down_pool),
+        "炸板股池代码":_pool_codes(broken_pool),"昨日涨停股池代码":_pool_codes(previous_pool),
+        "强势股池代码":_pool_codes(strong_pool),
         "市场宽度是否降级":degraded_breadth,"涨跌停是否降级":degraded_limits,
         "真实涨停家数":_to_count(activity.get("真实涨停")),
         "真实跌停家数":_to_count(activity.get("真实跌停")),
@@ -1214,7 +1247,7 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         "涨5%以上家数":int((pct>=5).sum()) if not pct.empty else np.nan,
         "跌5%以上家数":int((pct<=-5).sum()) if not pct.empty else np.nan,
         "全市场成交额":float(amt.sum()) if not amt.empty and amt.notna().any() else np.nan,
-        "说明":"上涨/下跌/平盘由逐股快照按涨跌幅正负计数；涨停/跌停直接读取东方财富公开股池；乐咕只做交叉QA。正式源失败时才降级并显式标记。"
+        "说明":"上涨/下跌/平盘由逐股快照计数；涨停/跌停读取东方财富公开池；炸板、封板率、昨日涨停溢价、连板高度为影子情绪层，仅记录和QA，暂不改变推荐。乐咕只做交叉核验。"
     }
     # 旧字段保留兼容，但不再叫“近似”：数值直接等于公开统计；若公开源失败则为空。
     row["涨停近似家数"]=row["涨停家数"]

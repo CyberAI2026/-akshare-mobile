@@ -22,12 +22,18 @@ class MarketReviewTests(unittest.TestCase):
             "成交额":[10,20,30,40,50,60],
         })
         legu=pd.DataFrame({"item":["上涨","下跌","平盘","涨停","跌停","停牌"],"value":[1,4,1,9,8,0]})
-        up_pool=pd.DataFrame({"代码":["000001","000006"]})
+        up_pool=pd.DataFrame({"代码":["000001","000006"],"连板数":[2,3]})
         down_pool=pd.DataFrame({"代码":["000004"]})
+        broken_pool=pd.DataFrame({"代码":["000002"],"涨跌幅":[4.0]})
+        previous_pool=pd.DataFrame({"代码":["000003","000005"],"涨跌幅":[2.0,-1.0]})
+        strong_pool=pd.DataFrame({"代码":["000001","000003","000006"]})
         with patch.object(core,"fetch_index_history",return_value=(pd.DataFrame(),"",[])), \
              patch.object(core.ak,"stock_market_activity_legu",return_value=legu), \
              patch.object(core.ak,"stock_zt_pool_em",return_value=up_pool), \
              patch.object(core.ak,"stock_zt_pool_dtgc_em",return_value=down_pool), \
+             patch.object(core.ak,"stock_zt_pool_zbgc_em",return_value=broken_pool), \
+             patch.object(core.ak,"stock_zt_pool_previous_em",return_value=previous_pool), \
+             patch.object(core.ak,"stock_zt_pool_strong_em",return_value=strong_pool), \
              patch.object(core.ak,"stock_zh_a_spot_em",side_effect=RuntimeError("blocked")), \
              patch.object(core.ak,"stock_zh_a_spot",return_value=spot):
             _,breadth,qa=core.fetch_market_review(5)
@@ -38,7 +44,19 @@ class MarketReviewTests(unittest.TestCase):
         self.assertFalse(r["市场宽度是否降级"])
         self.assertFalse(r["涨跌停是否降级"])
         self.assertEqual(r["涨停股池代码"],"000001|000006")
+        self.assertEqual((r["炸板家数"],r["触板家数"]),(1,3))
+        self.assertAlmostEqual(r["封板成功率"],2/3)
+        self.assertEqual(r["最高连板数"],3)
+        self.assertAlmostEqual(r["昨日涨停平均溢价"],0.5)
+        self.assertAlmostEqual(r["昨日涨停红盘率"],0.5)
+        self.assertTrue(r["市场情绪影子层可用"])
+        self.assertEqual(r["炸板股池代码"],"000002")
         self.assertTrue((qa["对象"]=="正式口径与乐咕差异").any())
+
+        payload=cli._market_payload(pd.DataFrame(),breadth)
+        self.assertNotIn("炸板家数",payload["市场宽度当日"][0])
+        components=cli._market_sentiment_components(breadth)
+        self.assertEqual(set(components["成分类型"]),{"涨停","跌停","炸板","昨日涨停","强势股"})
 
 
 class SectorFlowTests(unittest.TestCase):
