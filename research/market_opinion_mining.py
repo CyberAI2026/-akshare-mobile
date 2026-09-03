@@ -191,7 +191,7 @@ def aggregate(client: OpenAI, model: str, mined: list[dict], source_rows: list[d
 {
  "market_consensus":{"stance":"","phase":[],"summary":"","confidence":"低/中/高"},
  "market_disagreements":[""],
- "sector_consensus":[{"sector":"","mention_count":0,"consensus":"","stance":"","representative_stocks":[]}],
+ "sector_consensus":[{"sector":"","mention_count":0,"consensus":"","stance":"加强/活跃/分化/退潮/不明确","representative_stocks":[]}],
  "stock_attention":[{"stock":"","mention_count":0,"sectors":[],"roles":[]}],
  "tomorrow_consensus_watch":[""],
  "limitations":[""]
@@ -212,6 +212,28 @@ def aggregate(client: OpenAI, model: str, mined: list[dict], source_rows: list[d
     result["article_count"] = len(source_rows)
     result["source_platform"] = "淘股吧公开复盘"
     return result
+
+
+def group_attention_sectors(sectors: list[dict], limit: int = 10) -> dict[str, list[dict]]:
+    """关注度由提及次数决定，趋势状态单独分组；热度绝不等同于上涨。"""
+    ranked = sorted(
+        [x for x in sectors if str(x.get("sector", "")).strip()],
+        key=lambda x: int(x.get("mention_count", 0) or 0),
+        reverse=True,
+    )[:limit]
+    groups = {"观点偏强或加强": [], "活跃但分化": [], "退潮或走弱": [], "状态不明确": []}
+    for item in ranked:
+        stance = str(item.get("stance", "") or "不明确")
+        if any(k in stance for k in ["退潮", "走弱", "弱化", "冰点", "下跌"]):
+            key = "退潮或走弱"
+        elif any(k in stance for k in ["加强", "强势", "上涨", "修复", "发酵", "高潮"]):
+            key = "观点偏强或加强"
+        elif any(k in stance for k in ["活跃", "分化", "分歧"]):
+            key = "活跃但分化"
+        else:
+            key = "状态不明确"
+        groups[key].append(item)
+    return groups
 
 
 def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None:
@@ -239,13 +261,17 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
     (ROOT / "latest.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     index_path = ROOT / "opinion_25d.csv"
+    sector_groups = group_attention_sectors(summary.get("sector_consensus", []) or [])
     row = {
         "日期": day,
         "文章数": len(articles),
         "市场倾向": summary.get("market_consensus", {}).get("stance", ""),
         "市场阶段": "|".join(summary.get("market_consensus", {}).get("phase", []) or []),
         "摘要": summary.get("market_consensus", {}).get("summary", ""),
-        "热门板块": "|".join(str(x.get("sector", "")) for x in (summary.get("sector_consensus", []) or [])[:10]),
+        "高关注偏强板块": "|".join(str(x.get("sector", "")) for x in sector_groups["观点偏强或加强"]),
+        "高关注分化板块": "|".join(str(x.get("sector", "")) for x in sector_groups["活跃但分化"]),
+        "高关注退潮板块": "|".join(str(x.get("sector", "")) for x in sector_groups["退潮或走弱"]),
+        "高关注状态不明板块": "|".join(str(x.get("sector", "")) for x in sector_groups["状态不明确"]),
         "热门个股": "|".join(str(x.get("stock", "")) for x in (summary.get("stock_attention", []) or [])[:10]),
     }
     old = pd.read_csv(index_path, dtype=str, encoding="utf-8-sig") if index_path.exists() else pd.DataFrame()
@@ -260,14 +286,23 @@ def push_summary(summary: dict) -> None:
         return
     market = summary.get("market_consensus", {}) or {}
     sectors = summary.get("sector_consensus", []) or []
+    sector_groups = group_attention_sectors(sectors)
     stocks = summary.get("stock_attention", []) or []
+    def render(items):
+        return "、".join(
+            f"{x.get('sector', '')}（提及{x.get('mention_count', 0)}篇；{x.get('stance', '不明确')}）"
+            for x in items
+        ) or "无"
     lines = [
         f"<b>文章样本：</b>{summary.get('article_count', 0)}篇公开复盘全文",
         f"<b>市场观点：</b>{market.get('stance', '—')}｜{'、'.join(market.get('phase', []) or [])}",
         f"<b>共识摘要：</b>{market.get('summary', '—')}",
-        "<b>观点热门板块：</b>" + "、".join(str(x.get("sector", "")) for x in sectors[:8]),
+        "<b>高关注·观点偏强/加强：</b>" + render(sector_groups["观点偏强或加强"]),
+        "<b>高关注·活跃但分化：</b>" + render(sector_groups["活跃但分化"]),
+        "<b>高关注·退潮/走弱：</b>" + render(sector_groups["退潮或走弱"]),
+        "<b>高关注·状态不明确：</b>" + render(sector_groups["状态不明确"]),
         "<b>观点热门个股：</b>" + "、".join(str(x.get("stock", "")) for x in stocks[:10]),
-        "<small>以上为公开文章文本挖掘后的观点共识，不是行情事实或交易建议。</small>",
+        "<small>“高关注”仅表示文章提及较多，不等于上涨或推荐；以上趋势标签来自公开文章观点，客观涨幅以盘后行情复盘为准。</small>",
     ]
     r = requests.post(
         "https://www.pushplus.plus/send",
