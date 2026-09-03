@@ -2,6 +2,8 @@ name: V5 Official Market Count Test
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -45,6 +47,10 @@ jobs:
               raise SystemExit("FAIL: 市场宽度正式逐股快照不可用，已发生降级")
           if bool(r.get("涨跌停是否降级", True)):
               raise SystemExit("FAIL: 东方财富公开涨跌停池不可用，已发生降级")
+          if int(r["股票数"]) < 5000:
+              raise SystemExit(f"FAIL: 正式逐股快照覆盖不足，股票数={int(r['股票数'])}<5000")
+          if str(r.get("业务时区","")) != "Asia/Shanghai" or not str(r.get("数据时间","")).endswith("+0800"):
+              raise SystemExit("FAIL: 市场快照未使用带偏移的北京时间")
           if int(r["上涨家数"])+int(r["下跌家数"])+int(r["平盘家数"]) != int(r["股票数"]):
               raise SystemExit("FAIL: 上涨+下跌+平盘与正式股票数不一致")
           up_codes=[x for x in str(r.get("涨停股池代码","")).split("|") if x]
