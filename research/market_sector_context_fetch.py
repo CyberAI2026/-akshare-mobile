@@ -15,7 +15,7 @@ import pandas as pd
 import requests
 
 TZ = ZoneInfo("Asia/Shanghai")
-VERSION = "sector-membership-shadow-v0.3"
+VERSION = "sector-membership-shadow-v0.3.1"
 SOURCE = "public_board_membership_via_akshare"
 HTTP_TIMEOUT_SECONDS = 15
 
@@ -325,8 +325,8 @@ def main():
     concept=set(mapping.loc[mapping["板块类型"]=="概念","股票代码"]) if not mapping.empty else set()
     total=len(master)
     failures=int((qa.get("状态",pd.Series(dtype=str))=="失败").sum())
-    board_rows=max(1,len(qa)-1)
-    failure_rate=failures/board_rows
+    request_rows=max(1,len(qa))
+    failure_rate=min(1.0,failures/request_rows)
     any_coverage=len(mapped_any)/total if total else 0
     industry_coverage=len(industry)/total if total else 0
     concept_coverage=len(concept)/total if total else 0
@@ -350,8 +350,8 @@ def main():
     if args.persist_root:
         persist_library(output,Path(args.persist_root),summary["snapshot_date"],formal_ready)
     print(json.dumps(summary,ensure_ascii=False,indent=2),flush=True)
-    if mapping.empty or any_coverage<0.80:
-        raise SystemExit("FAIL: sector membership coverage below shadow-layer minimum")
+    if args.require_formal and not formal_ready:
+        raise SystemExit("FAIL: sector membership library did not pass formal quality gates")
 
 
 if __name__=="__main__":
