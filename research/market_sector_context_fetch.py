@@ -245,6 +245,8 @@ def persist_library(output_root: Path, persist_root: Path, snapshot_date: str, f
     for name in ["sector_membership.csv.gz","qa.csv.gz","unmapped_stocks.csv","summary.json"]:
         shutil.copy2(output_root/name,history/name)
     (persist_root/"latest_status.json").write_text((output_root/"summary.json").read_text(encoding="utf-8"),encoding="utf-8")
+    shutil.copy2(output_root/"sector_membership.csv.gz",persist_root/"working.csv.gz")
+    shutil.copy2(output_root/"summary.json",persist_root/"working_summary.json")
     if formal_ready:
         persist_root.mkdir(parents=True,exist_ok=True)
         shutil.copy2(output_root/"sector_membership.csv.gz",persist_root/"latest.csv.gz")
