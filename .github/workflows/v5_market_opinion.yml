@@ -1,0 +1,50 @@
+name: V5 Market Opinion Mining
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 13 * * 1-5"
+  push:
+    branches: [main]
+    paths:
+      - "research/market_opinion_mining.py"
+      - ".github/workflows/v5_market_opinion.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  opinion-mining:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TZ: Asia/Shanghai
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
+      OPINION_OPENAI_MODEL: gpt-5.6-terra
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      OPINION_ARTICLE_LIMIT: "20"
+      OPINION_BATCH_SIZE: "4"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Mine complete public review texts
+        run: python research/market_opinion_mining.py
+      - name: Upload derived opinion database
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-opinion-${{ github.run_id }}
+          path: v5_data/opinion/
+          if-no-files-found: warn
+          retention-days: 14
