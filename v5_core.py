@@ -90,10 +90,10 @@ def _read_delimited_stock_file(data: bytes) -> pd.DataFrame:
     # 部分行情软件会把 UTF-16LE 制表符文本命名为 .xls，且文件末尾可能带单个
     # 残缺字节。先严格解码；仅对能由 BOM/NUL 分布确认的 UTF-16 文本允许
     # 忽略最后一个残缺字节，避免把真正的二进制 Excel 静默当成文本。
-    looks_utf16_le = data.startswith(b"\\xff\\xfe") or (
+    looks_utf16_le = data.startswith(b"\xff\xfe") or (
         len(data) >= 8 and data[1:8:2].count(0) >= 3
     )
-    looks_utf16_be = data.startswith(b"\\xfe\\xff") or (
+    looks_utf16_be = data.startswith(b"\xfe\xff") or (
         len(data) >= 8 and data[0:8:2].count(0) >= 3
     )
     encodings = ["utf-8-sig", "gb18030", "gbk"]
