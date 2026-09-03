@@ -91,9 +91,19 @@ def pushplus_notify(title: str, content: str, template: str = "html", attempts: 
             with urllib.request.urlopen(req, timeout=15) as resp:
                 body = resp.read().decode("utf-8", errors="replace")
             try:
-                ok = str(json.loads(body).get("code", "")) == "200"
+                response_obj = json.loads(body)
+                response_code = str(response_obj.get("code", ""))
+                response_msg = str(response_obj.get("msg", ""))[:200]
+                response_data = str(response_obj.get("data", ""))[:200]
+                ok = response_code == "200"
+                print(
+                    f"PushPlus receipt attempt={attempt} code={response_code} "
+                    f"msg={response_msg!r} data={response_data!r}"
+                )
             except Exception:
+                response_obj = {}
                 ok = "200" in body
+                print(f"PushPlus non-JSON receipt attempt={attempt}: {body[:300]}")
             if ok:
                 print(f"PushPlus success on attempt {attempt}")
                 return True
