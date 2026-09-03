@@ -3,20 +3,21 @@ name: V5 Tail Confirmation
 on:
   workflow_dispatch:
   schedule:
-    # 06:40 UTC = 14:40 Beijing time
-    - cron: '40 6 * * 1-5'
+    # GitHub cron is not minute-precise. Start early, then wait inside the runner
+    # for 14:40 Asia/Shanghai; this absorbs ordinary scheduler delay.
+    - cron: '25 6 * * 1-5'
 
 permissions:
   contents: write
 
 concurrency:
-  group: v5-data-write
+  group: v5-tail-confirmation
   cancel-in-progress: false
 
 jobs:
   tail-confirmation:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       TZ: Asia/Shanghai
       GITHUB_REPO: ${{ github.repository }}
@@ -39,8 +40,74 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Hold scheduled run for the 14:40 decision window
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import time
+          from datetime import datetime, timedelta
+          from zoneinfo import ZoneInfo
+
+          tz = ZoneInfo("Asia/Shanghai")
+          now = datetime.now(tz)
+          target = now.replace(hour=14, minute=40, second=0, microsecond=0)
+          latest = now.replace(hour=14, minute=50, second=0, microsecond=0)
+          if now < target:
+              seconds = (target - now).total_seconds()
+              print(f"Scheduler arrived early; waiting {seconds:.0f}s until {target.isoformat()}", flush=True)
+              time.sleep(seconds)
+          elif now > latest:
+              raise SystemExit(
+                  f"TAIL_WINDOW_MISSED: scheduler started at {now.isoformat()}, "
+                  f"later than {latest.isoformat()}"
+              )
+          else:
+              print(f"Scheduler arrived inside decision window at {now.isoformat()}", flush=True)
+          PY
+
       - name: Run V5 tail confirmation
         run: python v5_cli.py tail
+
+      - name: Send failure alert through PushPlus
+        if: failure()
+        continue-on-error: true
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token:
+              print("PUSHPLUS_TOKEN missing; failure alert cannot be sent")
+              raise SystemExit(0)
+          now = datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds")
+          payload = {
+              "token": token,
+              "title": "A股二次启动系统｜尾盘任务故障",
+              "content": (
+                  f"尾盘确认任务在 {now} 运行失败。<br>"
+                  "本次不得依据系统执行买入；请检查 GitHub Actions 日志。<br>"
+                  "运行地址：https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              ),
+              "template": "html",
+              "channel": "wechat",
+          }
+          req = urllib.request.Request(
+              "https://www.pushplus.plus/send",
+              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=20) as resp:
+              body = resp.read().decode("utf-8", errors="replace")
+              print(body)
+              result = json.loads(body)
+              if int(result.get("code", -1)) != 200:
+                  raise SystemExit(f"PushPlus failure alert rejected: {body}")
+          PY
 
       - name: Upload V5 tail artifact
         if: always()
