@@ -1,0 +1,66 @@
+name: V5 Recommendation Feedback and Sector Attribution
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 15:35 and 19:40 Beijing time on weekdays.
+    - cron: "35 7 * * 1-5"
+    - cron: "40 11 * * 1-5"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  feedback-and-attribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      TZ: Asia/Shanghai
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Deterministic tests
+        run: |
+          python -m py_compile research/recommendation_feedback.py research/stock_sector_attribution.py
+          python -m unittest tests/test_recommendation_feedback.py
+      - name: Update recommendation cohorts after close
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '35 7 * * 1-5'
+        run: python research/recommendation_feedback.py update
+      - name: Build stock-to-multiple-sector attribution
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '40 11 * * 1-5'
+        run: |
+          python research/stock_sector_attribution.py \
+            --membership v5_data/context/sector_membership/working.csv.gz
+      - name: Commit versioned feedback
+        run: |
+          git config user.name "V5 Feedback Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add v5_data/feedback v5_data/stock_sector_attribution
+          if git diff --cached --quiet; then
+            echo "No feedback changes to commit"
+          else
+            git commit -m "V5 recommendation feedback $(date +%F-%H%M)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-feedback-${{ github.run_id }}
+          path: |
+            v5_data/feedback/
+            v5_data/stock_sector_attribution/
+          if-no-files-found: warn
+          retention-days: 30
