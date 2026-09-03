@@ -566,6 +566,18 @@ def run_after_close(batch_path: str | None):
     # 盘后市场层：指数直接保留180日；全市场宽度从系统运行日起逐日积累真实快照，最多180记录日。
     idx, breadth, market_qa = fetch_market_review(180)
     sector_tables, sector_qa = fetch_public_sector_flow(fetched_at=started)
+    sector_failures = int((sector_qa.get("状态") == "失败").sum()) if not sector_qa.empty else 0
+    sector_warnings = int((sector_qa.get("状态") == "警告").sum()) if not sector_qa.empty else 0
+    sector_formal_ready = len(sector_tables) == 10 and sector_failures == 0 and sector_warnings == 0
+    # 板块层有任何警告时仍保存完整审计文件，但不送入AI，避免实验性数据被误当正式证据。
+    sector_tables_for_ai = sector_tables if sector_formal_ready else {}
+    sector_validation = {
+        "status": "正式可用" if sector_formal_ready else "实验性有警告",
+        "table_count": len(sector_tables),
+        "failure_count": sector_failures,
+        "warning_count": sector_warnings,
+        "ai_enabled": sector_formal_ready,
+    }
     market_history, market_context = update_market_history(breadth, phase="盘后", keep_days=180)
     market_sheets=_market_review_sheets(idx,breadth,market_history,market_context,market_qa)
     sector_sheets={**sector_tables,"板块质量校验":sector_qa}
@@ -587,7 +599,7 @@ def run_after_close(batch_path: str | None):
     pre_summary={"folder":str(base)}
     try:
         obs, obs_meta, ai_result = run_openai_after_close(
-            research_pack, idx, breadth, market_history, market_context, base, generated_trade_date, pre_summary, sector_tables
+            research_pack, idx, breadth, market_history, market_context, base, generated_trade_date, pre_summary, sector_tables_for_ai
         )
     except Exception as e:
         err={
@@ -602,7 +614,7 @@ def run_after_close(batch_path: str | None):
             "status":"completed_ai_failed","engine":"V5.3-auditable-market-sector-layer","strategy":STRATEGY_VERSION,
             "started_cn":started.isoformat(),"completed_cn":now_cn().isoformat(),"batch_count":len(daily),
             "master_count":len(current),"eliminated_count":len(eliminated),"stage1":len(p1),"stage2_research_pool":len(p2),
-            "observation_pool_count":0,"ai_error":str(e),"folder":str(base)
+            "observation_pool_count":0,"ai_error":str(e),"sector_validation":sector_validation,"folder":str(base)
         }
         save_json(base/"summary.json",fail_summary); save_json(LATEST/"latest_after_close.json",fail_summary)
         meta.update(fail_summary); save_json(base/"meta.json",meta)
@@ -620,6 +632,7 @@ def run_after_close(batch_path: str | None):
         "python_final": "30-40只软容量研究包（不机械生成前10）",
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment",{}),
+        "sector_validation": sector_validation,
         "stock_qa_25_success": int((q25.get("状态") == "成功").sum()) if not q25.empty else 0,
         "stock_qa_120_success": int((q120.get("状态") == "成功").sum()) if not q120.empty else 0,
         "stock_qa_250_success": int((q250.get("状态") == "成功").sum()) if not q250.empty else 0,
