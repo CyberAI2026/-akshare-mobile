@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - "research/market_opinion_mining.py"
+      - "tests/test_market_opinion_mining.py"
       - ".github/workflows/v5_market_opinion.yml"
 
 permissions:
@@ -38,9 +39,15 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Run deterministic opinion-format tests
+        run: |
+          python -m py_compile research/market_opinion_mining.py
+          python -m unittest tests/test_market_opinion_mining.py
       - name: Refresh branch before mining
+        if: github.event_name != 'push'
         run: git pull --ff-only origin main
       - name: Mine complete public review texts
+        if: github.event_name != 'push'
         run: python research/market_opinion_mining.py
       - name: Upload derived opinion database
         if: always()
