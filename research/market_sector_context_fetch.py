@@ -268,7 +268,7 @@ def main():
     wanted=set(master["股票代码"])
     frames=[];qa_rows=[];board_counts={}
     industry_frame,industry_qa,industry_count=fetch_individual_industries(
-        master,captured,max(1,args.workers)
+        master,captured,max(8,args.workers)
     )
     if not industry_frame.empty:
         frames.append(industry_frame)
