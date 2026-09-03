@@ -193,7 +193,7 @@ def market_prefix(code: str) -> str:
 
 def _date_range(days: int) -> tuple[str, str]:
     need = days + (5 if days == 120 else 0)
-    end_dt = datetime.now()
+    end_dt = now_cn()
     start_dt = end_dt - timedelta(days=max(120, int(need * 2.25) + 80))
     return start_dt.strftime("%Y%m%d"), end_dt.strftime("%Y%m%d")
 
@@ -547,8 +547,9 @@ def fetch_spot_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, str, list[str]]:
         return pd.DataFrame(), used, errors
     want=set(pool["股票代码"].astype(str))
     out=spot[spot["股票代码"].isin(want)].copy()
-    out["日期"] = datetime.now().strftime("%Y-%m-%d")
-    out["数据时间"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    captured_at = _as_cn_time()
+    out["日期"] = captured_at.strftime("%Y-%m-%d")
+    out["数据时间"] = captured_at.strftime("%Y-%m-%d %H:%M:%S%z")
     cols=["股票代码","股票名称","日期","数据时间","今日开盘价","当前价","今日最高价","今日最低价","截至当前成交量","截至当前成交额","换手率","实时量比","当日涨跌幅","昨收"]
     for c in cols:
         if c not in out: out[c]=np.nan
@@ -565,7 +566,7 @@ def _std_minute(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def fetch_5m(code: str) -> tuple[pd.DataFrame, str, list[str]]:
-    errors=[]; today=datetime.now().date()
+    errors=[]; today=now_cn().date()
     try:
         raw=ak.stock_zh_a_minute(symbol=market_prefix(code), period="5", adjust="")
         x=_std_minute(raw)
