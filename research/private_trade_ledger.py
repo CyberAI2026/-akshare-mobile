@@ -33,6 +33,11 @@ def empty_transactions() -> pd.DataFrame:
     return pd.DataFrame(columns=TRANSACTION_COLUMNS)
 
 
+def generate_encryption_key() -> str:
+    """生成一次性配置用密钥；调用方负责安全保存，不写日志或文件。"""
+    return Fernet.generate_key().decode("utf-8")
+
+
 def normalize_code(value) -> str:
     raw = str(value or "").strip()
     if raw.endswith(".0"):
