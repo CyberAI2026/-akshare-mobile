@@ -294,6 +294,21 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
 
 
 def push_summary(summary: dict) -> None:
+    if os.getenv("OPINION_SKIP_PUSH", "").strip().lower() in {"1", "true", "yes"}:
+        print("OPINION_PUSHPLUS_SKIPPED context-only run")
+        return
+    not_before = os.getenv("OPINION_PUSH_NOT_BEFORE_CN", "").strip()
+    if not_before:
+        try:
+            hour, minute = (int(x) for x in not_before.split(":", 1))
+            current = now_cn()
+            target = current.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            if current < target:
+                wait_seconds = int((target - current).total_seconds())
+                print(f"OPINION_PUSHPLUS_WAIT seconds={wait_seconds} target_cn={target.isoformat()}")
+                time.sleep(wait_seconds)
+        except ValueError as exc:
+            raise RuntimeError(f"OPINION_PUSH_NOT_BEFORE_CN格式错误: {not_before}") from exc
     token = os.getenv("PUSHPLUS_TOKEN", "").strip()
     if not token:
         return
