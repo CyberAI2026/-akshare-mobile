@@ -7,3 +7,4 @@ xlrd
 requests
 openai>=1.40.0
 beautifulsoup4
+cryptography>=42.0.0
