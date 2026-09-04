@@ -29,6 +29,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: gpt-5.6-terra
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
