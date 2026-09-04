@@ -16,6 +16,7 @@ from research.private_trade_ledger import (
     decrypt_transactions,
     empty_transactions,
     encrypt_transactions,
+    generate_encryption_key,
     normalize_code,
     normalize_transactions,
 )
@@ -203,8 +204,21 @@ with t4:
     if not c:
         st.warning("尚未配置 GITHUB_PAT，无法读取或保存加密交易台账。")
     elif not trade_key or not trade_password:
-        st.warning("交易台账尚未启用。请先在 Streamlit Secrets 配置 TRADING_DATA_KEY 和 TRADING_UI_PASSWORD，并在 GitHub Actions Secrets 配置同一 TRADING_DATA_KEY。")
-        st.info("在密钥配置完成前，本页不会接收交易数据，避免把个人成交信息写入公开仓库明文。")
+        st.warning("交易台账尚未启用。需要一次性配置数据密钥和页面访问口令。")
+        st.markdown("""
+1. 在 Streamlit Secrets 增加 `TRADING_DATA_KEY` 和 `TRADING_UI_PASSWORD`。
+2. 在 GitHub Actions Secrets 增加同一个 `TRADING_DATA_KEY`。
+3. 保存后等待页面重启，再回到本页录入交易。
+""")
+        if not trade_key:
+            if st.button("生成一次性交易数据密钥"):
+                st.session_state.generated_trade_key = generate_encryption_key()
+            if st.session_state.get("generated_trade_key"):
+                st.code(st.session_state.generated_trade_key, language=None)
+                st.caption("请立即复制到上述两个密钥位置；刷新页面后该临时显示会消失。不要把密钥发到聊天或写入仓库文件。")
+        if not trade_password:
+            st.info("TRADING_UI_PASSWORD 由你自行设置，用于阻止其他访客查看解密后的交易与持仓。")
+        st.info("配置完成前，本页不会接收交易数据，避免把个人成交信息写入公开仓库明文。")
     else:
         if "trade_access_ok" not in st.session_state:
             st.session_state.trade_access_ok = False
