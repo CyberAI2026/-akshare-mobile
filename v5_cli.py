@@ -240,6 +240,12 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
             lines.append(f"基本面：{r.get('基本面理由','')}<br>技术面：{r.get('技术面理由','')}<br>资金面：{r.get('资金面理由','')}<br>事件面：{r.get('事件面理由','')}<br>板块：{r.get('板块理由','')}<br>")
     else:
         lines.append("<br><b>结论：</b>14:45没有符合条件的交易标的（0只）。")
+    if final_df is not None and not final_df.empty:
+        others=final_df[~final_df["股票代码"].astype(str).str.zfill(6).isin(selected)]
+        if not others.empty:
+            lines.append("<br><b>其余观察股决定：</b>")
+            for _,r in others.iterrows():
+                lines.append(f"{str(r.get('股票代码','')).zfill(6)} {r.get('股票名称','')}｜{r.get('decision','WAIT')}<br>依据：{r.get('核心证据','')}<br>风险：{r.get('主要风险','')}<br>")
     if meta.get("portfolio_note"): lines.append(f"<b>组合说明：</b>{meta.get('portfolio_note')}")
     lines.append("<br><small>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</small>")
     return pushplus_notify("A股二次启动｜14:45尾盘决策", "<br>".join(lines))
