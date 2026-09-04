@@ -21,7 +21,7 @@ concurrency:
 jobs:
   tail-confirmation:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 70
     env:
       TZ: Asia/Shanghai
       GITHUB_REPO: ${{ github.repository }}
