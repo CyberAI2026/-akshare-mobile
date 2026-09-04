@@ -6,6 +6,7 @@ import json
 import os
 import random
 import re
+import signal
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -21,6 +22,21 @@ import requests
 APP_VERSION = "V5.3-auditable-market-sector-layer"
 STRATEGY_VERSION = "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2"
 CN_TZ = ZoneInfo("Asia/Shanghai")
+
+
+def _call_with_alarm(function, seconds: int = 12):
+    """Linux Runner上的单调用硬截止；不让非requests上游拖过尾盘窗口。"""
+    if not hasattr(signal, "SIGALRM"):
+        return function()
+    def handler(_signum, _frame):
+        raise TimeoutError(f"upstream call exceeded {seconds}s")
+    previous=signal.signal(signal.SIGALRM,handler)
+    signal.setitimer(signal.ITIMER_REAL,max(1,seconds))
+    try:
+        return function()
+    finally:
+        signal.setitimer(signal.ITIMER_REAL,0)
+        signal.signal(signal.SIGALRM,previous)
 
 
 def now_cn() -> datetime:
@@ -714,7 +730,7 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
     for _, row in pool.iterrows():
         code=str(row["股票代码"]).zfill(6); name=str(row.get("股票名称","") or "")
         try:
-            info=ak.stock_individual_info_em(symbol=code, timeout=15)
+            info=_call_with_alarm(lambda:ak.stock_individual_info_em(symbol=code, timeout=12),12)
             item=_find_col(info.columns,["item","项目","指标"])
             value=_find_col(info.columns,["value","值","内容"])
             if info.empty or item is None or value is None:
@@ -727,7 +743,7 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
             qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
         try:
             market="sh" if code.startswith(("5","6","9")) else "sz"
-            ff=ak.stock_individual_fund_flow(stock=code, market=market)
+            ff=_call_with_alarm(lambda:ak.stock_individual_fund_flow(stock=code, market=market),12)
             if ff is None or ff.empty:
                 raise RuntimeError("个股资金流为空")
             date_col=_find_col(ff.columns,["日期","date"])
@@ -743,7 +759,7 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
         except Exception as exc:
             qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
         try:
-            nw=ak.stock_news_em(symbol=code)
+            nw=_call_with_alarm(lambda:ak.stock_news_em(symbol=code),12)
             if nw is None or nw.empty:
                 raise RuntimeError("个股新闻为空")
             title_col=_find_col(nw.columns,["新闻标题","标题"])
