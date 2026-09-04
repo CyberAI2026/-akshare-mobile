@@ -9,6 +9,9 @@ on:
     paths:
       - "v5_core.py"
       - "v5_cli.py"
+      - "app.py"
+      - "research/private_trade_ledger.py"
+      - "requirements.txt"
       - "tests/test_v5_data_layers.py"
       - ".github/workflows/v5_official_market_count_test.yml"
 
@@ -27,7 +30,7 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Run deterministic data-layer tests
         run: |
-          python -m py_compile v5_core.py v5_cli.py app.py
+          python -m py_compile v5_core.py v5_cli.py app.py research/private_trade_ledger.py
           python -m unittest tests/test_v5_data_layers.py
       - name: Test public market counts
         run: |
