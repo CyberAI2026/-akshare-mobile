@@ -2,6 +2,12 @@ name: V5 Daily Sector Membership Library
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "research/market_sector_context_fetch.py"
+      - "tests/test_sector_membership_library.py"
+      - ".github/workflows/research_market_sector_context.yml"
   pull_request:
     branches: [main]
     paths:
