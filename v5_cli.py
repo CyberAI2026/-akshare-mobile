@@ -19,6 +19,7 @@ from v5_core import (
     build_metrics,
     confirmation_metrics,
     fetch_market_review,
+    fetch_candidate_decision_context,
     fetch_public_sector_flow,
     fetch_pool_history_incremental,
     fetch_realtime_package,
@@ -895,7 +896,8 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
                     conf: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame,
                     market_history: pd.DataFrame, market_context: pd.DataFrame,
                     obs_meta: dict, base: Path, sector_tables: dict[str,pd.DataFrame] | None = None,
-                    sector_validation: dict | None = None) -> tuple[pd.DataFrame, dict]:
+                    sector_validation: dict | None = None,
+                    candidate_context: dict | None = None, candidate_context_qa: pd.DataFrame | None = None) -> tuple[pd.DataFrame, dict]:
     """14:45：观察池 -> 0~5，输出买入区间/仓位/结构止损；严格验证且允许0只。"""
     allowed={str(x).zfill(6) for x in pool["股票代码"].astype(str)}
     if not allowed: raise RuntimeError("尾盘观察池为空")
@@ -906,10 +908,10 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
         cols=[c for c in x.columns if c not in ["股票名称"]]
         merged=merged.merge(x[cols],on="股票代码",how="left",suffixes=("",suffix))
     schema={
-        "market_assessment":{"risk_level":"低/中/高","change_vs_previous_close":"改善/接近/恶化","summary":"实时市场判断","overall_new_position_cap_pct":0},
-        "sector_assessment":{"status":"正式可用/实验性未启用","summary":"14:45板块环境判断；无正式数据时明确写未启用"},
+        "market_assessment":{"overall_score_0_100":0,"trade_suitability":"适合/谨慎/不适合","risk_level":"低/中/高","change_vs_previous_close":"改善/接近/恶化","summary":"实时市场判断","overall_new_position_cap_pct":0},
+        "sector_assessment":{"status":"正式可用/实验性未启用","active_sectors":["活跃板块及强弱状态"],"capital_inflow_leaders":["资金净流入靠前板块"],"summary":"14:45板块环境判断；无正式数据时明确写未启用"},
         "selected_codes":["最多5个，必须来自观察池；可以为空"],
-        "decisions":[{"股票代码":"6位代码","decision":"TRADE/WAIT/REJECT","buy_zone_low":0,"buy_zone_high":0,"position_pct_total_capital":0,"structure_stop_price":0,"evidence":"关键证据","risk":"主要风险"}],
+        "decisions":[{"股票代码":"6位代码","decision":"TRADE/WAIT/REJECT","buy_zone_low":0,"buy_zone_high":0,"position_pct_total_capital":0,"structure_stop_price":0,"fundamental_reason":"基本面与行业定位","technical_reason":"技术结构","capital_reason":"实时及近10日资金","event_reason":"事件驱动；没有则写无明确事件","sector_reason":"所属板块及强弱","evidence":"综合证据","risk":"主要风险"}],
         "portfolio_note":"组合与T+1风险说明"
     }
     payload={
@@ -919,6 +921,8 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
         "sector_validation":_json_clean(sector_validation or {}),
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
         "candidate_stock_sector_attribution":_stock_sector_attribution_payload(pool),
+        "candidate_fundamental_capital_event_context":_json_clean(candidate_context or {}),
+        "candidate_context_quality":_json_clean(candidate_context_qa.to_dict("records")) if candidate_context_qa is not None else [],
         "hard_constraints":[
             "selected_codes最多5只且只能来自观察池，可以0只，不得凑数",
             "decisions必须覆盖全部观察池；selected_codes对应decision必须为TRADE",
@@ -927,7 +931,8 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             "结构止损是结构参考，不是保证最大亏损；A股T+1下当日买入不可卖出，隔夜跳空可能扩大损失",
             "若实时市场恶化、个股重新加速不足/过度、结构破坏或证据冲突，允许WAIT/REJECT",
             "不得仅凭机械确认分做最终决定；确认分只是辅助字段",
-            "板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论"
+            "板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论",
+            "基本面、资金面、事件面或个股板块映射缺失时必须明确写未核验，不得用常识补全；TRADE必须分别给出基本面、技术面、资金面、事件面和板块证据"
         ],"required_output_schema":schema
     }
     raw=openai_analyze("14:45尾盘0-5最终确认",payload)
@@ -942,6 +947,9 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
     missing=sorted(allowed-set(dm));
     if missing: raise ValueError(f"尾盘decisions未覆盖全部观察池: {missing}")
     ma=result.get("market_assessment",{}) or {}
+    try: market_score=float(ma.get("overall_score_0_100",0) or 0)
+    except Exception: raise ValueError("大盘评分不是数字")
+    if not 0<=market_score<=100: raise ValueError("大盘评分必须0-100")
     try: cap=float(ma.get("overall_new_position_cap_pct",0) or 0)
     except Exception: raise ValueError("总体新开仓上限不是数字")
     if not 0<=cap<=100: raise ValueError("总体新开仓上限必须0-100")
@@ -959,8 +967,14 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             if low<=0 or high<=0 or low>high: raise ValueError(f"{code}买入区间非法")
             if stop<=0 or stop>=high: raise ValueError(f"{code}结构止损非法")
             mid=(low+high)/2; risk=(mid-stop)/mid if mid>0 else None
+        if dec=="TRADE":
+            required_reasons=["fundamental_reason","technical_reason","capital_reason","event_reason","sector_reason"]
+            empty_reasons=[key for key in required_reasons if not str(d.get(key,"")).strip()]
+            if empty_reasons: raise ValueError(f"{code}缺少多维下单理由: {empty_reasons}")
         rows.append({"股票代码":code,"股票名称":name_map.get(code,""),"decision":dec,"买入区间下沿":low if low else None,"买入区间上沿":high if high else None,
                      "建议仓位占总资金%":pos,"结构止损参考":stop if stop else None,"结构风险距离":risk,"核心证据":d.get("evidence",""),"主要风险":d.get("risk","")})
+        rows[-1].update({"基本面理由":d.get("fundamental_reason",""),"技术面理由":d.get("technical_reason",""),
+                         "资金面理由":d.get("capital_reason",""),"事件面理由":d.get("event_reason",""),"板块理由":d.get("sector_reason","")})
     if total_pos > cap + 1e-6: raise ValueError(f"TRADE仓位合计{total_pos:.2f}%超过总体上限{cap:.2f}%")
     out=pd.DataFrame(rows)
     meta={"status":"valid","trade_date":str(now_cn().date()),"generated_at_cn":now_cn().isoformat(),"selected_codes":selected,"selected_count":len(selected),
@@ -1009,6 +1023,8 @@ def run_tail():
     wait_until_cn(14, 40)
     snap40, min40, qa40 = fetch_realtime_package(pool)
     save_bytes(base / "1440_precheck.xlsx", to_excel_bytes({"14点40实时快照": snap40, "当日5分钟K线": min40, "数据质量": qa40}))
+    candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
+    save_bytes(base / "candidate_decision_context.xlsx", to_excel_bytes({**candidate_context,"数据质量":candidate_context_qa}))
 
     wait_until_cn(14, 45)
     snap45, min45, qa45 = fetch_realtime_package(pool)
@@ -1041,7 +1057,7 @@ def run_tail():
     try:
         final_decisions, final_meta = run_openai_tail(
             pool,snap40,snap45,min45,conf,idx,breadth,market_history,market_context,
-            obs_meta,base,sector_tables_for_ai,sector_validation
+            obs_meta,base,sector_tables_for_ai,sector_validation,candidate_context,candidate_context_qa
         )
         # 尾盘一旦产生TRADE即写入独立推荐登记簿。14:45价格仅作参考，
         # 推荐日正式收盘价由15:35反馈任务回填，避免把未收盘价格冒充锚点。
