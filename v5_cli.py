@@ -47,6 +47,8 @@ CURRENT_MASTER = ROOT / "master" / "current_master_pool.csv"
 ELIMINATED = ROOT / "master" / "eliminated_archive.csv"
 LATEST = ROOT / "latest"
 MARKET_HISTORY = ROOT / "market" / "market_breadth_history.csv"
+CODE_NAME_MASTER = ROOT / "reference" / "a_share_code_name_master.csv"
+RECOMMENDATION_REGISTRY = ROOT / "feedback" / "recommendations.csv"
 
 
 def now_cn() -> datetime:
@@ -66,6 +68,69 @@ def save_df(path: Path, df: pd.DataFrame):
 def save_json(path: Path, obj: dict):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, default=str, indent=2), encoding="utf-8")
+
+
+def _norm_stock_code(value) -> str:
+    raw = str(value or "").strip()
+    if raw.endswith(".0"):
+        raw = raw[:-2]
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    return digits[-6:].zfill(6) if digits else ""
+
+
+def refresh_stock_names(frame: pd.DataFrame, master_path: str | Path = CODE_NAME_MASTER) -> pd.DataFrame:
+    """代码是唯一身份键；所有面向用户的名称均以最新代码名称主表回填。"""
+    out = frame.copy() if frame is not None else pd.DataFrame()
+    if out.empty or "股票代码" not in out.columns:
+        return out
+    out["股票代码"] = out["股票代码"].map(_norm_stock_code)
+    path = Path(master_path)
+    if not path.exists():
+        return out
+    try:
+        master = pd.read_csv(path, dtype={"股票代码": str})
+        master["股票代码"] = master["股票代码"].map(_norm_stock_code)
+        current_names = dict(zip(master["股票代码"], master["股票名称"].astype(str)))
+        if "股票名称" not in out.columns:
+            out["股票名称"] = ""
+        out["股票名称"] = [
+            current_names.get(code, old) for code, old in zip(out["股票代码"], out["股票名称"])
+        ]
+    except Exception as exc:
+        print("code-name refresh warning:", type(exc).__name__, exc)
+    return out
+
+
+def active_trade_codes(registry_path: str | Path = RECOMMENDATION_REGISTRY) -> set[str]:
+    """未明确退出的历史TRADE不得再次作为新开仓候选；D+10完成不等于已经卖出。"""
+    path = Path(registry_path)
+    if not path.exists():
+        return set()
+    try:
+        records = pd.read_csv(path, dtype={"股票代码": str})
+    except Exception as exc:
+        print("active-trade registry warning:", type(exc).__name__, exc)
+        return set()
+    if records.empty or "股票代码" not in records.columns:
+        return set()
+    decisions = records.get("决策", pd.Series("", index=records.index)).fillna("").astype(str).str.upper()
+    statuses = records.get("数据状态", pd.Series("", index=records.index)).fillna("").astype(str)
+    closed = statuses.str.contains("已退出|已卖出|止盈退出|止损退出|未成交|取消", regex=True)
+    return {
+        _norm_stock_code(code)
+        for code in records.loc[(decisions == "TRADE") & ~closed, "股票代码"]
+        if _norm_stock_code(code)
+    }
+
+
+def exclude_active_trades(frame: pd.DataFrame, registry_path: str | Path = RECOMMENDATION_REGISTRY) -> tuple[pd.DataFrame, list[str]]:
+    out = frame.copy() if frame is not None else pd.DataFrame()
+    if out.empty or "股票代码" not in out.columns:
+        return out, []
+    out["股票代码"] = out["股票代码"].map(_norm_stock_code)
+    active = active_trade_codes(registry_path)
+    excluded = sorted(set(out["股票代码"]) & active)
+    return out[~out["股票代码"].isin(excluded)].reset_index(drop=True), excluded
 
 
 def load_market_opinion_context(trade_date) -> dict:
@@ -649,6 +714,11 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             pass
     if research_pack is None or research_pack.empty:
         raise RuntimeError("30只研究包为空，不能调用OpenAI。")
+    research_pack = refresh_stock_names(research_pack)
+    source_candidate_count = len(research_pack)
+    research_pack, excluded_active_trade_codes = exclude_active_trades(research_pack)
+    if research_pack.empty:
+        raise RuntimeError("全部研究候选均处于未关闭TRADE周期，不生成重复新开仓观察池。")
     allowed={str(x).zfill(6) for x in research_pack["股票代码"].astype(str)}
     target=next_trade_day(generated_trade_date)
     schema={
@@ -667,6 +737,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "generated_trade_date":str(generated_trade_date),
         "target_trade_date":str(target),
         "candidate_count":int(len(research_pack)),
+        "excluded_active_trade_codes":excluded_active_trade_codes,
         "candidates":_json_clean(research_pack.to_dict("records")),
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_data_status":"正式可用" if sector_tables else "实验性未启用",
@@ -674,7 +745,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "candidate_stock_sector_attribution":_stock_sector_attribution_payload(research_pack),
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
-            "selected_codes只能来自candidates，最多10只，可以0只",
+            "selected_codes只能来自candidates，最多10只，可以0只；excluded_active_trade_codes中的股票处于未关闭TRADE周期，严禁重复推荐新开仓",
             "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
@@ -728,7 +799,9 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
     model=os.getenv("OPENAI_MODEL") or "gpt-5.6-terra"
     meta={
         "status":"valid","generated_trade_date":str(generated_trade_date),"target_trade_date":str(target),
-        "generated_at_cn":now_cn().isoformat(),"source_candidate_count":len(research_pack),"observation_count":len(obs),
+        "generated_at_cn":now_cn().isoformat(),"source_candidate_count":source_candidate_count,
+        "ai_candidate_count_after_active_trade_exclusion":len(research_pack),
+        "excluded_active_trade_codes":excluded_active_trade_codes,"observation_count":len(obs),
         "model":model,"strategy":STRATEGY_VERSION,"source_run":source_summary.get("folder",""),
         "market_assessment":result.get("market_assessment",{}),"sector_assessment":result.get("sector_assessment",{}),
         "opinion_assessment":result.get("opinion_assessment",{}),"opinion_context":opinion_context,
@@ -759,6 +832,7 @@ def run_after_close(batch_path: str | None):
 
     daily = _read_pool(batch_path)
     registry, changes = merge_master_pool(registry, daily, asof=started.date())
+    registry = refresh_stock_names(registry)
     # split_stock_and_indices再次保证注册表中不遗留明确指数。
     active_input = registry[registry["当前状态"].astype(str) != "已淘汰"][["股票代码", "股票名称"]]
     active_input, registry_indices = split_stock_and_indices(active_input)
@@ -1060,8 +1134,14 @@ def run_tail():
     if expected_prev and str(obs_meta.get("generated_trade_date", "")) != str(expected_prev):
         print("Observation pool did not come from previous trading day; safe skip."); return
     pool = pd.read_csv(obs_path, dtype={"股票代码": str})
-    pool["股票代码"] = pool["股票代码"].astype(str).str.zfill(6)
-    if pool.empty or len(pool) > 10:
+    pool = refresh_stock_names(pool)
+    pool, excluded_active_trade_codes = exclude_active_trades(pool)
+    if excluded_active_trade_codes:
+        print(f"TAIL_ACTIVE_TRADE_EXCLUDED codes={excluded_active_trade_codes}")
+    if pool.empty:
+        msg="观察池中的股票均处于未关闭TRADE周期；今日没有需要再次判断的新开仓候选。"
+        print(msg); pushplus_notify("A股二次启动｜无重复新开仓", msg); return
+    if len(pool) > 10:
         print(f"Invalid observation pool size {len(pool)}; safe skip."); return
 
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
