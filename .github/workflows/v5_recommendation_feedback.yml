@@ -7,6 +7,7 @@ on:
     paths:
       - "research/recommendation_feedback.py"
       - "research/stock_sector_attribution.py"
+      - "v5_data/context/sector_membership/**"
       - "tests/test_recommendation_feedback.py"
       - ".github/workflows/v5_recommendation_feedback.yml"
   schedule:
@@ -51,7 +52,7 @@ jobs:
             python research/recommendation_feedback.py update
           fi
       - name: Build stock-to-multiple-sector attribution
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '40 11 * * 1-5'
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '40 11 * * 1-5'
         run: |
           python research/stock_sector_attribution.py \
             --membership v5_data/context/sector_membership/working.csv.gz
