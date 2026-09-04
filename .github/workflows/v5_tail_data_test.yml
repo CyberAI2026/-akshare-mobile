@@ -2,6 +2,9 @@ name: V5 Tail Data Test
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/v5_tail_data_test.yml"
 
 permissions:
   contents: read
@@ -29,6 +32,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           from datetime import datetime
+          from zoneinfo import ZoneInfo
           import json
           import pandas as pd
           import v5_core as core
@@ -90,7 +94,7 @@ jobs:
           missing_snap = sorted(pool_codes - snap_codes)
 
           summary = {
-              "test_time_runner": datetime.now().isoformat(timespec="seconds"),
+              "test_time_runner_cn": datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds"),
               "observation_pool_count": int(len(pool)),
               "snapshot_rows": int(len(snap)),
               "snapshot_missing_codes": missing_snap,
@@ -112,11 +116,12 @@ jobs:
 
           print(json.dumps(summary, ensure_ascii=False, indent=2))
 
-          # 严格但不过度：只要三大模块都拿到数据即通过。
-          if len(snap) == 0:
-              raise SystemExit("FAIL: 实时/收盘快照为空")
-          if int((ms["5分钟K行数"] > 0).sum()) == 0:
-              raise SystemExit("FAIL: 所有观察股5分钟K均为空")
+          # 盘前硬验收：观察池中的每只股票都必须同时拿到快照与5分钟K。
+          if missing_snap:
+              raise SystemExit(f"FAIL: 缺少实时快照: {missing_snap}")
+          missing_5m = ms.loc[ms["5分钟K行数"] == 0, "股票代码"].tolist()
+          if missing_5m:
+              raise SystemExit(f"FAIL: 缺少5分钟K: {missing_5m}")
           if len(breadth) == 0:
               raise SystemExit("FAIL: 全市场状态为空")
           if len(indices) == 0:
