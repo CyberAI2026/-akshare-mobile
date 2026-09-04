@@ -98,6 +98,16 @@ def discover_articles() -> list[dict]:
     return sorted(rows, key=lambda x: (x["score"], x["read_count"]), reverse=True)[:ARTICLE_LIMIT]
 
 
+def title_review_date_matches(title: str, target) -> bool:
+    """标题明确标注旧复盘日期时拒绝；“明日策略9.4”不当作文章复盘日期。"""
+    dates = []
+    for match in re.finditer(r"(?:\d{4}年)?(\d{1,2})[月./-](\d{1,2})日?.{0,8}复盘", title):
+        dates.append((int(match.group(1)), int(match.group(2))))
+    for match in re.finditer(r"(?<!\d)(\d{2})(\d{2})复盘", title):
+        dates.append((int(match.group(1)), int(match.group(2))))
+    return not dates or (target.month, target.day) in dates
+
+
 def extract_article(meta: dict) -> dict | None:
     html = fetch_html(meta["url"])
     soup = BeautifulSoup(html, "html.parser")
@@ -105,6 +115,9 @@ def extract_article(meta: dict) -> dict | None:
         tag.decompose()
     title_node = soup.select_one("h1") or soup.select_one("title")
     title = clean_text(title_node.get_text(" ", strip=True) if title_node else meta["title_hint"])
+    if not title_review_date_matches(title, target_trade_date()):
+        print("ARTICLE_DATE_REJECTED", title[:120], meta["url"])
+        return None
     candidates = []
     selectors = [
         "article", ".article-content", ".article_content", ".content", ".topic-content",
@@ -311,6 +324,12 @@ def push_summary(summary: dict) -> None:
     )
     print("OPINION_PUSHPLUS", r.status_code, r.text[:300])
     r.raise_for_status()
+    try:
+        receipt = r.json()
+    except Exception as exc:
+        raise RuntimeError(f"PushPlus返回非JSON: {exc}") from exc
+    if str(receipt.get("code", "")) != "200":
+        raise RuntimeError(f"PushPlus业务回执失败: code={receipt.get('code')} msg={receipt.get('msg')}")
 
 
 def commit() -> None:
