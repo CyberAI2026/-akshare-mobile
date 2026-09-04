@@ -1,7 +1,7 @@
 {
   "asof": "2026-09-04",
   "total_recommendations": 1,
-  "tracking": 0,
+  "tracking": 1,
   "completed_d10": 0,
   "due_cohorts": {
     "D+3": [],
