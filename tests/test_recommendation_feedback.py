@@ -45,6 +45,10 @@ class RecommendationFeedbackTests(unittest.TestCase):
                 self.assertTrue(pd.isna(saved.iloc[0]["推荐日收盘价"]))
                 self.assertEqual(saved.iloc[0]["推荐时参考价"], 10.1)
 
+    def test_reference_price_accepts_current_price_column(self):
+        snap = pd.DataFrame([{"股票代码": "600801", "当前价": 24.7}])
+        self.assertEqual(rf._reference_price(snap, "600801"), 24.7)
+
 
 class AttributionTests(unittest.TestCase):
     def test_multiple_concepts_and_primary_candidate(self):
