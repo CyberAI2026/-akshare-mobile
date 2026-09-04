@@ -1,0 +1,26 @@
+{
+  "status": "PROVISIONAL",
+  "phase": "第二阶段板块映射影子库",
+  "version": "sector-membership-shadow-v0.3.1",
+  "snapshot_date": "2026-09-04",
+  "captured_at_cn": "2026-09-04T22:22:44.166178+08:00",
+  "master_stock_count": 573,
+  "mapping_rows": 0,
+  "mapped_stock_count": 0,
+  "any_coverage": 0.0,
+  "industry_coverage": 0.0,
+  "concept_coverage": 0.0,
+  "board_counts": {
+    "行业": 573,
+    "概念": 0
+  },
+  "failed_board_requests": 574,
+  "board_failure_rate": 1.0,
+  "formal_ready": false,
+  "ai_enabled": false,
+  "http_timeout_seconds": 15,
+  "shard_index": 0,
+  "shard_count": 1,
+  "previous_cache_used": false,
+  "point_in_time_warning": "本快照只代表采集当日公开分类，不得倒推此前日期。"
+}
