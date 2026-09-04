@@ -1,0 +1,44 @@
+name: V5 Tail-to-Close Breadth Audit
+
+on:
+  schedule:
+    # 15:10 Beijing time on weekdays.
+    - cron: '10 7 * * 1-5'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/v5_close_audit.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  close-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TZ: Asia/Shanghai
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Reconcile 14:45 snapshot with official close-time snapshot
+        run: python v5_cli.py close_audit
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-close-audit-${{ github.run_id }}
+          path: v5_data/market/close_audit/
+          retention-days: 30
+
