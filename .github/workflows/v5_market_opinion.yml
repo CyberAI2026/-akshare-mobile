@@ -3,7 +3,7 @@ name: V5 Market Opinion Mining
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 13 * * 1-5"
+    - cron: "30 12 * * 1-5"
   push:
     branches: [main]
     paths:
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   opinion-mining:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     env:
       TZ: Asia/Shanghai
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -30,6 +30,7 @@ jobs:
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
       OPINION_ARTICLE_LIMIT: "20"
       OPINION_BATCH_SIZE: "4"
+      OPINION_PUSH_NOT_BEFORE_CN: "21:00"
     steps:
       - uses: actions/checkout@v4
         with:
