@@ -132,6 +132,9 @@ def active_trade_codes(
     """优先用实际加密持仓；部分卖出仍锁定，全部卖出后自动恢复候选资格。"""
     ledger = Path(ledger_path)
     secret_key = (key if key is not None else os.getenv("TRADING_DATA_KEY", "")).strip()
+    if secret_key and not ledger.exists():
+        print("PRIVATE_HOLDINGS_OK active_position_count=0 ledger_not_created")
+        return set()
     if ledger.exists():
         if not secret_key:
             print("private trade ledger exists but TRADING_DATA_KEY is missing; using conservative recommendation lock")
