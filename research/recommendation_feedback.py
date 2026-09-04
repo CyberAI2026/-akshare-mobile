@@ -86,6 +86,22 @@ def _reference_price(snap45: pd.DataFrame, code: str):
     return None
 
 
+def _recover_reference_from_tail(row: pd.Series):
+    """Recover a missed 14:45 reference from the immutable tail workbook, never from close price."""
+    trade_date = str(row.get("推荐日期", ""))[:10]
+    code = norm_code(row.get("股票代码"))
+    folder = Path("v5_data/tail") / trade_date
+    for path in sorted(folder.glob("1445_confirmation_*.xlsx"), reverse=True):
+        try:
+            snap = pd.read_excel(path, sheet_name="14点45实时快照", dtype={"股票代码": str})
+            value = _reference_price(snap, code)
+            if value is not None:
+                return value
+        except Exception:
+            continue
+    return None
+
+
 def register_tail_recommendations(final_decisions: pd.DataFrame, final_meta: dict,
                                   snap45: pd.DataFrame | None = None,
                                   obs_meta: dict | None = None) -> dict:
@@ -268,13 +284,19 @@ def update_all(asof=None, notify=True) -> dict:
     if not REGISTRY.exists():
         ROOT.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(columns=BASE_COLUMNS).to_csv(REGISTRY, index=False, encoding="utf-8-sig")
-    records = pd.read_csv(REGISTRY, dtype={"股票代码": str})
+    # Tracking columns intentionally mix numbers, booleans, dates and blanks.
+    # Object dtype prevents pandas from rejecting a later date/blank assignment into an all-NaN column.
+    records = pd.read_csv(REGISTRY, dtype={"股票代码": str}).astype(object)
     for idx, row in records.iterrows():
         code = norm_code(row.get("股票代码"))
         start = str(row.get("推荐日期"))
         try:
             bars = fetch_bars(code, start, str(asof))
             updates = evaluate_record(row, bars, asof)
+            if _number(row.get("推荐时参考价")) is None:
+                recovered = _recover_reference_from_tail(row)
+                if recovered is not None:
+                    updates["推荐时参考价"] = recovered
             for key, value in updates.items():
                 records.at[idx, key] = value
         except Exception as exc:
