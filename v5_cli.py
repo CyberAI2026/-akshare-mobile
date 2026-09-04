@@ -215,6 +215,7 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
     selected=set(str(x).zfill(6) for x in meta.get("selected_codes",[]) or [])
     lines=[
         f"<b>交易日：</b>{meta.get('trade_date','—')}",
+        f"<b>大盘评分：</b>{ma.get('overall_score_0_100','—')}/100｜{ma.get('trade_suitability','—')}",
         f"<b>实时市场：</b>{ma.get('risk_level','—')}｜相对昨收 {ma.get('change_vs_previous_close','—')}",
         f"<b>总体新仓上限：</b>{_fmt_pct(ma.get('overall_new_position_cap_pct'))}",
         f"<b>最终候选：</b>{meta.get('selected_count',0)}只",
@@ -223,6 +224,8 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
     sv=meta.get("sector_validation",{}) or {}; sa=meta.get("sector_assessment",{}) or {}
     lines.append(f"<b>板块数据：</b>{sv.get('status','—')}｜AI启用：{'是' if sv.get('ai_enabled') else '否'}")
     if sa.get("summary"): lines.append(f"<b>板块判断：</b>{sa.get('summary')}")
+    if sa.get("active_sectors"): lines.append(f"<b>主要活跃板块：</b>{'、'.join(map(str,sa.get('active_sectors',[])[:8]))}")
+    if sa.get("capital_inflow_leaders"): lines.append(f"<b>资金流入靠前板块：</b>{'、'.join(map(str,sa.get('capital_inflow_leaders',[])[:8]))}")
     if selected and final_df is not None and not final_df.empty:
         lines.append("<br><b>14:45最终结果：</b>")
         for _,r in final_df.iterrows():
@@ -234,6 +237,7 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
             try: risk_txt=f"{float(risk)*100:.1f}%"
             except Exception: risk_txt="—"
             lines.append(f"<b>{code} {name}</b><br>买入区间：{lo}–{hi}<br>建议仓位：{_fmt_pct(pos)}｜结构止损：{stop}｜结构风险：{risk_txt}<br>证据：{r.get('核心证据','')}<br>风险：{r.get('主要风险','')}<br>")
+            lines.append(f"基本面：{r.get('基本面理由','')}<br>技术面：{r.get('技术面理由','')}<br>资金面：{r.get('资金面理由','')}<br>事件面：{r.get('事件面理由','')}<br>板块：{r.get('板块理由','')}<br>")
     else:
         lines.append("<br><b>结论：</b>14:45没有符合条件的交易标的（0只）。")
     if meta.get("portfolio_note"): lines.append(f"<b>组合说明：</b>{meta.get('portfolio_note')}")
