@@ -161,10 +161,15 @@ def fetch_bars(code: str, start_date: str, end_date: str) -> pd.DataFrame:
     end = pd.to_datetime(end_date).date()
     if not cached.empty and cached["日期"].min() <= start and cached["日期"].max() >= end:
         return cached
-    raw = ak.stock_zh_a_hist(
-        symbol=code, period="daily",
-        start_date=start.strftime("%Y%m%d"), end_date=end.strftime("%Y%m%d"), adjust="",
-    )
+    try:
+        raw = ak.stock_zh_a_hist(
+            symbol=code, period="daily",
+            start_date=start.strftime("%Y%m%d"), end_date=end.strftime("%Y%m%d"), adjust="",
+        )
+    except Exception:
+        if not cached.empty:
+            return cached
+        raise
     if raw is None or raw.empty:
         return cached
     raw["日期"] = pd.to_datetime(raw["日期"], errors="coerce").dt.date
@@ -290,17 +295,20 @@ def update_all(asof=None, notify=True) -> dict:
     for idx, row in records.iterrows():
         code = norm_code(row.get("股票代码"))
         start = str(row.get("推荐日期"))
+        if _number(row.get("推荐时参考价")) is None:
+            recovered = _recover_reference_from_tail(row)
+            if recovered is not None:
+                records.at[idx, "推荐时参考价"] = recovered
         try:
             bars = fetch_bars(code, start, str(asof))
             updates = evaluate_record(row, bars, asof)
-            if _number(row.get("推荐时参考价")) is None:
-                recovered = _recover_reference_from_tail(row)
-                if recovered is not None:
-                    updates["推荐时参考价"] = recovered
             for key, value in updates.items():
                 records.at[idx, key] = value
         except Exception as exc:
-            records.at[idx, "数据状态"] = f"更新失败:{type(exc).__name__}:{exc}"
+            if _number(row.get("推荐日收盘价")) is not None:
+                records.at[idx, "数据状态"] = f"跟踪中（本次行情更新失败:{type(exc).__name__}）"
+            else:
+                records.at[idx, "数据状态"] = f"更新失败:{type(exc).__name__}:{exc}"
         time.sleep(0.12)
     for col in BASE_COLUMNS:
         if col not in records:

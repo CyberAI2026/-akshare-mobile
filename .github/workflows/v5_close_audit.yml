@@ -36,7 +36,7 @@ jobs:
       - name: Reconcile 14:45 snapshot with official close-time snapshot
         run: python v5_cli.py close_audit
       - name: Backfill recommendation close anchors
-        run: python research/recommendation_feedback.py update
+        run: python research/recommendation_feedback.py update --no-notify
       - if: always()
         uses: actions/upload-artifact@v4
         with:
