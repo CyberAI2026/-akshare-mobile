@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import os
 import random
@@ -772,6 +773,26 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
     input_tokens = getattr(usage, "input_tokens", None) if usage else None
     output_tokens = getattr(usage, "output_tokens", None) if usage else None
     total_tokens = getattr(usage, "total_tokens", None) if usage else None
+    # 只保存调用凭证与用量，不保存提示词、第三方正文或密钥。
+    audit_dir = Path("v5_data/openai_audit")
+    audit_dir.mkdir(parents=True, exist_ok=True)
+    audit_record = {
+        "status": "succeeded",
+        "kind": kind,
+        "requested_at_cn": requested_at,
+        "completed_at_cn": now_cn().isoformat(),
+        "response_id": getattr(resp, "id", None),
+        "model": getattr(resp, "model", model),
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
+        "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+    }
+    with (audit_dir / "calls.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(audit_record, ensure_ascii=False) + "\n")
+    (audit_dir / "latest.json").write_text(
+        json.dumps(audit_record, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     print(
         "OPENAI_API_CALL_OK "
         f"requested_at={requested_at} response_id={getattr(resp, 'id', None)} "
