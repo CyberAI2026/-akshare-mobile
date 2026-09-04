@@ -78,7 +78,7 @@ def _reference_price(snap45: pd.DataFrame, code: str):
     rows = x[x["股票代码"] == code]
     if rows.empty:
         return None
-    for col in ["最新价", "现价", "价格", "收盘", "收盘价"]:
+    for col in ["当前价", "最新价", "现价", "价格", "收盘", "收盘价"]:
         if col in rows:
             value = _number(rows.iloc[-1][col])
             if value is not None:
