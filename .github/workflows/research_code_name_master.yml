@@ -31,8 +31,13 @@ jobs:
           git config user.name "V5 Automation"
           git config user.email "actions@users.noreply.github.com"
           git add v5_data/reference/a_share_code_name_master.csv
-          git diff --cached --quiet || git commit -m "Refresh A-share code-name reference"
-          git push
+          if git diff --cached --quiet; then
+            echo "No code-name changes to commit"
+          else
+            git commit -m "Refresh A-share code-name reference"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
       - if: always()
         uses: actions/upload-artifact@v4
         with:
