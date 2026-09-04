@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: v5-tail-data-test
+  cancel-in-progress: true
+
 jobs:
   tail-data-test:
     runs-on: ubuntu-latest
