@@ -1506,8 +1506,6 @@ def fetch_public_sector_flow(fetched_at: datetime | None = None) -> tuple[dict[s
     """获取同花顺概念/行业即时及多周期资金数据，作为增强层而非个股结构替代。"""
     fetched_at=_as_cn_time(fetched_at)
     trade_date=fetched_at.date()
-    if fetched_at.hour < 15:
-        trade_date-=timedelta(days=1)
     try:
         for _ in range(10):
             if is_trade_day(trade_date): break
