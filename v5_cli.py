@@ -300,18 +300,25 @@ def notify_failure(stage: str, err: Exception | str):
 
 
 def git_commit(message: str):
-    """V5只在阶段完成时提交，避免V4每10只提交一次造成大量额外开销。"""
-    try:
-        subprocess.run(["git", "config", "user.name", "V5 Automation"], check=False)
-        subprocess.run(["git", "config", "user.email", "actions@users.noreply.github.com"], check=False)
-        subprocess.run(["git", "add", "v5_data"], check=False)
-        diff = subprocess.run(["git", "diff", "--cached", "--quiet"], check=False)
-        if diff.returncode == 0:
+    """阶段完成时可靠写回；并发维护提交出现时变基重试，禁止静默丢失结果。"""
+    subprocess.run(["git", "config", "user.name", "V5 Automation"], check=False)
+    subprocess.run(["git", "config", "user.email", "actions@users.noreply.github.com"], check=False)
+    subprocess.run(["git", "add", "v5_data"], check=True)
+    diff = subprocess.run(["git", "diff", "--cached", "--quiet"], check=False)
+    if diff.returncode == 0:
+        return
+    subprocess.run(["git", "commit", "-m", message], check=True)
+    for attempt in range(1, 4):
+        pull = subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
+        if pull.returncode != 0:
+            subprocess.run(["git", "rebase", "--abort"], check=False)
+            raise RuntimeError("研究结果写回前rebase失败")
+        push = subprocess.run(["git", "push", "origin", "HEAD:main"], check=False)
+        if push.returncode == 0:
             return
-        subprocess.run(["git", "commit", "-m", message], check=False)
-        subprocess.run(["git", "push"], check=False)
-    except Exception as e:
-        print("git commit warning:", e)
+        print(f"V5_GIT_PUSH_RETRY attempt={attempt}")
+        time.sleep(attempt * 2)
+    raise RuntimeError("研究结果连续3次推送失败")
 
 
 def checkpoint_factory(stage_dir: Path):
