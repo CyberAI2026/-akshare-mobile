@@ -182,8 +182,8 @@ with t2:
 
 with t3:
     st.subheader("14:40 / 14:45 尾盘任务")
-    st.write("V5.3已把尾盘任务从盘后研究中彻底拆开。定时任务只负责读取‘明确标记给今天使用’的≤10只观察池；没有有效观察池或日期不符就安全退出。")
-    st.info("V5.3盘后OpenAI生成带目标交易日期的0–10只观察池；尾盘任务只接受日期锁通过的观察池，并在14:45调用OpenAI做最终0–2确认，输出买入区间、总体/个股仓位和结构止损参考。")
+    st.write("V5.4已把尾盘任务从盘后研究中彻底拆开。定时任务只负责读取‘明确标记给今天使用’的≤10只观察池；没有有效观察池或日期不符就安全退出。")
+    st.info("V5.4盘后OpenAI生成带目标交易日期的0–10只观察池；尾盘任务只接受日期锁通过的观察池，并在14:45调用OpenAI做最终0–5确认，输出买入区间、总体/个股仓位和结构止损参考。")
     c = cfg()
     if c:
         if st.button("手动测试尾盘任务（安全校验）", use_container_width=True):
@@ -460,7 +460,7 @@ with t5:
 - 尾盘任务增加交易日、目标日期、上一交易日来源、池大小等安全锁。
 - 每周五自动备份主池到GitHub。
 
-**已接入：OpenAI API盘后30–40→0–10 + 14:45最终0→2，并通过 PushPlus 推送微信通知。**
+**已接入：OpenAI API盘后30–40→0–10 + 14:45最终0→5，并通过 PushPlus 推送微信通知。**
 """)
     st.code('''Streamlit Secrets：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"\nTRADING_DATA_KEY = "Fernet密钥"\nTRADING_UI_PASSWORD = "交易台账独立口令（可选）"\n\nGitHub Actions Secrets：\nTRADING_DATA_KEY = "与Streamlit完全相同的Fernet密钥"''')
     st.warning("旧的 v4_background.yml 必须去掉 schedule；V5安装包中已提供一个‘仅手动兼容版’覆盖文件，防止再次出现#9那种晚上误触发。")
