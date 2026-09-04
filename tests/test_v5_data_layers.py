@@ -139,6 +139,36 @@ class SectorFlowTests(unittest.TestCase):
         self.assertEqual(len(usable),5)
 
 
+class IdentityAndOpenTradeTests(unittest.TestCase):
+    def test_latest_name_master_overrides_historical_name(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            master = Path(d) / "names.csv"
+            pd.DataFrame([{"股票代码":"600801","股票名称":"华新建材"}]).to_csv(master,index=False,encoding="utf-8-sig")
+            out = cli.refresh_stock_names(pd.DataFrame([{"股票代码":"600801","股票名称":"华新水泥"}]), master)
+        self.assertEqual(out.iloc[0]["股票名称"], "华新建材")
+
+    def test_unclosed_trade_is_excluded_but_explicit_exit_is_allowed(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            registry = Path(d) / "recommendations.csv"
+            pd.DataFrame([
+                {"股票代码":"600801","决策":"TRADE","数据状态":"跟踪中"},
+                {"股票代码":"000001","决策":"TRADE","数据状态":"D+10完成"},
+                {"股票代码":"000002","决策":"TRADE","数据状态":"已退出"},
+            ]).to_csv(registry,index=False,encoding="utf-8-sig")
+            pool = pd.DataFrame([
+                {"股票代码":"600801","股票名称":"华新建材"},
+                {"股票代码":"000001","股票名称":"平安银行"},
+                {"股票代码":"000002","股票名称":"万科A"},
+            ])
+            eligible, excluded = cli.exclude_active_trades(pool, registry)
+        self.assertEqual(excluded, ["000001", "600801"])
+        self.assertEqual(eligible["股票代码"].tolist(), ["000002"])
+
+
 class NotificationTests(unittest.TestCase):
     def test_pushplus_retries_then_succeeds(self):
         response=MagicMock()
