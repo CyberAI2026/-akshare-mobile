@@ -1,0 +1,12 @@
+{
+  "asof": "2026-09-04",
+  "total_recommendations": 0,
+  "tracking": 0,
+  "completed_d10": 0,
+  "due_cohorts": {
+    "D+3": [],
+    "D+5": [],
+    "D+10": []
+  },
+  "method": "推荐日正式收盘价为锚；D+N按后续第N个交易日收盘；止损触碰按推荐后交易日最低价<=结构止损位。"
+}
