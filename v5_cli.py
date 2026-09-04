@@ -237,7 +237,7 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
         lines.append("<br><b>结论：</b>14:45没有符合条件的交易标的（0只）。")
     if meta.get("portfolio_note"): lines.append(f"<b>组合说明：</b>{meta.get('portfolio_note')}")
     lines.append("<br><small>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</small>")
-    pushplus_notify("A股二次启动｜14:45尾盘决策", "<br>".join(lines))
+    return pushplus_notify("A股二次启动｜14:45尾盘决策", "<br>".join(lines))
 
 
 def notify_failure(stage: str, err: Exception | str):
@@ -1050,15 +1050,20 @@ def run_tail():
             final_decisions, final_meta, snap45=snap45, obs_meta=obs_meta
         )
         payload["feedback_registration"] = feedback_registration
-        payload["status"]="completed"; payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
+        payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
+        push_ok = bool(notify_tail_success(final_decisions, final_meta))
+        payload["pushplus_delivery_ok"] = push_ok
+        payload["status"] = "completed" if push_ok else "completed_push_failed"
         save_json(base/"tail_summary.json",payload); save_json(LATEST/"last_tail_summary.json",payload)
         git_commit(f"V5.3 tail AI completed {today}")
-        notify_tail_success(final_decisions, final_meta)
+        if not push_ok:
+            raise RuntimeError("PushPlus tail delivery exhausted retries")
     except Exception as e:
-        err={"status":"tail_ai_failed","trade_date":str(today),"time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),"rule":"失败时不生成伪0-5结果"}
+        delivery_failed = "PushPlus tail delivery" in str(e)
+        err={"status":"tail_delivery_failed" if delivery_failed else "tail_ai_failed","trade_date":str(today),"time_cn":now_cn().isoformat(),"error_type":type(e).__name__,"error":str(e),"rule":"失败时不生成伪0-5结果" if not delivery_failed else "OpenAI结果已保存，但微信送达未确认"}
         save_json(base/"tail_ai_error.json",err); save_json(LATEST/"last_tail_ai_error.json",err)
         git_commit(f"V5.3 tail AI failed {today}")
-        notify_failure("14:45尾盘OpenAI确认", e)
+        notify_failure("尾盘微信推送" if delivery_failed else "14:45尾盘OpenAI确认", e)
         raise
     print(json.dumps(payload, ensure_ascii=False, default=str, indent=2))
 
