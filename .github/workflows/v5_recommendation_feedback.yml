@@ -53,9 +53,19 @@ jobs:
           fi
       - name: Build stock-to-multiple-sector attribution
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '40 11 * * 1-5'
+        shell: bash
         run: |
+          MEMBERSHIP="v5_data/context/sector_membership/working.csv.gz"
+          if [ ! -f "$MEMBERSHIP" ]; then
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "Sector membership not committed yet; attribution will run automatically after the mapping commit."
+              exit 0
+            fi
+            echo "Required sector membership is missing: $MEMBERSHIP"
+            exit 1
+          fi
           python research/stock_sector_attribution.py \
-            --membership v5_data/context/sector_membership/working.csv.gz
+            --membership "$MEMBERSHIP"
       - name: Commit versioned feedback
         run: |
           git config user.name "V5 Feedback Automation"
