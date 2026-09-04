@@ -702,6 +702,13 @@ def fetch_realtime_package(pool: pd.DataFrame) -> tuple[pd.DataFrame,pd.DataFram
 
 def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) -> tuple[dict[str,pd.DataFrame], pd.DataFrame]:
     """为少量尾盘候选补充基本资料、近10日资金流与最新事件标题；失败项显式进入QA。"""
+    original_request=requests.sessions.Session.request
+    if not getattr(original_request,"_v5_candidate_timeout_wrapped",False):
+        def bounded_request(self,method,url,**kwargs):
+            kwargs.setdefault("timeout",12)
+            return original_request(self,method,url,**kwargs)
+        bounded_request._v5_candidate_timeout_wrapped=True
+        requests.sessions.Session.request=bounded_request
     profiles=[]; flows=[]; news_rows=[]; qa=[]
     for _, row in pool.iterrows():
         code=str(row["股票代码"]).zfill(6); name=str(row.get("股票名称","") or "")
