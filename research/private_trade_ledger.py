@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import math
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -52,8 +53,13 @@ def normalize_side(value) -> str:
 
 
 def _date_text(value) -> str:
+    if value is None or pd.isna(value):
+        raise ValueError("交易日期不能为空")
     try:
-        return pd.Timestamp(value).date().isoformat()
+        stamp = pd.Timestamp(value)
+        if pd.isna(stamp):
+            raise ValueError("交易日期不能为空")
+        return stamp.date().isoformat()
     except Exception as exc:
         raise ValueError(f"交易日期无效：{value}") from exc
 
@@ -103,15 +109,15 @@ def normalize_transactions(frame: pd.DataFrame) -> pd.DataFrame:
     for _, raw in source.iterrows():
         price = float(raw.get("成交价格"))
         qty_float = float(raw.get("成交数量"))
-        if price <= 0:
+        if not math.isfinite(price) or price <= 0:
             raise ValueError("成交价格必须大于0")
-        if qty_float <= 0 or not qty_float.is_integer():
+        if not math.isfinite(qty_float) or qty_float <= 0 or not qty_float.is_integer():
             raise ValueError("成交数量必须是正整数")
         qty = int(qty_float)
         fee = float(raw.get("手续费", 0) or 0)
         if pd.isna(fee):
             fee = 0.0
-        if fee < 0:
+        if not math.isfinite(fee) or fee < 0:
             raise ValueError("手续费不能为负数")
         amount = round(price * qty, 2)
         supplied = raw.get("成交金额", None)
