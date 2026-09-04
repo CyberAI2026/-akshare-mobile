@@ -35,10 +35,11 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Reconcile 14:45 snapshot with official close-time snapshot
         run: python v5_cli.py close_audit
+      - name: Backfill recommendation close anchors
+        run: python research/recommendation_feedback.py update
       - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: V5-close-audit-${{ github.run_id }}
           path: v5_data/market/close_audit/
           retention-days: 30
-
