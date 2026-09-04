@@ -221,6 +221,18 @@ class PrivateTradeLedgerTests(unittest.TestCase):
             active = cli.active_trade_codes(registry, ledger, key.decode())
         self.assertEqual(active, {"000001"})
 
+    def test_configured_missing_ledger_means_no_actual_position(self):
+        import tempfile
+        from pathlib import Path
+        from cryptography.fernet import Fernet
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            registry = root / "recommendations.csv"
+            pd.DataFrame([{"股票代码": "000002", "决策": "TRADE", "数据状态": "跟踪中"}]).to_csv(registry, index=False)
+            active = cli.active_trade_codes(registry, root / "missing.enc", Fernet.generate_key().decode())
+        self.assertEqual(active, set())
+
     def test_oversell_is_rejected(self):
         from research.private_trade_ledger import append_transactions, empty_transactions
         with self.assertRaisesRegex(ValueError, "超过此前持仓"):
