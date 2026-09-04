@@ -105,7 +105,6 @@ with t1:
                 data = stocks.to_csv(index=False).encode("utf-8-sig")
                 gh_put_bytes(c, path, data, f"V5 daily strong batch {stamp}")
                 gh_put_bytes(c, "v5_data/inbox/latest_daily_batch.csv", data, f"V5 latest daily batch {stamp}")
-                gh_dispatch(c, AFTER_CLOSE_WORKFLOW, {"batch_path": path})
                 st.success("已提交。可以关闭Safari；后台会维护主池、生成30–40只研究包，并调用OpenAI形成0–10只次日观察池。")
                 st.link_button("查看盘后任务", actions_url(c, AFTER_CLOSE_WORKFLOW), use_container_width=True)
             except Exception as e: st.error(f"提交失败：{e}")
