@@ -380,7 +380,7 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
                 other_lines.append(f"{_esc(str(r.get('股票代码','')).zfill(6))} {_esc(r.get('股票名称',''))}｜<strong>{_esc(r.get('decision','WAIT'))}</strong><br>{_esc(r.get('核心证据',''))}")
             lines.append(_section("其余观察股", "<br><br>".join(other_lines), "#64748b"))
     if meta.get("portfolio_note"): lines.append(_section("组合与风险",_esc(meta.get('portfolio_note')),"#b45309"))
-    lines.append("<div style='font-size:12px;color:#64748b;margin-top:12px'>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</div></div>")
+    lines.append("<div style='font-size:12px;color:#64748b;margin-top:12px'>盘后请在系统“交易与持仓”页确认实际成交：数量为0或未填写表示未买；忘记登记可在以后补录。<br>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</div></div>")
     return pushplus_notify("A股二次启动｜14:45尾盘决策", "".join(lines))
 
 
