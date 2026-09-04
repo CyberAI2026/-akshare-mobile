@@ -364,5 +364,5 @@ with t5:
 
 **已接入：OpenAI API盘后30–40→0–10 + 14:45最终0→2，并通过 PushPlus 推送微信通知。**
 """)
-    st.code('''Streamlit Secrets 保持现有：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"''')
+    st.code('''Streamlit Secrets：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"\nTRADING_DATA_KEY = "Fernet密钥"\nTRADING_UI_PASSWORD = "交易台账独立口令"\n\nGitHub Actions Secrets：\nTRADING_DATA_KEY = "与Streamlit完全相同的Fernet密钥"''')
     st.warning("旧的 v4_background.yml 必须去掉 schedule；V5安装包中已提供一个‘仅手动兼容版’覆盖文件，防止再次出现#9那种晚上误触发。")
