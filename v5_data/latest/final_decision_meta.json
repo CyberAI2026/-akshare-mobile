@@ -1,0 +1,37 @@
+{
+  "status": "valid",
+  "trade_date": "2026-09-04",
+  "generated_at_cn": "2026-09-04T14:48:26.062974+08:00",
+  "selected_codes": [
+    "600801"
+  ],
+  "selected_count": 1,
+  "market_assessment": {
+    "overall_score_0_100": 31,
+    "trade_suitability": "谨慎",
+    "risk_level": "高",
+    "change_vs_previous_close": "接近",
+    "summary": "计算事实：14:45全市场上涨1865家、下跌3488家，净上涨家数-1623；较前一日净上涨家数改善102家、成交额增加约8.0%，但下跌家数仍显著多于上涨家数，跌5%以上家数335家。研究判断：市场内部风险偏高且修复不足，允许仅对个股结构确认较完整的对象小仓位参与，其余应放弃或等待。",
+    "overall_new_position_cap_pct": 8
+  },
+  "sector_assessment": {
+    "status": "实验性未启用",
+    "active_sectors": [
+      "未启用：无正式板块强弱与持续性数据"
+    ],
+    "capital_inflow_leaders": [
+      "未启用：无可核验板块资金流数据"
+    ],
+    "summary": "板块验证存在警告且AI板块增强未启用，不能对候选股所属板块、板块强弱或资金共振形成研究结论。"
+  },
+  "sector_validation": {
+    "status": "实验性有警告",
+    "table_count": 5,
+    "failure_count": 5,
+    "warning_count": 4,
+    "ai_enabled": false
+  },
+  "portfolio_note": "组合仅保留华新水泥1只，计划新开仓合计8%，低于高风险市场下的总新仓上限。该选择基于14:45时点的结构相对确认，不代表趋势必然延续。23.82仅为结构止损参考位；A股T+1限制下，当日买入无法当日卖出，隔夜跳空、流动性变化或市场继续走弱均可能使实际损失超过该距离。其余对象因结构破坏、确认不足或关键实时可比性不足而不纳入交易。",
+  "model": "gpt-5.6-terra",
+  "t1_note": "结构止损不是保证最大亏损；当日买入不可卖出，隔夜跳空可能扩大损失。"
+}

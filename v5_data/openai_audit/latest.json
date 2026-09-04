@@ -1,0 +1,12 @@
+{
+  "status": "succeeded",
+  "kind": "14:45尾盘0-5最终确认",
+  "requested_at_cn": "2026-09-04T14:47:44.197704+08:00",
+  "completed_at_cn": "2026-09-04T14:48:26.059478+08:00",
+  "response_id": "resp_0fd73cb128c89d58006a9a6991880887d1b5bd874d77eae7f9",
+  "model": "gpt-5.6-terra",
+  "input_tokens": 12357,
+  "output_tokens": 3346,
+  "total_tokens": 15703,
+  "prompt_sha256": "f6d5c791279070622a4c54ca1a652a02e770b4e16507e7069d0f5c42f76304c7"
+}
