@@ -1,19 +1,33 @@
+import hmac
 import io
 import os
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
 import streamlit as st
 
 from v5_core import GithubConfig, gh_dispatch, gh_headers, gh_put_bytes, pool_from_text, pool_from_upload, split_stock_and_indices
+from research.private_trade_ledger import (
+    TRANSACTION_COLUMNS,
+    append_transactions,
+    build_positions,
+    decrypt_transactions,
+    empty_transactions,
+    encrypt_transactions,
+    normalize_code,
+    normalize_transactions,
+)
 
 AFTER_CLOSE_WORKFLOW = "v5_after_close.yml"
 TAIL_WORKFLOW = "v5_tail_confirmation.yml"
 BACKUP_WORKFLOW = "v5_weekly_backup.yml"
+TRADE_LEDGER_PATH = "v5_data/private/trades.enc"
+CN_TZ = ZoneInfo("Asia/Shanghai")
 
-st.set_page_config(page_title="A股二次启动研究系统 V5.3", page_icon="📈", layout="wide")
-st.title("A股强势股二次启动研究系统 V5.3｜可审计市场口径 + 板块增强 + 尾盘AI")
+st.set_page_config(page_title="A股二次启动研究系统 V5.4", page_icon="📈", layout="wide")
+st.title("A股强势股二次启动研究系统 V5.4｜研究、交易与持仓闭环")
 st.caption("每日提交强势股 → 云端主池维护 → Python约500→150–200→30–40 → OpenAI研究层30–40→0–10只次日观察池")
 
 
@@ -69,7 +83,7 @@ def actions_url(c, workflow=None):
     return f"https://github.com/{c.repo}/actions/workflows/{workflow}" if workflow else f"https://github.com/{c.repo}/actions"
 
 
-t1, t2, t3, t4 = st.tabs(["🌙 盘后提交", "☁️ 主池/研究结果", "⏱️ 尾盘任务", "⚙️ 设置与版本"])
+t1, t2, t3, t4, t5 = st.tabs(["🌙 盘后提交", "☁️ 主池/研究结果", "⏱️ 尾盘任务", "📒 交易与持仓", "⚙️ 设置与版本"])
 
 with t1:
     st.subheader("每天只提交你今天看到的强势股")
@@ -180,6 +194,162 @@ with t3:
     st.caption("正式定时：工作日 UTC 06:40 = 北京时间14:40。GitHub cron可能有排队延迟，因此未来仍保留手动备用触发。")
 
 with t4:
+    st.subheader("加密交易台账与当前持仓")
+    st.caption("盘后录入实际买卖成交。后台只用仍有持仓的股票代码阻止重复推荐；成交价、数量、金额和成本不会送入OpenAI。")
+    c = cfg()
+    trade_key = secret("TRADING_DATA_KEY")
+    trade_password = secret("TRADING_UI_PASSWORD")
+
+    if not c:
+        st.warning("尚未配置 GITHUB_PAT，无法读取或保存加密交易台账。")
+    elif not trade_key or not trade_password:
+        st.warning("交易台账尚未启用。请先在 Streamlit Secrets 配置 TRADING_DATA_KEY 和 TRADING_UI_PASSWORD，并在 GitHub Actions Secrets 配置同一 TRADING_DATA_KEY。")
+        st.info("在密钥配置完成前，本页不会接收交易数据，避免把个人成交信息写入公开仓库明文。")
+    else:
+        if "trade_access_ok" not in st.session_state:
+            st.session_state.trade_access_ok = False
+        if "trade_access_attempts" not in st.session_state:
+            st.session_state.trade_access_attempts = 0
+
+        if not st.session_state.trade_access_ok:
+            access_password = st.text_input("交易台账访问口令", type="password", key="trade_access_password")
+            locked = st.session_state.trade_access_attempts >= 5
+            if st.button("进入交易台账", type="primary", disabled=locked):
+                if hmac.compare_digest(access_password, trade_password):
+                    st.session_state.trade_access_ok = True
+                    st.session_state.trade_access_attempts = 0
+                    st.rerun()
+                else:
+                    st.session_state.trade_access_attempts += 1
+                    st.error("访问口令不正确。")
+            if locked:
+                st.error("本次会话连续失败5次，请关闭页面后重新进入。")
+        else:
+            top_left, top_right = st.columns([4, 1])
+            top_left.success("交易台账已解锁；数据仅在本次页面会话中解密。")
+            if top_right.button("退出台账", use_container_width=True):
+                st.session_state.trade_access_ok = False
+                st.rerun()
+
+            ledger_error = None
+            try:
+                encrypted_blob = gh_get_file(c, TRADE_LEDGER_PATH)
+                transactions = decrypt_transactions(encrypted_blob, trade_key) if encrypted_blob else empty_transactions()
+            except Exception as exc:
+                ledger_error = str(exc)
+                transactions = empty_transactions()
+                st.error(f"无法读取交易台账：{exc}")
+
+            if ledger_error is None:
+                name_master = gh_get_csv(c, "v5_data/reference/a_share_code_name_master.csv")
+                name_map = {}
+                if not name_master.empty and {"股票代码", "股票名称"}.issubset(name_master.columns):
+                    for _, name_row in name_master.iterrows():
+                        try:
+                            name_map[normalize_code(name_row["股票代码"])] = str(name_row["股票名称"]).strip()
+                        except Exception:
+                            pass
+
+                positions = build_positions(transactions)
+                active_positions = positions[positions["持仓数量"] > 0].copy() if not positions.empty else positions
+                m1, m2, m3 = st.columns(3)
+                m1.metric("当前持仓股票", len(active_positions))
+                m2.metric("当前持仓股数", int(active_positions["持仓数量"].sum()) if not active_positions.empty else 0)
+                m3.metric("累计交易记录", len(transactions))
+                if not active_positions.empty:
+                    st.markdown("#### 当前持仓")
+                    st.dataframe(active_positions, use_container_width=True, hide_index=True)
+                else:
+                    st.info("当前没有已登记持仓。")
+
+                manual_tab, upload_tab, history_tab = st.tabs(["手工录入", "批量上传", "交易历史"])
+                with manual_tab:
+                    with st.form("manual_trade_form", clear_on_submit=True):
+                        a1, a2, a3 = st.columns(3)
+                        trade_date = a1.date_input("交易日期", value=datetime.now(CN_TZ).date())
+                        trade_time = a2.time_input("交易时间", value=datetime.now(CN_TZ).time().replace(microsecond=0))
+                        account = a3.text_input("账户", value="默认账户")
+                        b1, b2, b3 = st.columns(3)
+                        side = b1.selectbox("操作", ["买入", "卖出"])
+                        code = b2.text_input("股票代码", placeholder="600801")
+                        manual_name = b3.text_input("股票名称（可留空自动回填）")
+                        c1, c2, c3 = st.columns(3)
+                        price = c1.number_input("成交价格", min_value=0.0, step=0.01, format="%.4f")
+                        quantity = c2.number_input("成交数量（股）", min_value=0, step=100)
+                        fee = c3.number_input("手续费", min_value=0.0, step=0.01, format="%.2f")
+                        note = st.text_input("备注（可选）")
+                        submitted = st.form_submit_button("确认并加密保存", type="primary", use_container_width=True)
+                    if submitted:
+                        try:
+                            normalized_code = normalize_code(code)
+                            current_name = name_map.get(normalized_code, manual_name.strip())
+                            if not current_name:
+                                raise ValueError("代码名称主表没有匹配结果，请手工填写股票名称")
+                            incoming = normalize_transactions(pd.DataFrame([{
+                                "交易日期": trade_date, "交易时间": trade_time, "账户": account,
+                                "操作": side, "股票代码": normalized_code, "股票名称": current_name,
+                                "成交价格": price, "成交数量": quantity, "手续费": fee, "备注": note,
+                            }]))
+                            updated = append_transactions(transactions, incoming)
+                            if len(updated) == len(transactions):
+                                st.info("这笔完全相同的记录已经存在，本次未重复写入。")
+                            else:
+                                gh_put_bytes(c, TRADE_LEDGER_PATH, encrypt_transactions(updated, trade_key), "Update encrypted private trade ledger")
+                                st.success(f"已加密保存：{side} {normalized_code} {current_name}，成交金额 {float(price) * int(quantity):,.2f} 元。")
+                                st.rerun()
+                        except Exception as exc:
+                            st.error(f"保存失败：{exc}")
+
+                with upload_tab:
+                    template = pd.DataFrame(columns=["交易日期", "交易时间", "账户", "操作", "股票代码", "股票名称", "成交价格", "成交数量", "成交金额", "手续费", "备注"])
+                    st.download_button("下载批量录入模板CSV", template.to_csv(index=False).encode("utf-8-sig"), file_name="trade_import_template.csv", mime="text/csv")
+                    trade_upload = st.file_uploader("上传成交记录 Excel/CSV/XLS", type=["xlsx", "xls", "csv"], key="tradebatch")
+                    prepared = None
+                    if trade_upload:
+                        try:
+                            raw_bytes = trade_upload.getvalue()
+                            if trade_upload.name.lower().endswith(".csv"):
+                                try:
+                                    raw_trades = pd.read_csv(io.BytesIO(raw_bytes), dtype={"股票代码": str}, encoding="utf-8-sig")
+                                except UnicodeDecodeError:
+                                    raw_trades = pd.read_csv(io.BytesIO(raw_bytes), dtype={"股票代码": str}, encoding="gb18030")
+                            else:
+                                raw_trades = pd.read_excel(io.BytesIO(raw_bytes), dtype={"股票代码": str})
+                            prepared = normalize_transactions(raw_trades)
+                            for idx, trade_row in prepared.iterrows():
+                                if not str(trade_row["股票名称"]).strip():
+                                    prepared.at[idx, "股票名称"] = name_map.get(trade_row["股票代码"], "")
+                            st.dataframe(prepared, use_container_width=True, hide_index=True)
+                        except Exception as exc:
+                            st.error(f"文件识别失败：{exc}")
+                    if st.button("确认导入并加密保存", type="primary", disabled=prepared is None or prepared.empty, use_container_width=True):
+                        try:
+                            unnamed = prepared[prepared["股票名称"].astype(str).str.strip().eq("")]
+                            if not unnamed.empty:
+                                raise ValueError("以下代码无法自动补全名称：" + "、".join(unnamed["股票代码"].tolist()))
+                            updated = append_transactions(transactions, prepared)
+                            added = len(updated) - len(transactions)
+                            if added <= 0:
+                                st.info("上传内容均已存在，本次未重复写入。")
+                            else:
+                                gh_put_bytes(c, TRADE_LEDGER_PATH, encrypt_transactions(updated, trade_key), "Update encrypted private trade ledger")
+                                st.success(f"已加密导入 {added} 笔交易记录。")
+                                st.rerun()
+                        except Exception as exc:
+                            st.error(f"导入失败：{exc}")
+
+                with history_tab:
+                    if transactions.empty:
+                        st.info("尚无交易历史。")
+                    else:
+                        display_columns = [col for col in TRANSACTION_COLUMNS if col != "交易ID"]
+                        st.dataframe(transactions[display_columns].sort_values(["交易日期", "交易时间"], ascending=False), use_container_width=True, hide_index=True)
+                        with st.expander("查看已清仓汇总"):
+                            closed = positions[positions["持仓数量"] == 0] if not positions.empty else positions
+                            st.dataframe(closed, use_container_width=True, hide_index=True)
+
+
+with t5:
     st.subheader("一次性设置与当前开发边界")
     st.markdown("""
 当前阶段已经实现/准备实现：
