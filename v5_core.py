@@ -700,6 +700,68 @@ def fetch_realtime_package(pool: pd.DataFrame) -> tuple[pd.DataFrame,pd.DataFram
     return snap, minute, pd.DataFrame(qa)
 
 
+def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) -> tuple[dict[str,pd.DataFrame], pd.DataFrame]:
+    """为少量尾盘候选补充基本资料、近10日资金流与最新事件标题；失败项显式进入QA。"""
+    profiles=[]; flows=[]; news_rows=[]; qa=[]
+    for _, row in pool.iterrows():
+        code=str(row["股票代码"]).zfill(6); name=str(row.get("股票名称","") or "")
+        try:
+            info=ak.stock_individual_info_em(symbol=code, timeout=15)
+            item=_find_col(info.columns,["item","项目","指标"])
+            value=_find_col(info.columns,["value","值","内容"])
+            if info.empty or item is None or value is None:
+                raise RuntimeError("个股资料为空或字段异常")
+            for _, r in info.iterrows():
+                profiles.append({"股票代码":code,"股票名称":name,"资料项":str(r[item]),"资料值":r[value],
+                                 "数据时间":now_cn().isoformat(),"数据源":"东方财富个股资料/AKShare"})
+            qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"成功","行数":len(info),"错误":""})
+        except Exception as exc:
+            qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
+        try:
+            market="sh" if code.startswith(("5","6","9")) else "sz"
+            ff=ak.stock_individual_fund_flow(stock=code, market=market)
+            if ff is None or ff.empty:
+                raise RuntimeError("个股资金流为空")
+            date_col=_find_col(ff.columns,["日期","date"])
+            if date_col is not None:
+                ff[date_col]=pd.to_datetime(ff[date_col],errors="coerce")
+                ff=ff.sort_values(date_col).tail(10)
+            else:
+                ff=ff.tail(10)
+            ff.insert(0,"股票名称",name); ff.insert(0,"股票代码",code)
+            ff["数据源"]="东方财富个股资金流/AKShare"
+            flows.append(ff)
+            qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"成功","行数":len(ff),"错误":""})
+        except Exception as exc:
+            qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
+        try:
+            nw=ak.stock_news_em(symbol=code)
+            if nw is None or nw.empty:
+                raise RuntimeError("个股新闻为空")
+            title_col=_find_col(nw.columns,["新闻标题","标题"])
+            time_col=_find_col(nw.columns,["发布时间","时间","日期"])
+            source_col=_find_col(nw.columns,["文章来源","来源"])
+            url_col=_find_col(nw.columns,["新闻链接","链接","url"])
+            if title_col is None:
+                raise RuntimeError("新闻标题字段缺失")
+            if time_col is not None:
+                nw[time_col]=pd.to_datetime(nw[time_col],errors="coerce")
+                nw=nw.sort_values(time_col,ascending=False)
+            for _, r in nw.head(max(1,news_limit)).iterrows():
+                news_rows.append({"股票代码":code,"股票名称":name,"发布时间":r.get(time_col,"") if time_col else "",
+                                  "新闻标题":str(r.get(title_col,"")),"来源":str(r.get(source_col,"")) if source_col else "",
+                                  "链接":str(r.get(url_col,"")) if url_col else "","数据源":"东方财富个股新闻/AKShare"})
+            qa.append({"股票代码":code,"股票名称":name,"数据层":"事件标题","状态":"成功","行数":min(len(nw),max(1,news_limit)),"错误":""})
+        except Exception as exc:
+            qa.append({"股票代码":code,"股票名称":name,"数据层":"事件标题","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
+    tables={
+        "候选基本资料":pd.DataFrame(profiles),
+        "候选近10日资金流":pd.concat(flows,ignore_index=True) if flows else pd.DataFrame(),
+        "候选最新事件标题":pd.DataFrame(news_rows),
+    }
+    return tables,pd.DataFrame(qa)
+
+
 def confirmation_metrics(snapshot: pd.DataFrame, minute: pd.DataFrame) -> pd.DataFrame:
     rows=[]
     for _,r in snapshot.iterrows():
