@@ -5,7 +5,7 @@ on:
   schedule:
     # GitHub cron is not minute-precise. Start early, then wait inside the runner
     # for 14:40 Asia/Shanghai; this absorbs ordinary scheduler delay.
-    - cron: '25 6 * * 1-5'
+    - cron: '10 6 * * 1-5'
 
 permissions:
   contents: write
@@ -39,6 +39,32 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Validate today's dated inputs and required secrets
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          today = str(datetime.now(ZoneInfo("Asia/Shanghai")).date())
+          pool = Path("v5_data/latest/observation_pool.csv")
+          meta_path = Path("v5_data/latest/observation_pool_meta.json")
+          if not pool.exists() or not meta_path.exists():
+              raise SystemExit("TAIL_PREFLIGHT_FAILED: observation pool files missing")
+          meta = json.loads(meta_path.read_text(encoding="utf-8"))
+          if str(meta.get("target_trade_date")) != today:
+              raise SystemExit(f"TAIL_PREFLIGHT_FAILED: target={meta.get('target_trade_date')} today={today}")
+          count = int(meta.get("observation_count", -1))
+          if count < 1 or count > 10:
+              raise SystemExit(f"TAIL_PREFLIGHT_FAILED: observation_count={count}")
+          missing = [name for name in ["OPENAI_API_KEY", "PUSHPLUS_TOKEN"] if not (os.getenv(name) or "").strip()]
+          if missing:
+              raise SystemExit("TAIL_PREFLIGHT_FAILED: missing secrets " + ",".join(missing))
+          print(f"TAIL_PREFLIGHT_OK target={today} observation_count={count} secrets=present")
+          PY
 
       - name: Hold scheduled run for the 14:40 decision window
         if: github.event_name == 'schedule'
