@@ -84,7 +84,7 @@ def actions_url(c, workflow=None):
     return f"https://github.com/{c.repo}/actions/workflows/{workflow}" if workflow else f"https://github.com/{c.repo}/actions"
 
 
-t1, t2, t3, t4, t5 = st.tabs(["🌙 盘后提交", "☁️ 主池/研究结果", "⏱️ 尾盘任务", "📒 交易与持仓", "⚙️ 设置与版本"])
+t1, t4, t2, t3, t5 = st.tabs(["🌙 盘后提交", "📒 交易与持仓", "☁️ 主池/研究结果", "⏱️ 尾盘任务", "⚙️ 设置与版本"])
 
 with t1:
     st.subheader("每天只提交你今天看到的强势股")
@@ -203,12 +203,12 @@ with t4:
 
     if not c:
         st.warning("尚未配置 GITHUB_PAT，无法读取或保存加密交易台账。")
-    elif not trade_key or not trade_password:
-        st.warning("交易台账尚未启用。需要一次性配置数据密钥和页面访问口令。")
+    elif not trade_key:
+        st.warning("交易台账尚未启用。只需一次性配置数据加密密钥；页面访问口令为可选项。")
         st.markdown("""
-1. 在 Streamlit Secrets 增加 `TRADING_DATA_KEY` 和 `TRADING_UI_PASSWORD`。
+1. 在 Streamlit Secrets 增加 `TRADING_DATA_KEY`。
 2. 在 GitHub Actions Secrets 增加同一个 `TRADING_DATA_KEY`。
-3. 保存后等待页面重启，再回到本页录入交易。
+3. 如希望页面另加口令，可选配置 `TRADING_UI_PASSWORD`。
 """)
         if not trade_key:
             if st.button("生成一次性交易数据密钥"):
@@ -216,12 +216,13 @@ with t4:
             if st.session_state.get("generated_trade_key"):
                 st.code(st.session_state.generated_trade_key, language=None)
                 st.caption("请立即复制到上述两个密钥位置；刷新页面后该临时显示会消失。不要把密钥发到聊天或写入仓库文件。")
-        if not trade_password:
-            st.info("TRADING_UI_PASSWORD 由你自行设置，用于阻止其他访客查看解密后的交易与持仓。")
+        st.info("未配置 TRADING_UI_PASSWORD 也能使用；配置后可增加页面访问口令。")
         st.info("配置完成前，本页不会接收交易数据，避免把个人成交信息写入公开仓库明文。")
     else:
         if "trade_access_ok" not in st.session_state:
-            st.session_state.trade_access_ok = False
+            st.session_state.trade_access_ok = not bool(trade_password)
+        if not trade_password:
+            st.session_state.trade_access_ok = True
         if "trade_access_attempts" not in st.session_state:
             st.session_state.trade_access_attempts = 0
 
@@ -240,8 +241,8 @@ with t4:
                 st.error("本次会话连续失败5次，请关闭页面后重新进入。")
         else:
             top_left, top_right = st.columns([4, 1])
-            top_left.success("交易台账已解锁；数据仅在本次页面会话中解密。")
-            if top_right.button("退出台账", use_container_width=True):
+            top_left.success("交易台账已启用；成交明细从加密文件读取。")
+            if trade_password and top_right.button("退出台账", use_container_width=True):
                 st.session_state.trade_access_ok = False
                 st.rerun()
 
@@ -281,32 +282,110 @@ with t4:
                 else:
                     st.info("当前没有已登记持仓。")
 
-                manual_tab, upload_tab, history_tab = st.tabs(["手工录入", "批量上传", "交易历史"])
-                with manual_tab:
-                    with st.form("manual_trade_form", clear_on_submit=True):
-                        a1, a2, a3 = st.columns(3)
-                        trade_date = a1.date_input("交易日期", value=datetime.now(CN_TZ).date())
-                        trade_time = a2.time_input("交易时间", value=datetime.now(CN_TZ).time().replace(microsecond=0, tzinfo=None))
-                        account = a3.text_input("账户", value="默认账户")
-                        b1, b2, b3 = st.columns(3)
-                        side = b1.selectbox("操作", ["买入", "卖出"])
-                        code = b2.text_input("股票代码", placeholder="600801")
-                        manual_name = b3.text_input("股票名称（可留空自动回填）")
-                        c1, c2, c3 = st.columns(3)
-                        price = c1.number_input("成交价格", min_value=0.0, step=0.01, format="%.4f")
-                        quantity = c2.number_input("成交数量（股）", min_value=0, step=100)
-                        fee = c3.number_input("手续费", min_value=0.0, step=0.01, format="%.2f")
-                        note = st.text_input("备注（可选）")
-                        submitted = st.form_submit_button("确认并加密保存", type="primary", use_container_width=True)
-                    if submitted:
+                st.markdown("#### 今日推荐成交确认")
+                final_decisions = gh_get_csv(c, "v5_data/latest/final_decisions.csv")
+                final_meta = gh_get_json(c, "v5_data/latest/final_decision_meta.json") or {}
+                recommended = pd.DataFrame()
+                if not final_decisions.empty and "decision" in final_decisions.columns:
+                    recommended = final_decisions[
+                        final_decisions["decision"].fillna("").astype(str).str.upper().eq("TRADE")
+                    ].copy()
+                if not recommended.empty:
+                    for idx, rec in recommended.iterrows():
+                        current_name = name_map.get(str(rec["股票代码"]).zfill(6))
+                        if current_name:
+                            recommended.at[idx, "股票名称"] = current_name
+                    quick = recommended[["股票代码", "股票名称"]].copy()
+                    quick["建议区间"] = [
+                        f"{row.get('买入区间下沿', '')}–{row.get('买入区间上沿', '')}"
+                        for _, row in recommended.iterrows()
+                    ]
+                    quick["实际成交价"] = 0.0
+                    quick["买入数量"] = 0
+                    quick["手续费"] = 0.0
+                    recommendation_date = str(final_meta.get("trade_date") or datetime.now(CN_TZ).date())
+                    st.caption(f"尾盘推荐日期：{recommendation_date}。没有买入时保持0或不提交；价格与数量大于0才登记持仓。")
+                    quick_account = st.text_input("本次成交账户", value="默认账户", key="quick_trade_account")
+                    edited = st.data_editor(
+                        quick,
+                        use_container_width=True,
+                        hide_index=True,
+                        disabled=["股票代码", "股票名称", "建议区间"],
+                        column_config={
+                            "实际成交价": st.column_config.NumberColumn(min_value=0.0, step=0.01, format="%.4f"),
+                            "买入数量": st.column_config.NumberColumn(min_value=0, step=100, format="%d"),
+                            "手续费": st.column_config.NumberColumn(min_value=0.0, step=0.01, format="%.2f"),
+                        },
+                        key=f"quick_trade_{recommendation_date}",
+                    )
+                    if st.button("保存今日实际成交（0表示未买）", type="primary", use_container_width=True):
                         try:
-                            normalized_code = normalize_code(code)
-                            current_name = name_map.get(normalized_code, manual_name.strip())
-                            if not current_name:
-                                raise ValueError("代码名称主表没有匹配结果，请手工填写股票名称")
+                            rows = []
+                            for _, row in edited.iterrows():
+                                qty = int(float(row.get("买入数量", 0) or 0))
+                                price = float(row.get("实际成交价", 0) or 0)
+                                if qty <= 0:
+                                    continue
+                                if price <= 0:
+                                    raise ValueError(f"{row['股票代码']} 已填写数量但成交价为0")
+                                rows.append({
+                                    "交易日期": recommendation_date,
+                                    "交易时间": "14:45:00",
+                                    "账户": quick_account,
+                                    "操作": "买入",
+                                    "股票代码": row["股票代码"],
+                                    "股票名称": row["股票名称"],
+                                    "成交价格": price,
+                                    "成交数量": qty,
+                                    "手续费": float(row.get("手续费", 0) or 0),
+                                    "备注": f"来自{recommendation_date}尾盘推荐",
+                                })
+                            incoming = normalize_transactions(pd.DataFrame(rows)) if rows else empty_transactions()
+                            updated = append_transactions(transactions, incoming)
+                            if rows or not encrypted_blob:
+                                gh_put_bytes(c, TRADE_LEDGER_PATH, encrypt_transactions(updated, trade_key), "Update encrypted private trade ledger")
+                            if rows:
+                                st.success(f"已加密保存 {len(updated) - len(transactions)} 笔实际买入；对应股票立即进入持仓管理。")
+                            else:
+                                st.success("本次没有登记买入；这些股票不会因推荐本身被视为持仓。")
+                            st.rerun()
+                        except Exception as exc:
+                            st.error(f"保存失败：{exc}")
+                else:
+                    st.info("最新尾盘结果没有TRADE标的，无需填写买入数量。")
+
+                manual_tab, upload_tab, history_tab = st.tabs(["补录/卖出", "批量上传", "交易历史"])
+                with manual_tab:
+                    st.caption("用于卖出、非推荐成交或忘记登记后的补录；交易日期可选择过去日期。")
+                    lookup_code = st.text_input("股票代码", placeholder="600801", key="manual_trade_code")
+                    resolved_code, resolved_name = "", ""
+                    if lookup_code.strip():
+                        try:
+                            resolved_code = normalize_code(lookup_code)
+                            resolved_name = name_map.get(resolved_code, "")
+                            if resolved_name:
+                                st.success(f"对应股票：{resolved_code} {resolved_name}")
+                            else:
+                                st.warning("代码名称主表未找到该代码，请先确认代码是否正确。")
+                        except Exception as exc:
+                            st.error(str(exc))
+                    a1, a2, a3 = st.columns(3)
+                    trade_date = a1.date_input("交易日期", value=datetime.now(CN_TZ).date(), key="manual_trade_date")
+                    trade_time = a2.time_input("交易时间", value=datetime.now(CN_TZ).time().replace(microsecond=0, tzinfo=None), key="manual_trade_time")
+                    account = a3.text_input("账户", value="默认账户", key="manual_trade_account")
+                    b1, b2, b3 = st.columns(3)
+                    side = b1.selectbox("操作", ["买入", "卖出"], key="manual_trade_side")
+                    price = b2.number_input("成交价格", min_value=0.0, step=0.01, format="%.4f", key="manual_trade_price")
+                    quantity = b3.number_input("成交数量（股）", min_value=0, step=100, key="manual_trade_quantity")
+                    fee = st.number_input("手续费", min_value=0.0, step=0.01, format="%.2f", key="manual_trade_fee")
+                    note = st.text_input("备注（可选）", key="manual_trade_note")
+                    if st.button("确认并加密保存这笔交易", type="primary", use_container_width=True):
+                        try:
+                            if not resolved_code or not resolved_name:
+                                raise ValueError("请先输入能够匹配当前名称的股票代码")
                             incoming = normalize_transactions(pd.DataFrame([{
                                 "交易日期": trade_date, "交易时间": trade_time, "账户": account,
-                                "操作": side, "股票代码": normalized_code, "股票名称": current_name,
+                                "操作": side, "股票代码": resolved_code, "股票名称": resolved_name,
                                 "成交价格": price, "成交数量": quantity, "手续费": fee, "备注": note,
                             }]))
                             updated = append_transactions(transactions, incoming)
@@ -314,7 +393,7 @@ with t4:
                                 st.info("这笔完全相同的记录已经存在，本次未重复写入。")
                             else:
                                 gh_put_bytes(c, TRADE_LEDGER_PATH, encrypt_transactions(updated, trade_key), "Update encrypted private trade ledger")
-                                st.success(f"已加密保存：{side} {normalized_code} {current_name}，成交金额 {float(price) * int(quantity):,.2f} 元。")
+                                st.success(f"已保存：{side} {resolved_code} {resolved_name}，成交金额 {float(price) * int(quantity):,.2f} 元。")
                                 st.rerun()
                         except Exception as exc:
                             st.error(f"保存失败：{exc}")
@@ -383,5 +462,5 @@ with t5:
 
 **已接入：OpenAI API盘后30–40→0–10 + 14:45最终0→2，并通过 PushPlus 推送微信通知。**
 """)
-    st.code('''Streamlit Secrets：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"\nTRADING_DATA_KEY = "Fernet密钥"\nTRADING_UI_PASSWORD = "交易台账独立口令"\n\nGitHub Actions Secrets：\nTRADING_DATA_KEY = "与Streamlit完全相同的Fernet密钥"''')
+    st.code('''Streamlit Secrets：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"\nTRADING_DATA_KEY = "Fernet密钥"\nTRADING_UI_PASSWORD = "交易台账独立口令（可选）"\n\nGitHub Actions Secrets：\nTRADING_DATA_KEY = "与Streamlit完全相同的Fernet密钥"''')
     st.warning("旧的 v4_background.yml 必须去掉 schedule；V5安装包中已提供一个‘仅手动兼容版’覆盖文件，防止再次出现#9那种晚上误触发。")
