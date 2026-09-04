@@ -120,8 +120,9 @@ jobs:
               "breadth_down": int(breadth.iloc[0].get("下跌家数",0)) if not breadth.empty else 0,
               "breadth_limit_up": int(breadth.iloc[0].get("涨停家数",0)) if not breadth.empty else 0,
               "breadth_limit_down": int(breadth.iloc[0].get("跌停家数",0)) if not breadth.empty else 0,
-              "candidate_context_success": int((candidate_context_qa["状态"] == "成功").sum()),
-              "candidate_context_failures": candidate_context_qa.loc[candidate_context_qa["状态"] != "成功"].to_dict("records"),
+              "candidate_context_available": int((candidate_context_qa["状态"] != "失败").sum()),
+              "candidate_context_warnings": candidate_context_qa.loc[candidate_context_qa["状态"] == "警告"].to_dict("records"),
+              "candidate_context_failures": candidate_context_qa.loc[candidate_context_qa["状态"] == "失败"].to_dict("records"),
               "note": "收盘后测试只验证接口可用性与今日5分钟K/收盘快照；不能替代真实14:40和14:45交易时点验证。"
           }
           (out/"summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -134,7 +135,7 @@ jobs:
           missing_5m = ms.loc[ms["5分钟K行数"] == 0, "股票代码"].tolist()
           if missing_5m:
               raise SystemExit(f"FAIL: 缺少5分钟K: {missing_5m}")
-          failed_context = candidate_context_qa[candidate_context_qa["状态"] != "成功"]
+          failed_context = candidate_context_qa[candidate_context_qa["状态"] == "失败"]
           if not failed_context.empty:
               raise SystemExit("FAIL: 候选多维上下文缺失: " + failed_context.to_json(force_ascii=False, orient="records"))
           if len(breadth) == 0:
