@@ -70,8 +70,8 @@ jobs:
           print(f"TAIL_PREFLIGHT_OK target={today} observation_count={count} secrets=present")
           PY
 
-      - name: Hold scheduled run for the 14:40 decision window
-        if: github.event_name == 'schedule'
+      - name: Hold run for the 14:40 decision window
+        if: github.event_name == 'schedule' || github.event_name == 'push'
         shell: bash
         run: |
           python - <<'PY'
@@ -96,12 +96,14 @@ jobs:
               print(f"Scheduler arrived inside decision window at {now.isoformat()}", flush=True)
           PY
 
+      - name: Refresh latest data before decision
+        run: git pull --ff-only origin main
+
       - name: Run V5 tail confirmation
-        if: github.event_name != 'push'
         run: python v5_cli.py tail
 
       - name: Send failure alert through PushPlus
-        if: failure() && github.event_name != 'push'
+        if: failure()
         continue-on-error: true
         shell: bash
         run: |
