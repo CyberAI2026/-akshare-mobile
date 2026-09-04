@@ -187,6 +187,8 @@ def evaluate_record(row: pd.Series, bars: pd.DataFrame, asof=None) -> dict:
     if asof is not None:
         x = x[x["日期"] <= asof]
     if x.empty or x.iloc[0]["日期"] != rec_date:
+        if _number(row.get("推荐日收盘价")) is not None:
+            return {"最后更新日期": str(asof or now_cn().date()), "数据状态": "跟踪中（收盘锚点已保存，等待后续行情）"}
         return {"数据状态": "等待推荐日正式收盘"}
     anchor = _number(x.iloc[0].get("收盘"))
     if not anchor:

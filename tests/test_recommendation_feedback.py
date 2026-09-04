@@ -26,6 +26,12 @@ class RecommendationFeedbackTests(unittest.TestCase):
         self.assertEqual(out["首次触碰止损日期"], "2026-09-03")
         self.assertAlmostEqual(out["D+10涨跌幅%"], 20.0)
 
+    def test_saved_anchor_is_not_downgraded_when_same_day_bar_is_temporarily_missing(self):
+        row=pd.Series({"推荐日期":"2026-09-04","推荐日收盘价":24.8,"结构止损位":23.82})
+        bars=pd.DataFrame({"日期":[pd.Timestamp("2026-09-03")],"收盘":[24.0],"最低":[23.5]})
+        out=rf.evaluate_record(row,bars,pd.Timestamp("2026-09-04").date())
+        self.assertIn("跟踪中",out["数据状态"])
+
     def test_register_is_idempotent_and_anchor_is_pending(self):
         decisions = pd.DataFrame([{
             "股票代码": "000001", "股票名称": "平安银行", "decision": "TRADE",
