@@ -49,6 +49,7 @@ LATEST = ROOT / "latest"
 MARKET_HISTORY = ROOT / "market" / "market_breadth_history.csv"
 CODE_NAME_MASTER = ROOT / "reference" / "a_share_code_name_master.csv"
 RECOMMENDATION_REGISTRY = ROOT / "feedback" / "recommendations.csv"
+PRIVATE_TRADE_LEDGER = ROOT / "private" / "trades.enc"
 
 
 def now_cn() -> datetime:
@@ -101,8 +102,8 @@ def refresh_stock_names(frame: pd.DataFrame, master_path: str | Path = CODE_NAME
     return out
 
 
-def active_trade_codes(registry_path: str | Path = RECOMMENDATION_REGISTRY) -> set[str]:
-    """未明确退出的历史TRADE不得再次作为新开仓候选；D+10完成不等于已经卖出。"""
+def _active_recommendation_codes(registry_path: str | Path = RECOMMENDATION_REGISTRY) -> set[str]:
+    """加密交易台账未启用时的保守回退：未明确退出的历史TRADE继续锁定。"""
     path = Path(registry_path)
     if not path.exists():
         return set()
@@ -122,6 +123,29 @@ def active_trade_codes(registry_path: str | Path = RECOMMENDATION_REGISTRY) -> s
         if _norm_stock_code(code)
     }
 
+
+def active_trade_codes(
+    registry_path: str | Path = RECOMMENDATION_REGISTRY,
+    ledger_path: str | Path = PRIVATE_TRADE_LEDGER,
+    key: str | None = None,
+) -> set[str]:
+    """优先用实际加密持仓；部分卖出仍锁定，全部卖出后自动恢复候选资格。"""
+    ledger = Path(ledger_path)
+    secret_key = (key if key is not None else os.getenv("TRADING_DATA_KEY", "")).strip()
+    if ledger.exists():
+        if not secret_key:
+            print("private trade ledger exists but TRADING_DATA_KEY is missing; using conservative recommendation lock")
+        else:
+            try:
+                from research.private_trade_ledger import active_position_codes, decrypt_transactions
+
+                transactions = decrypt_transactions(ledger.read_bytes(), secret_key)
+                active = active_position_codes(transactions)
+                print(f"PRIVATE_HOLDINGS_OK active_position_count={len(active)}")
+                return active
+            except Exception as exc:
+                print("private trade ledger warning:", type(exc).__name__, str(exc)[:160])
+    return _active_recommendation_codes(registry_path)
 
 def exclude_active_trades(frame: pd.DataFrame, registry_path: str | Path = RECOMMENDATION_REGISTRY) -> tuple[pd.DataFrame, list[str]]:
     out = frame.copy() if frame is not None else pd.DataFrame()
