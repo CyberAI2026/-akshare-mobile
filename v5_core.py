@@ -39,6 +39,32 @@ def _call_with_alarm(function, seconds: int = 12):
         signal.signal(signal.SIGALRM,previous)
 
 
+def _safe_stock_news(code: str) -> pd.DataFrame:
+    """绕过AKShare当前与pandas 3不兼容的新闻正文转义清洗，仅取事件标题元数据。"""
+    from curl_cffi import requests as curl_requests
+    callback="jQuery35101792940631092459_1764599530165"
+    inner={"uid":"","keyword":code,"type":["cmsArticleWebOld"],"client":"web","clientType":"web","clientVersion":"curr",
+           "param":{"cmsArticleWebOld":{"searchScope":"default","sort":"default","pageIndex":1,"pageSize":10,
+                                        "preTag":"<em>","postTag":"</em>"}}}
+    response=curl_requests.get(
+        "https://search-api-web.eastmoney.com/search/jsonp",
+        params={"cb":callback,"param":json.dumps(inner,ensure_ascii=False),"_":str(int(time.time()*1000))},
+        headers={"referer":f"https://so.eastmoney.com/news/s?keyword={code}","user-agent":"Mozilla/5.0"},
+        timeout=12,impersonate="chrome",
+    )
+    raw=response.text
+    left=raw.find("("); right=raw.rfind(")")
+    if left<0 or right<=left:
+        raise ValueError("news JSONP malformed")
+    items=(json.loads(raw[left+1:right]).get("result",{}).get("cmsArticleWebOld",[]) or [])
+    rows=[]
+    for item in items:
+        rows.append({"发布时间":item.get("date",""),"文章来源":item.get("mediaName",""),
+                     "新闻标题":re.sub(r"</?em>","",str(item.get("title",""))),
+                     "新闻链接":"http://finance.eastmoney.com/a/"+str(item.get("code",""))+".html"})
+    return pd.DataFrame(rows)
+
+
 def now_cn() -> datetime:
     return datetime.now(CN_TZ)
 
@@ -740,7 +766,18 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
                                  "数据时间":now_cn().isoformat(),"数据源":"东方财富个股资料/AKShare"})
             qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"成功","行数":len(info),"错误":""})
         except Exception as exc:
-            qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
+            try:
+                business=_call_with_alarm(lambda:ak.stock_zyjs_ths(symbol=code),12)
+                if business is None or business.empty: raise RuntimeError("主营介绍为空")
+                for col in business.columns:
+                    value=business.iloc[-1].get(col)
+                    profiles.append({"股票代码":code,"股票名称":name,"资料项":f"主营介绍:{col}","资料值":value,
+                                     "数据时间":now_cn().isoformat(),"数据源":"同花顺主营介绍/AKShare"})
+                qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"警告","行数":len(business),
+                           "错误":f"个股资料失败，已使用主营介绍替代:{type(exc).__name__}:{exc}"})
+            except Exception as fallback_exc:
+                qa.append({"股票代码":code,"股票名称":name,"数据层":"基本面/行业资料","状态":"失败","行数":0,
+                           "错误":f"主源:{type(exc).__name__}:{exc}; 备用:{type(fallback_exc).__name__}:{fallback_exc}"})
         try:
             market="sh" if code.startswith(("5","6","9")) else "sz"
             ff=_call_with_alarm(lambda:ak.stock_individual_fund_flow(stock=code, market=market),12)
@@ -777,7 +814,18 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
                                   "链接":str(r.get(url_col,"")) if url_col else "","数据源":"东方财富个股新闻/AKShare"})
             qa.append({"股票代码":code,"股票名称":name,"数据层":"事件标题","状态":"成功","行数":min(len(nw),max(1,news_limit)),"错误":""})
         except Exception as exc:
-            qa.append({"股票代码":code,"股票名称":name,"数据层":"事件标题","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
+            try:
+                nw=_call_with_alarm(lambda:_safe_stock_news(code),12)
+                if nw is None or nw.empty: raise RuntimeError("备用新闻为空")
+                for _, r in nw.head(max(1,news_limit)).iterrows():
+                    news_rows.append({"股票代码":code,"股票名称":name,"发布时间":r.get("发布时间",""),
+                                      "新闻标题":str(r.get("新闻标题","")),"来源":str(r.get("文章来源","")),
+                                      "链接":str(r.get("新闻链接","")),"数据源":"东方财富搜索API/安全清洗"})
+                qa.append({"股票代码":code,"股票名称":name,"数据层":"事件标题","状态":"警告","行数":min(len(nw),max(1,news_limit)),
+                           "错误":f"AKShare清洗失败，已使用标题备用源:{type(exc).__name__}:{exc}"})
+            except Exception as fallback_exc:
+                qa.append({"股票代码":code,"股票名称":name,"数据层":"事件标题","状态":"失败","行数":0,
+                           "错误":f"主源:{type(exc).__name__}:{exc}; 备用:{type(fallback_exc).__name__}:{fallback_exc}"})
     tables={
         "候选基本资料":pd.DataFrame(profiles),
         "候选近10日资金流":pd.concat(flows,ignore_index=True) if flows else pd.DataFrame(),
