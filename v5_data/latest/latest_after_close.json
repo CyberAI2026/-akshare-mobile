@@ -2,58 +2,109 @@
   "status": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2",
-  "started_cn": "2026-09-03T22:37:41.453652+08:00",
-  "completed_cn": "2026-09-03T22:55:22.062789+08:00",
-  "elapsed_minutes": 17.68,
-  "batch_count": 72,
-  "master_count": 559,
+  "started_cn": "2026-09-04T18:06:51.443108+08:00",
+  "completed_cn": "2026-09-04T18:22:28.492064+08:00",
+  "elapsed_minutes": 15.62,
+  "batch_count": 85,
+  "master_count": 573,
   "eliminated_count": 0,
-  "daily_new_count": 27,
+  "daily_new_count": 14,
   "daily_reactivated_count": 0,
   "daily_eliminated_count": 0,
   "cooling_count": 0,
   "master_pool_capacity_note": "动态证据池；不按固定500只硬砍，按长期未提交且趋势同步转弱可逆淘汰",
   "cache_summary": {
     "25日": {
-      "命中或增量": 553,
-      "总数": 559
+      "命中或增量": 567,
+      "总数": 573
     },
     "120日": {
-      "命中或增量": 163,
-      "总数": 163
+      "命中或增量": 200,
+      "总数": 200
     },
     "250日": {
-      "命中或增量": 40,
-      "总数": 40
+      "命中或增量": 50,
+      "总数": 50
     }
   },
-  "stage1": 163,
-  "stage2_research_pool": 40,
-  "python_final": "30-40只软容量研究包（不机械生成前10）",
-  "observation_pool_count": 4,
-  "target_trade_date": "2026-09-04",
+  "stage1": 200,
+  "stage2_research_pool": 50,
+  "python_final": "30-50只软容量研究包（不机械生成前10）",
+  "observation_pool_count": 2,
+  "target_trade_date": "2026-09-07",
   "openai_model": "gpt-5.6-terra",
   "market_assessment": {
     "risk_level": "高",
-    "summary": "计算事实：当日全市场上涨比例33.22%、下跌比例64.28%、净上涨家数-1725；深成指、创业板指、科创50近5日和近20日均为负。研究判断：市场风险偏好偏弱，次日仅适合保留结构相对成熟且需尾盘确认的少量观察对象，不宜扩张观察池。",
+    "summary": "计算事实：上证近20日接近平稳，深成指、创业板指和科创50近5日至60日均偏弱；当日上涨2444家、下跌2913家，较前日修复但仍为净下跌469家。研究判断：市场仍处弱势轮动与修复并存状态，个股二次启动需要更严格确认，避免追逐日内强势。",
     "next_day_aggressiveness": "偏防守"
   },
   "sector_validation": {
-    "status": "实验性有警告",
-    "table_count": 6,
-    "failure_count": 4,
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
     "warning_count": 0,
-    "ai_enabled": false
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
   },
-  "stock_qa_25_success": 553,
-  "stock_qa_120_success": 163,
-  "stock_qa_250_success": 40,
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [
+        {
+          "板块": "军工",
+          "文章提及数": 2,
+          "观点状态": "不明确",
+          "板块类型": "概念",
+          "当日涨跌幅%": -0.66,
+          "当日涨幅排名": 257,
+          "同类板块数": 387,
+          "净额亿元": -104.15
+        }
+      ],
+      "高关注且观点退潮": [
+        {
+          "板块": "AI硬件/半导体/算力硬件",
+          "文章提及数": 4,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "AI应用/传媒/短剧",
+          "文章提及数": 4,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "农业/种植业/养殖业",
+          "文章提及数": 4,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "金融/证券/非银金融",
+          "文章提及数": 3,
+          "观点状态": "分化"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 567,
+  "stock_qa_120_success": 200,
+  "stock_qa_250_success": 50,
   "isolated_index_count": 0,
   "cache_seed": {
     "seeded": 0,
     "scanned": 772,
     "available": 535
   },
-  "folder": "v5_data/runs/20260903_223741",
-  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~2确认"
+  "folder": "v5_data/runs/20260904_180651",
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "model_observation_pool_count": 3,
+  "excluded_active_trade_codes": [
+    "600801"
+  ],
+  "observation_pool_post_filter": "未关闭TRADE周期不重复推荐新开仓"
 }
