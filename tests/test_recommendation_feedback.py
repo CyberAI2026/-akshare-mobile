@@ -49,6 +49,24 @@ class RecommendationFeedbackTests(unittest.TestCase):
         snap = pd.DataFrame([{"股票代码": "600801", "当前价": 24.7}])
         self.assertEqual(rf._reference_price(snap, "600801"), 24.7)
 
+    def test_update_all_allows_blank_date_in_numeric_inferred_column(self):
+        bars = pd.DataFrame({"日期": [pd.Timestamp("2026-09-04")], "收盘": [24.8], "最低": [23.82]})
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            registry = root / "recommendations.csv"
+            pd.DataFrame([{"推荐ID":"x","推荐日期":"2026-09-04","股票代码":"600801",
+                           "结构止损位":23.82,"首次触碰止损日期":None}]).to_csv(registry,index=False)
+            with patch.object(rf,"ROOT",root), patch.object(rf,"REGISTRY",registry), \
+                 patch.object(rf,"LATEST_DAILY",root/"latest_daily.json"), \
+                 patch.object(rf,"LATEST_WEEKLY",root/"latest_weekly.json"), \
+                 patch.object(rf,"fetch_bars",return_value=bars), \
+                 patch.object(rf,"_recover_reference_from_tail",return_value=24.7), \
+                 patch.object(rf.time,"sleep"):
+                rf.update_all(pd.Timestamp("2026-09-04").date(),notify=False)
+            saved=pd.read_csv(registry)
+            self.assertEqual(saved.iloc[0]["数据状态"],"跟踪中")
+            self.assertEqual(saved.iloc[0]["推荐时参考价"],24.7)
+
 
 class AttributionTests(unittest.TestCase):
     def test_multiple_concepts_and_primary_candidate(self):
