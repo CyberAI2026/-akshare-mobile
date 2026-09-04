@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 sys.modules.setdefault("bs4", MagicMock())
 sys.modules.setdefault("openai", MagicMock())
+sys.modules.setdefault("requests", MagicMock())
 
 from datetime import date
 
