@@ -250,6 +250,11 @@ with t4:
                         except Exception:
                             pass
 
+                if not transactions.empty and name_map:
+                    for idx, trade_row in transactions.iterrows():
+                        current_name = name_map.get(str(trade_row["股票代码"]))
+                        if current_name:
+                            transactions.at[idx, "股票名称"] = current_name
                 positions = build_positions(transactions)
                 active_positions = positions[positions["持仓数量"] > 0].copy() if not positions.empty else positions
                 m1, m2, m3 = st.columns(3)
@@ -267,7 +272,7 @@ with t4:
                     with st.form("manual_trade_form", clear_on_submit=True):
                         a1, a2, a3 = st.columns(3)
                         trade_date = a1.date_input("交易日期", value=datetime.now(CN_TZ).date())
-                        trade_time = a2.time_input("交易时间", value=datetime.now(CN_TZ).time().replace(microsecond=0))
+                        trade_time = a2.time_input("交易时间", value=datetime.now(CN_TZ).time().replace(microsecond=0, tzinfo=None))
                         account = a3.text_input("账户", value="默认账户")
                         b1, b2, b3 = st.columns(3)
                         side = b1.selectbox("操作", ["买入", "卖出"])
