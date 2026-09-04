@@ -16,6 +16,7 @@ ROOT = Path("v5_data/feedback")
 REGISTRY = ROOT / "recommendations.csv"
 LATEST_DAILY = ROOT / "latest_daily.json"
 LATEST_WEEKLY = ROOT / "latest_weekly.json"
+NAME_MASTER = Path("v5_data/reference/a_share_code_name_master.csv")
 
 BASE_COLUMNS = [
     "推荐ID", "推荐日期", "推荐时间", "股票代码", "股票名称", "决策", "推荐时参考价",
@@ -37,6 +38,27 @@ def norm_code(value) -> str:
         raw = raw[:-2]
     digits = "".join(x for x in raw if x.isdigit())
     return digits[-6:].zfill(6) if digits else ""
+
+
+def refresh_names(frame: pd.DataFrame, master_path: str | Path = NAME_MASTER) -> pd.DataFrame:
+    """推荐登记和跟踪展示始终使用证券代码对应的最新简称。"""
+    out = frame.copy() if frame is not None else pd.DataFrame()
+    if out.empty or "股票代码" not in out.columns:
+        return out
+    out["股票代码"] = out["股票代码"].map(norm_code)
+    path = Path(master_path)
+    if not path.exists():
+        return out
+    try:
+        master = pd.read_csv(path, dtype={"股票代码": str})
+        master["股票代码"] = master["股票代码"].map(norm_code)
+        names = dict(zip(master["股票代码"], master["股票名称"].astype(str)))
+        if "股票名称" not in out.columns:
+            out["股票名称"] = ""
+        out["股票名称"] = [names.get(code, old) for code, old in zip(out["股票代码"], out["股票名称"])]
+    except Exception as exc:
+        print("recommendation name refresh warning:", type(exc).__name__, exc)
+    return out
 
 
 def _number(value):
@@ -139,6 +161,7 @@ def register_tail_recommendations(final_decisions: pd.DataFrame, final_meta: dic
         combined = combined.drop_duplicates("推荐ID", keep="last")
     else:
         combined = old
+    combined = refresh_names(combined)
     for col in BASE_COLUMNS:
         if col not in combined:
             combined[col] = None
@@ -293,7 +316,7 @@ def update_all(asof=None, notify=True) -> dict:
         pd.DataFrame(columns=BASE_COLUMNS).to_csv(REGISTRY, index=False, encoding="utf-8-sig")
     # Tracking columns intentionally mix numbers, booleans, dates and blanks.
     # Object dtype prevents pandas from rejecting a later date/blank assignment into an all-NaN column.
-    records = pd.read_csv(REGISTRY, dtype={"股票代码": str}).astype(object)
+    records = refresh_names(pd.read_csv(REGISTRY, dtype={"股票代码": str}).astype(object))
     for idx, row in records.iterrows():
         code = norm_code(row.get("股票代码"))
         start = str(row.get("推荐日期"))
