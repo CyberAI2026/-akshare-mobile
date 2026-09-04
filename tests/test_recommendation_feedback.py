@@ -31,6 +31,8 @@ class RecommendationFeedbackTests(unittest.TestCase):
         bars=pd.DataFrame({"日期":[pd.Timestamp("2026-09-03")],"收盘":[24.0],"最低":[23.5]})
         out=rf.evaluate_record(row,bars,pd.Timestamp("2026-09-04").date())
         self.assertIn("跟踪中",out["数据状态"])
+        summary=rf.build_daily_summary(pd.DataFrame([{"数据状态":out["数据状态"]}]),pd.Timestamp("2026-09-04").date())
+        self.assertEqual(summary["tracking"],1)
 
     def test_register_is_idempotent_and_anchor_is_pending(self):
         decisions = pd.DataFrame([{

@@ -249,7 +249,7 @@ def build_daily_summary(records: pd.DataFrame, asof) -> dict:
             due[f"D+{horizon}"] = []
     return {
         "asof": str(asof), "total_recommendations": int(len(records)),
-        "tracking": int((records.get("数据状态", "") == "跟踪中").sum()),
+        "tracking": int(records.get("数据状态", pd.Series(dtype=str)).astype(str).str.startswith("跟踪中").sum()),
         "completed_d10": int(records.get("D+10日期", pd.Series(dtype=object)).notna().sum()),
         "due_cohorts": due,
         "method": "推荐日正式收盘价为锚；D+N按后续第N个交易日收盘；止损触碰按推荐后交易日最低价<=结构止损位。",
