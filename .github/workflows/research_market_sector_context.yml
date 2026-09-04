@@ -46,12 +46,20 @@ jobs:
               --output-root sector_membership_run \
               --shards 20
           else
+            # 首次没有缓存时必须完整建库；有缓存后再按5个分片滚动刷新。
+            if [ -f v5_data/context/sector_membership/working.csv.gz ]; then
+              SHARD_COUNT=5
+              echo "Incremental sector refresh: 1/5 daily shard"
+            else
+              SHARD_COUNT=1
+              echo "Initial sector bootstrap: full master pool and all concept boards"
+            fi
             python research/market_sector_context_fetch.py \
               --master-pool v5_data/master/current_master_pool.csv \
               --output-root sector_membership_run \
               --persist-root v5_data/context/sector_membership \
               --previous-mapping v5_data/context/sector_membership/working.csv.gz \
-              --shards 5 \
+              --shards "$SHARD_COUNT" \
               --skip-non-trading-day
           fi
       - name: Commit daily online snapshot
@@ -64,7 +72,8 @@ jobs:
             echo "No sector membership changes to commit"
           else
             git commit -m "V5 daily sector membership snapshot $(date +%F)"
-            git push
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
       - name: Upload audit artifact
         if: always()
