@@ -2,6 +2,10 @@ name: V5 Tail Confirmation
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/v5_tail_confirmation.yml"
   schedule:
     # GitHub cron is not minute-precise. Start early, then wait inside the runner
     # for 14:40 Asia/Shanghai; this absorbs ordinary scheduler delay.
@@ -93,10 +97,11 @@ jobs:
           PY
 
       - name: Run V5 tail confirmation
+        if: github.event_name != 'push'
         run: python v5_cli.py tail
 
       - name: Send failure alert through PushPlus
-        if: failure()
+        if: failure() && github.event_name != 'push'
         continue-on-error: true
         shell: bash
         run: |
