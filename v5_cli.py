@@ -761,7 +761,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "generated_trade_date":str(generated_trade_date),
         "target_trade_date":str(target),
         "candidate_count":int(len(research_pack)),
-        "excluded_active_trade_codes":excluded_active_trade_codes,
+        "excluded_active_trade_count":len(excluded_active_trade_codes),
         "candidates":_json_clean(research_pack.to_dict("records")),
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_data_status":"正式可用" if sector_tables else "实验性未启用",
@@ -769,7 +769,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "candidate_stock_sector_attribution":_stock_sector_attribution_payload(research_pack),
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
-            "selected_codes只能来自candidates，最多10只，可以0只；excluded_active_trade_codes中的股票处于未关闭TRADE周期，严禁重复推荐新开仓",
+            "selected_codes只能来自candidates，最多10只，可以0只；实际持仓已经在进入模型前排除，严禁从输入外补入",
             "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
@@ -825,7 +825,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "status":"valid","generated_trade_date":str(generated_trade_date),"target_trade_date":str(target),
         "generated_at_cn":now_cn().isoformat(),"source_candidate_count":source_candidate_count,
         "ai_candidate_count_after_active_trade_exclusion":len(research_pack),
-        "excluded_active_trade_codes":excluded_active_trade_codes,"observation_count":len(obs),
+        "excluded_active_trade_count":len(excluded_active_trade_codes),"observation_count":len(obs),
         "model":model,"strategy":STRATEGY_VERSION,"source_run":source_summary.get("folder",""),
         "market_assessment":result.get("market_assessment",{}),"sector_assessment":result.get("sector_assessment",{}),
         "opinion_assessment":result.get("opinion_assessment",{}),"opinion_context":opinion_context,
@@ -1161,7 +1161,7 @@ def run_tail():
     pool = refresh_stock_names(pool)
     pool, excluded_active_trade_codes = exclude_active_trades(pool)
     if excluded_active_trade_codes:
-        print(f"TAIL_ACTIVE_TRADE_EXCLUDED codes={excluded_active_trade_codes}")
+        print(f"TAIL_ACTIVE_TRADE_EXCLUDED count={len(excluded_active_trade_codes)}")
     if pool.empty:
         msg="观察池中的股票均处于未关闭TRADE周期；今日没有需要再次判断的新开仓候选。"
         print(msg); pushplus_notify("A股二次启动｜无重复新开仓", msg); return
