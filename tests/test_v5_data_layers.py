@@ -125,6 +125,19 @@ class SectorFlowTests(unittest.TestCase):
         self.assertEqual(row["交易日期"],"2026-09-03")
         self.assertEqual(row["抓取时间"],"2026-09-03 16:00:00+0800")
 
+    def test_complete_industry_family_remains_partially_usable_when_concepts_fail(self):
+        tables={f"industry_{p}":self._table(["水泥","教育"]) for p in ["now","3d","5d","10d","20d"]}
+        qa=pd.DataFrame([
+            *[{"测试":f"concept_{p}","状态":"失败"} for p in ["now","3d","5d","10d","20d"]],
+            *[{"测试":f"industry_{p}","状态":"成功"} for p in ["now","3d","5d","10d","20d"]],
+        ])
+        usable,validation=cli._sector_readiness(tables,qa)
+        self.assertTrue(validation["ai_enabled"])
+        self.assertEqual(validation["status"],"部分可用")
+        self.assertEqual(validation["industry_table_count"],5)
+        self.assertEqual(validation["concept_table_count"],0)
+        self.assertEqual(len(usable),5)
+
 
 class NotificationTests(unittest.TestCase):
     def test_pushplus_retries_then_succeeds(self):
