@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
 import shutil
@@ -144,6 +145,40 @@ def _fmt_pct(x):
         return "—"
 
 
+def _esc(value) -> str:
+    return html.escape(str(value if value is not None else "—"))
+
+
+def _section(title: str, body: str, color: str = "#2563eb") -> str:
+    """PushPlus-compatible lightweight card; avoids an all-bold text wall."""
+    return (
+        '<div style="margin:12px 0;padding:10px 12px;border-left:4px solid '
+        f'{color};background:#f8fafc;border-radius:4px">'
+        f'<div style="font-size:16px;font-weight:700;color:{color};margin-bottom:7px">{_esc(title)}</div>'
+        f'<div style="font-size:14px;line-height:1.75;color:#334155">{body}</div></div>'
+    )
+
+
+def _sector_readiness(tables: dict[str, pd.DataFrame], qa: pd.DataFrame) -> tuple[dict[str, pd.DataFrame], dict]:
+    """Enable each independently verified sector family instead of failing the whole layer."""
+    usable = {k: v for k, v in (tables or {}).items() if v is not None and not v.empty}
+    concept_count = sum(k.startswith("concept_") for k in usable)
+    industry_count = sum(k.startswith("industry_") for k in usable)
+    failures = int((qa.get("状态") == "失败").sum()) if qa is not None and not qa.empty else 0
+    warnings = int((qa.get("状态") == "警告").sum()) if qa is not None and not qa.empty else 0
+    # At least one complete family is sufficient for partial use. Missing families remain explicitly unavailable.
+    ai_enabled = concept_count == 5 or industry_count == 5
+    fully_ready = concept_count == 5 and industry_count == 5 and failures == 0
+    status = "正式可用" if fully_ready else "部分可用" if ai_enabled else "实验性有警告"
+    validation = {
+        "status": status, "table_count": len(usable), "failure_count": failures,
+        "warning_count": warnings, "ai_enabled": ai_enabled,
+        "concept_table_count": concept_count, "industry_table_count": industry_count,
+        "scope_note": "仅使用已通过校验的板块类型；缺失板块不得推断" if ai_enabled and not fully_ready else "",
+    }
+    return (usable if ai_enabled else {}), validation
+
+
 def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict):
     ma = obs_meta.get("market_assessment", {}) or {}
     lines = [
@@ -213,21 +248,25 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
 def notify_tail_success(final_df: pd.DataFrame, meta: dict):
     ma=meta.get("market_assessment",{}) or {}
     selected=set(str(x).zfill(6) for x in meta.get("selected_codes",[]) or [])
-    lines=[
-        f"<b>交易日：</b>{meta.get('trade_date','—')}",
-        f"<b>大盘评分：</b>{ma.get('overall_score_0_100','—')}/100｜{ma.get('trade_suitability','—')}",
-        f"<b>实时市场：</b>{ma.get('risk_level','—')}｜相对昨收 {ma.get('change_vs_previous_close','—')}",
-        f"<b>总体新仓上限：</b>{_fmt_pct(ma.get('overall_new_position_cap_pct'))}",
-        f"<b>最终候选：</b>{meta.get('selected_count',0)}只",
-    ]
-    if ma.get("summary"): lines.append(f"<b>市场判断：</b>{ma.get('summary')}")
+    snap=meta.get("market_snapshot",{}) or {}
+    market_body=(
+        f"评分 <strong>{_esc(ma.get('overall_score_0_100','—'))}/100</strong> · {_esc(ma.get('trade_suitability','—'))} · 风险{_esc(ma.get('risk_level','—'))}<br>"
+        f"上涨 <span style='color:#dc2626'>{_esc(snap.get('上涨家数','—'))}</span>｜下跌 <span style='color:#16a34a'>{_esc(snap.get('下跌家数','—'))}</span>｜平盘 {_esc(snap.get('平盘家数','—'))}<br>"
+        f"采样 {_esc(snap.get('数据时间','—'))}｜来源 {_esc(snap.get('快照数据源',snap.get('数据源','—')))}<br>"
+        f"新仓上限 {_fmt_pct(ma.get('overall_new_position_cap_pct'))}｜最终候选 <strong>{_esc(meta.get('selected_count',0))}只</strong><br>"
+        f"{_esc(ma.get('summary',''))}<br><small style='color:#64748b'>这是14:45附近快照，不是15:00收盘统计。</small>"
+    )
+    lines=[f"<div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#1f2937'>",
+           f"<div style='font-size:13px;color:#64748b'>交易日 {_esc(meta.get('trade_date','—'))}</div>",
+           _section("市场温度",market_body,"#7c3aed")]
     sv=meta.get("sector_validation",{}) or {}; sa=meta.get("sector_assessment",{}) or {}
-    lines.append(f"<b>板块数据：</b>{sv.get('status','—')}｜AI启用：{'是' if sv.get('ai_enabled') else '否'}")
-    if sa.get("summary"): lines.append(f"<b>板块判断：</b>{sa.get('summary')}")
-    if sa.get("active_sectors"): lines.append(f"<b>主要活跃板块：</b>{'、'.join(map(str,sa.get('active_sectors',[])[:8]))}")
-    if sa.get("capital_inflow_leaders"): lines.append(f"<b>资金流入靠前板块：</b>{'、'.join(map(str,sa.get('capital_inflow_leaders',[])[:8]))}")
+    sector_body=(f"状态 {_esc(sv.get('status','—'))}｜概念 {sv.get('concept_table_count',0)}/5｜行业 {sv.get('industry_table_count',0)}/5<br>"
+                 f"{_esc(sa.get('summary',''))}<br>"
+                 f"<span style='color:#b45309'>活跃：</span>{_esc('、'.join(map(str,sa.get('active_sectors',[])[:8])) or '未核验')}<br>"
+                 f"<span style='color:#0369a1'>资金靠前：</span>{_esc('、'.join(map(str,sa.get('capital_inflow_leaders',[])[:8])) or '未核验')}")
+    lines.append(_section("板块强弱与资金",sector_body,"#0f766e"))
     if selected and final_df is not None and not final_df.empty:
-        lines.append("<br><b>14:45最终结果：</b>")
+        trade_lines=[]
         for _,r in final_df.iterrows():
             code=str(r.get("股票代码","")).zfill(6)
             if code not in selected: continue
@@ -236,19 +275,21 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
             stop=r.get("结构止损参考"); risk=r.get("结构风险距离")
             try: risk_txt=f"{float(risk)*100:.1f}%"
             except Exception: risk_txt="—"
-            lines.append(f"<b>{code} {name}</b><br>买入区间：{lo}–{hi}<br>建议仓位：{_fmt_pct(pos)}｜结构止损：{stop}｜结构风险：{risk_txt}<br>证据：{r.get('核心证据','')}<br>风险：{r.get('主要风险','')}<br>")
-            lines.append(f"基本面：{r.get('基本面理由','')}<br>技术面：{r.get('技术面理由','')}<br>资金面：{r.get('资金面理由','')}<br>事件面：{r.get('事件面理由','')}<br>板块：{r.get('板块理由','')}<br>")
+            trade_lines.append(f"<strong>{_esc(code)} {_esc(name)}</strong><br>区间 {_esc(lo)}–{_esc(hi)}｜仓位 {_fmt_pct(pos)}｜止损 {_esc(stop)}｜风险距 {_esc(risk_txt)}<br>"
+                               f"技术：{_esc(r.get('技术面理由',''))}<br>资金：{_esc(r.get('资金面理由',''))}<br>基本面/事件：{_esc(r.get('基本面理由',''))} {_esc(r.get('事件面理由',''))}<br>板块：{_esc(r.get('板块理由',''))}<br>主要风险：{_esc(r.get('主要风险',''))}")
+        lines.append(_section("可下单标的", "<hr style='border:0;border-top:1px solid #e2e8f0'>".join(trade_lines), "#dc2626"))
     else:
-        lines.append("<br><b>结论：</b>14:45没有符合条件的交易标的（0只）。")
+        lines.append(_section("交易结论", "14:45没有符合条件的交易标的（0只）。", "#64748b"))
     if final_df is not None and not final_df.empty:
         others=final_df[~final_df["股票代码"].astype(str).str.zfill(6).isin(selected)]
         if not others.empty:
-            lines.append("<br><b>其余观察股决定：</b>")
+            other_lines=[]
             for _,r in others.iterrows():
-                lines.append(f"{str(r.get('股票代码','')).zfill(6)} {r.get('股票名称','')}｜{r.get('decision','WAIT')}<br>依据：{r.get('核心证据','')}<br>风险：{r.get('主要风险','')}<br>")
-    if meta.get("portfolio_note"): lines.append(f"<b>组合说明：</b>{meta.get('portfolio_note')}")
-    lines.append("<br><small>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</small>")
-    return pushplus_notify("A股二次启动｜14:45尾盘决策", "<br>".join(lines))
+                other_lines.append(f"{_esc(str(r.get('股票代码','')).zfill(6))} {_esc(r.get('股票名称',''))}｜<strong>{_esc(r.get('decision','WAIT'))}</strong><br>{_esc(r.get('核心证据',''))}")
+            lines.append(_section("其余观察股", "<br><br>".join(other_lines), "#64748b"))
+    if meta.get("portfolio_note"): lines.append(_section("组合与风险",_esc(meta.get('portfolio_note')),"#b45309"))
+    lines.append("<div style='font-size:12px;color:#64748b;margin-top:12px'>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</div></div>")
+    return pushplus_notify("A股二次启动｜14:45尾盘决策", "".join(lines))
 
 
 def notify_failure(stage: str, err: Exception | str):
@@ -776,18 +817,7 @@ def run_after_close(batch_path: str | None):
     # 盘后市场层：指数直接保留180日；全市场宽度从系统运行日起逐日积累真实快照，最多180记录日。
     idx, breadth, market_qa = fetch_market_review(180)
     sector_tables, sector_qa = fetch_public_sector_flow(fetched_at=started)
-    sector_failures = int((sector_qa.get("状态") == "失败").sum()) if not sector_qa.empty else 0
-    sector_warnings = int((sector_qa.get("状态") == "警告").sum()) if not sector_qa.empty else 0
-    sector_formal_ready = len(sector_tables) == 10 and sector_failures == 0 and sector_warnings == 0
-    # 板块层有任何警告时仍保存完整审计文件，但不送入AI，避免实验性数据被误当正式证据。
-    sector_tables_for_ai = sector_tables if sector_formal_ready else {}
-    sector_validation = {
-        "status": "正式可用" if sector_formal_ready else "实验性有警告",
-        "table_count": len(sector_tables),
-        "failure_count": sector_failures,
-        "warning_count": sector_warnings,
-        "ai_enabled": sector_formal_ready,
-    }
+    sector_tables_for_ai, sector_validation = _sector_readiness(sector_tables, sector_qa)
     market_history, market_context = update_market_history(breadth, phase="盘后", keep_days=180)
     market_sheets=_market_review_sheets(idx,breadth,market_history,market_context,market_qa)
     sector_sheets={**sector_tables,"板块质量校验":sector_qa}
@@ -1041,15 +1071,7 @@ def run_tail():
     conf = confirmation_metrics(snap45, min45)
     idx, breadth, market_qa = fetch_market_review(180)
     sector_tables, sector_qa = fetch_public_sector_flow(fetched_at=now_cn())
-    sector_failures = int((sector_qa.get("状态") == "失败").sum()) if not sector_qa.empty else 0
-    sector_warnings = int((sector_qa.get("状态") == "警告").sum()) if not sector_qa.empty else 0
-    sector_formal_ready = len(sector_tables) == 10 and sector_failures == 0 and sector_warnings == 0
-    sector_tables_for_ai = sector_tables if sector_formal_ready else {}
-    sector_validation = {
-        "status":"正式可用" if sector_formal_ready else "实验性有警告",
-        "table_count":len(sector_tables),"failure_count":sector_failures,
-        "warning_count":sector_warnings,"ai_enabled":sector_formal_ready,
-    }
+    sector_tables_for_ai, sector_validation = _sector_readiness(sector_tables, sector_qa)
     market_history, market_context = update_market_history(breadth, phase="14:45", keep_days=180)
     stamp = now_cn().strftime("%H%M%S")
     sheets={"14点45实时快照":snap45,"当日5分钟K线":min45,"确认指标":conf,"实时市场":breadth,
@@ -1077,6 +1099,8 @@ def run_tail():
         )
         payload["feedback_registration"] = feedback_registration
         payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
+        final_meta["market_snapshot"] = _json_clean(breadth.iloc[0].to_dict()) if not breadth.empty else {}
+        save_json(base/"final_decision_meta.json", final_meta); save_json(LATEST/"final_decision_meta.json", final_meta)
         push_ok = bool(notify_tail_success(final_decisions, final_meta))
         payload["pushplus_delivery_ok"] = push_ok
         payload["status"] = "completed" if push_ok else "completed_push_failed"
@@ -1092,6 +1116,52 @@ def run_tail():
         notify_failure("尾盘微信推送" if delivery_failed else "14:45尾盘OpenAI确认", e)
         raise
     print(json.dumps(payload, ensure_ascii=False, default=str, indent=2))
+
+
+def run_close_audit():
+    """15:10复核14:45市场宽度与正式收盘，避免把尾盘快照误读成收盘数据。"""
+    today = now_cn().date()
+    if not is_trade_day(today):
+        print("Not a China A-share trading day; skip."); return
+    if now_cn().hour * 60 + now_cn().minute < 15 * 60 + 5:
+        raise RuntimeError("收盘复核最早只能在15:05运行")
+    tail_path = LATEST / "last_tail_payload.json"
+    if not tail_path.exists():
+        raise RuntimeError("缺少当天14:45尾盘快照")
+    tail = json.loads(tail_path.read_text(encoding="utf-8"))
+    if str(tail.get("trade_date")) != str(today):
+        raise RuntimeError("尾盘快照日期与今天不一致")
+    _, close_breadth, close_qa = fetch_market_review(180)
+    if close_breadth.empty:
+        raise RuntimeError("收盘市场宽度为空")
+    close = _json_clean(close_breadth.iloc[0].to_dict())
+    old_rows = tail.get("market", []) or []
+    old = old_rows[0] if old_rows else {}
+    fields = ["上涨家数", "下跌家数", "平盘家数", "涨停家数", "跌停家数"]
+    delta = {f: int(close.get(f, 0) or 0) - int(old.get(f, 0) or 0) for f in fields}
+    audit = {
+        "trade_date": str(today), "audited_at_cn": now_cn().isoformat(),
+        "tail_snapshot": {f: old.get(f) for f in ["数据时间", "数据源", "快照数据源", *fields]},
+        "close_snapshot": {f: close.get(f) for f in ["数据时间", "数据源", "快照数据源", *fields]},
+        "tail_to_close_delta": delta,
+        "qa": _json_clean(close_qa.to_dict("records")),
+        "conclusion": "14:45为时点快照；收盘统计是另一时点，两者差异不自动视为数据错误。",
+    }
+    path = ROOT / "market" / "close_audit" / f"{today}.json"
+    save_json(path, audit); save_json(LATEST / "latest_close_audit.json", audit)
+    body = (
+        f"14:45：上涨 {_esc(old.get('上涨家数','—'))}｜下跌 {_esc(old.get('下跌家数','—'))}<br>"
+        f"收盘：上涨 {_esc(close.get('上涨家数','—'))}｜下跌 {_esc(close.get('下跌家数','—'))}<br>"
+        f"变化：上涨 {delta['上涨家数']:+d}｜下跌 {delta['下跌家数']:+d}<br>"
+        f"收盘采样：{_esc(close.get('数据时间','—'))}｜来源 {_esc(close.get('快照数据源',close.get('数据源','—')))}<br>"
+        "<small style='color:#64748b'>两组数字分别代表14:45附近与15:00后，不应混称为收盘数据。</small>"
+    )
+    ok = pushplus_notify("A股二次启动｜尾盘与收盘复核", _section("市场宽度时点复核", body, "#7c3aed"))
+    audit["pushplus_delivery_ok"] = ok
+    save_json(path, audit); save_json(LATEST / "latest_close_audit.json", audit)
+    git_commit(f"V5 close breadth audit {today}")
+    if not ok: raise RuntimeError("收盘复核微信推送失败")
+    print(json.dumps(audit, ensure_ascii=False, default=str, indent=2))
 
 
 def run_backup():
@@ -1115,10 +1185,12 @@ def main():
     p = sub.add_parser("after_close")
     p.add_argument("--batch", default="")
     sub.add_parser("tail")
+    sub.add_parser("close_audit")
     sub.add_parser("backup")
     a = ap.parse_args()
     if a.cmd == "after_close": run_after_close(a.batch or None)
     elif a.cmd == "tail": run_tail()
+    elif a.cmd == "close_audit": run_close_audit()
     else: run_backup()
 
 
