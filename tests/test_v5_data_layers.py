@@ -182,5 +182,50 @@ class NotificationTests(unittest.TestCase):
         sleeper.assert_called_once_with(2)
 
 
+class PrivateTradeLedgerTests(unittest.TestCase):
+    @staticmethod
+    def trade(side, qty, price=10.0, trade_time="14:45:00"):
+        return pd.DataFrame([{
+            "交易日期": "2026-09-04", "交易时间": trade_time, "账户": "测试账户",
+            "操作": side, "股票代码": "000001", "股票名称": "测试股票",
+            "成交价格": price, "成交数量": qty, "手续费": 0,
+        }])
+
+    def test_encrypted_ledger_roundtrip_and_full_sell_unlock(self):
+        from cryptography.fernet import Fernet
+        from research.private_trade_ledger import (
+            active_position_codes, append_transactions, decrypt_transactions,
+            empty_transactions, encrypt_transactions,
+        )
+        key = Fernet.generate_key()
+        tx = append_transactions(empty_transactions(), self.trade("买入", 100))
+        restored = decrypt_transactions(encrypt_transactions(tx, key), key)
+        self.assertEqual(active_position_codes(restored), {"000001"})
+        tx = append_transactions(restored, self.trade("卖出", 100, price=11.0, trade_time="14:46:00"))
+        self.assertEqual(active_position_codes(tx), set())
+
+    def test_encrypted_actual_holdings_override_recommendation_fallback(self):
+        import tempfile
+        from pathlib import Path
+        from cryptography.fernet import Fernet
+        from research.private_trade_ledger import append_transactions, empty_transactions, encrypt_transactions
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            registry = root / "recommendations.csv"
+            ledger = root / "trades.enc"
+            pd.DataFrame([{"股票代码": "000002", "决策": "TRADE", "数据状态": "跟踪中"}]).to_csv(registry, index=False)
+            key = Fernet.generate_key()
+            tx = append_transactions(empty_transactions(), self.trade("买入", 100))
+            ledger.write_bytes(encrypt_transactions(tx, key))
+            active = cli.active_trade_codes(registry, ledger, key.decode())
+        self.assertEqual(active, {"000001"})
+
+    def test_oversell_is_rejected(self):
+        from research.private_trade_ledger import append_transactions, empty_transactions
+        with self.assertRaisesRegex(ValueError, "超过此前持仓"):
+            append_transactions(empty_transactions(), self.trade("卖出", 100))
+
+
 if __name__ == "__main__":
     unittest.main()
