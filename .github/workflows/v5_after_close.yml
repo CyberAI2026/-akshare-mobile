@@ -35,6 +35,7 @@ jobs:
       OPINION_ARTICLE_LIMIT: "20"
       OPINION_BATCH_SIZE: "4"
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
