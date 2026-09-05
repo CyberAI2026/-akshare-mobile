@@ -8,9 +8,15 @@ sys.modules.setdefault("bs4", MagicMock())
 sys.modules.setdefault("openai", MagicMock())
 sys.modules.setdefault("requests", MagicMock())
 
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
-from research.market_opinion_mining import group_attention_sectors, title_review_date_matches
+from research.market_opinion_mining import (
+    group_attention_sectors,
+    source_date,
+    target_trade_date,
+    title_review_date_matches,
+)
 
 
 class OpinionSectorGroupingTests(unittest.TestCase):
@@ -33,6 +39,12 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertFalse(title_review_date_matches("0902复盘丨指数承压", target))
         self.assertTrue(title_review_date_matches("9月3日主题复盘", target))
         self.assertTrue(title_review_date_matches("退潮期空仓！附9.4明日市场核心策略", target))
+
+    def test_weekend_articles_target_next_trading_day(self):
+        current=datetime(2026,9,5,20,30,tzinfo=ZoneInfo("Asia/Shanghai"))
+        calendar=[date(2026,9,4),date(2026,9,7)]
+        self.assertEqual(source_date(current),date(2026,9,5))
+        self.assertEqual(target_trade_date(current,calendar),date(2026,9,7))
 
 
 if __name__ == "__main__":

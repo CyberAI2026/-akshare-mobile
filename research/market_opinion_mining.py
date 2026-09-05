@@ -8,7 +8,7 @@ import subprocess
 import time
 import concurrent.futures
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urljoin
 from zoneinfo import ZoneInfo
@@ -36,12 +36,51 @@ def now_cn() -> datetime:
     return datetime.now(TZ)
 
 
-def target_trade_date():
-    current = now_cn()
+def source_date(current: datetime | None = None) -> date:
+    current = current or now_cn()
     day = current.date() - timedelta(days=1) if current.hour < 6 else current.date()
-    while day.weekday() >= 5:
-        day -= timedelta(days=1)
     return day
+
+
+def target_trade_date(current: datetime | None = None,
+                      trade_dates: list[date] | None = None) -> date:
+    """Attach weekend/holiday commentary to the next trading day, with audit dates."""
+    day=source_date(current)
+    if trade_dates is None:
+        try:
+            import akshare as ak
+            calendar=ak.tool_trade_date_hist_sina()
+            trade_dates=sorted(set(pd.to_datetime(
+                calendar[calendar.columns[0]],errors="coerce"
+            ).dt.date.dropna()))
+        except Exception as exc:
+            print("OPINION_TRADE_CALENDAR_FALLBACK",type(exc).__name__,str(exc)[:160],flush=True)
+            trade_dates=[]
+    if trade_dates:
+        if day in trade_dates:
+            return day
+        future=[item for item in trade_dates if item>day]
+        if future:
+            return future[0]
+    while day.weekday()>=5:
+        day+=timedelta(days=1)
+    return day
+
+
+def wait_until_cn(env_name: str) -> None:
+    not_before=os.getenv(env_name,"").strip()
+    if not not_before:
+        return
+    try:
+        hour,minute=(int(x) for x in not_before.split(":",1))
+    except ValueError as exc:
+        raise RuntimeError(f"{env_name}格式错误: {not_before}") from exc
+    current=now_cn()
+    target=current.replace(hour=hour,minute=minute,second=0,microsecond=0)
+    if current<target:
+        wait_seconds=int((target-current).total_seconds())
+        print(f"{env_name}_WAIT seconds={wait_seconds} target_cn={target.isoformat()}",flush=True)
+        time.sleep(wait_seconds)
 
 
 def fetch_html(url: str) -> str:
@@ -64,7 +103,7 @@ def clean_text(text: str) -> str:
 def discover_articles() -> list[dict]:
     seen: set[str] = set()
     rows: list[dict] = []
-    target = target_trade_date()
+    target = source_date()
     date_tokens = {
         target.strftime("%m-%d"), target.strftime("%m.%d"),
         f"{target.month}-{target.day}", f"{target.month}.{target.day}",
@@ -118,7 +157,7 @@ def extract_article(meta: dict) -> dict | None:
         tag.decompose()
     title_node = soup.select_one("h1") or soup.select_one("title")
     title = clean_text(title_node.get_text(" ", strip=True) if title_node else meta["title_hint"])
-    if not title_review_date_matches(title, target_trade_date()):
+    if not title_review_date_matches(title, source_date()):
         print("ARTICLE_DATE_REJECTED", title[:120], meta["url"])
         return None
     candidates = []
@@ -269,6 +308,7 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
     } for a in articles]
     out = {
         "trade_date": day,
+        "source_date": source_date().isoformat(),
         "generated_at_cn": now_cn().isoformat(),
         "method": "full-text transient mining; raw article bodies not persisted",
         "sources": sources,
@@ -302,18 +342,7 @@ def push_summary(summary: dict) -> None:
     if os.getenv("OPINION_SKIP_PUSH", "").strip().lower() in {"1", "true", "yes"}:
         print("OPINION_PUSHPLUS_SKIPPED context-only run")
         return
-    not_before = os.getenv("OPINION_PUSH_NOT_BEFORE_CN", "").strip()
-    if not_before:
-        try:
-            hour, minute = (int(x) for x in not_before.split(":", 1))
-            current = now_cn()
-            target = current.replace(hour=hour, minute=minute, second=0, microsecond=0)
-            if current < target:
-                wait_seconds = int((target - current).total_seconds())
-                print(f"OPINION_PUSHPLUS_WAIT seconds={wait_seconds} target_cn={target.isoformat()}")
-                time.sleep(wait_seconds)
-        except ValueError as exc:
-            raise RuntimeError(f"OPINION_PUSH_NOT_BEFORE_CN格式错误: {not_before}") from exc
+    wait_until_cn("OPINION_PUSH_NOT_BEFORE_CN")
     token = os.getenv("PUSHPLUS_TOKEN", "").strip()
     if not token:
         return
@@ -327,6 +356,7 @@ def push_summary(summary: dict) -> None:
             for x in items
         ) or "无"
     lines = [
+        f"<b>采集日：</b>{source_date().isoformat()}｜<b>适用交易日：</b>{target_trade_date().isoformat()}",
         f"<b>文章样本：</b>{summary.get('article_count', 0)}篇公开复盘全文",
         f"<b>市场观点：</b>{market.get('stance', '—')}｜{'、'.join(market.get('phase', []) or [])}",
         f"<b>共识摘要：</b>{market.get('summary', '—')}",
@@ -377,6 +407,7 @@ def main() -> None:
     key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
         raise RuntimeError("OPENAI_API_KEY未配置，不能执行正文观点挖掘")
+    wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
     model = os.getenv("OPINION_OPENAI_MODEL", os.getenv("OPENAI_MODEL", "gpt-5.6-terra"))
     discovered = discover_articles()
     articles = []

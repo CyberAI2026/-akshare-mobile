@@ -3,7 +3,9 @@ name: V5 Market Opinion Mining
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 12 * * 1-5"
+    # Daily 18:47 Beijing start provides queue-delay buffer; the script waits
+    # until 20:30 before collection and does not push before 21:00.
+    - cron: "47 10 * * *"
   push:
     branches: [main]
     paths:
@@ -21,7 +23,7 @@ concurrency:
 jobs:
   opinion-mining:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 180
     env:
       TZ: Asia/Shanghai
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -32,6 +34,7 @@ jobs:
       OPINION_BATCH_SIZE: "4"
       OPINION_BATCH_WORKERS: "3"
       OPINION_OPENAI_TIMEOUT_SECONDS: "240"
+      OPINION_COLLECT_NOT_BEFORE_CN: "20:30"
       OPINION_PUSH_NOT_BEFORE_CN: "21:00"
     steps:
       - uses: actions/checkout@v4
