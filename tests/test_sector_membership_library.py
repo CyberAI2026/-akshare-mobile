@@ -61,8 +61,10 @@ class SectorMembershipTests(unittest.TestCase):
         saturday=date(2026,9,5)
         empty=pd.DataFrame(columns=mod.MAPPING_COLUMNS)
         usable=pd.DataFrame([{"股票代码":"000001","板块类型":"行业","板块名称":"银行"}])
-        self.assertFalse(mod.should_skip_non_trading_day(True,saturday,empty))
-        self.assertTrue(mod.should_skip_non_trading_day(True,saturday,usable))
+        self.assertFalse(mod.should_skip_non_trading_day(True,saturday,False))
+        self.assertTrue(mod.should_skip_non_trading_day(True,saturday,True))
+        self.assertFalse(mod.mapping_baseline_usable(empty,1))
+        self.assertTrue(mod.mapping_baseline_usable(usable,1))
 
     def test_sina_fallback_maps_symbol_and_preserves_source(self):
         captured=datetime(2026,9,5,20,0,tzinfo=ZoneInfo("Asia/Shanghai"))
@@ -75,6 +77,19 @@ class SectorMembershipTests(unittest.TestCase):
         self.assertEqual(out.iloc[0]["股票代码"],"000001")
         self.assertEqual(out.iloc[0]["板块名称"],"测试概念")
         self.assertEqual(out.iloc[0]["数据源"],"sina_sector_membership_via_akshare")
+        self.assertEqual(qa[-1]["状态"],"成功")
+
+    def test_shenwan_fallback_maps_first_level_industry(self):
+        captured=datetime(2026,9,5,20,0,tzinfo=ZoneInfo("Asia/Shanghai"))
+        listing=pd.DataFrame({"指数代码":["801010"],"指数名称":["农林牧渔"]})
+        detail=pd.DataFrame({"证券代码":["000001","600000"],"证券名称":["甲","乙"]})
+        with unittest.mock.patch.object(mod.ak,"index_realtime_sw",return_value=listing), \
+             unittest.mock.patch.object(mod.ak,"index_component_sw",return_value=detail):
+            out,qa,count=mod.fetch_sw_industries({"600000"},captured,workers=1)
+        self.assertEqual(count,1)
+        self.assertEqual(out.iloc[0]["股票代码"],"600000")
+        self.assertEqual(out.iloc[0]["板块名称"],"农林牧渔")
+        self.assertEqual(out.iloc[0]["数据源"],"shenwan_industry_membership_via_akshare")
         self.assertEqual(qa[-1]["状态"],"成功")
 
 

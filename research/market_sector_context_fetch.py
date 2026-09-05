@@ -110,9 +110,19 @@ def load_previous_mapping(path: Path, wanted: set[str]) -> pd.DataFrame:
     return previous.drop(columns=["股票名称"], errors="ignore")
 
 
-def should_skip_non_trading_day(enabled: bool, captured_date, previous: pd.DataFrame) -> bool:
-    """Skip routine weekend refreshes, but never defer recovery from a broken cache."""
-    return bool(enabled and not is_trade_day(captured_date) and not previous.empty)
+def mapping_baseline_usable(previous: pd.DataFrame, total: int) -> bool:
+    """A cache is usable for incremental work only after partial-quality coverage."""
+    if previous.empty or total <= 0:
+        return False
+    any_coverage=previous["股票代码"].nunique()/total
+    industry_coverage=previous.loc[previous["板块类型"].eq("行业"),"股票代码"].nunique()/total
+    concept_coverage=previous.loc[previous["板块类型"].eq("概念"),"股票代码"].nunique()/total
+    return bool(any_coverage>=0.90 and (industry_coverage>=0.90 or concept_coverage>=0.90))
+
+
+def should_skip_non_trading_day(enabled: bool, captured_date, baseline_usable: bool) -> bool:
+    """Skip routine weekend refreshes, but never defer recovery from a weak cache."""
+    return bool(enabled and not is_trade_day(captured_date) and baseline_usable)
 
 
 def normalize_board_names(frame: pd.DataFrame) -> list[str]:
@@ -309,6 +319,58 @@ def fetch_sina_type(board_type: str, indicator: str, wanted: set[str],
     return result,qa,len(records)
 
 
+def fetch_sw_industries(wanted: set[str], captured_at: datetime, workers: int = 6):
+    """Fetch first-level Shenwan industries as a high-coverage industry fallback."""
+    board_frame,list_errors=retry(
+        lambda:ak.index_realtime_sw(symbol="一级行业"),"行业:申万:list",3
+    )
+    qa=[]
+    if board_frame.empty:
+        qa.append({"板块类型":"行业","板块名称":"__SW_LIST__","状态":"失败",
+                   "匹配主池数":0,"错误":" | ".join(list_errors)})
+        return pd.DataFrame(),qa,0
+    code_col=find_col(board_frame.columns,["指数代码","代码","code"])
+    name_col=find_col(board_frame.columns,["指数名称","板块名称","名称","name"])
+    if code_col is None or name_col is None:
+        qa.append({"板块类型":"行业","板块名称":"__SW_LIST__","状态":"失败",
+                   "匹配主池数":0,"错误":f"columns missing: {list(board_frame.columns)}"})
+        return pd.DataFrame(),qa,0
+    boards=(board_frame[[code_col,name_col]].dropna().astype(str)
+            .rename(columns={code_col:"code",name_col:"name"}).drop_duplicates("code"))
+    records=boards.to_dict(orient="records")
+    qa.append({"板块类型":"行业","板块名称":"__SW_LIST__","状态":"成功",
+               "匹配主池数":0,"板块总数":len(records),"错误":" | ".join(list_errors)})
+    frames=[]
+    def one(row):
+        raw,errors=retry(lambda:ak.index_component_sw(symbol=row["code"]),
+                         f"行业:申万:{row['name']}",2)
+        if raw.empty:
+            return row["name"],pd.DataFrame(),errors
+        try:
+            matched=normalize_constituents(
+                raw,"行业",row["name"],wanted,captured_at,
+                source="shenwan_industry_membership_via_akshare",
+                source_url="https://www.swsresearch.com/institute_sw/allIndex/releasedIndex",
+            )
+            return row["name"],matched,errors
+        except Exception as exc:
+            errors.append(f"normalize:{type(exc).__name__}:{exc}")
+            return row["name"],pd.DataFrame(),errors
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures=[executor.submit(one,row) for row in records]
+        for number,future in enumerate(concurrent.futures.as_completed(futures),1):
+            name,matched,errors=future.result()
+            status="失败" if errors and matched.empty else "警告" if errors else "成功"
+            qa.append({"板块类型":"行业","板块名称":name,"状态":status,
+                       "匹配主池数":len(matched),"错误":" | ".join(errors)})
+            if not matched.empty:
+                frames.append(matched)
+            if number%20==0 or number==len(records):
+                print(f"行业 申万 progress={number}/{len(records)}",flush=True)
+    result=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
+    return result,qa,len(records)
+
+
 def is_trade_day(day) -> bool:
     try:
         cal=ak.tool_trade_date_hist_sina()
@@ -371,14 +433,15 @@ def main():
     wanted=set(master["股票代码"])
     requested_shards=max(1,args.shards)
     previous=load_previous_mapping(Path(args.previous_mapping),wanted) if args.previous_mapping else pd.DataFrame(columns=MAPPING_COLUMNS)
-    if should_skip_non_trading_day(args.skip_non_trading_day,captured.date(),previous):
+    baseline_usable=mapping_baseline_usable(previous,len(master))
+    if should_skip_non_trading_day(args.skip_non_trading_day,captured.date(),baseline_usable):
         print("Non-trading day with a usable cache; safe skip.")
         return
-    if args.skip_non_trading_day and not is_trade_day(captured.date()) and previous.empty:
+    if args.skip_non_trading_day and not is_trade_day(captured.date()) and not baseline_usable:
         print("SECTOR_CACHE_RECOVERY: non-trading-day bootstrap allowed because cache is missing or invalid",flush=True)
     # An incremental shard is safe only when there is a non-empty prior baseline.
-    shard_count=requested_shards if not previous.empty else 1
-    if requested_shards > 1 and previous.empty:
+    shard_count=requested_shards if baseline_usable else 1
+    if requested_shards > 1 and not baseline_usable:
         print("SECTOR_CACHE_INVALID_OR_EMPTY: switching to full bootstrap", flush=True)
     shard_index=captured.date().toordinal()%shard_count
     industry_target=master[
@@ -400,6 +463,11 @@ def main():
         if not sina_frame.empty:
             industry_frame=sina_frame
             industry_count=sina_count
+    sw_frame,sw_qa,sw_count=fetch_sw_industries(wanted,captured,args.workers)
+    industry_qa.extend(sw_qa)
+    if not sw_frame.empty:
+        industry_frame=pd.concat([industry_frame,sw_frame],ignore_index=True)
+        industry_count=max(industry_count,sw_count)
     covered=set(industry_frame["股票代码"]) if not industry_frame.empty else set()
     industry_missing=industry_target[~industry_target["股票代码"].isin(covered)]
     if not industry_missing.empty:
@@ -471,6 +539,7 @@ def main():
         "ai_enabled":partial_ready,"http_timeout_seconds":HTTP_TIMEOUT_SECONDS,
         "shard_index":shard_index,"shard_count":shard_count,
         "previous_cache_used":bool(not previous.empty),
+        "previous_cache_usable":baseline_usable,
         "point_in_time_warning":"本快照只代表采集当日公开分类，不得倒推此前日期。",
     }
     output=Path(args.output_root)
