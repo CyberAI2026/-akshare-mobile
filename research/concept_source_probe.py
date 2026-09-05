@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 from io import StringIO
 from pathlib import Path
+from urllib.parse import urljoin
 
 import akshare as ak
 import pandas as pd
 import requests
+from bs4 import BeautifulSoup
 
 
 OUT = Path("concept_source_probe")
@@ -42,6 +44,21 @@ def ths_first_board_table() -> pd.DataFrame:
     return candidates[0] if candidates else pd.DataFrame()
 
 
+def ths_first_board_pagination() -> pd.DataFrame:
+    boards = ak.stock_board_concept_name_ths()
+    code = str(boards.iloc[0]["code"])
+    url = f"https://q.10jqka.com.cn/gn/detail/code/{code}/"
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "lxml")
+    links = []
+    for anchor in soup.find_all("a", href=True):
+        href = str(anchor["href"])
+        if "/page/" in href or "page=" in href:
+            links.append({"text": anchor.get_text(strip=True), "url": urljoin(url, href)})
+    return pd.DataFrame(links).drop_duplicates() if links else pd.DataFrame()
+
+
 def main() -> None:
     available = sorted(name for name in dir(ak) if "concept" in name.lower() or "board_cons" in name.lower())
     results = [
@@ -49,6 +66,7 @@ def main() -> None:
         record("eastmoney_concept_list", ak.stock_board_concept_name_em),
         record("ths_concept_list", ak.stock_board_concept_name_ths),
         record("ths_first_board_html_table", ths_first_board_table),
+        record("ths_first_board_pagination", ths_first_board_pagination),
     ]
     OUT.mkdir(parents=True, exist_ok=True)
     payload = {"available_functions": available, "results": results}
