@@ -1,6 +1,7 @@
 import importlib.util
 import sys
 import unittest
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -38,6 +39,23 @@ class SectorMembershipTests(unittest.TestCase):
     def test_formal_latest_only_updates_when_ready(self):
         self.assertEqual(mod.norm_code("SZ000001"),"000001")
         self.assertEqual(mod.norm_code(600000.0),"600000")
+
+    def test_headerless_previous_cache_is_treated_as_missing(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/"empty.csv"
+            path.write_bytes(b"")
+            out=mod.load_previous_mapping(path,{"000001"})
+        self.assertTrue(out.empty)
+        self.assertIn("股票代码",out.columns)
+
+    def test_empty_output_keeps_csv_schema(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            master=pd.DataFrame({"股票代码":["000001"],"股票名称":["平安银行"]})
+            mod.save_outputs(root,master,pd.DataFrame(),pd.DataFrame(),{"mapping_rows":0})
+            loaded=pd.read_csv(root/"sector_membership.csv.gz",dtype={"股票代码":str})
+        self.assertTrue(loaded.empty)
+        self.assertIn("板块名称",loaded.columns)
 
 
 if __name__=="__main__":

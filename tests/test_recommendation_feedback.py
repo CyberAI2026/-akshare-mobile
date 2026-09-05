@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from research import recommendation_feedback as rf
-from research.stock_sector_attribution import build_attribution
+from research.stock_sector_attribution import build_attribution, load_membership
 
 
 class RecommendationFeedbackTests(unittest.TestCase):
@@ -77,6 +77,13 @@ class RecommendationFeedbackTests(unittest.TestCase):
 
 
 class AttributionTests(unittest.TestCase):
+    def test_headerless_membership_is_safe_skip(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/"empty.csv.gz"
+            pd.DataFrame().to_csv(path,index=False,compression="gzip")
+            out=load_membership(path)
+        self.assertTrue(out.empty)
+
     def test_multiple_concepts_and_primary_candidate(self):
         membership = pd.DataFrame([
             {"股票代码": "1", "股票名称": "甲", "板块类型": "概念", "板块名称": "机器人"},

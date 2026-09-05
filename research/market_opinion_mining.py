@@ -6,6 +6,7 @@ import os
 import re
 import subprocess
 import time
+import concurrent.futures
 from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -26,6 +27,8 @@ LIST_URLS = [
 UA = "AStockResearch/1.0 (private research; low-frequency; contact via repository owner)"
 ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "20"))
 BATCH_SIZE = int(os.getenv("OPINION_BATCH_SIZE", "4"))
+BATCH_WORKERS = int(os.getenv("OPINION_BATCH_WORKERS", "3"))
+OPENAI_TIMEOUT_SECONDS = float(os.getenv("OPINION_OPENAI_TIMEOUT_SECONDS", "240"))
 MIN_TEXT = 500
 
 
@@ -193,7 +196,8 @@ def analyze_batch(client: OpenAI, model: str, articles: list[dict], batch_no: in
     print(
         "OPINION_OPENAI_CALL_OK "
         f"batch={batch_no} response_id={getattr(resp, 'id', None)} model={getattr(resp, 'model', model)} "
-        f"input_tokens={getattr(usage, 'input_tokens', None)} output_tokens={getattr(usage, 'output_tokens', None)}"
+        f"input_tokens={getattr(usage, 'input_tokens', None)} output_tokens={getattr(usage, 'output_tokens', None)}",
+        flush=True,
     )
     return parse_json(resp.output_text)
 
@@ -219,7 +223,8 @@ def aggregate(client: OpenAI, model: str, mined: list[dict], source_rows: list[d
     print(
         "OPINION_OPENAI_AGGREGATE_OK "
         f"response_id={getattr(resp, 'id', None)} model={getattr(resp, 'model', model)} "
-        f"input_tokens={getattr(usage, 'input_tokens', None)} output_tokens={getattr(usage, 'output_tokens', None)}"
+        f"input_tokens={getattr(usage, 'input_tokens', None)} output_tokens={getattr(usage, 'output_tokens', None)}",
+        flush=True,
     )
     result = parse_json(resp.output_text)
     result["article_count"] = len(source_rows)
@@ -385,11 +390,17 @@ def main() -> None:
         time.sleep(1.2)
     if not articles:
         raise RuntimeError("没有取得可分析的完整公开复盘正文")
-    client = OpenAI(api_key=key)
-    mined = []
-    for i in range(0, len(articles), BATCH_SIZE):
-        result = analyze_batch(client, model, articles[i:i + BATCH_SIZE], i // BATCH_SIZE + 1)
-        mined.extend(result.get("articles", []) or [])
+    client = OpenAI(api_key=key, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1)
+    batches=[articles[i:i + BATCH_SIZE] for i in range(0,len(articles),BATCH_SIZE)]
+    mined_by_batch={}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(1,min(BATCH_WORKERS,len(batches)))) as executor:
+        futures={executor.submit(analyze_batch,client,model,batch,number):number
+                 for number,batch in enumerate(batches,1)}
+        for future in concurrent.futures.as_completed(futures):
+            number=futures[future]
+            result=future.result()
+            mined_by_batch[number]=result.get("articles",[]) or []
+    mined=[item for number in sorted(mined_by_batch) for item in mined_by_batch[number]]
     expected = {a["body_sha256"][:16] for a in articles}
     actual = {str(x.get("article_id", "")) for x in mined}
     if expected - actual:

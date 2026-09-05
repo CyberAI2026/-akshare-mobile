@@ -10,6 +10,11 @@ import pandas as pd
 
 TZ = ZoneInfo("Asia/Shanghai")
 VERSION = "stock-sector-attribution-v0.1.0"
+OUTPUT_COLUMNS = [
+    "快照日期", "强势观察日期", "股票代码", "股票名称", "板块类型", "板块名称",
+    "归因得分", "事实强度分", "观点提及", "归因证据", "时点一致", "归因口径",
+    "时点限制", "版本", "主导板块候选",
+]
 
 
 def norm_code(value) -> str:
@@ -71,6 +76,15 @@ def load_sector_strength(path: Path) -> dict[str, dict]:
 def load_opinion_mentions(path: Path) -> str:
     if not path.exists():
         return ""
+
+
+def load_membership(path: Path) -> pd.DataFrame:
+    try:
+        frame = pd.read_csv(path, dtype={"股票代码": str})
+    except (pd.errors.EmptyDataError, EOFError, OSError):
+        return pd.DataFrame()
+    required = {"股票代码", "板块类型", "板块名称"}
+    return frame if not frame.empty and required.issubset(frame.columns) else pd.DataFrame()
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         return json.dumps(data.get("daily_consensus", {}), ensure_ascii=False)
@@ -139,7 +153,19 @@ def main():
             membership_path = working
         else:
             raise FileNotFoundError(f"板块成分映射不存在: {membership_path}")
-    membership = pd.read_csv(membership_path, dtype={"股票代码": str})
+    membership = load_membership(membership_path)
+    if membership.empty:
+        root = Path(args.output_root)
+        root.mkdir(parents=True, exist_ok=True)
+        summary = {
+            "status": "skipped_invalid_membership", "snapshot_date": "",
+            "rows": 0, "stocks": 0, "multi_concept_stocks": 0,
+            "fact_board_count": 0, "version": VERSION,
+            "reason": f"板块成分文件为空或缺少必要列: {membership_path}",
+        }
+        (root / "latest_summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return
     master = pd.read_csv(args.master, dtype={"股票代码": str})
     snapshot_date = str(membership.get("快照日期", pd.Series([datetime.now(TZ).date()])).iloc[0])[:10]
     strength = load_sector_strength(Path(args.sector_facts))
@@ -148,6 +174,8 @@ def main():
 
     root = Path(args.output_root)
     root.mkdir(parents=True, exist_ok=True)
+    if result.empty:
+        result = pd.DataFrame(columns=OUTPUT_COLUMNS)
     result.to_csv(root / "latest.csv", index=False, encoding="utf-8-sig")
     history = root / "history"
     history.mkdir(parents=True, exist_ok=True)

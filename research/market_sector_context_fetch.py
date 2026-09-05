@@ -19,6 +19,10 @@ TZ = ZoneInfo("Asia/Shanghai")
 VERSION = "sector-membership-shadow-v0.3.1"
 SOURCE = "public_board_membership_via_akshare"
 HTTP_TIMEOUT_SECONDS = 15
+MAPPING_COLUMNS = [
+    "快照日期", "业务时区", "抓取时间", "板块类型", "板块名称", "股票代码",
+    "股票名称", "数据源", "数据源URL", "映射口径", "版本",
+]
 
 
 def install_default_http_timeout():
@@ -86,6 +90,24 @@ def load_master(path: Path) -> pd.DataFrame:
     out["股票名称"]=frame[name_col].astype(str).str.strip() if name_col else ""
     out=out[out["股票代码"].str.fullmatch(r"\d{6}",na=False)]
     return out.drop_duplicates("股票代码").reset_index(drop=True)
+
+
+def load_previous_mapping(path: Path, wanted: set[str]) -> pd.DataFrame:
+    """A zero-byte/headerless cache is not a usable incremental baseline."""
+    if not path.exists():
+        return pd.DataFrame(columns=MAPPING_COLUMNS)
+    try:
+        previous = pd.read_csv(path, dtype={"股票代码": str})
+    except (pd.errors.EmptyDataError, EOFError, OSError):
+        return pd.DataFrame(columns=MAPPING_COLUMNS)
+    required = {"股票代码", "板块类型", "板块名称"}
+    if previous.empty or not required.issubset(previous.columns):
+        return pd.DataFrame(columns=MAPPING_COLUMNS)
+    previous["股票代码"] = previous["股票代码"].map(norm_code)
+    previous = previous[previous["股票代码"].isin(wanted)].copy()
+    if "股票名称_板块源" not in previous:
+        previous["股票名称_板块源"] = previous.get("股票名称", "")
+    return previous.drop(columns=["股票名称"], errors="ignore")
 
 
 def normalize_board_names(frame: pd.DataFrame) -> list[str]:
@@ -232,6 +254,8 @@ def is_trade_day(day) -> bool:
 def save_outputs(output_root: Path, master: pd.DataFrame, mapping: pd.DataFrame,
                  qa: pd.DataFrame, summary: dict):
     output_root.mkdir(parents=True,exist_ok=True)
+    if mapping.empty:
+        mapping = pd.DataFrame(columns=MAPPING_COLUMNS)
     mapping.to_csv(output_root/"sector_membership.csv.gz",index=False,encoding="utf-8-sig",compression="gzip")
     qa.to_csv(output_root/"qa.csv.gz",index=False,encoding="utf-8-sig",compression="gzip")
     mapped=set(mapping["股票代码"].astype(str)) if not mapping.empty else set()
@@ -246,8 +270,14 @@ def persist_library(output_root: Path, persist_root: Path, snapshot_date: str, f
     for name in ["sector_membership.csv.gz","qa.csv.gz","unmapped_stocks.csv","summary.json"]:
         shutil.copy2(output_root/name,history/name)
     (persist_root/"latest_status.json").write_text((output_root/"summary.json").read_text(encoding="utf-8"),encoding="utf-8")
-    shutil.copy2(output_root/"sector_membership.csv.gz",persist_root/"working.csv.gz")
-    shutil.copy2(output_root/"summary.json",persist_root/"working_summary.json")
+    # Never replace the last usable baseline with an empty upstream response.
+    try:
+        candidate = pd.read_csv(output_root/"sector_membership.csv.gz", nrows=1)
+    except (pd.errors.EmptyDataError, EOFError, OSError):
+        candidate = pd.DataFrame()
+    if not candidate.empty:
+        shutil.copy2(output_root/"sector_membership.csv.gz",persist_root/"working.csv.gz")
+        shutil.copy2(output_root/"summary.json",persist_root/"working_summary.json")
     if formal_ready:
         persist_root.mkdir(parents=True,exist_ok=True)
         shutil.copy2(output_root/"sector_membership.csv.gz",persist_root/"latest.csv.gz")
@@ -275,23 +305,32 @@ def main():
         return
     master=load_master(Path(args.master_pool))
     wanted=set(master["股票代码"])
-    shard_count=max(1,args.shards)
+    requested_shards=max(1,args.shards)
+    previous=load_previous_mapping(Path(args.previous_mapping),wanted) if args.previous_mapping else pd.DataFrame(columns=MAPPING_COLUMNS)
+    # An incremental shard is safe only when there is a non-empty prior baseline.
+    shard_count=requested_shards if not previous.empty else 1
+    if requested_shards > 1 and previous.empty:
+        print("SECTOR_CACHE_INVALID_OR_EMPTY: switching to full bootstrap", flush=True)
     shard_index=captured.date().toordinal()%shard_count
-    previous=pd.DataFrame()
-    if args.previous_mapping and Path(args.previous_mapping).exists():
-        previous=pd.read_csv(args.previous_mapping,dtype={"股票代码":str})
-        previous["股票代码"]=previous["股票代码"].map(norm_code)
-        previous=previous[previous["股票代码"].isin(wanted)].copy()
-        if "股票名称_板块源" not in previous:
-            previous["股票名称_板块源"]=previous.get("股票名称","")
-        previous=previous.drop(columns=["股票名称"],errors="ignore")
     industry_target=master[
         master["股票代码"].map(lambda code:int(code)%shard_count==shard_index)
     ].copy() if shard_count>1 else master
     frames=[];qa_rows=[];board_counts={}
-    industry_frame,industry_qa,industry_count=fetch_individual_industries(
-        industry_target,captured,max(2,args.workers)
+    # Board-level requests are materially fewer than one request per stock.  Keep the
+    # individual endpoint as a fallback for stocks not covered by the board source.
+    industry_frame,industry_qa,industry_count=fetch_type(
+        "行业",ak.stock_board_industry_name_em,ak.stock_board_industry_cons_em,
+        wanted,captured,args.workers,args.max_boards or None,shard_index,shard_count
     )
+    covered=set(industry_frame["股票代码"]) if not industry_frame.empty else set()
+    industry_missing=industry_target[~industry_target["股票代码"].isin(covered)]
+    if not industry_missing.empty:
+        fallback_frame,fallback_qa,_=fetch_individual_industries(
+            industry_missing,captured,max(2,args.workers)
+        )
+        if not fallback_frame.empty:
+            industry_frame=pd.concat([industry_frame,fallback_frame],ignore_index=True)
+        industry_qa.extend(fallback_qa)
     if not industry_frame.empty:
         frames.append(industry_frame)
     qa_rows.extend(industry_qa);board_counts["行业"]=industry_count
@@ -331,9 +370,10 @@ def main():
     any_coverage=len(mapped_any)/total if total else 0
     industry_coverage=len(industry)/total if total else 0
     concept_coverage=len(concept)/total if total else 0
+    partial_ready=bool(total and any_coverage>=0.90 and (industry_coverage>=0.90 or concept_coverage>=0.90) and failure_rate<=0.20)
     formal_ready=bool(total and any_coverage>=0.95 and industry_coverage>=0.90 and concept_coverage>=0.90 and failure_rate<=0.20)
     summary={
-        "status":"FORMAL_READY" if formal_ready else "PROVISIONAL",
+        "status":"FORMAL_READY" if formal_ready else "PARTIAL_READY" if partial_ready else "PROVISIONAL",
         "phase":"第二阶段板块映射影子库","version":VERSION,
         "snapshot_date":captured.strftime("%Y-%m-%d"),"captured_at_cn":captured.isoformat(),
         "master_stock_count":total,"mapping_rows":len(mapping),
@@ -341,7 +381,7 @@ def main():
         "industry_coverage":round(industry_coverage,6),"concept_coverage":round(concept_coverage,6),
         "board_counts":board_counts,"failed_board_requests":failures,"board_failure_rate":round(failure_rate,6),
         "formal_ready":formal_ready,
-        "ai_enabled":False,"http_timeout_seconds":HTTP_TIMEOUT_SECONDS,
+        "ai_enabled":partial_ready,"http_timeout_seconds":HTTP_TIMEOUT_SECONDS,
         "shard_index":shard_index,"shard_count":shard_count,
         "previous_cache_used":bool(not previous.empty),
         "point_in_time_warning":"本快照只代表采集当日公开分类，不得倒推此前日期。",
