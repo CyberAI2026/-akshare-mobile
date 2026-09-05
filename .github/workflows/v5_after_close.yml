@@ -12,6 +12,10 @@ on:
     branches: [main]
     paths:
       - 'v5_data/inbox/daily_*.csv'
+      - 'research/after_close_stages.py'
+      - 'tests/test_after_close_stages.py'
+      - '.github/workflows/v5_after_close.yml'
+      - '.github/workflows/v5_after_close_stage.yml'
 
 permissions:
   contents: write
@@ -24,6 +28,8 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      run_pipeline: ${{ steps.scope.outputs.run_pipeline }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,9 +41,22 @@ jobs:
         run: |
           python -m py_compile v5_cli.py research/after_close_stages.py
           python -m unittest tests/test_v5_data_layers.py tests/test_after_close_stages.py
+      - name: Decide whether this event contains a daily batch
+        id: scope
+        shell: bash
+        run: |
+          RUN_PIPELINE=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RUN_PIPELINE=true
+          elif git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep -q '^v5_data/inbox/daily_.*\.csv$'; then
+            RUN_PIPELINE=true
+          fi
+          echo "run_pipeline=$RUN_PIPELINE" >> "$GITHUB_OUTPUT"
+          echo "RUN_PIPELINE=$RUN_PIPELINE"
 
   initialize:
     needs: validate
+    if: needs.validate.outputs.run_pipeline == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
