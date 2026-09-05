@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: v5-data-write
+  group: v5-sector-feedback-chain
   cancel-in-progress: false
 
 jobs:

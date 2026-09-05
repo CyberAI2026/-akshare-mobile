@@ -22,7 +22,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: v5-data-write
+  # Keep membership and attribution serialized, without letting an unrelated
+  # opinion job evict one of the two pending runs.
+  group: v5-sector-feedback-chain
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: v5-data-write
+  group: v5-market-opinion
   cancel-in-progress: false
 
 jobs:
