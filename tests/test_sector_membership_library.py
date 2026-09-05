@@ -2,7 +2,7 @@ import importlib.util
 import sys
 import unittest
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
@@ -56,6 +56,13 @@ class SectorMembershipTests(unittest.TestCase):
             loaded=pd.read_csv(root/"sector_membership.csv.gz",dtype={"股票代码":str})
         self.assertTrue(loaded.empty)
         self.assertIn("板块名称",loaded.columns)
+
+    def test_weekend_skip_is_bypassed_for_cache_recovery(self):
+        saturday=date(2026,9,5)
+        empty=pd.DataFrame(columns=mod.MAPPING_COLUMNS)
+        usable=pd.DataFrame([{"股票代码":"000001","板块类型":"行业","板块名称":"银行"}])
+        self.assertFalse(mod.should_skip_non_trading_day(True,saturday,empty))
+        self.assertTrue(mod.should_skip_non_trading_day(True,saturday,usable))
 
 
 if __name__=="__main__":

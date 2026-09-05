@@ -110,6 +110,11 @@ def load_previous_mapping(path: Path, wanted: set[str]) -> pd.DataFrame:
     return previous.drop(columns=["股票名称"], errors="ignore")
 
 
+def should_skip_non_trading_day(enabled: bool, captured_date, previous: pd.DataFrame) -> bool:
+    """Skip routine weekend refreshes, but never defer recovery from a broken cache."""
+    return bool(enabled and not is_trade_day(captured_date) and not previous.empty)
+
+
 def normalize_board_names(frame: pd.DataFrame) -> list[str]:
     col=find_col(frame.columns,["板块名称","概念名称","行业名称","板块","名称"])
     if col is None:
@@ -300,13 +305,15 @@ def main():
 
     install_default_http_timeout()
     captured=now_cn()
-    if args.skip_non_trading_day and not is_trade_day(captured.date()):
-        print("Non-trading day; safe skip.")
-        return
     master=load_master(Path(args.master_pool))
     wanted=set(master["股票代码"])
     requested_shards=max(1,args.shards)
     previous=load_previous_mapping(Path(args.previous_mapping),wanted) if args.previous_mapping else pd.DataFrame(columns=MAPPING_COLUMNS)
+    if should_skip_non_trading_day(args.skip_non_trading_day,captured.date(),previous):
+        print("Non-trading day with a usable cache; safe skip.")
+        return
+    if args.skip_non_trading_day and not is_trade_day(captured.date()) and previous.empty:
+        print("SECTOR_CACHE_RECOVERY: non-trading-day bootstrap allowed because cache is missing or invalid",flush=True)
     # An incremental shard is safe only when there is a non-empty prior baseline.
     shard_count=requested_shards if not previous.empty else 1
     if requested_shards > 1 and previous.empty:
