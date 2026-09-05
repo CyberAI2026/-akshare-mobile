@@ -66,15 +66,30 @@ def ths_large_board_page2() -> pd.DataFrame:
     named = boards[boards["name"].astype(str).str.contains("融资融券", na=False)]
     row = named.iloc[0] if not named.empty else boards.iloc[0]
     code = str(row["code"])
-    url = f"https://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/2/ajax/1/code/{code}"
     js = py_mini_racer.MiniRacer()
     js.eval(_get_file_content_ths("ths.js"))
     v_code = js.call("v")
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://q.10jqka.com.cn/", "Cookie": f"v={v_code}"}, timeout=15)
-    response.raise_for_status()
-    tables = pd.read_html(StringIO(response.text))
-    candidates = [x for x in tables if any("代码" in str(c) for c in x.columns)]
-    return candidates[0] if candidates else pd.DataFrame()
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0", "Referer": "https://q.10jqka.com.cn/"})
+    session.cookies.set("v", v_code, domain=".10jqka.com.cn")
+    first_url = f"https://q.10jqka.com.cn/gn/detail/code/{code}/"
+    first = session.get(first_url, timeout=15)
+    candidates = [
+        f"https://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/2/ajax/1/code/{code}/",
+        f"http://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/2/ajax/1/code/{code}/",
+        f"https://q.10jqka.com.cn/gn/detail/field/199112/order/desc/page/2/ajax/1/code/{code}/",
+    ]
+    rows = [{"variant": "first", "status": first.status_code, "chars": len(first.text), "tables": len(pd.read_html(StringIO(first.text))) if first.ok else 0}]
+    for url in candidates:
+        response = session.get(url, timeout=15)
+        table_count = 0
+        code_rows = 0
+        if response.ok:
+            tables = pd.read_html(StringIO(response.text))
+            table_count = len(tables)
+            code_rows = sum(len(x) for x in tables if any("代码" in str(c) for c in x.columns))
+        rows.append({"variant": url, "status": response.status_code, "chars": len(response.text), "tables": table_count, "code_rows": code_rows})
+    return pd.DataFrame(rows)
 
 
 def main() -> None:
