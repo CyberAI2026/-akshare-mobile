@@ -21,43 +21,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  after-close:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    env:
-      TZ: Asia/Shanghai
-      GITHUB_REPO: ${{ github.repository }}
-      GITHUB_BRANCH: ${{ github.ref_name }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: gpt-5.6-terra
-      OPINION_OPENAI_MODEL: gpt-5.6-terra
-      OPINION_SKIP_PUSH: "1"
-      OPINION_ARTICLE_LIMIT: "20"
-      OPINION_BATCH_SIZE: "4"
-      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
-      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    timeout-minutes: 5
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: Validate staged runner
+        run: |
+          python -m py_compile v5_cli.py research/after_close_stages.py
+          python -m unittest tests/test_v5_data_layers.py tests/test_after_close_stages.py
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Build same-day full-text market opinion context
-        run: python research/market_opinion_mining.py
-
-      - name: Refresh checkout after opinion commit
-        run: git pull --ff-only
-
-      - name: Run V5 after-close pipeline
+  initialize:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TZ: Asia/Shanghai
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: Initialize immutable run state
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
@@ -66,11 +61,56 @@ jobs:
             BATCH='${{ inputs.batch_path }}'
           fi
           if [ -n "$BATCH" ]; then
-            python v5_cli.py after_close --batch "$BATCH"
+            python research/after_close_stages.py init --batch "$BATCH"
           else
-            python v5_cli.py after_close
+            python research/after_close_stages.py init
           fi
 
+  screen-25d:
+    needs: initialize
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 25d
+
+  screen-120d:
+    needs: screen-25d
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 120d
+
+  lifecycle-250d:
+    needs: screen-120d
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 250d
+
+  market-context:
+    needs: lifecycle-250d
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: market
+
+  ai-finalize:
+    needs: market-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: python research/after_close_stages.py ai
       - name: Upload V5 result artifact
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,0 +1,30 @@
+name: V5 After-Close Reusable Stage
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  run-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: python research/after_close_stages.py ${{ inputs.stage }}
