@@ -1,0 +1,10 @@
+{
+  "status": "skipped_invalid_membership",
+  "snapshot_date": "",
+  "rows": 0,
+  "stocks": 0,
+  "multi_concept_stocks": 0,
+  "fact_board_count": 0,
+  "version": "stock-sector-attribution-v0.1.0",
+  "reason": "板块成分文件为空或缺少必要列: v5_data/context/sector_membership/working.csv.gz"
+}
