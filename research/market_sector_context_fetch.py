@@ -123,10 +123,12 @@ def normalize_board_names(frame: pd.DataFrame) -> list[str]:
 
 
 def normalize_constituents(frame: pd.DataFrame, board_type: str, board_name: str,
-                           wanted: set[str], captured_at: datetime) -> pd.DataFrame:
+                           wanted: set[str], captured_at: datetime,
+                           source: str = SOURCE,
+                           source_url: str = "https://quote.eastmoney.com/center/boardlist.html") -> pd.DataFrame:
     if frame is None or frame.empty:
         return pd.DataFrame()
-    code_col=find_col(frame.columns,["代码","股票代码","证券代码","code"])
+    code_col=find_col(frame.columns,["代码","股票代码","证券代码","code","symbol"])
     name_col=find_col(frame.columns,["名称","股票名称","证券名称","name"])
     if code_col is None:
         raise ValueError(f"constituent code column missing: {list(frame.columns)}")
@@ -140,8 +142,8 @@ def normalize_constituents(frame: pd.DataFrame, board_type: str, board_name: str
     out.insert(0,"抓取时间",captured_at.strftime("%Y-%m-%d %H:%M:%S%z"))
     out.insert(0,"业务时区","Asia/Shanghai")
     out.insert(0,"快照日期",captured_at.strftime("%Y-%m-%d"))
-    out["数据源"]=SOURCE
-    out["数据源URL"]="https://quote.eastmoney.com/center/boardlist.html"
+    out["数据源"]=source
+    out["数据源URL"]=source_url
     out["映射口径"]="采集当日公开板块成分；不可用于倒推此前日期"
     out["版本"]=VERSION
     return out
@@ -247,6 +249,66 @@ def fetch_type(board_type: str, list_fn, cons_fn, wanted: set[str],
     return result,qa,len(names)
 
 
+def fetch_sina_type(board_type: str, indicator: str, wanted: set[str],
+                    captured_at: datetime, workers: int = 6,
+                    max_boards: int | None = None, shard_index: int = 0,
+                    shard_count: int = 1):
+    """Independent board-member fallback for runners blocked by Eastmoney."""
+    board_frame,list_errors=retry(
+        lambda:ak.stock_sector_spot(indicator=indicator),f"{board_type}:新浪:list",3
+    )
+    qa=[]
+    if board_frame.empty:
+        qa.append({"板块类型":board_type,"板块名称":"__SINA_LIST__","状态":"失败",
+                   "匹配主池数":0,"错误":" | ".join(list_errors)})
+        return pd.DataFrame(),qa,0
+    label_col=find_col(board_frame.columns,["label","板块代码","代码"])
+    name_col=find_col(board_frame.columns,["板块","板块名称","名称","name"])
+    if label_col is None or name_col is None:
+        qa.append({"板块类型":board_type,"板块名称":"__SINA_LIST__","状态":"失败",
+                   "匹配主池数":0,"错误":f"columns missing: {list(board_frame.columns)}"})
+        return pd.DataFrame(),qa,0
+    boards=(board_frame[[label_col,name_col]].dropna().astype(str)
+            .rename(columns={label_col:"label",name_col:"name"})
+            .drop_duplicates("label"))
+    if shard_count>1:
+        boards=boards[boards["name"].map(lambda x:zlib.crc32(x.encode("utf-8"))%shard_count==shard_index)]
+    if max_boards:
+        boards=boards.head(max_boards)
+    records=boards.to_dict(orient="records")
+    qa.append({"板块类型":board_type,"板块名称":"__SINA_LIST__","状态":"成功",
+               "匹配主池数":0,"板块总数":len(records),"错误":" | ".join(list_errors)})
+    frames=[]
+    def one(row):
+        raw,errors=retry(lambda:ak.stock_sector_detail(sector=row["label"]),
+                         f"{board_type}:新浪:{row['name']}",2)
+        if raw.empty:
+            return row["name"],pd.DataFrame(),errors
+        try:
+            matched=normalize_constituents(
+                raw,board_type,row["name"],wanted,captured_at,
+                source="sina_sector_membership_via_akshare",
+                source_url="http://finance.sina.com.cn/stock/sl/",
+            )
+            return row["name"],matched,errors
+        except Exception as exc:
+            errors.append(f"normalize:{type(exc).__name__}:{exc}")
+            return row["name"],pd.DataFrame(),errors
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures=[executor.submit(one,row) for row in records]
+        for number,future in enumerate(concurrent.futures.as_completed(futures),1):
+            name,matched,errors=future.result()
+            status="失败" if errors and matched.empty else "警告" if errors else "成功"
+            qa.append({"板块类型":board_type,"板块名称":name,"状态":status,
+                       "匹配主池数":len(matched),"错误":" | ".join(errors)})
+            if not matched.empty:
+                frames.append(matched)
+            if number%50==0 or number==len(records):
+                print(f"{board_type} 新浪 progress={number}/{len(records)}",flush=True)
+    result=pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
+    return result,qa,len(records)
+
+
 def is_trade_day(day) -> bool:
     try:
         cal=ak.tool_trade_date_hist_sina()
@@ -329,6 +391,15 @@ def main():
         "行业",ak.stock_board_industry_name_em,ak.stock_board_industry_cons_em,
         wanted,captured,args.workers,args.max_boards or None,shard_index,shard_count
     )
+    if industry_frame.empty:
+        sina_frame,sina_qa,sina_count=fetch_sina_type(
+            "行业","新浪行业",wanted,captured,args.workers,args.max_boards or None,
+            shard_index,shard_count
+        )
+        industry_qa.extend(sina_qa)
+        if not sina_frame.empty:
+            industry_frame=sina_frame
+            industry_count=sina_count
     covered=set(industry_frame["股票代码"]) if not industry_frame.empty else set()
     industry_missing=industry_target[~industry_target["股票代码"].isin(covered)]
     if not industry_missing.empty:
@@ -346,16 +417,25 @@ def main():
         "概念",ak.stock_board_concept_name_em,ak.stock_board_concept_cons_em,
         wanted,captured,args.workers,args.max_boards or None,shard_index,shard_count
     )
+    if concept_frame.empty:
+        sina_frame,sina_qa,sina_count=fetch_sina_type(
+            "概念","概念",wanted,captured,args.workers,args.max_boards or None,
+            shard_index,shard_count
+        )
+        concept_qa.extend(sina_qa)
+        if not sina_frame.empty:
+            concept_frame=sina_frame
+            concept_count=sina_count
     if not concept_frame.empty:
         frames.append(concept_frame)
     qa_rows.extend(concept_qa);board_counts["概念"]=concept_count
 
     if not previous.empty:
-        industry_ok={str(row["板块名称"]) for row in industry_qa if row["状态"]!="失败"}
+        industry_refreshed=set(industry_frame["股票代码"]) if not industry_frame.empty else set()
         concept_ok={str(row["板块名称"]) for row in concept_qa
-                    if row["板块名称"]!="__LIST__" and row["状态"]!="失败"}
+                    if not str(row["板块名称"]).startswith("__") and row["状态"]!="失败"}
         keep=previous[
-            ((previous["板块类型"]=="行业") & ~previous["股票代码"].isin(industry_ok)) |
+            ((previous["板块类型"]=="行业") & ~previous["股票代码"].isin(industry_refreshed)) |
             ((previous["板块类型"]=="概念") & ~previous["板块名称"].isin(concept_ok))
         ].copy()
         if not keep.empty:

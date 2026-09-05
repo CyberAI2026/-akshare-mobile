@@ -64,6 +64,19 @@ class SectorMembershipTests(unittest.TestCase):
         self.assertFalse(mod.should_skip_non_trading_day(True,saturday,empty))
         self.assertTrue(mod.should_skip_non_trading_day(True,saturday,usable))
 
+    def test_sina_fallback_maps_symbol_and_preserves_source(self):
+        captured=datetime(2026,9,5,20,0,tzinfo=ZoneInfo("Asia/Shanghai"))
+        listing=pd.DataFrame({"label":["gn_test"],"板块":["测试概念"]})
+        detail=pd.DataFrame({"symbol":["sz000001","sh600000"],"name":["甲","乙"]})
+        with unittest.mock.patch.object(mod.ak,"stock_sector_spot",return_value=listing), \
+             unittest.mock.patch.object(mod.ak,"stock_sector_detail",return_value=detail):
+            out,qa,count=mod.fetch_sina_type("概念","概念",{"000001"},captured,workers=1)
+        self.assertEqual(count,1)
+        self.assertEqual(out.iloc[0]["股票代码"],"000001")
+        self.assertEqual(out.iloc[0]["板块名称"],"测试概念")
+        self.assertEqual(out.iloc[0]["数据源"],"sina_sector_membership_via_akshare")
+        self.assertEqual(qa[-1]["状态"],"成功")
+
 
 if __name__=="__main__":
     unittest.main()
