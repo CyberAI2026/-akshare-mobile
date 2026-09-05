@@ -22,10 +22,10 @@ permissions:
   contents: write
 
 concurrency:
-  # Keep membership and attribution serialized, without letting an unrelated
-  # opinion job evict one of the two pending runs.
-  group: v5-sector-feedback-chain
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # A newer membership build supersedes an unfinished stale build. Attribution
+  # has its own serialized queue and is triggered after this workflow commits.
+  group: v5-sector-membership
+  cancel-in-progress: true
 
 jobs:
   sector-membership-library:
@@ -67,6 +67,7 @@ jobs:
               --output-root sector_membership_run \
               --persist-root v5_data/context/sector_membership \
               --previous-mapping v5_data/context/sector_membership/working.csv.gz \
+              --workers 10 \
               --shards "$SHARD_COUNT" \
               --skip-non-trading-day
           fi

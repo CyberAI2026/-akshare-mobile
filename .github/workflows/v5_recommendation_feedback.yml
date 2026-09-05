@@ -19,7 +19,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: v5-sector-feedback-chain
+  # Serialize feedback/attribution runs without letting a long membership build
+  # occupy or evict this queue.
+  group: v5-recommendation-feedback
   cancel-in-progress: false
 
 jobs:
