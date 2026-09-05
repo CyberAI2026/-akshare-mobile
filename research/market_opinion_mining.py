@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -29,6 +30,7 @@ ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "20"))
 BATCH_SIZE = int(os.getenv("OPINION_BATCH_SIZE", "4"))
 BATCH_WORKERS = int(os.getenv("OPINION_BATCH_WORKERS", "3"))
 OPENAI_TIMEOUT_SECONDS = float(os.getenv("OPINION_OPENAI_TIMEOUT_SECONDS", "240"))
+OPENAI_MAX_RETRIES = int(os.getenv("OPINION_OPENAI_MAX_RETRIES", "1"))
 MIN_TEXT = 500
 
 
@@ -338,14 +340,17 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
     frame.to_csv(index_path, index=False, encoding="utf-8-sig")
 
 
-def push_summary(summary: dict) -> None:
+def push_summary(summary: dict, source_day: str | None = None,
+                 target_day: str | None = None) -> bool:
     if os.getenv("OPINION_SKIP_PUSH", "").strip().lower() in {"1", "true", "yes"}:
         print("OPINION_PUSHPLUS_SKIPPED context-only run")
-        return
+        return False
     wait_until_cn("OPINION_PUSH_NOT_BEFORE_CN")
     token = os.getenv("PUSHPLUS_TOKEN", "").strip()
     if not token:
-        return
+        raise RuntimeError("PUSHPLUS_TOKEN未配置，不能发送市场观点摘要")
+    source_day=source_day or source_date().isoformat()
+    target_day=target_day or target_trade_date().isoformat()
     market = summary.get("market_consensus", {}) or {}
     sectors = summary.get("sector_consensus", []) or []
     sector_groups = group_attention_sectors(sectors)
@@ -356,7 +361,7 @@ def push_summary(summary: dict) -> None:
             for x in items
         ) or "无"
     lines = [
-        f"<b>采集日：</b>{source_date().isoformat()}｜<b>适用交易日：</b>{target_trade_date().isoformat()}",
+        f"<b>采集日：</b>{source_day}｜<b>适用交易日：</b>{target_day}",
         f"<b>文章样本：</b>{summary.get('article_count', 0)}篇公开复盘全文",
         f"<b>市场观点：</b>{market.get('stance', '—')}｜{'、'.join(market.get('phase', []) or [])}",
         f"<b>共识摘要：</b>{market.get('summary', '—')}",
@@ -380,15 +385,16 @@ def push_summary(summary: dict) -> None:
         raise RuntimeError(f"PushPlus返回非JSON: {exc}") from exc
     if str(receipt.get("code", "")) != "200":
         raise RuntimeError(f"PushPlus业务回执失败: code={receipt.get('code')} msg={receipt.get('msg')}")
+    return True
 
 
-def commit() -> None:
+def commit(message: str | None = None) -> None:
     subprocess.run(["git", "config", "user.name", "V5 Automation"], check=False)
     subprocess.run(["git", "config", "user.email", "actions@users.noreply.github.com"], check=False)
     subprocess.run(["git", "add", "v5_data/opinion"], check=True)
     changed = subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode != 0
     if changed:
-        subprocess.run(["git", "commit", "-m", f"Update 25-day market opinion database {target_trade_date().isoformat()}"], check=True)
+        subprocess.run(["git", "commit", "-m", message or f"Update 25-day market opinion database {target_trade_date().isoformat()}"], check=True)
         # 研究期间主分支可能有并行维护提交；先变基再推送，避免非快进导致数据产物只留在artifact。
         for attempt in range(1, 4):
             pull = subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=False)
@@ -403,26 +409,153 @@ def commit() -> None:
         raise RuntimeError("观点数据库连续3次推送失败")
 
 
-def main() -> None:
-    key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not key:
-        raise RuntimeError("OPENAI_API_KEY未配置，不能执行正文观点挖掘")
-    wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
-    model = os.getenv("OPINION_OPENAI_MODEL", os.getenv("OPENAI_MODEL", "gpt-5.6-terra"))
-    discovered = discover_articles()
-    articles = []
-    for meta in discovered:
+def build_client(key: str) -> tuple[OpenAI, str]:
+    model=os.getenv("OPINION_OPENAI_MODEL",os.getenv("OPENAI_MODEL","gpt-5.6-terra"))
+    client=OpenAI(api_key=key,timeout=OPENAI_TIMEOUT_SECONDS,max_retries=OPENAI_MAX_RETRIES)
+    return client,model
+
+
+def public_article_metadata(article: dict) -> dict:
+    return {
+        "article_id":article["body_sha256"][:16],
+        "title":article["title"],
+        "url":article["url"],
+        "read_count":article["read_count"],
+        "body_chars":article["body_chars"],
+        "body_sha256":article["body_sha256"],
+    }
+
+
+def fetch_selected_articles(selected: list[dict]) -> list[dict]:
+    articles=[]
+    for meta in selected:
         try:
-            item = extract_article(meta)
+            item=extract_article(meta)
             if item:
                 articles.append(item)
         except Exception as exc:
-            print("ARTICLE_FETCH_FAILED", meta["url"], type(exc).__name__, str(exc)[:200])
+            print("ARTICLE_FETCH_FAILED",meta["url"],type(exc).__name__,str(exc)[:200],flush=True)
         time.sleep(1.2)
+    return articles
+
+
+def run_batch_stage(key: str, batch_index: int, batch_count: int, stage_root: Path) -> None:
+    if batch_index<0 or batch_index>=batch_count:
+        raise ValueError(f"batch-index必须在0到{batch_count-1}之间")
+    wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
+    discovered=discover_articles()
+    selected=[item for index,item in enumerate(discovered) if index%batch_count==batch_index]
+    articles=fetch_selected_articles(selected)
+    mined=[]
+    if articles:
+        client,model=build_client(key)
+        result=analyze_batch(client,model,articles,batch_index+1)
+        mined=result.get("articles",[]) or []
+        expected={a["body_sha256"][:16] for a in articles}
+        actual={str(x.get("article_id","")) for x in mined}
+        if expected-actual:
+            raise RuntimeError(f"批次缺失article_id: {sorted(expected-actual)}")
+    stage_root.mkdir(parents=True,exist_ok=True)
+    payload={
+        "batch_index":batch_index,"batch_count":batch_count,
+        "source_date":source_date().isoformat(),
+        "trade_date":target_trade_date().isoformat(),
+        "sources":[public_article_metadata(a) for a in articles],
+        "article_mining":mined,
+    }
+    path=stage_root/f"batch_{batch_index}.json"
+    path.write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8")
+    print(f"OPINION_BATCH_STAGE_OK batch={batch_index} selected={len(selected)} analyzed={len(articles)}",flush=True)
+
+
+def load_batch_stages(stage_root: Path) -> tuple[list[dict],list[dict],str,str]:
+    paths=sorted(stage_root.rglob("batch_*.json"))
+    if not paths:
+        raise RuntimeError(f"没有找到观点批次文件: {stage_root}")
+    sources_by_id={};mined_by_id={};source_days=set();trade_days=set()
+    for path in paths:
+        data=json.loads(path.read_text(encoding="utf-8"))
+        source_days.add(str(data.get("source_date","")))
+        trade_days.add(str(data.get("trade_date","")))
+        for item in data.get("sources",[]) or []:
+            sources_by_id[str(item.get("article_id",""))]=item
+        for item in data.get("article_mining",[]) or []:
+            mined_by_id[str(item.get("article_id",""))]=item
+    if len(source_days)!=1 or len(trade_days)!=1:
+        raise RuntimeError(f"批次日期不一致: source={sorted(source_days)} trade={sorted(trade_days)}")
+    sources=[x for key,x in sources_by_id.items() if key]
+    mined=[mined_by_id[key] for key in sources_by_id if key in mined_by_id]
+    missing=sorted(set(sources_by_id)-set(mined_by_id))
+    if missing:
+        raise RuntimeError(f"汇总前缺失article_id: {missing}")
+    if not sources:
+        raise RuntimeError("所有短批次均未取得可分析的公开正文")
+    return sources,mined,next(iter(source_days)),next(iter(trade_days))
+
+
+def delivery_path(source_day: str) -> Path:
+    return ROOT/"delivery"/f"{source_day}.json"
+
+
+def summary_fingerprint(data: dict) -> str:
+    payload=json.dumps(data.get("daily_consensus",{}),ensure_ascii=False,sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def deliver_data(data: dict) -> bool:
+    source_day=str(data.get("source_date") or data.get("trade_date") or "")
+    target_day=str(data.get("trade_date") or "")
+    fingerprint=summary_fingerprint(data)
+    receipt_path=delivery_path(source_day)
+    if receipt_path.exists():
+        old=json.loads(receipt_path.read_text(encoding="utf-8"))
+        if old.get("summary_sha256")==fingerprint and old.get("status")=="delivered":
+            print(f"OPINION_DELIVERY_ALREADY_DONE source_date={source_day}",flush=True)
+            return False
+    delivered=push_summary(data.get("daily_consensus",{}),source_day,target_day)
+    if delivered:
+        receipt_path.parent.mkdir(parents=True,exist_ok=True)
+        receipt_path.write_text(json.dumps({
+            "status":"delivered","source_date":source_day,"trade_date":target_day,
+            "delivered_at_cn":now_cn().isoformat(),"summary_sha256":fingerprint,
+            "article_count":len(data.get("sources",[]) or []),
+        },ensure_ascii=False,indent=2),encoding="utf-8")
+    return delivered
+
+
+def run_aggregate_stage(key: str, stage_root: Path) -> None:
+    sources,mined,source_day,trade_day=load_batch_stages(stage_root)
+    client,model=build_client(key)
+    summary=aggregate(client,model,mined,sources)
+    save_results(sources,mined,summary)
+    if os.getenv("OPINION_PUSH_AFTER_AGGREGATE","").strip().lower() in {"1","true","yes"}:
+        data=json.loads((ROOT/"latest.json").read_text(encoding="utf-8"))
+        deliver_data(data)
+    commit()
+    print(f"OPINION_AGGREGATE_STAGE_OK source_date={source_day} trade_date={trade_day} articles={len(sources)}",flush=True)
+
+
+def run_delivery_stage() -> None:
+    path=ROOT/"latest.json"
+    if not path.exists():
+        print("OPINION_DELIVERY_NOT_READY reason=latest_missing",flush=True)
+        return
+    data=json.loads(path.read_text(encoding="utf-8"))
+    if str(data.get("source_date") or data.get("trade_date"))!=source_date().isoformat():
+        print(f"OPINION_DELIVERY_NOT_READY reason=stale source_date={data.get('source_date')}",flush=True)
+        return
+    if deliver_data(data):
+        commit(f"Record market opinion delivery {data.get('source_date')}")
+
+
+def run_full_stage(key: str) -> None:
+    wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
+    discovered=discover_articles()
+    articles=fetch_selected_articles(discovered)
     if not articles:
         raise RuntimeError("没有取得可分析的完整公开复盘正文")
-    client = OpenAI(api_key=key, timeout=OPENAI_TIMEOUT_SECONDS, max_retries=1)
-    batches=[articles[i:i + BATCH_SIZE] for i in range(0,len(articles),BATCH_SIZE)]
+    client,model=build_client(key)
+    batches=[articles[i:i+BATCH_SIZE] for i in range(0,len(articles),BATCH_SIZE)]
     mined_by_batch={}
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(1,min(BATCH_WORKERS,len(batches)))) as executor:
         futures={executor.submit(analyze_batch,client,model,batch,number):number
@@ -432,15 +565,35 @@ def main() -> None:
             result=future.result()
             mined_by_batch[number]=result.get("articles",[]) or []
     mined=[item for number in sorted(mined_by_batch) for item in mined_by_batch[number]]
-    expected = {a["body_sha256"][:16] for a in articles}
-    actual = {str(x.get("article_id", "")) for x in mined}
-    if expected - actual:
-        raise RuntimeError(f"逐篇分析缺失article_id: {sorted(expected - actual)}")
-    summary = aggregate(client, model, mined, articles)
-    save_results(articles, mined, summary)
+    expected={a["body_sha256"][:16] for a in articles}
+    actual={str(x.get("article_id","")) for x in mined}
+    if expected-actual:
+        raise RuntimeError(f"逐篇分析缺失article_id: {sorted(expected-actual)}")
+    summary=aggregate(client,model,mined,articles)
+    save_results(articles,mined,summary)
     push_summary(summary)
     commit()
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    print(json.dumps(summary,ensure_ascii=False,indent=2))
+
+
+def main() -> None:
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--stage",choices=["full","batch","aggregate","push"],default="full")
+    parser.add_argument("--batch-index",type=int,default=0)
+    parser.add_argument("--batch-count",type=int,default=5)
+    parser.add_argument("--stage-root",default="opinion_stage")
+    args=parser.parse_args()
+    key = os.getenv("OPENAI_API_KEY", "").strip()
+    if args.stage!="push" and not key:
+        raise RuntimeError("OPENAI_API_KEY未配置，不能执行正文观点挖掘")
+    if args.stage=="batch":
+        run_batch_stage(key,args.batch_index,args.batch_count,Path(args.stage_root))
+    elif args.stage=="aggregate":
+        run_aggregate_stage(key,Path(args.stage_root))
+    elif args.stage=="push":
+        run_delivery_stage()
+    else:
+        run_full_stage(key)
 
 
 if __name__ == "__main__":

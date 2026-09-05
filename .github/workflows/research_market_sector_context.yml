@@ -22,15 +22,14 @@ permissions:
   contents: write
 
 concurrency:
-  # A newer membership build supersedes an unfinished stale build. Attribution
-  # has its own serialized queue and is triggered after this workflow commits.
+  # A newer membership build supersedes an unfinished stale build.
   group: v5-sector-membership
   cancel-in-progress: true
 
 jobs:
   sector-membership-library:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
     steps:
@@ -90,4 +89,49 @@ jobs:
         with:
           name: V5-sector-membership-${{ github.run_id }}
           path: sector_membership_run/
+          retention-days: 30
+
+  sector-attribution:
+    needs: sector-membership-library
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      # The membership job may have committed a newer snapshot. Read main again
+      # because commits made with GITHUB_TOKEN do not start another push run.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Build stock-to-sector attribution
+        run: |
+          python -m py_compile research/stock_sector_attribution.py
+          python research/stock_sector_attribution.py \
+            --membership v5_data/context/sector_membership/working.csv.gz
+      - name: Commit attribution snapshot
+        run: |
+          git config user.name "V5 Sector Attribution"
+          git config user.email "actions@users.noreply.github.com"
+          git add --all -- v5_data/stock_sector_attribution
+          if git diff --cached --quiet; then
+            echo "No sector attribution changes to commit"
+          else
+            git commit -m "V5 sector attribution $(date +%F-%H%M)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Upload attribution artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-sector-attribution-${{ github.run_id }}
+          path: v5_data/stock_sector_attribution/
+          if-no-files-found: warn
           retention-days: 30

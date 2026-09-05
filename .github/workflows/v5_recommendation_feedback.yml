@@ -27,7 +27,7 @@ concurrency:
 jobs:
   feedback-and-attribution:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}

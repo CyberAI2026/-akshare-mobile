@@ -3,9 +3,8 @@ name: V5 Market Opinion Mining
 on:
   workflow_dispatch:
   schedule:
-    # Daily 18:47 Beijing start provides queue-delay buffer; the script waits
-    # until 20:30 before collection and does not push before 21:00.
-    - cron: "47 10 * * *"
+    # Daily 20:30 Beijing, including weekends and exchange holidays.
+    - cron: "30 12 * * *"
   push:
     branches: [main]
     paths:
@@ -21,25 +20,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  opinion-mining:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
-    env:
-      TZ: Asia/Shanghai
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: gpt-5.6-terra
-      OPINION_OPENAI_MODEL: gpt-5.6-terra
-      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
-      OPINION_ARTICLE_LIMIT: "20"
-      OPINION_BATCH_SIZE: "4"
-      OPINION_BATCH_WORKERS: "3"
-      OPINION_OPENAI_TIMEOUT_SECONDS: "240"
-      OPINION_COLLECT_NOT_BEFORE_CN: "20:30"
-      OPINION_PUSH_NOT_BEFORE_CN: "21:00"
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -49,12 +34,79 @@ jobs:
         run: |
           python -m py_compile research/market_opinion_mining.py
           python -m unittest tests/test_market_opinion_mining.py
-      - name: Refresh branch before mining
-        if: github.event_name != 'push'
-        run: git pull --ff-only origin main
-      - name: Mine complete public review texts
-        if: github.event_name != 'push'
-        run: python research/market_opinion_mining.py
+
+  opinion-batches:
+    needs: validate
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        batch: [0, 1, 2, 3, 4]
+    env:
+      TZ: Asia/Shanghai
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
+      OPINION_OPENAI_MODEL: gpt-5.6-terra
+      OPINION_ARTICLE_LIMIT: "20"
+      OPINION_OPENAI_TIMEOUT_SECONDS: "180"
+      OPINION_OPENAI_MAX_RETRIES: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Mine one bounded article batch
+        run: |
+          python research/market_opinion_mining.py \
+            --stage batch \
+            --batch-index ${{ matrix.batch }} \
+            --batch-count 5 \
+            --stage-root opinion_stage
+      - name: Upload structured batch only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-opinion-batch-${{ github.run_id }}-${{ matrix.batch }}
+          path: opinion_stage/batch_${{ matrix.batch }}.json
+          if-no-files-found: error
+          retention-days: 1
+
+  aggregate:
+    needs: opinion-batches
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
+      OPINION_OPENAI_MODEL: gpt-5.6-terra
+      OPINION_OPENAI_TIMEOUT_SECONDS: "180"
+      OPINION_OPENAI_MAX_RETRIES: "0"
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      OPINION_PUSH_AFTER_AGGREGATE: ${{ github.event_name == 'push' && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: market-opinion-batch-${{ github.run_id }}-*
+          path: opinion_stage
+          merge-multiple: true
+      - name: Aggregate structured batches
+        run: python research/market_opinion_mining.py --stage aggregate --stage-root opinion_stage
       - name: Upload derived opinion database
         if: always()
         uses: actions/upload-artifact@v4
