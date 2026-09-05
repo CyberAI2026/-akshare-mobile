@@ -9,6 +9,8 @@ import akshare as ak
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from py_mini_racer import py_mini_racer
+from akshare.stock_feature.stock_board_concept_ths import _get_file_content_ths
 
 
 OUT = Path("concept_source_probe")
@@ -65,7 +67,10 @@ def ths_large_board_page2() -> pd.DataFrame:
     row = named.iloc[0] if not named.empty else boards.iloc[0]
     code = str(row["code"])
     url = f"https://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/2/ajax/1/code/{code}"
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://q.10jqka.com.cn/"}, timeout=15)
+    js = py_mini_racer.MiniRacer()
+    js.eval(_get_file_content_ths("ths.js"))
+    v_code = js.call("v")
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://q.10jqka.com.cn/", "Cookie": f"v={v_code}"}, timeout=15)
     response.raise_for_status()
     tables = pd.read_html(StringIO(response.text))
     candidates = [x for x in tables if any("代码" in str(c) for c in x.columns)]
