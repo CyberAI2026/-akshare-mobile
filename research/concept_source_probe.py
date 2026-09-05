@@ -59,6 +59,19 @@ def ths_first_board_pagination() -> pd.DataFrame:
     return pd.DataFrame(links).drop_duplicates() if links else pd.DataFrame()
 
 
+def ths_large_board_page2() -> pd.DataFrame:
+    boards = ak.stock_board_concept_name_ths()
+    named = boards[boards["name"].astype(str).str.contains("融资融券", na=False)]
+    row = named.iloc[0] if not named.empty else boards.iloc[0]
+    code = str(row["code"])
+    url = f"https://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/2/ajax/1/code/{code}"
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://q.10jqka.com.cn/"}, timeout=15)
+    response.raise_for_status()
+    tables = pd.read_html(StringIO(response.text))
+    candidates = [x for x in tables if any("代码" in str(c) for c in x.columns)]
+    return candidates[0] if candidates else pd.DataFrame()
+
+
 def main() -> None:
     available = sorted(name for name in dir(ak) if "concept" in name.lower() or "board_cons" in name.lower())
     results = [
@@ -67,6 +80,7 @@ def main() -> None:
         record("ths_concept_list", ak.stock_board_concept_name_ths),
         record("ths_first_board_html_table", ths_first_board_table),
         record("ths_first_board_pagination", ths_first_board_pagination),
+        record("ths_large_board_page2", ths_large_board_page2),
     ]
     OUT.mkdir(parents=True, exist_ok=True)
     payload = {"available_functions": available, "results": results}
