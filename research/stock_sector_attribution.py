@@ -76,6 +76,11 @@ def load_sector_strength(path: Path) -> dict[str, dict]:
 def load_opinion_mentions(path: Path) -> str:
     if not path.exists():
         return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return json.dumps(data.get("daily_consensus", {}) or {}, ensure_ascii=False)
+    except Exception:
+        return ""
 
 
 def load_membership(path: Path) -> pd.DataFrame:
@@ -85,16 +90,12 @@ def load_membership(path: Path) -> pd.DataFrame:
         return pd.DataFrame()
     required = {"股票代码", "板块类型", "板块名称"}
     return frame if not frame.empty and required.issubset(frame.columns) else pd.DataFrame()
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return json.dumps(data.get("daily_consensus", {}), ensure_ascii=False)
-    except Exception:
-        return ""
 
 
 def build_attribution(membership: pd.DataFrame, master: pd.DataFrame,
                       strength: dict[str, dict], opinion_text: str,
                       snapshot_date: str) -> pd.DataFrame:
+    opinion_text = opinion_text or ""
     x = membership.copy()
     x["股票代码"] = x["股票代码"].map(norm_code)
     master = master.copy()

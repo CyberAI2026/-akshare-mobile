@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from research import recommendation_feedback as rf
-from research.stock_sector_attribution import build_attribution, load_membership
+from research.stock_sector_attribution import build_attribution, load_membership, load_opinion_mentions
 
 
 class RecommendationFeedbackTests(unittest.TestCase):
@@ -77,6 +77,14 @@ class RecommendationFeedbackTests(unittest.TestCase):
 
 
 class AttributionTests(unittest.TestCase):
+    def test_missing_or_null_opinion_is_empty_text(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.assertEqual(load_opinion_mentions(root / "missing.json"), "")
+            path = root / "opinion.json"
+            path.write_text('{"daily_consensus": null}', encoding="utf-8")
+            self.assertEqual(load_opinion_mentions(path), "{}")
+
     def test_headerless_membership_is_safe_skip(self):
         with tempfile.TemporaryDirectory() as td:
             path=Path(td)/"empty.csv.gz"
