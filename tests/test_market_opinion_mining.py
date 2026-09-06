@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.modules.setdefault("bs4", MagicMock())
 sys.modules.setdefault("openai", MagicMock())
@@ -21,9 +21,19 @@ from research.market_opinion_mining import (
     target_trade_date,
     title_review_date_matches,
 )
+from research import market_opinion_mining as opinion
 
 
 class OpinionSectorGroupingTests(unittest.TestCase):
+    def test_pushplus_acceptance_keeps_shortcode_without_claiming_delivery(self):
+        response=MagicMock(status_code=200,text='{"code":200}')
+        response.json.return_value={"code":200,"msg":"执行成功","data":"short-code-1"}
+        with patch.dict(opinion.os.environ,{"PUSHPLUS_TOKEN":"token"},clear=False), \
+             patch.object(opinion.requests,"post",return_value=response):
+            receipt=opinion.push_summary({"article_count":0},"2026-09-06","2026-09-07",[])
+        self.assertTrue(receipt["accepted"])
+        self.assertEqual(receipt["short_code"],"short-code-1")
+
     def test_attention_and_trend_are_separate(self):
         sectors = [
             {"sector": "机器人", "mention_count": 8, "stance": "加强"},
