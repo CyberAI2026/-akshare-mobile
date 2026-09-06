@@ -26,12 +26,16 @@ LIST_URLS = [
     "https://www.tgb.cn/newIndex/2",
 ]
 UA = "AStockResearch/1.0 (private research; low-frequency; contact via repository owner)"
-ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "20"))
+ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "30"))
+MIN_ARTICLE_COUNT = int(os.getenv("OPINION_MIN_ARTICLES", "15"))
 BATCH_SIZE = int(os.getenv("OPINION_BATCH_SIZE", "4"))
 BATCH_WORKERS = int(os.getenv("OPINION_BATCH_WORKERS", "3"))
 OPENAI_TIMEOUT_SECONDS = float(os.getenv("OPINION_OPENAI_TIMEOUT_SECONDS", "240"))
 OPENAI_MAX_RETRIES = int(os.getenv("OPINION_OPENAI_MAX_RETRIES", "1"))
-MIN_TEXT = 500
+MIN_TEXT = 600
+MARKET_TERMS = ("市场", "大盘", "指数", "情绪", "成交额", "涨停", "跌停", "赚钱效应", "亏钱效应")
+SECTOR_TERMS = ("板块", "题材", "主线", "周期", "轮动", "资金", "分歧", "退潮", "修复")
+REVIEW_TERMS = ("复盘", "收盘", "市场", "情绪", "板块", "明日", "策略")
 
 
 def now_cn() -> datetime:
@@ -102,6 +106,42 @@ def clean_text(text: str) -> str:
     return text.strip()
 
 
+def parse_published_at(text: str) -> datetime | None:
+    """Parse the article's own publication timestamp; list-page dates are not proof."""
+    patterns = [
+        r"(?<!\d)(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})日?\s+(\d{1,2}):(\d{2})(?!\d)",
+        r"(?<!\d)(\d{2})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})(?!\d)",
+    ]
+    for pattern in patterns:
+        match=re.search(pattern,text or "")
+        if not match:
+            continue
+        year=int(match.group(1))
+        if year<100:
+            year+=2000
+        try:
+            return datetime(year,int(match.group(2)),int(match.group(3)),
+                            int(match.group(4)),int(match.group(5)),tzinfo=TZ)
+        except ValueError:
+            continue
+    return None
+
+
+def review_quality_reasons(title: str, body: str) -> list[str]:
+    reasons=[]
+    if len(body)<MIN_TEXT:
+        reasons.append(f"正文少于{MIN_TEXT}字")
+    market_hits=sum(term in body for term in MARKET_TERMS)
+    sector_hits=sum(term in body for term in SECTOR_TERMS)
+    if not any(term in title for term in REVIEW_TERMS) and market_hits<2:
+        reasons.append("缺少市场复盘主题")
+    if market_hits<2:
+        reasons.append("市场维度不足")
+    if sector_hits<2:
+        reasons.append("板块/周期维度不足")
+    return reasons
+
+
 def discover_articles() -> list[dict]:
     seen: set[str] = set()
     rows: list[dict] = []
@@ -143,32 +183,30 @@ def discover_articles() -> list[dict]:
 
 
 def title_review_date_matches(title: str, target) -> bool:
-    """拒绝标题明确标注的陈旧内容；周末允许最近一个工作日，明日策略日期不误杀。"""
+    """标题明确标注旧复盘日期时拒绝；“明日策略9.4”不当作文章复盘日期。"""
     dates = []
     for match in re.finditer(r"(?:\d{4}年)?(\d{1,2})[月./-](\d{1,2})日?.{0,8}复盘", title):
         dates.append((int(match.group(1)), int(match.group(2))))
     for match in re.finditer(r"(?<!\d)(\d{2})(\d{2})复盘", title):
         dates.append((int(match.group(1)), int(match.group(2))))
-    leading = re.match(r"^\s*(?:盘前情报\s*[·|｜:-]?\s*)?(?:\d{4}[年./-])?(\d{1,2})[月./-](\d{1,2})(?:日|\b|\s)", title)
-    if leading:
-        dates.append((int(leading.group(1)), int(leading.group(2))))
-    compact_leading = re.match(r"^\s*(\d{2})(\d{2})(?:\D|$)", title)
-    if compact_leading:
-        dates.append((int(compact_leading.group(1)), int(compact_leading.group(2))))
-    if not dates:
-        return True
-    allowed = {(target.month, target.day)}
-    if target.weekday() >= 5:
-        latest_weekday = target
-        while latest_weekday.weekday() >= 5:
-            latest_weekday -= timedelta(days=1)
-        allowed.add((latest_weekday.month, latest_weekday.day))
-    return bool(set(dates) & allowed)
+    return not dates or (target.month, target.day) in dates
 
 
 def extract_article(meta: dict) -> dict | None:
     html = fetch_html(meta["url"])
     soup = BeautifulSoup(html, "html.parser")
+    publication_candidates=[]
+    for selector in [
+        'meta[property="article:published_time"]', 'meta[name="publishdate"]',
+        'meta[name="pubdate"]', 'meta[name="date"]', 'time[datetime]',
+    ]:
+        for node in soup.select(selector):
+            publication_candidates.append(str(node.get("content") or node.get("datetime") or ""))
+    publication_candidates.append(clean_text(soup.get_text(" ",strip=True)))
+    published_at=next((value for value in (parse_published_at(x) for x in publication_candidates) if value),None)
+    if published_at is None or published_at.date()!=source_date():
+        print("ARTICLE_PUBLICATION_DATE_REJECTED",published_at.isoformat() if published_at else "missing",meta["url"],flush=True)
+        return None
     for tag in soup(["script", "style", "nav", "footer", "form", "noscript"]):
         tag.decompose()
     title_node = soup.select_one("h1") or soup.select_one("title")
@@ -196,7 +234,9 @@ def extract_article(meta: dict) -> dict | None:
         if pos > MIN_TEXT:
             text = text[:pos]
     text = clean_text(text)
-    if len(text) < MIN_TEXT:
+    quality_reasons=review_quality_reasons(title,text)
+    if quality_reasons:
+        print("ARTICLE_QUALITY_REJECTED", "|".join(quality_reasons), title[:100], flush=True)
         return None
     return {
         **meta,
@@ -204,6 +244,8 @@ def extract_article(meta: dict) -> dict | None:
         "body": text,
         "body_chars": len(text),
         "body_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        "published_at_cn": published_at.isoformat(),
+        "quality_checks": ["当天发表时间已核验", f"正文不少于{MIN_TEXT}字", "覆盖市场维度", "覆盖板块/周期维度"],
     }
 
 
@@ -321,12 +363,21 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
         "read_count": a["read_count"],
         "body_chars": a["body_chars"],
         "body_sha256": a["body_sha256"],
+        "published_at_cn": a.get("published_at_cn", ""),
+        "quality_checks": a.get("quality_checks", []),
     } for a in articles]
     out = {
         "trade_date": day,
         "source_date": source_date().isoformat(),
         "generated_at_cn": now_cn().isoformat(),
         "method": "full-text transient mining; raw article bodies not persisted",
+        "selection_standard": {
+            "publication_date": "文章页面可核验的发表日期必须等于采集日",
+            "minimum_articles_for_formal_consensus": MIN_ARTICLE_COUNT,
+            "minimum_body_chars": MIN_TEXT,
+            "topic_requirements": "必须同时覆盖市场以及板块/题材/周期维度",
+            "exclusions": "排除旧文、无法核验发表时间、正文不完整、纯单股流水或缺少市场板块分析的帖子",
+        },
         "sources": sources,
         "article_mining": mined,
         "daily_consensus": summary,
@@ -376,7 +427,8 @@ def push_summary(summary: dict, source_day: str | None = None,
         ) or "无"
     lines = [
         f"<b>采集日：</b>{source_day}｜<b>适用交易日：</b>{target_day}",
-        f"<b>文章样本：</b>{summary.get('article_count', 0)}篇公开复盘全文",
+        f"<b>文章样本：</b>{summary.get('article_count', 0)}篇／正式门槛{MIN_ARTICLE_COUNT}篇",
+        f"<b>样本状态：</b>{summary.get('sample_status', '正式样本')}",
         f"<b>市场观点：</b>{market.get('stance', '—')}｜{'、'.join(market.get('phase', []) or [])}",
         f"<b>共识摘要：</b>{market.get('summary', '—')}",
         "<b>高关注·观点偏强/加强：</b>" + render(sector_groups["观点偏强或加强"]),
@@ -437,6 +489,8 @@ def public_article_metadata(article: dict) -> dict:
         "read_count":article["read_count"],
         "body_chars":article["body_chars"],
         "body_sha256":article["body_sha256"],
+        "published_at_cn":article.get("published_at_cn",""),
+        "quality_checks":article.get("quality_checks",[]),
     }
 
 
@@ -539,8 +593,23 @@ def deliver_data(data: dict) -> bool:
 
 def run_aggregate_stage(key: str, stage_root: Path) -> None:
     sources,mined,source_day,trade_day=load_batch_stages(stage_root)
-    client,model=build_client(key)
-    summary=aggregate(client,model,mined,sources)
+    if len(sources)<MIN_ARTICLE_COUNT:
+        summary={
+            "market_consensus":{
+                "stance":"样本不足","phase":[],"confidence":"低",
+                "summary":f"当天仅取得{len(sources)}篇合格复盘，低于{MIN_ARTICLE_COUNT}篇正式门槛，不形成正式市场共识。",
+            },
+            "market_disagreements":[],"sector_consensus":[],"stock_attention":[],
+            "tomorrow_consensus_watch":[],
+            "limitations":["当天合格样本不足；没有使用旧文章或低质量帖子补足数量。"],
+            "article_count":len(sources),"source_platform":"淘股吧公开复盘",
+            "sample_status":"样本不足，非正式摘要",
+        }
+        print(f"OPINION_SAMPLE_INSUFFICIENT articles={len(sources)} minimum={MIN_ARTICLE_COUNT}",flush=True)
+    else:
+        client,model=build_client(key)
+        summary=aggregate(client,model,mined,sources)
+        summary["sample_status"]="正式样本"
     save_results(sources,mined,summary)
     if os.getenv("OPINION_PUSH_AFTER_AGGREGATE","").strip().lower() in {"1","true","yes"}:
         data=json.loads((ROOT/"latest.json").read_text(encoding="utf-8"))
