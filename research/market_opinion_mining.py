@@ -164,7 +164,7 @@ def compute_concept_index_metrics(frame: pd.DataFrame, name: str, code: str = ""
     }
 
 
-def fetch_ths_concept_facts(sectors: list[dict], day: date) -> dict:
+def fetch_ths_concept_facts(sectors: list[dict], day: date, limit: int | None = None) -> dict:
     result={"status":"unavailable","asof_date":day.isoformat(),"items":[],
             "note":"客观指数数据与文章观点分开记录。"}
     wanted=[]
@@ -191,11 +191,12 @@ def fetch_ths_concept_facts(sectors: list[dict], day: date) -> dict:
             if key and key not in catalog:
                 catalog[key]=(raw_name,str(row[code_col]).strip() if code_col else "")
         matched=[]
+        effective_limit=max(1,int(limit or THS_CONCEPT_LIMIT))
         for opinion_name in wanted:
             found=catalog.get(normalize_concept_name(opinion_name))
             if found and found not in matched:
                 matched.append(found)
-            if len(matched)>=THS_CONCEPT_LIMIT:
+            if len(matched)>=effective_limit:
                 break
         start=(day-timedelta(days=20)).strftime("%Y%m%d")
         end=day.strftime("%Y%m%d")
