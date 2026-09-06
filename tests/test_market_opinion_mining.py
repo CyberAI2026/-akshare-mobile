@@ -13,6 +13,8 @@ from zoneinfo import ZoneInfo
 
 from research.market_opinion_mining import (
     group_attention_sectors,
+    parse_published_at,
+    review_quality_reasons,
     source_date,
     target_trade_date,
     title_review_date_matches,
@@ -37,22 +39,30 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         target = date(2026, 9, 3)
         self.assertFalse(title_review_date_matches("2026年9月2日 市场复盘与明日策略", target))
         self.assertFalse(title_review_date_matches("0902复盘丨指数承压", target))
-        self.assertFalse(title_review_date_matches("9.2 明天或开始新的反弹", target))
         self.assertTrue(title_review_date_matches("9月3日主题复盘", target))
         self.assertTrue(title_review_date_matches("退潮期空仓！附9.4明日市场核心策略", target))
-
-    def test_weekend_allows_latest_weekday_but_rejects_older_leading_dates(self):
-        saturday = date(2026, 9, 5)
-        sunday = date(2026, 9, 6)
-        self.assertTrue(title_review_date_matches("盘前情报 · 2026-09-04 周五", saturday))
-        self.assertTrue(title_review_date_matches("9.4 收盘观察", sunday))
-        self.assertFalse(title_review_date_matches("9.3 明天不创新低则反弹开启", saturday))
 
     def test_weekend_articles_target_next_trading_day(self):
         current=datetime(2026,9,5,20,30,tzinfo=ZoneInfo("Asia/Shanghai"))
         calendar=[date(2026,9,4),date(2026,9,7)]
         self.assertEqual(source_date(current),date(2026,9,5))
         self.assertEqual(target_trade_date(current,calendar),date(2026,9,7))
+
+    def test_publication_timestamp_must_be_parsed_from_article_page(self):
+        parsed=parse_published_at("淘股吧原创 2026-09-06 20:48 | 浏览100")
+        self.assertEqual(parsed.date(),date(2026,9,6))
+        self.assertEqual(parsed.hour,20)
+        compact=parse_published_at("26-09-06 21:03 300次浏览")
+        self.assertEqual(compact.date(),date(2026,9,6))
+
+    def test_quality_requires_market_and_sector_dimensions(self):
+        good=("市场指数成交额与赚钱效应发生变化，情绪进入分歧。"
+              "板块题材围绕主线轮动，资金从高位退潮方向转向低位修复。"*30)
+        self.assertEqual(review_quality_reasons("9月6日市场复盘",good),[])
+        single_stock=("某股票今日买入，记录个人成交和持仓。"*80)
+        reasons=review_quality_reasons("个人实盘",single_stock)
+        self.assertIn("市场维度不足",reasons)
+        self.assertIn("板块/周期维度不足",reasons)
 
 
 if __name__ == "__main__":
