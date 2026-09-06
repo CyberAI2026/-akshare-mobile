@@ -2,8 +2,12 @@ name: V5 Market Opinion Delivery
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "v5_data/opinion/delivery_requests/**"
   schedule:
-    # Beijing 21:00/21:20/21:40. Later attempts safely skip after a saved receipt.
+    # Beijing 21:00/21:20/21:40. Later attempts safely skip after PushPlus accepts the request.
     - cron: "0,20,40 13 * * *"
 
 permissions:
