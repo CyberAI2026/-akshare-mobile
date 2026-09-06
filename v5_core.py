@@ -1000,13 +1000,48 @@ def gh_headers(cfg: GithubConfig):
     return {"Authorization":f"Bearer {cfg.token}","Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
 
 
+def gh_get_bytes(cfg: GithubConfig, path: str) -> bytes | None:
+    """读取GitHub文件正文；优先使用Contents API内嵌内容，避免临时下载链接过期(410)。"""
+    import base64
+    url=f"{cfg.api}/contents/{path}"
+    response=requests.get(url,headers=gh_headers(cfg),params={"ref":cfg.branch},timeout=20)
+    if response.status_code==404:
+        return None
+    if response.status_code!=200:
+        raise RuntimeError(f"GitHub文件读取失败 {response.status_code}: {response.text[:200]}")
+    obj=response.json()
+    encoded=obj.get("content") if isinstance(obj,dict) else None
+    if encoded:
+        try:
+            return base64.b64decode(str(encoded).replace("\n",""),validate=True)
+        except Exception as exc:
+            raise RuntimeError("GitHub文件正文Base64解码失败") from exc
+    download_url=obj.get("download_url") if isinstance(obj,dict) else None
+    if not download_url:
+        raise RuntimeError("GitHub文件响应缺少正文和下载地址")
+    downloaded=requests.get(download_url,headers=gh_headers(cfg),timeout=30)
+    if downloaded.status_code!=200:
+        raise RuntimeError(f"GitHub文件下载失败 {downloaded.status_code}")
+    return downloaded.content
+
+
 def gh_put_bytes(cfg: GithubConfig, path: str, content: bytes, message: str) -> str:
     import base64
     url=f"{cfg.api}/contents/{path}"
     old=requests.get(url,headers=gh_headers(cfg),params={"ref":cfg.branch},timeout=20)
     payload={"message":message,"content":base64.b64encode(content).decode(),"branch":cfg.branch}
-    if old.status_code==200: payload["sha"]=old.json().get("sha")
-    r=requests.put(url,headers=gh_headers(cfg),json=payload,timeout=30); r.raise_for_status()
+    if old.status_code==200:
+        payload["sha"]=old.json().get("sha")
+    elif old.status_code!=404:
+        raise RuntimeError(f"GitHub写入前读取失败 {old.status_code}: {old.text[:200]}")
+    r=requests.put(url,headers=gh_headers(cfg),json=payload,timeout=30)
+    if r.status_code in (409,422):
+        # 页面和工作流偶发同时提交时，只重读最新blob并安全重试一次。
+        latest=requests.get(url,headers=gh_headers(cfg),params={"ref":cfg.branch},timeout=20)
+        if latest.status_code==200:
+            payload["sha"]=latest.json().get("sha")
+            r=requests.put(url,headers=gh_headers(cfg),json=payload,timeout=30)
+    r.raise_for_status()
     return r.json()["content"].get("download_url") or r.json()["content"].get("html_url")
 
 
