@@ -1,8 +1,10 @@
 {
-  "status": "delivered",
+  "status": "resend_requested",
   "source_date": "2026-09-06",
   "trade_date": "2026-09-07",
   "delivered_at_cn": "2026-09-06T21:24:33.342921+08:00",
   "summary_sha256": "194082786d90367b04ca876e463624c98df128437449202f33268a9966ec0cb3",
-  "article_count": 8
+  "article_count": 8,
+  "delivery_confirmation": "user_reported_not_received",
+  "resend_requested_at_cn": "2026-09-06T23:08:00+08:00"
 }
