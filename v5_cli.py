@@ -334,7 +334,7 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     else:
         lines.append("<br><b>结论：</b>今日OpenAI未选出次日观察标的（0只）。")
     lines.append("<br><small>盘后观察池不是买入名单，需次日14:40–14:45再次确认。</small>")
-    return pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
+    pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
 
 
 def notify_tail_success(final_df: pd.DataFrame, meta: dict):
@@ -700,8 +700,8 @@ def _attention_sector_market_groups(sector_tables: dict[str, pd.DataFrame] | Non
     }
 
 
-def _stock_sector_attribution_payload(candidates: pd.DataFrame) -> dict:
-    """逐股加载一股多概念与主导板块候选；保留快照日期和时点限制供AI审计。"""
+def _stock_sector_attribution_payload(candidates: pd.DataFrame, concept_fact_day=None) -> dict:
+    """逐股连接行业/多概念及同花顺概念指数客观行情，保留截止日供AI审计。"""
     path = Path("v5_data/stock_sector_attribution/latest.csv")
     if not path.exists() or candidates is None or candidates.empty:
         return {"status": "unavailable", "stocks": []}
@@ -723,9 +723,41 @@ def _stock_sector_attribution_payload(candidates: pd.DataFrame) -> dict:
                 "快照日期": primary.get("快照日期", ""), "强势观察日期": primary.get("强势观察日期", ""),
                 "时点一致": primary.get("时点一致", False), "时点限制": primary.get("时点限制", ""),
             })
+        concept_result={"status":"not_requested","items":[]}
+        if rows and concept_fact_day is not None:
+            # 轮询各股票的第一、第二……概念，避免前几只多概念股票耗尽全局额度。
+            wanted=[]
+            max_depth=max((len(row["全部概念"]) for row in rows),default=0)
+            for depth in range(max_depth):
+                for row in rows:
+                    concepts=row["全部概念"]
+                    if depth<len(concepts) and concepts[depth] not in wanted:
+                        wanted.append(concepts[depth])
+            try:
+                from research.market_opinion_mining import fetch_ths_concept_facts, normalize_concept_name
+                fact_limit=int(os.getenv("RECOMMENDATION_THS_CONCEPT_LIMIT","24"))
+                concept_result=fetch_ths_concept_facts(
+                    [{"sector":name} for name in wanted],concept_fact_day,limit=fact_limit
+                )
+                fact_map={normalize_concept_name(item.get("concept","")):item
+                          for item in concept_result.get("items",[])}
+                covered=0
+                for row in rows:
+                    facts=[fact_map[normalize_concept_name(name)] for name in row["全部概念"]
+                           if normalize_concept_name(name) in fact_map]
+                    row["同花顺概念指数客观行情"]=facts
+                    if facts:
+                        covered+=1
+                concept_result["candidate_stock_count"]=len(rows)
+                concept_result["covered_stock_count"]=covered
+                concept_result["stock_coverage_pct"]=round(covered/len(rows)*100,2) if rows else 0
+            except Exception as exc:
+                concept_result={"status":"unavailable","items":[],
+                                "note":f"候选概念指数连接失败: {type(exc).__name__}: {str(exc)[:160]}"}
         return {
             "status": "available" if rows else "unavailable", "stocks": _json_clean(rows),
-            "method": "板块成分×同日行情/资金×正文观点；是关联归因，不是确定因果",
+            "concept_index_summary":_json_clean(concept_result),
+            "method": "股票代码→行业/多概念映射→同花顺概念指数1日/5日客观行情；板块归因是可审计关联，不声称确定因果",
         }
     except Exception as exc:
         return {"status": "invalid", "error": f"{type(exc).__name__}: {exc}", "stocks": []}
@@ -760,6 +792,8 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "portfolio_note":"只描述观察池层面的风险偏好，不给最终买入仓位"
     }
     opinion_context = load_market_opinion_context(generated_trade_date)
+    stock_sector_context=_stock_sector_attribution_payload(research_pack,generated_trade_date)
+    save_json(base/"ai"/"candidate_stock_sector_context.json",stock_sector_context)
     payload={
         "generated_trade_date":str(generated_trade_date),
         "target_trade_date":str(target),
@@ -769,7 +803,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_data_status":"正式可用" if sector_tables else "实验性未启用",
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
-        "candidate_stock_sector_attribution":_stock_sector_attribution_payload(research_pack),
+        "candidate_stock_sector_attribution":stock_sector_context,
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
             "selected_codes只能来自candidates，最多10只，可以0只；实际持仓已经在进入模型前排除，严禁从输入外补入",
@@ -777,7 +811,8 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
             "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当硬规则",
-            "板块/题材/资金只作为增强证据，不能替代个股结构，也不能单独生成候选",
+            "按大盘—行业/概念—个股三层研判；同花顺概念指数是客观行情增强证据，不能替代个股结构，也不能单独生成候选",
+            "同花顺概念指数只能使用其asof_date及以前数据；未匹配或抓取失败必须写未核验，不得猜测",
             "sector_data_status为实验性未启用时，不得臆测板块结论，sector_assessment必须明确数据未启用",
             "market_opinion_text_mining只是公开复盘正文的聚合观点，不是行情事实；可作风险提醒和共识/分歧证据，不得单独生成候选",
             "若证据不足，宁可WAIT/REJECT，不要凑数"
@@ -1062,13 +1097,16 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
         "decisions":[{"股票代码":"6位代码","decision":"TRADE/WAIT/REJECT","buy_zone_low":0,"buy_zone_high":0,"position_pct_total_capital":0,"structure_stop_price":0,"fundamental_reason":"基本面与行业定位","technical_reason":"技术结构","capital_reason":"实时及近10日资金","event_reason":"事件驱动；没有则写无明确事件","sector_reason":"所属板块及强弱","evidence":"综合证据","risk":"主要风险"}],
         "portfolio_note":"组合与T+1风险说明"
     }
+    completed_concept_day=previous_trade_day(now_cn().date())
+    stock_sector_context=_stock_sector_attribution_payload(pool,completed_concept_day)
+    save_json(base/"candidate_stock_sector_context.json",stock_sector_context)
     payload={
         "trade_date":str(now_cn().date()),"source_observation_meta":_json_clean(obs_meta),
         "observation_candidates":_json_clean(merged.to_dict("records")),
         "market":_market_payload(indices,breadth,market_history,market_context),
         "sector_validation":_json_clean(sector_validation or {}),
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
-        "candidate_stock_sector_attribution":_stock_sector_attribution_payload(pool),
+        "candidate_stock_sector_attribution":stock_sector_context,
         "candidate_fundamental_capital_event_context":_json_clean(candidate_context or {}),
         "candidate_context_quality":_json_clean(candidate_context_qa.to_dict("records")) if candidate_context_qa is not None else [],
         "hard_constraints":[
@@ -1079,7 +1117,8 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             "结构止损是结构参考，不是保证最大亏损；A股T+1下当日买入不可卖出，隔夜跳空可能扩大损失",
             "若实时市场恶化、个股重新加速不足/过度、结构破坏或证据冲突，允许WAIT/REJECT",
             "不得仅凭机械确认分做最终决定；确认分只是辅助字段",
-            "板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论",
+            "按大盘—行业/概念—个股三层研判；板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论",
+            "尾盘所用同花顺概念日线只允许截至上一完整交易日，严禁把当日收盘后数据倒灌到14:45决策",
             "基本面、资金面、事件面或个股板块映射缺失时必须明确写未核验，不得用常识补全；TRADE必须分别给出基本面、技术面、资金面、事件面和板块证据"
         ],"required_output_schema":schema
     }
@@ -1135,96 +1174,50 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
     return out,meta
 
 
-def _load_tail_pool(today):
-    """读取并验证当日观察池；两个尾盘阶段共用同一套日期与持仓门禁。"""
+def run_tail():
+    """安全的14:40/14:45尾盘确认：严格日期锁 + 实时/5分钟 + 市场历史上下文 + OpenAI 0~5。"""
+    now0 = now_cn()
+    today = now0.date()
+    if not is_trade_day(today):
+        print("Not a China A-share trading day; skip."); return
+    # GitHub cron可能排队。过晚时绝不能用收盘后数据冒充14:45状态；过早手动误触发也不让Runner长时间空等。
+    minutes_now = now0.hour * 60 + now0.minute
+    if minutes_now < 14 * 60 + 25:
+        print(f"Tail task triggered too early at {now0:%H:%M}; safe skip (valid start window >=14:25).")
+        return
+    if minutes_now > 14 * 60 + 55:
+        msg=f"尾盘任务在{now0:%H:%M}才启动，超过14:55安全窗；已停止，未用收盘后数据冒充尾盘信号。"
+        print(msg); pushplus_notify("A股二次启动｜尾盘任务迟到", msg); return
     obs_path = LATEST / "observation_pool.csv"
     meta_path = LATEST / "observation_pool_meta.json"
     if not obs_path.exists() or not meta_path.exists():
-        raise RuntimeError("今日缺少有效的上一交易日OpenAI观察池")
+        msg="今日缺少有效的上一交易日OpenAI观察池；尾盘任务已安全停止。"
+        print(msg); pushplus_notify("A股二次启动｜尾盘任务未执行", msg); return
     obs_meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if str(obs_meta.get("target_trade_date", "")) != str(today):
-        raise RuntimeError(f"观察池目标日{obs_meta.get('target_trade_date')}与今天{today}不一致")
+        print(f"Observation pool is stale/not for today: {obs_meta.get('target_trade_date')} != {today}; safe skip."); return
     expected_prev = previous_trade_day(today)
     if expected_prev and str(obs_meta.get("generated_trade_date", "")) != str(expected_prev):
-        raise RuntimeError("观察池不是由上一交易日生成")
+        print("Observation pool did not come from previous trading day; safe skip."); return
     pool = pd.read_csv(obs_path, dtype={"股票代码": str})
     pool = refresh_stock_names(pool)
     pool, excluded_active_trade_codes = exclude_active_trades(pool)
     if excluded_active_trade_codes:
         print(f"TAIL_ACTIVE_TRADE_EXCLUDED count={len(excluded_active_trade_codes)}")
     if pool.empty:
-        raise RuntimeError("观察池中的股票均处于未关闭TRADE周期，没有新开仓候选")
+        msg="观察池中的股票均处于未关闭TRADE周期；今日没有需要再次判断的新开仓候选。"
+        print(msg); pushplus_notify("A股二次启动｜无重复新开仓", msg); return
     if len(pool) > 10:
-        raise RuntimeError(f"观察池数量{len(pool)}超过10只")
-    return pool, obs_meta
-
-
-def _enforce_tail_stage_window(stage: str):
-    """拒绝用收盘后数据倒充尾盘数据；每个阶段最多只等待几分钟。"""
-    now0 = now_cn()
-    today = now0.date()
-    if not is_trade_day(today):
-        print("Not a China A-share trading day; skip.")
-        return None
-    minutes_now = now0.hour * 60 + now0.minute
-    earliest = 14 * 60 + (32 if stage == "precheck" else 40)
-    latest = 14 * 60 + (44 if stage == "precheck" else 55)
-    if minutes_now < earliest:
-        raise RuntimeError(f"{stage}在{now0:%H:%M}过早启动；允许窗口从{earliest//60:02d}:{earliest%60:02d}开始")
-    if minutes_now > latest:
-        msg=f"尾盘{stage}在{now0:%H:%M}才启动，超过安全窗；未用收盘后数据冒充尾盘信号。"
-        pushplus_notify("A股二次启动｜尾盘任务迟到", msg)
-        raise RuntimeError(msg)
-    return today
-
-
-def run_tail_precheck():
-    """14:40短任务：日期锁、持仓排重、实时/5分钟与候选多维资料预采样。"""
-    today = _enforce_tail_stage_window("precheck")
-    if today is None:
-        return
-    pool, obs_meta = _load_tail_pool(today)
+        print(f"Invalid observation pool size {len(pool)}; safe skip."); return
 
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
     base.mkdir(parents=True, exist_ok=True)
+    # workflow在14:40左右触发；若提前则等到14:40。
     wait_until_cn(14, 40)
     snap40, min40, qa40 = fetch_realtime_package(pool)
     save_bytes(base / "1440_precheck.xlsx", to_excel_bytes({"14点40实时快照": snap40, "当日5分钟K线": min40, "数据质量": qa40}))
     candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
     save_bytes(base / "candidate_decision_context.xlsx", to_excel_bytes({**candidate_context,"数据质量":candidate_context_qa}))
-    marker = {
-        "status": "precheck_completed", "trade_date": str(today),
-        "generated_at_cn": now_cn().isoformat(),
-        "target_trade_date": obs_meta.get("target_trade_date"),
-        "candidate_codes": sorted(pool["股票代码"].astype(str).str.zfill(6).tolist()),
-    }
-    save_json(base / "tail_precheck_meta.json", marker)
-    save_json(LATEST / "tail_precheck_meta.json", marker)
-    git_commit(f"V5 tail precheck {today}")
-    print(json.dumps(marker, ensure_ascii=False, indent=2))
-
-
-def run_tail_finalize():
-    """14:45短任务：读取14:40预采样，补抓市场/板块并完成OpenAI与微信决策。"""
-    today = _enforce_tail_stage_window("finalize")
-    if today is None:
-        return
-    pool, obs_meta = _load_tail_pool(today)
-    base = ROOT / "tail" / today.strftime("%Y-%m-%d")
-    marker_path = base / "tail_precheck_meta.json"
-    if not marker_path.exists():
-        raise RuntimeError("缺少当日14:40预采样标记，禁止直接执行14:45决策")
-    marker = json.loads(marker_path.read_text(encoding="utf-8"))
-    expected_codes = sorted(pool["股票代码"].astype(str).str.zfill(6).tolist())
-    if marker.get("status") != "precheck_completed" or str(marker.get("trade_date")) != str(today):
-        raise RuntimeError("14:40预采样标记状态或日期无效")
-    if sorted(marker.get("candidate_codes", [])) != expected_codes:
-        raise RuntimeError("14:40预采样候选与14:45观察池不一致")
-    precheck_sheets = pd.read_excel(base / "1440_precheck.xlsx", sheet_name=None, dtype={"股票代码": str})
-    snap40 = precheck_sheets.get("14点40实时快照", pd.DataFrame())
-    context_sheets = pd.read_excel(base / "candidate_decision_context.xlsx", sheet_name=None, dtype={"股票代码": str})
-    candidate_context_qa = context_sheets.pop("数据质量", pd.DataFrame())
-    candidate_context = context_sheets
 
     wait_until_cn(14, 45)
     snap45, min45, qa45 = fetch_realtime_package(pool)
@@ -1276,12 +1269,6 @@ def run_tail_finalize():
         notify_failure("尾盘微信推送" if delivery_failed else "14:45尾盘OpenAI确认", e)
         raise
     print(json.dumps(payload, ensure_ascii=False, default=str, indent=2))
-
-
-def run_tail():
-    """手动兼容入口；正式工作流使用两个独立短阶段。"""
-    run_tail_precheck()
-    run_tail_finalize()
 
 
 def run_close_audit():
@@ -1351,15 +1338,11 @@ def main():
     p = sub.add_parser("after_close")
     p.add_argument("--batch", default="")
     sub.add_parser("tail")
-    sub.add_parser("tail_precheck")
-    sub.add_parser("tail_finalize")
     sub.add_parser("close_audit")
     sub.add_parser("backup")
     a = ap.parse_args()
     if a.cmd == "after_close": run_after_close(a.batch or None)
     elif a.cmd == "tail": run_tail()
-    elif a.cmd == "tail_precheck": run_tail_precheck()
-    elif a.cmd == "tail_finalize": run_tail_finalize()
     elif a.cmd == "close_audit": run_close_audit()
     else: run_backup()
 
