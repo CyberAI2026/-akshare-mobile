@@ -1508,18 +1508,35 @@ def fetch_market_review(days: int = 180) -> tuple[pd.DataFrame, pd.DataFrame, pd
         except Exception as e:
             qa.append({"对象":label,"代码":"","状态":"失败","数据源":"eastmoney_public_pool","交易日数":0,"错误":f"{type(e).__name__}:{e}"})
 
-    # C. 全市场快照：正式上涨/下跌/平盘口径，同时补充成交额和涨跌幅分布
+    # C. 全市场快照：正式上涨/下跌/平盘口径，同时补充成交额和涨跌幅分布。
+    # 每个公开源都设置硬截止并有限重试，避免上游半开连接拖死尾盘任务。
+    # 失败时保留每次错误；绝不把缓存或旧快照伪装成当前实时数据。
     spot=pd.DataFrame(); spot_src=""; spot_candidates=[]
     for src,fn in [("eastmoney",lambda: ak.stock_zh_a_spot_em()),("sina",lambda: ak.stock_zh_a_spot())]:
-        try:
-            raw=fn(); candidate=_std_spot(raw)
-            if candidate.empty: raise RuntimeError("空快照")
-            valid_pct=int(pd.to_numeric(candidate.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce").notna().sum())
-            if valid_pct==0: raise RuntimeError("快照缺少有效涨跌幅")
+        source_errors=[]; candidate=pd.DataFrame(); valid_pct=0; attempts_used=0
+        for attempt in range(1,3):
+            attempts_used=attempt
+            try:
+                raw=_call_with_alarm(fn,45)
+                candidate=_std_spot(raw)
+                if candidate.empty:
+                    raise RuntimeError("空快照")
+                valid_pct=int(pd.to_numeric(candidate.get("当日涨跌幅",pd.Series(dtype=float)),errors="coerce").notna().sum())
+                if valid_pct==0:
+                    raise RuntimeError("快照缺少有效涨跌幅")
+                break
+            except Exception as e:
+                candidate=pd.DataFrame(); valid_pct=0
+                source_errors.append(f"第{attempt}次:{type(e).__name__}:{e}")
+                if attempt<2:
+                    time.sleep(1.0+attempt*0.5+random.uniform(0.0,0.4))
+        if not candidate.empty and valid_pct:
             spot_candidates.append((valid_pct,len(candidate),src,candidate))
-            qa.append({"对象":"全市场逐股快照候选","代码":"","状态":"成功","数据源":src,"交易日数":len(candidate),"错误":f"有效涨跌幅={valid_pct}"})
-        except Exception as e:
-            qa.append({"对象":"全市场逐股快照候选","代码":"","状态":"失败","数据源":src,"交易日数":0,"错误":f"{type(e).__name__}:{e}"})
+            qa.append({"对象":"全市场逐股快照候选","代码":"","状态":"成功","数据源":src,"交易日数":len(candidate),
+                       "错误":f"有效涨跌幅={valid_pct}; 尝试次数={attempts_used}" + (f"; 前序错误={' | '.join(source_errors)}" if source_errors else "")})
+        else:
+            qa.append({"对象":"全市场逐股快照候选","代码":"","状态":"失败","数据源":src,"交易日数":0,
+                       "错误":f"尝试次数={attempts_used}; " + " | ".join(source_errors)})
     if spot_candidates:
         _,_,spot_src,spot=max(spot_candidates,key=lambda x:(x[0],x[1]))
         qa.append({"对象":"全市场逐股快照正式源","代码":"","状态":"成功","数据源":spot_src,"交易日数":len(spot),"错误":"按有效涨跌幅覆盖数择优"})
