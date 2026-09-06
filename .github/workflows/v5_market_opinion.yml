@@ -3,8 +3,10 @@ name: V5 Market Opinion Mining
 on:
   workflow_dispatch:
   schedule:
-    # Daily 20:30 Beijing, including weekends and exchange holidays.
-    - cron: "30 12 * * *"
+    # Daily 20:30/20:50/21:10 Beijing, including weekends and exchange holidays.
+    # The preflight below makes later attempts no-cost skips after a same-day result.
+    - cron: "30,50 12 * * *"
+    - cron: "10 13 * * *"
   push:
     # Manual recovery commits may include [run-opinion] to execute the bounded pipeline.
     branches: [main]
@@ -21,7 +23,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.gate.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        name: Check whether today's opinion summary already exists
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          event=os.environ.get("GITHUB_EVENT_NAME","")
+          force=event=="workflow_dispatch" or (event=="push" and "[run-opinion]" in os.environ.get("HEAD_MESSAGE",""))
+          today=datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
+          path=Path("v5_data/opinion/latest.json")
+          complete=False
+          if path.exists():
+              try:
+                  complete=str(json.loads(path.read_text(encoding="utf-8")).get("source_date"))==today
+              except Exception:
+                  complete=False
+          should_run=force or not complete
+          with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as handle:
+              handle.write(f"should_run={'true' if should_run else 'false'}\n")
+          print(f"OPINION_PREFLIGHT source_date={today} complete={complete} force={force} should_run={should_run}")
+          PY
+        env:
+          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+
   validate:
+    needs: preflight
+    if: github.event_name == 'push' || needs.preflight.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -37,8 +74,8 @@ jobs:
           python -m unittest tests/test_market_opinion_mining.py
 
   opinion-batches:
-    needs: validate
-    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]')
+    needs: [preflight, validate]
+    if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -79,8 +116,8 @@ jobs:
           retention-days: 1
 
   aggregate:
-    needs: opinion-batches
-    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]')
+    needs: [preflight, opinion-batches]
+    if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
