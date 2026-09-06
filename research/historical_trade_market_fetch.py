@@ -13,6 +13,8 @@ import pandas as pd
 
 START_DATE = "20250801"
 END_DATE = "20260904"
+SINA_START_DATE = "2025-08-01"
+SINA_END_DATE = "2026-09-04"
 BATCH_COUNT = 9
 
 
@@ -69,22 +71,37 @@ def normalize_history(frame: pd.DataFrame, code: str, name: str) -> pd.DataFrame
     return out.dropna(subset=["日期"]).drop_duplicates("日期").sort_values("日期").reset_index(drop=True)
 
 
+def sina_symbol(code: str) -> str | None:
+    if code.startswith("6"):
+        return "sh" + code
+    if code.startswith(("0", "3")):
+        return "sz" + code
+    return None
+
+
 def fetch_one(code: str, name: str) -> tuple[pd.DataFrame, str]:
     errors = []
-    for attempt in range(1, 3):
+    sources = [("eastmoney", lambda: ak.stock_zh_a_hist(
+        symbol=code, period="daily", start_date=START_DATE,
+        end_date=END_DATE, adjust="qfq",
+    ))]
+    symbol = sina_symbol(code)
+    if symbol:
+        sources.append(("sina", lambda: ak.stock_zh_a_daily(
+            symbol=symbol, start_date=SINA_START_DATE,
+            end_date=SINA_END_DATE, adjust="qfq",
+        )))
+    for source, fetch in sources:
         try:
             with alarm_timeout(15):
-                raw = ak.stock_zh_a_hist(
-                    symbol=code, period="daily", start_date=START_DATE,
-                    end_date=END_DATE, adjust="qfq",
-                )
+                raw = fetch()
             out = normalize_history(raw, code, name)
             if out.empty:
                 raise RuntimeError("empty history")
-            return out, f"success attempt={attempt}"
+            return out, f"success source={source}"
         except Exception as exc:
-            errors.append(f"{type(exc).__name__}: {exc}")
-            time.sleep(attempt)
+            errors.append(f"{source} {type(exc).__name__}: {exc}")
+            time.sleep(1)
     return pd.DataFrame(), " | ".join(errors)
 
 

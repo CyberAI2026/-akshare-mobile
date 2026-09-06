@@ -38,6 +38,12 @@ class HistoricalTradeMarketFetchTests(unittest.TestCase):
         self.assertEqual(out.iloc[0]["股票代码"], "000001")
         self.assertEqual(out.iloc[0]["日期"], "2026-01-02")
 
+    def test_sina_symbol_only_uses_supported_exchanges(self):
+        self.assertEqual(fetcher.sina_symbol("600000"), "sh600000")
+        self.assertEqual(fetcher.sina_symbol("000001"), "sz000001")
+        self.assertEqual(fetcher.sina_symbol("300001"), "sz300001")
+        self.assertIsNone(fetcher.sina_symbol("920083"))
+
 
 if __name__ == "__main__":
     unittest.main()
