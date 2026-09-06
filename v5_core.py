@@ -753,6 +753,41 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
         bounded_request._v5_candidate_timeout_wrapped=True
         requests.sessions.Session.request=bounded_request
     profiles=[]; flows=[]; news_rows=[]; qa=[]
+    fallback_fund_tables: dict[str,pd.DataFrame | Exception]={}
+
+    def fund_rank_fallback(code: str) -> tuple[pd.DataFrame,str]:
+        """主时间序列断连时使用另一供应方的10日聚合排名；不伪装成逐日序列。"""
+        sources=[
+            ("同花顺个股资金10日排行/AKShare",lambda:ak.stock_fund_flow_individual(symbol="10日排行")),
+            ("东方财富个股资金10日排行/AKShare",lambda:ak.stock_individual_fund_flow_rank(indicator="10日")),
+        ]
+        errors=[]
+        for source,loader in sources:
+            cached=fallback_fund_tables.get(source)
+            if cached is None:
+                try:
+                    cached=_call_with_alarm(loader,15)
+                except Exception as exc:
+                    cached=exc
+                fallback_fund_tables[source]=cached
+            if isinstance(cached,Exception):
+                errors.append(f"{source}:{type(cached).__name__}:{cached}")
+                continue
+            frame=cached.copy()
+            code_col=_find_col(frame.columns,["股票代码","代码"])
+            if code_col is None:
+                errors.append(f"{source}:代码列缺失")
+                continue
+            matched=frame[frame[code_col].map(_norm_code).eq(code)].copy()
+            if not matched.empty:
+                if "股票代码" in matched:
+                    matched["股票代码"]=code
+                else:
+                    matched.insert(0,"股票代码",code)
+                matched["统计口径"]="近10日聚合排行（非逐日明细）"
+                matched["数据源"]=source
+                return matched,source
+        raise RuntimeError("; ".join(errors) or "10日资金排行均未包含该股票")
     for _, row in pool.iterrows():
         code=str(row["股票代码"]).zfill(6); name=str(row.get("股票名称","") or "")
         try:
@@ -794,7 +829,16 @@ def fetch_candidate_decision_context(pool: pd.DataFrame, news_limit: int = 6) ->
             flows.append(ff)
             qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"成功","行数":len(ff),"错误":""})
         except Exception as exc:
-            qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"失败","行数":0,"错误":f"{type(exc).__name__}:{exc}"})
+            try:
+                ff,source=fund_rank_fallback(code)
+                if "股票名称" not in ff:
+                    ff.insert(1,"股票名称",name)
+                flows.append(ff)
+                qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"警告","行数":len(ff),
+                           "错误":f"逐日主源失败，已使用10日聚合备用源:{type(exc).__name__}:{exc}; 备用={source}"})
+            except Exception as fallback_exc:
+                qa.append({"股票代码":code,"股票名称":name,"数据层":"近10日资金流","状态":"失败","行数":0,
+                           "错误":f"逐日主源:{type(exc).__name__}:{exc}; 聚合备用:{type(fallback_exc).__name__}:{fallback_exc}"})
         try:
             nw=_call_with_alarm(lambda:ak.stock_news_em(symbol=code),12)
             if nw is None or nw.empty:
