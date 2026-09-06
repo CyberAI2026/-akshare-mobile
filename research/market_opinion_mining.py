@@ -143,13 +143,27 @@ def discover_articles() -> list[dict]:
 
 
 def title_review_date_matches(title: str, target) -> bool:
-    """标题明确标注旧复盘日期时拒绝；“明日策略9.4”不当作文章复盘日期。"""
+    """拒绝标题明确标注的陈旧内容；周末允许最近一个工作日，明日策略日期不误杀。"""
     dates = []
     for match in re.finditer(r"(?:\d{4}年)?(\d{1,2})[月./-](\d{1,2})日?.{0,8}复盘", title):
         dates.append((int(match.group(1)), int(match.group(2))))
     for match in re.finditer(r"(?<!\d)(\d{2})(\d{2})复盘", title):
         dates.append((int(match.group(1)), int(match.group(2))))
-    return not dates or (target.month, target.day) in dates
+    leading = re.match(r"^\s*(?:盘前情报\s*[·|｜:-]?\s*)?(?:\d{4}[年./-])?(\d{1,2})[月./-](\d{1,2})(?:日|\b|\s)", title)
+    if leading:
+        dates.append((int(leading.group(1)), int(leading.group(2))))
+    compact_leading = re.match(r"^\s*(\d{2})(\d{2})(?:\D|$)", title)
+    if compact_leading:
+        dates.append((int(compact_leading.group(1)), int(compact_leading.group(2))))
+    if not dates:
+        return True
+    allowed = {(target.month, target.day)}
+    if target.weekday() >= 5:
+        latest_weekday = target
+        while latest_weekday.weekday() >= 5:
+            latest_weekday -= timedelta(days=1)
+        allowed.add((latest_weekday.month, latest_weekday.day))
+    return bool(set(dates) & allowed)
 
 
 def extract_article(meta: dict) -> dict | None:

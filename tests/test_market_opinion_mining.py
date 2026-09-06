@@ -37,8 +37,16 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         target = date(2026, 9, 3)
         self.assertFalse(title_review_date_matches("2026年9月2日 市场复盘与明日策略", target))
         self.assertFalse(title_review_date_matches("0902复盘丨指数承压", target))
+        self.assertFalse(title_review_date_matches("9.2 明天或开始新的反弹", target))
         self.assertTrue(title_review_date_matches("9月3日主题复盘", target))
         self.assertTrue(title_review_date_matches("退潮期空仓！附9.4明日市场核心策略", target))
+
+    def test_weekend_allows_latest_weekday_but_rejects_older_leading_dates(self):
+        saturday = date(2026, 9, 5)
+        sunday = date(2026, 9, 6)
+        self.assertTrue(title_review_date_matches("盘前情报 · 2026-09-04 周五", saturday))
+        self.assertTrue(title_review_date_matches("9.4 收盘观察", sunday))
+        self.assertFalse(title_review_date_matches("9.3 明天不创新低则反弹开启", saturday))
 
     def test_weekend_articles_target_next_trading_day(self):
         current=datetime(2026,9,5,20,30,tzinfo=ZoneInfo("Asia/Shanghai"))
