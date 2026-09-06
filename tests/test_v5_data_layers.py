@@ -1,5 +1,8 @@
 import unittest
 import sys
+import os
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -140,6 +143,32 @@ class SectorFlowTests(unittest.TestCase):
 
 
 class IdentityAndOpenTradeTests(unittest.TestCase):
+    def test_candidate_concepts_are_linked_to_objective_ths_index_facts(self):
+        with tempfile.TemporaryDirectory() as d:
+            old=os.getcwd(); os.chdir(d)
+            try:
+                Path("v5_data/stock_sector_attribution").mkdir(parents=True)
+                pd.DataFrame([
+                    {"股票代码":"000001","股票名称":"甲","板块类型":"概念","板块名称":"机器人概念",
+                     "归因得分":9,"归因证据":"测试","快照日期":"2026-09-04","强势观察日期":"2026-09-04",
+                     "时点一致":True,"时点限制":"仅使用当时数据"},
+                    {"股票代码":"000001","股票名称":"甲","板块类型":"概念","板块名称":"人工智能",
+                     "归因得分":8,"归因证据":"测试","快照日期":"2026-09-04","强势观察日期":"2026-09-04",
+                     "时点一致":True,"时点限制":"仅使用当时数据"},
+                ]).to_csv("v5_data/stock_sector_attribution/latest.csv",index=False)
+                facts={"status":"ready","items":[{"concept":"机器人概念","asof_date":"2026-09-04",
+                       "one_day_pct":1.2,"five_day_pct":3.4,"state":"上涨加强"}]}
+                with patch("research.market_opinion_mining.fetch_ths_concept_facts",return_value=facts) as fetch:
+                    out=cli._stock_sector_attribution_payload(
+                        pd.DataFrame([{"股票代码":"000001","股票名称":"甲"}]),
+                        datetime(2026,9,4).date(),
+                    )
+                self.assertEqual(out["concept_index_summary"]["covered_stock_count"],1)
+                self.assertEqual(out["stocks"][0]["同花顺概念指数客观行情"][0]["state"],"上涨加强")
+                self.assertEqual(fetch.call_args.args[1].isoformat(),"2026-09-04")
+            finally:
+                os.chdir(old)
+
     def test_latest_name_master_overrides_historical_name(self):
         import tempfile
         from pathlib import Path
