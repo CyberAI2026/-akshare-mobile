@@ -12,8 +12,10 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from research.market_opinion_mining import (
+    compute_concept_index_metrics,
     group_attention_sectors,
     parse_published_at,
+    render_source_links,
     review_quality_reasons,
     source_date,
     target_trade_date,
@@ -65,6 +67,28 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         reasons=review_quality_reasons("个人实盘",single_stock)
         self.assertIn("市场维度不足",reasons)
         self.assertIn("板块/周期维度不足",reasons)
+
+    def test_ths_concept_metrics_separate_daily_and_five_day_state(self):
+        import pandas as pd
+        frame=pd.DataFrame({
+            "日期":pd.date_range("2026-09-01",periods=6,freq="D"),
+            "收盘价":[100,101,102,103,104,106],
+            "成交量":[100,100,100,100,100,150],
+        })
+        out=compute_concept_index_metrics(frame,"机器人","885000")
+        self.assertEqual(out["asof_date"],"2026-09-06")
+        self.assertAlmostEqual(out["five_day_pct"],6.0,places=2)
+        self.assertEqual(out["volume_ratio_5d"],1.5)
+        self.assertEqual(out["state"],"上涨加强")
+
+    def test_article_links_only_render_tgb_sources_and_escape_html(self):
+        rendered=render_source_links([
+            {"title":"复盘 <一>","url":"https://www.tgb.cn/a/abc"},
+            {"title":"外站", "url":"https://example.com/a"},
+        ])
+        self.assertIn("https://www.tgb.cn/a/abc",rendered)
+        self.assertIn("复盘 &lt;一&gt;",rendered)
+        self.assertNotIn("example.com",rendered)
 
 
 if __name__ == "__main__":
