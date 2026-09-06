@@ -1174,50 +1174,96 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
     return out,meta
 
 
-def run_tail():
-    """安全的14:40/14:45尾盘确认：严格日期锁 + 实时/5分钟 + 市场历史上下文 + OpenAI 0~5。"""
-    now0 = now_cn()
-    today = now0.date()
-    if not is_trade_day(today):
-        print("Not a China A-share trading day; skip."); return
-    # GitHub cron可能排队。过晚时绝不能用收盘后数据冒充14:45状态；过早手动误触发也不让Runner长时间空等。
-    minutes_now = now0.hour * 60 + now0.minute
-    if minutes_now < 14 * 60 + 25:
-        print(f"Tail task triggered too early at {now0:%H:%M}; safe skip (valid start window >=14:25).")
-        return
-    if minutes_now > 14 * 60 + 55:
-        msg=f"尾盘任务在{now0:%H:%M}才启动，超过14:55安全窗；已停止，未用收盘后数据冒充尾盘信号。"
-        print(msg); pushplus_notify("A股二次启动｜尾盘任务迟到", msg); return
+def _load_tail_pool(today):
+    """读取并验证当日观察池；两个尾盘阶段共用同一套日期与持仓门禁。"""
     obs_path = LATEST / "observation_pool.csv"
     meta_path = LATEST / "observation_pool_meta.json"
     if not obs_path.exists() or not meta_path.exists():
-        msg="今日缺少有效的上一交易日OpenAI观察池；尾盘任务已安全停止。"
-        print(msg); pushplus_notify("A股二次启动｜尾盘任务未执行", msg); return
+        raise RuntimeError("今日缺少有效的上一交易日OpenAI观察池")
     obs_meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if str(obs_meta.get("target_trade_date", "")) != str(today):
-        print(f"Observation pool is stale/not for today: {obs_meta.get('target_trade_date')} != {today}; safe skip."); return
+        raise RuntimeError(f"观察池目标日{obs_meta.get('target_trade_date')}与今天{today}不一致")
     expected_prev = previous_trade_day(today)
     if expected_prev and str(obs_meta.get("generated_trade_date", "")) != str(expected_prev):
-        print("Observation pool did not come from previous trading day; safe skip."); return
+        raise RuntimeError("观察池不是由上一交易日生成")
     pool = pd.read_csv(obs_path, dtype={"股票代码": str})
     pool = refresh_stock_names(pool)
     pool, excluded_active_trade_codes = exclude_active_trades(pool)
     if excluded_active_trade_codes:
         print(f"TAIL_ACTIVE_TRADE_EXCLUDED count={len(excluded_active_trade_codes)}")
     if pool.empty:
-        msg="观察池中的股票均处于未关闭TRADE周期；今日没有需要再次判断的新开仓候选。"
-        print(msg); pushplus_notify("A股二次启动｜无重复新开仓", msg); return
+        raise RuntimeError("观察池中的股票均处于未关闭TRADE周期，没有新开仓候选")
     if len(pool) > 10:
-        print(f"Invalid observation pool size {len(pool)}; safe skip."); return
+        raise RuntimeError(f"观察池数量{len(pool)}超过10只")
+    return pool, obs_meta
+
+
+def _enforce_tail_stage_window(stage: str):
+    """拒绝用收盘后数据倒充尾盘数据；每个阶段最多只等待几分钟。"""
+    now0 = now_cn()
+    today = now0.date()
+    if not is_trade_day(today):
+        print("Not a China A-share trading day; skip.")
+        return None
+    minutes_now = now0.hour * 60 + now0.minute
+    earliest = 14 * 60 + (32 if stage == "precheck" else 40)
+    latest = 14 * 60 + (44 if stage == "precheck" else 55)
+    if minutes_now < earliest:
+        raise RuntimeError(f"{stage}在{now0:%H:%M}过早启动；允许窗口从{earliest//60:02d}:{earliest%60:02d}开始")
+    if minutes_now > latest:
+        msg=f"尾盘{stage}在{now0:%H:%M}才启动，超过安全窗；未用收盘后数据冒充尾盘信号。"
+        pushplus_notify("A股二次启动｜尾盘任务迟到", msg)
+        raise RuntimeError(msg)
+    return today
+
+
+def run_tail_precheck():
+    """14:40短任务：日期锁、持仓排重、实时/5分钟与候选多维资料预采样。"""
+    today = _enforce_tail_stage_window("precheck")
+    if today is None:
+        return
+    pool, obs_meta = _load_tail_pool(today)
 
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
     base.mkdir(parents=True, exist_ok=True)
-    # workflow在14:40左右触发；若提前则等到14:40。
     wait_until_cn(14, 40)
     snap40, min40, qa40 = fetch_realtime_package(pool)
     save_bytes(base / "1440_precheck.xlsx", to_excel_bytes({"14点40实时快照": snap40, "当日5分钟K线": min40, "数据质量": qa40}))
     candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
     save_bytes(base / "candidate_decision_context.xlsx", to_excel_bytes({**candidate_context,"数据质量":candidate_context_qa}))
+    marker = {
+        "status": "precheck_completed", "trade_date": str(today),
+        "generated_at_cn": now_cn().isoformat(),
+        "target_trade_date": obs_meta.get("target_trade_date"),
+        "candidate_codes": sorted(pool["股票代码"].astype(str).str.zfill(6).tolist()),
+    }
+    save_json(base / "tail_precheck_meta.json", marker)
+    save_json(LATEST / "tail_precheck_meta.json", marker)
+    git_commit(f"V5 tail precheck {today}")
+    print(json.dumps(marker, ensure_ascii=False, indent=2))
+
+
+def run_tail_finalize():
+    """14:45短任务：读取14:40预采样，补抓市场/板块并完成OpenAI与微信决策。"""
+    today = _enforce_tail_stage_window("finalize")
+    if today is None:
+        return
+    pool, obs_meta = _load_tail_pool(today)
+    base = ROOT / "tail" / today.strftime("%Y-%m-%d")
+    marker_path = base / "tail_precheck_meta.json"
+    if not marker_path.exists():
+        raise RuntimeError("缺少当日14:40预采样标记，禁止直接执行14:45决策")
+    marker = json.loads(marker_path.read_text(encoding="utf-8"))
+    expected_codes = sorted(pool["股票代码"].astype(str).str.zfill(6).tolist())
+    if marker.get("status") != "precheck_completed" or str(marker.get("trade_date")) != str(today):
+        raise RuntimeError("14:40预采样标记状态或日期无效")
+    if sorted(marker.get("candidate_codes", [])) != expected_codes:
+        raise RuntimeError("14:40预采样候选与14:45观察池不一致")
+    precheck_sheets = pd.read_excel(base / "1440_precheck.xlsx", sheet_name=None, dtype={"股票代码": str})
+    snap40 = precheck_sheets.get("14点40实时快照", pd.DataFrame())
+    context_sheets = pd.read_excel(base / "candidate_decision_context.xlsx", sheet_name=None, dtype={"股票代码": str})
+    candidate_context_qa = context_sheets.pop("数据质量", pd.DataFrame())
+    candidate_context = context_sheets
 
     wait_until_cn(14, 45)
     snap45, min45, qa45 = fetch_realtime_package(pool)
@@ -1269,6 +1315,12 @@ def run_tail():
         notify_failure("尾盘微信推送" if delivery_failed else "14:45尾盘OpenAI确认", e)
         raise
     print(json.dumps(payload, ensure_ascii=False, default=str, indent=2))
+
+
+def run_tail():
+    """手动兼容入口；正式工作流使用两个独立短阶段。"""
+    run_tail_precheck()
+    run_tail_finalize()
 
 
 def run_close_audit():
