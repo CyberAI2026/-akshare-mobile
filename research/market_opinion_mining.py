@@ -537,10 +537,10 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
 
 def push_summary(summary: dict, source_day: str | None = None,
                  target_day: str | None = None,
-                 sources: list[dict] | None = None) -> bool:
+                 sources: list[dict] | None = None) -> dict:
     if os.getenv("OPINION_SKIP_PUSH", "").strip().lower() in {"1", "true", "yes"}:
         print("OPINION_PUSHPLUS_SKIPPED context-only run")
-        return False
+        return {"accepted":False,"reason":"context-only run"}
     wait_until_cn("OPINION_PUSH_NOT_BEFORE_CN")
     token = os.getenv("PUSHPLUS_TOKEN", "").strip()
     if not token:
@@ -599,7 +599,11 @@ def push_summary(summary: dict, source_day: str | None = None,
         raise RuntimeError(f"PushPlus返回非JSON: {exc}") from exc
     if str(receipt.get("code", "")) != "200":
         raise RuntimeError(f"PushPlus业务回执失败: code={receipt.get('code')} msg={receipt.get('msg')}")
-    return True
+    return {
+        "accepted":True,
+        "short_code":str(receipt.get("data") or ""),
+        "response_message":str(receipt.get("msg") or ""),
+    }
 
 
 def commit(message: str | None = None) -> None:
@@ -725,18 +729,21 @@ def deliver_data(data: dict) -> bool:
     receipt_path=delivery_path(source_day)
     if receipt_path.exists():
         old=json.loads(receipt_path.read_text(encoding="utf-8"))
-        if old.get("summary_sha256")==fingerprint and old.get("status")=="delivered":
+        if old.get("summary_sha256")==fingerprint and old.get("status") in {"delivered","request_accepted"}:
             print(f"OPINION_DELIVERY_ALREADY_DONE source_date={source_day}",flush=True)
             return False
-    delivered=push_summary(data.get("daily_consensus",{}),source_day,target_day,data.get("sources",[]) or [])
-    if delivered:
+    request_receipt=push_summary(data.get("daily_consensus",{}),source_day,target_day,data.get("sources",[]) or [])
+    if request_receipt.get("accepted"):
         receipt_path.parent.mkdir(parents=True,exist_ok=True)
         receipt_path.write_text(json.dumps({
-            "status":"delivered","source_date":source_day,"trade_date":target_day,
-            "delivered_at_cn":now_cn().isoformat(),"summary_sha256":fingerprint,
+            "status":"request_accepted","delivery_confirmation":"unverified",
+            "source_date":source_day,"trade_date":target_day,
+            "accepted_at_cn":now_cn().isoformat(),"summary_sha256":fingerprint,
             "article_count":len(data.get("sources",[]) or []),
+            "pushplus_short_code":request_receipt.get("short_code",""),
+            "pushplus_message":request_receipt.get("response_message",""),
         },ensure_ascii=False,indent=2),encoding="utf-8")
-    return delivered
+    return bool(request_receipt.get("accepted"))
 
 
 def run_aggregate_stage(key: str, stage_root: Path) -> None:
