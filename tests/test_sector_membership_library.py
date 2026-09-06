@@ -79,6 +79,17 @@ class SectorMembershipTests(unittest.TestCase):
         self.assertEqual(out.iloc[0]["数据源"],"sina_sector_membership_via_akshare")
         self.assertEqual(qa[-1]["状态"],"成功")
 
+    def test_multi_source_concepts_do_not_double_count_stock_coverage(self):
+        first=pd.DataFrame([
+            {"股票代码":"000001","板块类型":"概念","板块名称":"人工智能","数据源":"eastmoney"},
+        ])
+        second=pd.DataFrame([
+            {"股票代码":"000001","板块类型":"概念","板块名称":"人工智能","数据源":"sina"},
+            {"股票代码":"000002","板块类型":"概念","板块名称":"机器人","数据源":"sina"},
+        ])
+        combined=pd.concat([first,second],ignore_index=True)
+        self.assertEqual(combined["股票代码"].nunique(),2)
+
     def test_shenwan_fallback_maps_first_level_industry(self):
         captured=datetime(2026,9,5,20,0,tzinfo=ZoneInfo("Asia/Shanghai"))
         listing=pd.DataFrame({"指数代码":["801010"],"指数名称":["农林牧渔"]})
