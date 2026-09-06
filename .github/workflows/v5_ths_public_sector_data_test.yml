@@ -18,7 +18,7 @@ permissions:
 jobs:
   ths-sector-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -77,6 +77,37 @@ jobs:
           summary["warning_count"]=int(len(warnings))
           (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
           print(f"THS_PUBLIC_SECTOR_TEST_{'OK' if warnings.empty else 'PROVISIONAL'} tables={len(tables)}/10 warnings={len(warnings)} status={status}")
+          PY
+
+      - name: Test one THS concept-index history and derived metrics
+        shell: bash
+        run: |
+          python - <<'PY'
+          from datetime import date, timedelta
+          import json
+          from pathlib import Path
+          import akshare as ak
+          from research.market_opinion_mining import compute_concept_index_metrics
+
+          catalog=ak.stock_board_concept_name_ths()
+          name_col=next(c for c in ["name","概念名称","板块名称","名称"] if c in catalog)
+          code_col=next((c for c in ["code","概念代码","板块代码","代码"] if c in catalog),None)
+          preferred=["机器人概念","人工智能","DeepSeek概念","阿里巴巴概念"]
+          available=set(catalog[name_col].astype(str))
+          selected=next((name for name in preferred if name in available),str(catalog.iloc[0][name_col]))
+          row=catalog[catalog[name_col].astype(str).eq(selected)].iloc[0]
+          code=str(row[code_col]) if code_col else ""
+          end=date.today(); start=end-timedelta(days=30)
+          history=ak.stock_board_concept_index_ths(
+              symbol=selected,start_date=start.strftime("%Y%m%d"),end_date=end.strftime("%Y%m%d")
+          )
+          metrics=compute_concept_index_metrics(history,selected,code)
+          if metrics is None:
+              raise SystemExit(f"FAIL: 同花顺概念指数无足够历史数据 concept={selected} rows={len(history)}")
+          Path("ths_public_sector_test/concept_index_metrics.json").write_text(
+              json.dumps(metrics,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+          print("THS_CONCEPT_INDEX_TEST_OK",json.dumps(metrics,ensure_ascii=False))
           PY
 
       - name: Upload artifact
