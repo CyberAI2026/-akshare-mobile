@@ -12,8 +12,11 @@ import pandas as pd
 
 sys.modules.setdefault("akshare",MagicMock())
 sys.modules.setdefault("requests",MagicMock())
+sys.modules.setdefault("bs4",MagicMock())
+sys.modules.setdefault("openai",MagicMock())
 import v5_core as core
 import v5_cli as cli
+from research import market_opinion_mining as opinion
 
 
 class MarketReviewTests(unittest.TestCase):
@@ -158,7 +161,7 @@ class IdentityAndOpenTradeTests(unittest.TestCase):
                 ]).to_csv("v5_data/stock_sector_attribution/latest.csv",index=False)
                 facts={"status":"ready","items":[{"concept":"机器人概念","asof_date":"2026-09-04",
                        "one_day_pct":1.2,"five_day_pct":3.4,"state":"上涨加强"}]}
-                with patch("research.market_opinion_mining.fetch_ths_concept_facts",return_value=facts) as fetch:
+                with patch.object(opinion,"fetch_ths_concept_facts",return_value=facts) as fetch:
                     out=cli._stock_sector_attribution_payload(
                         pd.DataFrame([{"股票代码":"000001","股票名称":"甲"}]),
                         datetime(2026,9,4).date(),
@@ -209,6 +212,24 @@ class NotificationTests(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(mocked.call_count,2)
         sleeper.assert_called_once_with(2)
+
+
+class CandidateFundFlowFallbackTests(unittest.TestCase):
+    def test_ten_day_rank_is_used_when_daily_fund_flow_disconnects(self):
+        pool=pd.DataFrame([{"股票代码":"000889","股票名称":"中嘉博创"}])
+        profile=pd.DataFrame({"item":["行业"],"value":["通信"]})
+        fallback=pd.DataFrame({"股票代码":[889,1],"股票简称":["中嘉博创","测试"],
+                               "10日主力净流入-净额":[123.0,0.0]})
+        news=pd.DataFrame({"新闻标题":["测试事件"],"发布时间":["2026-09-04"]})
+        with patch.object(core.ak,"stock_individual_info_em",return_value=profile), \
+             patch.object(core.ak,"stock_individual_fund_flow",side_effect=ConnectionError("disconnect")), \
+             patch.object(core.ak,"stock_fund_flow_individual",return_value=fallback), \
+             patch.object(core.ak,"stock_news_em",return_value=news):
+            tables,qa=core.fetch_candidate_decision_context(pool)
+        fund_qa=qa[qa["数据层"].eq("近10日资金流")].iloc[0]
+        self.assertEqual(fund_qa["状态"],"警告")
+        self.assertIn("聚合备用源",fund_qa["错误"])
+        self.assertEqual(tables["候选近10日资金流"].iloc[0]["统计口径"],"近10日聚合排行（非逐日明细）")
 
 
 class PrivateTradeLedgerTests(unittest.TestCase):
