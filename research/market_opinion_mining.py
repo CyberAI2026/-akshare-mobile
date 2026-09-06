@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import hashlib
 import json
 import os
@@ -33,6 +34,7 @@ BATCH_WORKERS = int(os.getenv("OPINION_BATCH_WORKERS", "3"))
 OPENAI_TIMEOUT_SECONDS = float(os.getenv("OPINION_OPENAI_TIMEOUT_SECONDS", "240"))
 OPENAI_MAX_RETRIES = int(os.getenv("OPINION_OPENAI_MAX_RETRIES", "1"))
 MIN_TEXT = 600
+THS_CONCEPT_LIMIT = int(os.getenv("OPINION_THS_CONCEPT_LIMIT", "10"))
 MARKET_TERMS = ("市场", "大盘", "指数", "情绪", "成交额", "涨停", "跌停", "赚钱效应", "亏钱效应")
 SECTOR_TERMS = ("板块", "题材", "主线", "周期", "轮动", "资金", "分歧", "退潮", "修复")
 REVIEW_TERMS = ("复盘", "收盘", "市场", "情绪", "板块", "明日", "策略")
@@ -104,6 +106,133 @@ def clean_text(text: str) -> str:
     text = re.sub(r"[ \t\u3000]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+def install_default_http_timeout(seconds: float = 15) -> None:
+    """Bound AKShare/THS requests that do not pass their own timeout."""
+    original=requests.sessions.Session.request
+    if getattr(original,"_v5_opinion_timeout_wrapped",False):
+        return
+    def bounded(self,method,url,**kwargs):
+        kwargs.setdefault("timeout",seconds)
+        return original(self,method,url,**kwargs)
+    bounded._v5_opinion_timeout_wrapped=True
+    requests.sessions.Session.request=bounded
+
+
+def normalize_concept_name(value: str) -> str:
+    value=re.sub(r"[\s·•_—\-]+","",str(value or "").strip()).lower()
+    return re.sub(r"(?:概念|板块)$","",value)
+
+
+def compute_concept_index_metrics(frame: pd.DataFrame, name: str, code: str = "") -> dict | None:
+    if frame is None or frame.empty or "日期" not in frame or "收盘价" not in frame:
+        return None
+    x=frame.copy()
+    x["日期"]=pd.to_datetime(x["日期"],errors="coerce")
+    x["收盘价"]=pd.to_numeric(x["收盘价"],errors="coerce")
+    if "成交量" in x:
+        x["成交量"]=pd.to_numeric(x["成交量"],errors="coerce")
+    x=x.dropna(subset=["日期","收盘价"]).sort_values("日期").drop_duplicates("日期").tail(10)
+    if len(x)<2:
+        return None
+    close=x["收盘价"]
+    one_day=(close.iloc[-1]/close.iloc[-2]-1)*100
+    five_day=(close.iloc[-1]/close.iloc[-6]-1)*100 if len(x)>=6 else None
+    volume_ratio=None
+    if "成交量" in x and len(x)>=6:
+        baseline=x["成交量"].iloc[-6:-1].mean()
+        if pd.notna(baseline) and baseline>0 and pd.notna(x["成交量"].iloc[-1]):
+            volume_ratio=float(x["成交量"].iloc[-1]/baseline)
+    if one_day>=1 and (five_day is None or five_day>0):
+        state="上涨加强"
+    elif one_day<=-1 and (five_day is None or five_day<0):
+        state="退潮走弱"
+    elif five_day is not None and five_day>=2:
+        state="趋势偏强但当日分化"
+    elif five_day is not None and five_day<=-2:
+        state="趋势偏弱但当日修复/震荡"
+    else:
+        state="震荡分化"
+    return {
+        "concept":name,"ths_code":str(code or ""),
+        "asof_date":x["日期"].iloc[-1].date().isoformat(),
+        "one_day_pct":round(float(one_day),2),
+        "five_day_pct":round(float(five_day),2) if five_day is not None else None,
+        "volume_ratio_5d":round(volume_ratio,2) if volume_ratio is not None else None,
+        "state":state,"source":"同花顺概念指数（AKShare）",
+    }
+
+
+def fetch_ths_concept_facts(sectors: list[dict], day: date) -> dict:
+    result={"status":"unavailable","asof_date":day.isoformat(),"items":[],
+            "note":"客观指数数据与文章观点分开记录。"}
+    wanted=[]
+    for item in sectors or []:
+        name=str(item.get("sector","")).strip()
+        if name and name not in wanted:
+            wanted.append(name)
+    if not wanted:
+        result["status"]="not_applicable"
+        result["note"]="文章样本没有形成可匹配的概念板块。"
+        return result
+    try:
+        install_default_http_timeout()
+        import akshare as ak
+        names=ak.stock_board_concept_name_ths()
+        name_col=next((c for c in ["name","概念名称","板块名称","名称"] if c in names),None)
+        code_col=next((c for c in ["code","概念代码","板块代码","代码"] if c in names),None)
+        if name_col is None:
+            raise RuntimeError(f"同花顺概念目录缺少名称列: {list(names.columns)}")
+        catalog={}
+        for _,row in names.iterrows():
+            raw_name=str(row[name_col]).strip()
+            key=normalize_concept_name(raw_name)
+            if key and key not in catalog:
+                catalog[key]=(raw_name,str(row[code_col]).strip() if code_col else "")
+        matched=[]
+        for opinion_name in wanted:
+            found=catalog.get(normalize_concept_name(opinion_name))
+            if found and found not in matched:
+                matched.append(found)
+            if len(matched)>=THS_CONCEPT_LIMIT:
+                break
+        start=(day-timedelta(days=20)).strftime("%Y%m%d")
+        end=day.strftime("%Y%m%d")
+        def one(pair):
+            name,code=pair
+            try:
+                raw=ak.stock_board_concept_index_ths(symbol=name,start_date=start,end_date=end)
+                return compute_concept_index_metrics(raw,name,code),""
+            except Exception as exc:
+                return None,f"{name}:{type(exc).__name__}:{str(exc)[:120]}"
+        errors=[]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(5,max(1,len(matched)))) as executor:
+            for item,error in executor.map(one,matched):
+                if item:
+                    result["items"].append(item)
+                if error:
+                    errors.append(error)
+        result["status"]="ready" if result["items"] else "unavailable"
+        result["matched_concepts"]=len(matched)
+        result["failed_concepts"]=len(errors)
+        if errors:
+            result["errors"]=errors[:5]
+        if result["items"]:
+            result["asof_date"]=max(x["asof_date"] for x in result["items"])
+    except Exception as exc:
+        result["note"]=f"同花顺概念指数暂不可用: {type(exc).__name__}: {str(exc)[:160]}"
+    return result
+
+
+def render_source_links(sources: list[dict], limit: int = 30) -> str:
+    links=[]
+    for index,item in enumerate(sources[:limit],1):
+        title=html.escape(str(item.get("title") or f"文章{index}"))
+        url=html.escape(str(item.get("url") or ""),quote=True)
+        if url.startswith("https://www.tgb.cn/") or url.startswith("https://m.tgb.cn/"):
+            links.append(f'{index}. <a href="{url}">{title}</a>')
+    return "<br>".join(links) or "本次没有合格文章链接"
 
 
 def parse_published_at(text: str) -> datetime | None:
@@ -406,7 +535,8 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
 
 
 def push_summary(summary: dict, source_day: str | None = None,
-                 target_day: str | None = None) -> bool:
+                 target_day: str | None = None,
+                 sources: list[dict] | None = None) -> bool:
     if os.getenv("OPINION_SKIP_PUSH", "").strip().lower() in {"1", "true", "yes"}:
         print("OPINION_PUSHPLUS_SKIPPED context-only run")
         return False
@@ -420,6 +550,7 @@ def push_summary(summary: dict, source_day: str | None = None,
     sectors = summary.get("sector_consensus", []) or []
     sector_groups = group_attention_sectors(sectors)
     stocks = summary.get("stock_attention", []) or []
+    concept_facts=summary.get("ths_concept_index",{}) or {}
     def render(items):
         return "、".join(
             f"{x.get('sector', '')}（提及{x.get('mention_count', 0)}篇；{x.get('stance', '不明确')}）"
@@ -435,9 +566,25 @@ def push_summary(summary: dict, source_day: str | None = None,
         "<b>高关注·活跃但分化：</b>" + render(sector_groups["活跃但分化"]),
         "<b>高关注·退潮/走弱：</b>" + render(sector_groups["退潮或走弱"]),
         "<b>高关注·状态不明确：</b>" + render(sector_groups["状态不明确"]),
+        "<b>同花顺概念指数（客观行情）：</b>",
+    ]
+    fact_items=concept_facts.get("items",[]) or []
+    if fact_items:
+        for item in fact_items[:THS_CONCEPT_LIMIT]:
+            five="—" if item.get("five_day_pct") is None else f"{item['five_day_pct']:+.2f}%"
+            volume="—" if item.get("volume_ratio_5d") is None else f"{item['volume_ratio_5d']:.2f}倍"
+            code=f"｜代码{html.escape(str(item.get('ths_code','')))}" if item.get("ths_code") else ""
+            lines.append(
+                f"• {html.escape(str(item.get('concept','')))}{code}｜1日{item.get('one_day_pct',0):+.2f}%｜5日{five}｜量比{volume}｜{html.escape(str(item.get('state','')))}"
+            )
+    else:
+        lines.append("未取得与本次观点板块精确匹配且通过校验的同花顺概念指数。")
+    lines.extend([
         "<b>观点热门个股：</b>" + "、".join(str(x.get("stock", "")) for x in stocks[:10]),
         "<small>“高关注”仅表示文章提及较多，不等于上涨或推荐；以上趋势标签来自公开文章观点，客观涨幅以盘后行情复盘为准。</small>",
-    ]
+        "<hr><b>本次纳入复盘的淘股吧文章：</b>",
+        render_source_links(sources or []),
+    ])
     r = requests.post(
         "https://www.pushplus.plus/send",
         json={"token": token, "title": "A股二次启动｜市场观点摘要", "content": "<br>".join(lines), "template": "html", "channel": "wechat"},
@@ -580,7 +727,7 @@ def deliver_data(data: dict) -> bool:
         if old.get("summary_sha256")==fingerprint and old.get("status")=="delivered":
             print(f"OPINION_DELIVERY_ALREADY_DONE source_date={source_day}",flush=True)
             return False
-    delivered=push_summary(data.get("daily_consensus",{}),source_day,target_day)
+    delivered=push_summary(data.get("daily_consensus",{}),source_day,target_day,data.get("sources",[]) or [])
     if delivered:
         receipt_path.parent.mkdir(parents=True,exist_ok=True)
         receipt_path.write_text(json.dumps({
@@ -610,6 +757,9 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
         client,model=build_client(key)
         summary=aggregate(client,model,mined,sources)
         summary["sample_status"]="正式样本"
+    summary["ths_concept_index"]=fetch_ths_concept_facts(
+        summary.get("sector_consensus",[]) or [],date.fromisoformat(source_day)
+    )
     save_results(sources,mined,summary)
     if os.getenv("OPINION_PUSH_AFTER_AGGREGATE","").strip().lower() in {"1","true","yes"}:
         data=json.loads((ROOT/"latest.json").read_text(encoding="utf-8"))
@@ -652,9 +802,24 @@ def run_full_stage(key: str) -> None:
     actual={str(x.get("article_id","")) for x in mined}
     if expected-actual:
         raise RuntimeError(f"逐篇分析缺失article_id: {sorted(expected-actual)}")
-    summary=aggregate(client,model,mined,articles)
+    if len(articles)<MIN_ARTICLE_COUNT:
+        summary={
+            "market_consensus":{"stance":"样本不足","phase":[],"confidence":"低",
+                                "summary":f"当天仅取得{len(articles)}篇合格复盘，低于{MIN_ARTICLE_COUNT}篇正式门槛，不形成正式市场共识。"},
+            "market_disagreements":[],"sector_consensus":[],"stock_attention":[],
+            "tomorrow_consensus_watch":[],
+            "limitations":["当天合格样本不足；没有使用旧文章或低质量帖子补足数量。"],
+            "article_count":len(articles),"source_platform":"淘股吧公开复盘",
+            "sample_status":"样本不足，非正式摘要",
+        }
+    else:
+        summary=aggregate(client,model,mined,articles)
+        summary["sample_status"]="正式样本"
+    summary["ths_concept_index"]=fetch_ths_concept_facts(
+        summary.get("sector_consensus",[]) or [],source_date()
+    )
     save_results(articles,mined,summary)
-    push_summary(summary)
+    deliver_data(json.loads((ROOT/"latest.json").read_text(encoding="utf-8")))
     commit()
     print(json.dumps(summary,ensure_ascii=False,indent=2))
 
