@@ -45,6 +45,8 @@ jobs:
 
           out = Path("tail_data_test_output")
           out.mkdir(parents=True, exist_ok=True)
+          now_cn = datetime.now(ZoneInfo("Asia/Shanghai"))
+          trading_day = core.is_trade_day(now_cn.date())
 
           candidates = [
               Path("v5_data/latest/observation_pool.csv"),
@@ -104,7 +106,8 @@ jobs:
           missing_snap = sorted(pool_codes - snap_codes)
 
           summary = {
-              "test_time_runner_cn": datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds"),
+              "test_time_runner_cn": now_cn.isoformat(timespec="seconds"),
+              "is_a_share_trading_day": bool(trading_day),
               "observation_pool_count": int(len(pool)),
               "snapshot_rows": int(len(snap)),
               "snapshot_missing_codes": missing_snap,
@@ -133,8 +136,10 @@ jobs:
           if missing_snap:
               raise SystemExit(f"FAIL: 缺少实时快照: {missing_snap}")
           missing_5m = ms.loc[ms["5分钟K行数"] == 0, "股票代码"].tolist()
-          if missing_5m:
+          if trading_day and missing_5m:
               raise SystemExit(f"FAIL: 缺少5分钟K: {missing_5m}")
+          if not trading_day and missing_5m:
+              print(f"SKIP_STRICT_5M_NON_TRADING_DAY missing={missing_5m}")
           failed_context = candidate_context_qa[candidate_context_qa["状态"] == "失败"]
           usable_context = candidate_context_qa[candidate_context_qa["状态"] != "失败"]
           if not failed_context.empty:
