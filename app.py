@@ -30,6 +30,7 @@ CN_TZ = ZoneInfo("Asia/Shanghai")
 st.set_page_config(page_title="A股二次启动研究系统 V5.4", page_icon="📈", layout="wide")
 st.title("A股强势股二次启动研究系统 V5.4｜研究、交易与持仓闭环")
 st.caption("每日提交强势股 → 云端主池维护 → Python约500→150–200→30–40 → OpenAI研究层30–40→0–10只次日观察池")
+st.caption("部署标识：2026-09-06｜交易与持仓页、分段盘后研究、14:40/14:45双阶段尾盘任务")
 
 
 def secret(name, default=""):
@@ -192,7 +193,7 @@ with t3:
                 st.success("已触发。若没有今天有效观察池，它会安全退出，不会读取旧测试池。")
             except Exception as e: st.error(f"触发失败：{e}")
         st.link_button("查看尾盘Workflow", actions_url(c, TAIL_WORKFLOW), use_container_width=True)
-    st.caption("正式定时：工作日 UTC 06:40 = 北京时间14:40。GitHub cron可能有排队延迟，因此未来仍保留手动备用触发。")
+    st.caption("正式调度：工作日14:36启动，14:40预采样和14:45最终决策分别运行在独立短作业中；14:37另有独立状态检查兜底，避免只依赖单次GitHub cron。")
 
 with t4:
     st.subheader("加密交易台账与当前持仓")
