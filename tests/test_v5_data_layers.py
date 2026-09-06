@@ -2,6 +2,7 @@ import unittest
 import sys
 import os
 import tempfile
+import base64
 from pathlib import Path
 from unittest.mock import MagicMock
 from datetime import datetime
@@ -230,6 +231,25 @@ class CandidateFundFlowFallbackTests(unittest.TestCase):
         self.assertEqual(fund_qa["状态"],"警告")
         self.assertIn("聚合备用源",fund_qa["错误"])
         self.assertEqual(tables["候选近10日资金流"].iloc[0]["统计口径"],"近10日聚合排行（非逐日明细）")
+
+
+class GithubFileTransportTests(unittest.TestCase):
+    def test_embedded_contents_api_body_avoids_expiring_download_url(self):
+        response=MagicMock(status_code=200)
+        response.json.return_value={"content":base64.b64encode(b"encrypted-ledger").decode(),
+                                    "download_url":"https://expired.example/file"}
+        config=core.GithubConfig("token","owner/repo")
+        with patch.object(core.requests,"get",return_value=response) as get:
+            body=core.gh_get_bytes(config,"v5_data/private/trades.enc")
+        self.assertEqual(body,b"encrypted-ledger")
+        self.assertEqual(get.call_count,1)
+
+    def test_non_404_read_failure_is_not_treated_as_empty_ledger(self):
+        response=MagicMock(status_code=410,text="Gone")
+        config=core.GithubConfig("token","owner/repo")
+        with patch.object(core.requests,"get",return_value=response):
+            with self.assertRaisesRegex(RuntimeError,"410"):
+                core.gh_get_bytes(config,"v5_data/private/trades.enc")
 
 
 class PrivateTradeLedgerTests(unittest.TestCase):
