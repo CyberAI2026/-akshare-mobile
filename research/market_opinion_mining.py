@@ -25,6 +25,11 @@ ROOT = Path("v5_data/opinion")
 LIST_URLS = [
     "https://www.tgb.cn/talk/talkSeq/21325",
     "https://www.tgb.cn/newIndex/2",
+    # 扩展发现面但不降低正文门槛；研股、方法论和综合页中只有同时通过
+    # 当天发表时间、市场维度、板块/周期维度校验的文章才会入选。
+    "https://www.tgb.cn/newIndex/1",
+    "https://www.tgb.cn/newIndex/4",
+    "https://www.tgb.cn/newIndex/5",
 ]
 UA = "AStockResearch/1.0 (private research; low-frequency; contact via repository owner)"
 ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "30"))
