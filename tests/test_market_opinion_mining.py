@@ -54,6 +54,8 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertEqual(parsed.hour,20)
         compact=parse_published_at("26-09-06 21:03 300次浏览")
         self.assertEqual(compact.date(),date(2026,9,6))
+        iso=parse_published_at("2026-09-06T21:03:22+08:00")
+        self.assertEqual(iso.date(),date(2026,9,6))
 
     def test_quality_requires_market_and_sector_dimensions(self):
         good=("市场指数成交额与赚钱效应发生变化，情绪进入分歧。"
