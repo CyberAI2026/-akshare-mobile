@@ -51,7 +51,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: gpt-5.6-terra
       OPINION_OPENAI_MODEL: gpt-5.6-terra
-      OPINION_ARTICLE_LIMIT: "20"
+      OPINION_ARTICLE_LIMIT: "30"
+      OPINION_MIN_ARTICLES: "15"
       OPINION_OPENAI_TIMEOUT_SECONDS: "180"
       OPINION_OPENAI_MAX_RETRIES: "0"
     steps:
@@ -90,7 +91,8 @@ jobs:
       OPINION_OPENAI_TIMEOUT_SECONDS: "180"
       OPINION_OPENAI_MAX_RETRIES: "0"
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
-      # 汇总完成即发送，避免GitHub cron严重延迟后错过21:00/21:20/21:40兜底窗口。
+      OPINION_MIN_ARTICLES: "15"
+      # 汇总完成即发送；样本不足时只发送明确的低样本提示，不用旧文凑数。
       OPINION_PUSH_AFTER_AGGREGATE: "1"
     steps:
       - uses: actions/checkout@v4
