@@ -66,6 +66,36 @@ class MarketReviewTests(unittest.TestCase):
         self.assertEqual(set(components["成分类型"]),{"涨停","跌停","炸板","昨日涨停","强势股"})
 
 
+    def test_market_spot_retries_transient_primary_failure(self):
+        spot=pd.DataFrame({
+            "代码":["000001","000002","000003"],
+            "名称":["A","B","C"],
+            "涨跌幅":[1.0,-1.0,0.0],
+            "成交额":[10,20,30],
+        })
+        legu=pd.DataFrame({"item":["上涨","下跌","平盘","涨停","跌停","停牌"],"value":[1,1,1,0,0,0]})
+        primary=MagicMock(side_effect=[ConnectionError("transient"),spot])
+        empty_pool=pd.DataFrame()
+        with patch.object(core,"fetch_index_history",return_value=(pd.DataFrame(),"",[])), \
+             patch.object(core.ak,"stock_market_activity_legu",return_value=legu), \
+             patch.object(core.ak,"stock_zt_pool_em",return_value=empty_pool), \
+             patch.object(core.ak,"stock_zt_pool_dtgc_em",return_value=empty_pool), \
+             patch.object(core.ak,"stock_zt_pool_zbgc_em",return_value=empty_pool), \
+             patch.object(core.ak,"stock_zt_pool_previous_em",return_value=empty_pool), \
+             patch.object(core.ak,"stock_zt_pool_strong_em",return_value=empty_pool), \
+             patch.object(core.ak,"stock_zh_a_spot_em",primary), \
+             patch.object(core.ak,"stock_zh_a_spot",side_effect=RuntimeError("secondary blocked")), \
+             patch.object(core.time,"sleep",return_value=None), \
+             patch.object(core.random,"uniform",return_value=0):
+            _,breadth,qa=core.fetch_market_review(5)
+        self.assertEqual(primary.call_count,2)
+        self.assertEqual(breadth.iloc[0]["快照数据源"],"eastmoney")
+        self.assertFalse(breadth.iloc[0]["市场宽度是否降级"])
+        row=qa[(qa["对象"]=="全市场逐股快照候选") & (qa["数据源"]=="eastmoney")].iloc[0]
+        self.assertIn("尝试次数=2",str(row["错误"]))
+        self.assertIn("前序错误",str(row["错误"]))
+
+
 class SectorFlowTests(unittest.TestCase):
     @staticmethod
     def _table(names):
