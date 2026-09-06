@@ -109,7 +109,7 @@ def clean_text(text: str) -> str:
 def parse_published_at(text: str) -> datetime | None:
     """Parse the article's own publication timestamp; list-page dates are not proof."""
     patterns = [
-        r"(?<!\d)(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})日?\s+(\d{1,2}):(\d{2})(?!\d)",
+        r"(?<!\d)(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})日?[T\s]+(\d{1,2}):(\d{2})(?!\d)",
         r"(?<!\d)(\d{2})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})(?!\d)",
     ]
     for pattern in patterns:
