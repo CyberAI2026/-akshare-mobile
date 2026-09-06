@@ -16,7 +16,7 @@ import pandas as pd
 import requests
 
 TZ = ZoneInfo("Asia/Shanghai")
-VERSION = "sector-membership-shadow-v0.3.1"
+VERSION = "sector-membership-shadow-v0.4.0"
 SOURCE = "public_board_membership_via_akshare"
 HTTP_TIMEOUT_SECONDS = 15
 MAPPING_COLUMNS = [
@@ -485,15 +485,17 @@ def main():
         "概念",ak.stock_board_concept_name_em,ak.stock_board_concept_cons_em,
         wanted,captured,args.workers,args.max_boards or None,shard_index,shard_count
     )
-    if concept_frame.empty:
-        sina_frame,sina_qa,sina_count=fetch_sina_type(
-            "概念","概念",wanted,captured,args.workers,args.max_boards or None,
-            shard_index,shard_count
-        )
-        concept_qa.extend(sina_qa)
-        if not sina_frame.empty:
-            concept_frame=sina_frame
-            concept_count=sina_count
+    # 东方财富概念目录可能只返回部分板块（公开接口曾出现约200条截断）。
+    # 新浪不再只是“主源全空才启用”的备用源，而是每天同分片补充并取并集。
+    # 这样不会用重复关系虚增覆盖率，股票覆盖仍按唯一代码计算。
+    sina_frame,sina_qa,sina_count=fetch_sina_type(
+        "概念","概念",wanted,captured,args.workers,args.max_boards or None,
+        shard_index,shard_count
+    )
+    concept_qa.extend(sina_qa)
+    if not sina_frame.empty:
+        concept_frame=pd.concat([concept_frame,sina_frame],ignore_index=True)
+    concept_count=concept_count+sina_count
     if not concept_frame.empty:
         frames.append(concept_frame)
     qa_rows.extend(concept_qa);board_counts["概念"]=concept_count
@@ -525,6 +527,10 @@ def main():
     any_coverage=len(mapped_any)/total if total else 0
     industry_coverage=len(industry)/total if total else 0
     concept_coverage=len(concept)/total if total else 0
+    source_coverage={}
+    if not mapping.empty and "数据源" in mapping:
+        for (board_type,source),group in mapping.groupby(["板块类型","数据源"]):
+            source_coverage[f"{board_type}:{source}"]=round(group["股票代码"].nunique()/total,6) if total else 0
     partial_ready=bool(total and any_coverage>=0.90 and (industry_coverage>=0.90 or concept_coverage>=0.90) and failure_rate<=0.20)
     formal_ready=bool(total and any_coverage>=0.95 and industry_coverage>=0.90 and concept_coverage>=0.90 and failure_rate<=0.20)
     summary={
@@ -535,6 +541,7 @@ def main():
         "mapped_stock_count":len(mapped_any),"any_coverage":round(any_coverage,6),
         "industry_coverage":round(industry_coverage,6),"concept_coverage":round(concept_coverage,6),
         "board_counts":board_counts,"failed_board_requests":failures,"board_failure_rate":round(failure_rate,6),
+        "source_stock_coverage":source_coverage,
         "formal_ready":formal_ready,
         "ai_enabled":partial_ready,"http_timeout_seconds":HTTP_TIMEOUT_SECONDS,
         "shard_index":shard_index,"shard_count":shard_count,
