@@ -6,6 +6,7 @@ on:
     # Daily 20:30 Beijing, including weekends and exchange holidays.
     - cron: "30 12 * * *"
   push:
+    # Manual recovery commits may include [run-opinion] to execute the bounded pipeline.
     branches: [main]
     paths:
       - "research/market_opinion_mining.py"
