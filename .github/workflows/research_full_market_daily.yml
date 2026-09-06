@@ -1,12 +1,10 @@
-name: Research Full-Market Daily Data
+name: Legacy Full-Market History Research (Manual Only)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "research/full_market_data_fetch.py"
-      - ".github/workflows/research_full_market_daily.yml"
+
+# 非生产任务：一次抓取全市场多年历史数据，规模不适合日常自动链路。
+# 保留手动研究入口，但不再因代码提交自动启动；正式V5使用分层增量缓存。
 
 permissions:
   contents: read

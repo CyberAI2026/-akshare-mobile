@@ -334,7 +334,7 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     else:
         lines.append("<br><b>结论：</b>今日OpenAI未选出次日观察标的（0只）。")
     lines.append("<br><small>盘后观察池不是买入名单，需次日14:40–14:45再次确认。</small>")
-    pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
+    return pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
 
 
 def notify_tail_success(final_df: pd.DataFrame, meta: dict):

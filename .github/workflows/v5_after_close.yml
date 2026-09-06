@@ -138,3 +138,47 @@ jobs:
           path: v5_data/
           if-no-files-found: warn
           retention-days: 14
+
+  failure-alert:
+    needs: [validate, initialize, screen-25d, screen-120d, lifecycle-250d, market-context, ai-finalize]
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Send one after-close failure alert
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token:
+              print("PUSHPLUS_TOKEN missing; failure alert cannot be sent")
+              raise SystemExit(0)
+          now = datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds")
+          payload = {
+              "token": token,
+              "title": "A股二次启动系统｜盘后任务故障",
+              "content": (
+                  f"盘后分段任务在 {now} 运行失败。<br>"
+                  "失败不能解释为0只观察股，请检查具体阶段日志。<br>"
+                  "运行地址：https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              ),
+              "template": "html",
+              "channel": "wechat",
+          }
+          req = urllib.request.Request(
+              "https://www.pushplus.plus/send",
+              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=20) as resp:
+              result = json.loads(resp.read().decode("utf-8", errors="replace"))
+              if int(result.get("code", -1)) != 200:
+                  raise SystemExit(f"PushPlus failure alert rejected: {result}")
+          PY

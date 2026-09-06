@@ -214,7 +214,27 @@ def run_market() -> None:
 
 
 def run_ai() -> None:
-    state, base = _load_state("market_context_complete")
+    state, base = _load_state()
+    if state.get("stage") == "completed" and state.get("status") == "completed_push_failed":
+        obs = _read_csv(cli.LATEST / "observation_pool.csv")
+        meta_path = cli.LATEST / "observation_pool_meta.json"
+        if not meta_path.exists():
+            raise FileNotFoundError("盘后微信重试缺少观察池元数据")
+        obs_meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        push_ok = bool(cli.notify_after_close_success(state, obs, obs_meta))
+        state["pushplus_delivery_ok"] = push_ok
+        state["status"] = "completed" if push_ok else "completed_push_failed"
+        cli.save_json(base / "summary.json", state)
+        cli.save_json(cli.LATEST / "latest_after_close.json", state)
+        cli.save_json(base / "meta.json", state)
+        _save_state(state)
+        cli.git_commit(f"V5.3 after-close delivery retry {state['stamp']}")
+        if not push_ok:
+            raise RuntimeError("盘后结果已保存，但PushPlus再次送达失败")
+        print(f"AFTER_CLOSE_STAGE_OK stage=delivery-retry observation_pool={len(obs)}")
+        return
+    if state.get("stage") != "market_context_complete":
+        raise RuntimeError(f"阶段顺序错误：需要 market_context_complete，当前为 {state.get('stage')}")
     research_pack = _read_csv(base / "250d" / "research_pack_30_40.csv")
     market_sheets = pd.read_excel(base / "market_review.xlsx", sheet_name=None)
     sector_sheets = pd.read_excel(base / "sector_fund_flow.xlsx", sheet_name=None)
@@ -264,12 +284,17 @@ def run_ai() -> None:
         "stock_qa_250_success": state.get("qa250", {}).get("成功", 0),
         "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
     }
+    push_ok = bool(cli.notify_after_close_success(summary, obs, obs_meta))
+    summary["pushplus_delivery_ok"] = push_ok
+    summary["status"] = "completed" if push_ok else "completed_push_failed"
     cli.save_json(base / "summary.json", summary)
     cli.save_json(cli.LATEST / "latest_after_close.json", summary)
     cli.save_json(base / "meta.json", summary)
     _save_state(summary)
     cli.git_commit(f"V5.3 after-close + AI completed {state['stamp']}")
-    cli.notify_after_close_success(summary, obs, obs_meta)
+    if not push_ok:
+        cli.notify_failure("盘后微信推送", "PushPlus delivery exhausted retries")
+        raise RuntimeError("盘后结果已保存，但PushPlus送达未确认")
     print(f"AFTER_CLOSE_STAGE_OK stage=ai observation_pool={len(obs)}")
 
 

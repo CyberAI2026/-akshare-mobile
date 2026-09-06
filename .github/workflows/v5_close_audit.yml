@@ -20,7 +20,7 @@ concurrency:
 jobs:
   close-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}

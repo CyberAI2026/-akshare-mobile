@@ -23,6 +23,7 @@ permissions:
 jobs:
   legacy-manual-only:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     env:
       TZ: Asia/Shanghai
     steps:

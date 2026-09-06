@@ -89,7 +89,8 @@ jobs:
       OPINION_OPENAI_TIMEOUT_SECONDS: "180"
       OPINION_OPENAI_MAX_RETRIES: "0"
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
-      OPINION_PUSH_AFTER_AGGREGATE: ${{ github.event_name == 'push' && '1' || '0' }}
+      # 汇总完成即发送，避免GitHub cron严重延迟后错过21:00/21:20/21:40兜底窗口。
+      OPINION_PUSH_AFTER_AGGREGATE: "1"
     steps:
       - uses: actions/checkout@v4
         with:

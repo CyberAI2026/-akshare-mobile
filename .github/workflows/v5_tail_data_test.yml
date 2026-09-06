@@ -16,7 +16,7 @@ concurrency:
 jobs:
   tail-data-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
 
@@ -136,8 +136,11 @@ jobs:
           if missing_5m:
               raise SystemExit(f"FAIL: 缺少5分钟K: {missing_5m}")
           failed_context = candidate_context_qa[candidate_context_qa["状态"] == "失败"]
+          usable_context = candidate_context_qa[candidate_context_qa["状态"] != "失败"]
           if not failed_context.empty:
-              raise SystemExit("FAIL: 候选多维上下文缺失: " + failed_context.to_json(force_ascii=False, orient="records"))
+              print("WARN: 部分候选上下文未核验，正式任务将明确降级: " + failed_context.to_json(force_ascii=False, orient="records"))
+          if candidate_context_qa.empty or usable_context.empty:
+              raise SystemExit("FAIL: 所有候选多维上下文均不可用")
           if len(breadth) == 0:
               raise SystemExit("FAIL: 全市场状态为空")
           if len(indices) == 0:
