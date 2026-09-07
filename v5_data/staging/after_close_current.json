@@ -1,6 +1,6 @@
 {
-  "status": "completed_ai_failed",
-  "stage": "ai_failed",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-07T20:09:12.538190+08:00",
@@ -74,8 +74,8 @@
     "industry_table_count": 5,
     "scope_note": ""
   },
-  "completed_cn": "2026-09-08T01:13:32.617536+08:00",
-  "elapsed_minutes": 304.33,
+  "completed_cn": "2026-09-08T01:24:47.990133+08:00",
+  "elapsed_minutes": 315.59,
   "cache_summary": {
     "25日": {
       "命中或增量": 586,
@@ -94,12 +94,12 @@
     }
   },
   "python_final": "30-50只软容量研究包（不机械生成前10）",
-  "observation_pool_count": 3,
+  "observation_pool_count": 1,
   "target_trade_date": "2026-09-08",
   "openai_model": "gpt-5.6-terra",
   "market_assessment": {
     "risk_level": "高",
-    "summary": "计算事实：当日上涨3039家、下跌1987家、涨停94家、跌停2家，广度较前一记录改善；但上证、深成指、创业板和科创50的5日及20日收益多数为负，科创50近5日-4.09%、近20日-7.03%。市场宽度当日数据标注为降级，且滚动样本仅3日。研究判断：反弹广度改善但指数中短期仍偏弱，题材承接与高位反馈需要次日验证。",
+    "summary": "计算事实：当日上涨3039家、下跌1987家、涨停94家、跌停2家，较前两日宽度明显修复；但上证、深成指、创业板及科创50的5日和20日收益多数仍为负。研究判断：修复日后的承接持续性仍需验证，且市场宽度和涨跌停数据标记为降级口径。",
     "next_day_aggressiveness": "偏防守"
   },
   "high_attention_sector_market": {
