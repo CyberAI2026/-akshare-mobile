@@ -116,6 +116,39 @@ class AfterCloseStageTests(unittest.TestCase):
             self.assertEqual(saved["status"], "completed")
             self.assertTrue(saved["pushplus_delivery_ok"])
 
+    def test_ai_failed_state_is_allowed_to_resume_from_saved_inputs(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            run = root / "run"
+            latest = root / "latest"
+            (run / "250d").mkdir(parents=True)
+            latest.mkdir()
+            state_path = root / "state.json"
+            state_path.write_text(json.dumps({
+                "stage": "ai_failed", "status": "completed_ai_failed",
+                "folder": str(run), "generated_trade_date": "2026-09-07",
+                "engine": "test", "stamp": "test",
+            }), encoding="utf-8")
+            pd.DataFrame([{"股票代码": "000001", "股票名称": "平安银行"}]).to_csv(
+                run / "250d" / "research_pack_30_40.csv", index=False
+            )
+            empty_sheets = {"五大指数180日": pd.DataFrame(), "市场宽度当日": pd.DataFrame(),
+                            "市场宽度历史180": pd.DataFrame(), "市场滚动上下文": pd.DataFrame()}
+            with pd.ExcelWriter(run / "market_review.xlsx") as writer:
+                for name, frame in empty_sheets.items():
+                    frame.to_excel(writer, sheet_name=name, index=False)
+            with pd.ExcelWriter(run / "sector_fund_flow.xlsx") as writer:
+                pd.DataFrame().to_excel(writer, sheet_name="板块质量校验", index=False)
+            with patch.object(stages, "STATE", state_path), \
+                 patch.object(stages.cli, "LATEST", latest), \
+                 patch.object(stages.cli, "run_openai_after_close", side_effect=RuntimeError("stop-after-gate")), \
+                 patch.object(stages.cli, "git_commit"), \
+                 patch.object(stages.cli, "notify_failure"):
+                with self.assertRaisesRegex(RuntimeError, "stop-after-gate"):
+                    stages.run_ai()
+            saved = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["stage"], "ai_failed")
+
 
 if __name__ == "__main__":
     unittest.main()

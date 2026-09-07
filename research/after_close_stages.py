@@ -396,8 +396,8 @@ def run_ai() -> None:
             raise RuntimeError("盘后结果已保存，但PushPlus再次送达失败")
         print(f"AFTER_CLOSE_STAGE_OK stage=delivery-retry observation_pool={len(obs)}")
         return
-    if state.get("stage") != "market_context_complete":
-        raise RuntimeError(f"阶段顺序错误：需要 market_context_complete，当前为 {state.get('stage')}")
+    if state.get("stage") not in {"market_context_complete", "ai_failed"}:
+        raise RuntimeError(f"阶段顺序错误：需要 market_context_complete/ai_failed，当前为 {state.get('stage')}")
     research_pack = _read_csv(base / "250d" / "research_pack_30_40.csv")
     market_sheets = pd.read_excel(base / "market_review.xlsx", sheet_name=None)
     sector_sheets = pd.read_excel(base / "sector_fund_flow.xlsx", sheet_name=None)

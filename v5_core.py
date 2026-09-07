@@ -1012,10 +1012,32 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
     )
     prompt=common+task+output_rule+"\n任务类型:"+kind+"\n数据(JSON):\n"+json.dumps(payload,ensure_ascii=False,default=str,allow_nan=False)
     requested_at = now_cn().isoformat()
-    resp=client.responses.create(model=model,input=prompt,max_output_tokens=12000)
-    text=(resp.output_text or "").strip()
-    if not text:
-        raise RuntimeError("OpenAI 返回空文本。")
+    resp = None
+    text = ""
+    errors = []
+    # 盘后和尾盘调用都要求JSON对象。使用Responses API JSON mode约束语法，
+    # 同时保留一次重试来处理极少数不完整响应或传输中断。
+    for attempt in range(1, 3):
+        resp=client.responses.create(
+            model=model,
+            input=prompt,
+            max_output_tokens=12000,
+            text={"format": {"type": "json_object"}},
+        )
+        text=(resp.output_text or "").strip()
+        status=str(getattr(resp,"status","") or "")
+        try:
+            if status and status != "completed":
+                details=getattr(resp,"incomplete_details",None)
+                raise RuntimeError(f"OpenAI响应未完成: status={status}, details={details}")
+            parsed=json.loads(text)
+            if not isinstance(parsed,dict):
+                raise ValueError("OpenAI JSON顶层不是对象")
+            break
+        except Exception as exc:
+            errors.append(f"attempt={attempt}:{type(exc).__name__}:{exc}")
+            if attempt == 2:
+                raise RuntimeError("OpenAI连续两次未返回完整合法JSON；"+" | ".join(errors)) from exc
     usage = getattr(resp, "usage", None)
     input_tokens = getattr(usage, "input_tokens", None) if usage else None
     output_tokens = getattr(usage, "output_tokens", None) if usage else None
@@ -1034,6 +1056,7 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
         "output_tokens": output_tokens,
         "total_tokens": total_tokens,
         "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+        "attempt_count": len(errors) + 1,
     }
     with (audit_dir / "calls.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(audit_record, ensure_ascii=False) + "\n")

@@ -3,6 +3,9 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import json
+import os
+from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import MagicMock
 from unittest.mock import patch
@@ -12,7 +15,7 @@ import pandas as pd
 
 sys.modules.setdefault("akshare", MagicMock())
 sys.modules.setdefault("requests", MagicMock())
-from v5_core import build_metrics, fetch_pool_history_incremental, stage2_rank
+from v5_core import build_metrics, fetch_pool_history_incremental, openai_analyze, stage2_rank
 
 
 def sample_history(contracting: bool = True, with_turnover: bool = True) -> pd.DataFrame:
@@ -89,6 +92,27 @@ class SecondStartEvidenceTests(unittest.TestCase):
         self.assertEqual(len(qa), 30)
         self.assertEqual(qa["状态"].eq("成功").sum(), 30)
         self.assertEqual(data["股票代码"].nunique(), 30)
+
+    def test_openai_json_mode_retries_malformed_response_once(self):
+        responses = [
+            SimpleNamespace(output_text='{"broken":', status="completed", usage=None, id="r1", model="test"),
+            SimpleNamespace(output_text='{"ok": true}', status="completed", usage=None, id="r2", model="test"),
+        ]
+        create = MagicMock(side_effect=responses)
+        fake_client = SimpleNamespace(responses=SimpleNamespace(create=create))
+        fake_openai = SimpleNamespace(OpenAI=lambda api_key: fake_client)
+        old_cwd = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch.dict(sys.modules, {"openai": fake_openai}), \
+             patch.dict(os.environ, {"OPENAI_API_KEY": "test"}):
+            try:
+                os.chdir(tmp)
+                raw = openai_analyze("盘后观察池", {"required_output_schema": {}})
+            finally:
+                os.chdir(old_cwd)
+        self.assertEqual(json.loads(raw), {"ok": True})
+        self.assertEqual(create.call_count, 2)
+        self.assertEqual(create.call_args.kwargs["text"], {"format": {"type": "json_object"}})
 
 
 if __name__ == "__main__":
