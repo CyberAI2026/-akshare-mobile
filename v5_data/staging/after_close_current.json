@@ -74,7 +74,6 @@
     "industry_table_count": 5,
     "scope_note": ""
   },
-  "ai_error": "Expecting ',' delimiter: line 1 column 19093 (char 19092)",
   "completed_cn": "2026-09-08T01:13:32.617536+08:00",
   "elapsed_minutes": 304.33,
   "cache_summary": {
