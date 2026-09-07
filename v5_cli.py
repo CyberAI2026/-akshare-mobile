@@ -872,9 +872,28 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
     missing=sorted(allowed-set(decision_by_code))
     if missing:
         raise ValueError(f"OpenAI decisions未覆盖全部30只，缺少{len(missing)}只: {missing[:8]}")
-    for code in selected:
-        if str(decision_by_code[code].get("decision","")).upper()!="SELECT":
+    required_dimensions=["structure_assessment","volume_assessment","amplitude_assessment","turnover_assessment","sector_resonance"]
+    for code in list(selected):
+        decision=decision_by_code[code]
+        if str(decision.get("decision","")).upper()!="SELECT":
             raise ValueError(f"selected_codes与decisions不一致: {code}不是SELECT")
+        missing_dimensions=[field for field in required_dimensions if not str(decision.get(field,"")).strip()]
+        if missing_dimensions:
+            raise ValueError(f"OpenAI SELECT缺少二次启动解释维度: {code} {missing_dimensions}")
+    # 同期概念客观行情已经明确退潮时，保守降为WAIT；不让个股价格结构覆盖板块负反馈。
+    sector_by_code={str(item.get("股票代码","")).zfill(6):item
+                    for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
+    downgraded=[]
+    for code in list(selected):
+        if str(sector_by_code.get(code,{}).get("板块共振状态",""))=="同期概念退潮":
+            selected.remove(code)
+            decision_by_code[code]["decision"]="WAIT"
+            old_risk=str(decision_by_code[code].get("risk","") or "")
+            decision_by_code[code]["risk"]=(old_risk+"；同期概念客观行情退潮，系统保守降为WAIT").strip("；")
+            downgraded.append(code)
+    result["selected_codes"]=selected
+    result["sector_retreat_downgraded_codes"]=downgraded
+    result["decisions"]=[decision_by_code.get(str(d.get("股票代码","")).zfill(6),d) if isinstance(d,dict) else d for d in decisions]
     # 观察池保留原始量化证据 + AI判断，便于次日尾盘继续分析。
     rows=[]
     base_map={str(r["股票代码"]).zfill(6):r for r in research_pack.to_dict("records")}
