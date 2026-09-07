@@ -5,7 +5,7 @@ import tempfile
 import base64
 from pathlib import Path
 from unittest.mock import MagicMock
-from datetime import datetime
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 from unittest.mock import patch
 
@@ -18,6 +18,85 @@ sys.modules.setdefault("openai",MagicMock())
 import v5_core as core
 import v5_cli as cli
 from research import market_opinion_mining as opinion
+
+
+class UnifiedHistoryCacheTests(unittest.TestCase):
+    def test_bulk_spot_appends_one_closed_day_without_per_stock_history_call(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            pd.DataFrame([{
+                "日期": "2026-09-04", "开盘价": 9.8, "最高价": 10.2, "最低价": 9.7,
+                "收盘价": 10.0, "成交量": 100, "成交额": 1000, "换手率": 1.0,
+                "未复权收盘价": 10.0,
+            }]).to_csv(cache / "000001.csv", index=False)
+            pool = pd.DataFrame([{"股票代码": "000001", "股票名称": "测试"}])
+            spot = pd.DataFrame([{
+                "代码": "000001", "最新价": 10.5, "今开": 10.1, "最高": 10.6,
+                "最低": 10.0, "昨收": 10.0, "成交量": 200, "成交额": 2100, "换手率": 2.0,
+            }])
+            with patch.object(core, "is_trade_day", side_effect=lambda d: d == date(2026, 9, 4)):
+                result = core.refresh_history_cache_from_bulk_spot(
+                    pool, cache, date(2026, 9, 7), spot=spot
+                )
+            updated = pd.read_csv(cache / "000001.csv")
+            self.assertEqual(result["bulk_appended"], 1)
+            self.assertEqual(result["needs_history_fallback"], 0)
+            self.assertEqual(str(updated.iloc[-1]["日期"])[:10], "2026-09-07")
+            self.assertAlmostEqual(float(updated.iloc[-1]["收盘价"]), 10.5)
+
+    def test_bulk_spot_rejects_possible_corporate_action_boundary(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            pd.DataFrame([{"日期": "2026-09-04", "收盘价": 10.0}]).to_csv(
+                cache / "000001.csv", index=False
+            )
+            pool = pd.DataFrame([{"股票代码": "000001", "股票名称": "测试"}])
+            spot = pd.DataFrame([{
+                "代码": "000001", "最新价": 8.5, "今开": 8.4, "最高": 8.6,
+                "最低": 8.3, "昨收": 8.0,
+            }])
+            with patch.object(core, "is_trade_day", side_effect=lambda d: d == date(2026, 9, 4)):
+                result = core.refresh_history_cache_from_bulk_spot(
+                    pool, cache, date(2026, 9, 7), spot=spot
+                )
+            self.assertEqual(result["bulk_appended"], 0)
+            self.assertEqual(result["corporate_action_guard"], 1)
+            self.assertEqual(len(pd.read_csv(cache / "000001.csv")), 1)
+
+    def test_remote_backfill_builds_deep_cache_once(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache_file = Path(td) / "000001.csv"
+            history = pd.DataFrame({
+                "日期": pd.date_range("2025-08-01", periods=280, freq="B"),
+                "开盘价": range(280), "最高价": range(1, 281), "最低价": range(280),
+                "收盘价": range(1, 281), "成交量": range(280),
+            })
+            with patch.object(core, "fetch_history", return_value=(
+                history, {"source": "test", "raw_source": "test", "errors": [], "raw_matched": 0}
+            )) as fetch:
+                view, _ = core.fetch_history_incremental(
+                    "000001", 25, cache_file, date(2026, 9, 7)
+                )
+            fetch.assert_called_once_with("000001", 280)
+            self.assertEqual(len(view), 25)
+            self.assertEqual(len(pd.read_csv(cache_file)), 280)
+
+    def test_current_deep_cache_is_local_only(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache_file = Path(td) / "000001.csv"
+            history = pd.DataFrame({
+                "日期": pd.date_range(end="2026-09-07", periods=280, freq="B"),
+                "收盘价": range(1, 281), "最高价": range(1, 281),
+                "最低价": range(1, 281), "成交量": range(280),
+            })
+            history.to_csv(cache_file, index=False)
+            with patch.object(core, "fetch_history", side_effect=AssertionError("must stay local")):
+                view, meta = core.fetch_history_incremental(
+                    "000001", 120, cache_file, date(2026, 9, 7)
+                )
+            self.assertEqual(len(view), 120)
+            self.assertEqual(meta["source"], "global-cache")
+
 
 
 class MarketReviewTests(unittest.TestCase):
