@@ -1198,6 +1198,22 @@ def _load_tail_pool(today):
     return pool, obs_meta
 
 
+def _tail_completed_for_date(trade_date) -> bool:
+    """Allow a redundant scheduled run to exit without repeating OpenAI or PushPlus."""
+    path = LATEST / "last_tail_summary.json"
+    if not path.exists():
+        return False
+    try:
+        summary = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return False
+    return (
+        str(summary.get("trade_date", "")) == str(trade_date)
+        and summary.get("status") == "completed"
+        and summary.get("pushplus_delivery_ok") is True
+    )
+
+
 def _enforce_tail_stage_window(stage: str):
     """拒绝用收盘后数据倒充尾盘数据；每个阶段最多只等待几分钟。"""
     now0 = now_cn()
@@ -1219,6 +1235,10 @@ def _enforce_tail_stage_window(stage: str):
 
 def run_tail_precheck():
     """14:40短任务：日期锁、持仓排重、实时/5分钟与候选多维资料预采样。"""
+    today0 = now_cn().date()
+    if _tail_completed_for_date(today0):
+        print(f"TAIL_ALREADY_COMPLETED trade_date={today0}; redundant run skipped")
+        return
     today = _enforce_tail_stage_window("precheck")
     if today is None:
         return
@@ -1245,6 +1265,10 @@ def run_tail_precheck():
 
 def run_tail_finalize():
     """14:45短任务：读取14:40预采样，补抓市场/板块并完成OpenAI与微信决策。"""
+    today0 = now_cn().date()
+    if _tail_completed_for_date(today0):
+        print(f"TAIL_ALREADY_COMPLETED trade_date={today0}; redundant finalize skipped")
+        return
     today = _enforce_tail_stage_window("finalize")
     if today is None:
         return
