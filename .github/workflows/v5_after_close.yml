@@ -93,14 +93,38 @@ jobs:
     with:
       stage: 25d
 
-  screen-120d:
+  screen-120d-shard-0:
     needs: screen-25d
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
-      stage: 120d
+      stage: 120d-shard-0
+
+  screen-120d-shard-1:
+    needs: screen-120d-shard-0
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 120d-shard-1
+
+  screen-120d-shard-2:
+    needs: screen-120d-shard-1
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 120d-shard-2
+
+  screen-120d-shard-3:
+    needs: screen-120d-shard-2
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 120d-shard-3
+
+  screen-120d-aggregate:
+    needs: screen-120d-shard-3
+    uses: ./.github/workflows/v5_after_close_stage.yml
+    with:
+      stage: 120d-aggregate
 
   lifecycle-250d:
-    needs: screen-120d
+    needs: screen-120d-aggregate
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 250d
@@ -142,8 +166,8 @@ jobs:
           retention-days: 14
 
   failure-alert:
-    needs: [validate, initialize, screen-25d, screen-120d, lifecycle-250d, market-context, ai-finalize]
-    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    needs: [validate, initialize, screen-25d, screen-120d-shard-0, screen-120d-shard-1, screen-120d-shard-2, screen-120d-shard-3, screen-120d-aggregate, lifecycle-250d, market-context, ai-finalize]
+    if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
