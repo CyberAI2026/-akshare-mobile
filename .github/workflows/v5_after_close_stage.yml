@@ -27,4 +27,4 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
       - run: pip install -r requirements.txt
-      - run: python research/after_close_stages.py ${{ inputs.stage }}
+      - run: python -m research.after_close_stages ${{ inputs.stage }}
