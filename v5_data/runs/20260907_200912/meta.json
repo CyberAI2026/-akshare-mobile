@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "initialized",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-07T20:09:12.538190+08:00",
@@ -32,5 +32,127 @@
   "cache_deep_ready_count": 57,
   "cache_current_count": 176,
   "cache_fallback_count": 415,
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 174,
+  "qa25": {
+    "命中或增量": 586,
+    "总数": 591,
+    "成功": 591
+  },
+  "completed_120d_shards": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "shard_count_120d": 4,
+  "stage2_research_pool": 34,
+  "qa120": {
+    "命中或增量": 40,
+    "总数": 174,
+    "成功": 174
+  },
+  "generated_trade_date": "2026-09-07",
+  "master_count": 591,
+  "eliminated_count": 0,
+  "daily_new_count": 0,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 0,
+  "cooling_count": 0,
+  "qa250": {
+    "命中或增量": 34,
+    "总数": 34,
+    "成功": 34
+  },
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "ai_error": "Expecting ',' delimiter: line 1 column 19093 (char 19092)",
+  "completed_cn": "2026-09-08T01:13:32.617536+08:00",
+  "elapsed_minutes": 304.33,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 586,
+      "总数": 591,
+      "成功": 591
+    },
+    "120日": {
+      "命中或增量": 40,
+      "总数": 174,
+      "成功": 174
+    },
+    "250日": {
+      "命中或增量": 34,
+      "总数": 34,
+      "成功": 34
+    }
+  },
+  "python_final": "30-50只软容量研究包（不机械生成前10）",
+  "observation_pool_count": 3,
+  "target_trade_date": "2026-09-08",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：当日上涨3039家、下跌1987家、涨停94家、跌停2家，广度较前一记录改善；但上证、深成指、创业板和科创50的5日及20日收益多数为负，科创50近5日-4.09%、近20日-7.03%。市场宽度当日数据标注为降级，且滚动样本仅3日。研究判断：反弹广度改善但指数中短期仍偏弱，题材承接与高位反馈需要次日验证。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [
+        {
+          "板块": "液冷服务器/算力硬件",
+          "文章提及数": 6,
+          "观点状态": "退潮"
+        },
+        {
+          "板块": "半导体芯片/AI硬件",
+          "文章提及数": 5,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "农业/养殖/猪肉",
+          "文章提及数": 7,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "AI应用/传媒/短剧",
+          "文章提及数": 6,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "数字货币/数字人民币/跨境支付",
+          "文章提及数": 4,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "零售/大消费",
+          "文章提及数": 4,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "金融/证券",
+          "文章提及数": 3,
+          "观点状态": "分化"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 591,
+  "stock_qa_120_success": 174,
+  "stock_qa_250_success": 34,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true
 }
