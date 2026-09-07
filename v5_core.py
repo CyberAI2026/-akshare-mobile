@@ -1327,6 +1327,7 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
     errors = []
     source = "global-cache"
     raw_source = "global-cache"
+    cache_mode = "local-cache"
 
     enough = len(cached) >= need
     latest = cached["日期"].max().date() if (not cached.empty and "日期" in cached and cached["日期"].notna().any()) else None
@@ -1355,9 +1356,11 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
             out = out.sort_values("日期").drop_duplicates("日期", keep="last").tail(max(280, need + 20)).reset_index(drop=True)
             source = f"global-cache+{used}"
             raw_source = "global-cache"
+            cache_mode = "per-stock-incremental"
         else:
             out = cached.copy()
             source = "global-cache(stale-fetch-failed)"
+            cache_mode = "stale-fallback"
     else:
         # A remote backfill is expensive; fetch one reusable deep history so the
         # later 25/120/250-day stages only slice the same cache.
@@ -1365,6 +1368,7 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
         if full is None or full.empty:
             return pd.DataFrame(), {"source": meta.get("source", ""), "raw_source": meta.get("raw_source", ""), "errors": meta.get("errors", []), "raw_matched": meta.get("raw_matched", 0), "cache_mode": "full-fetch-failed"}
         out = full.copy(); source = meta.get("source", ""); raw_source = meta.get("raw_source", ""); errors.extend(meta.get("errors", []))
+        cache_mode = "deep-backfill"
 
     if out is None or out.empty:
         return pd.DataFrame(), {"source": source, "raw_source": raw_source, "errors": errors, "raw_matched": 0, "cache_mode": "empty"}
@@ -1380,7 +1384,33 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
     else:
         view = view.tail(days).reset_index(drop=True)
     raw_matched = int(view.get("未复权收盘价", pd.Series(dtype=float)).notna().sum()) if not view.empty else 0
-    return view, {"source": source, "raw_source": raw_source, "errors": errors, "raw_matched": raw_matched, "cache_mode": "incremental" if "+" in source else "cache/full"}
+    return view, {"source": source, "raw_source": raw_source, "errors": errors, "raw_matched": raw_matched, "cache_mode": cache_mode}
+
+
+
+def history_cache_manifest(
+    pool: pd.DataFrame, global_cache_dir: str | Path, asof_trade_date: date
+) -> pd.DataFrame:
+    """Local, auditable index of depth and freshness for the unified history cache."""
+    cache_dir = Path(global_cache_dir)
+    rows = []
+    for _, item in pool.reset_index(drop=True).iterrows():
+        code = _norm_code(item["股票代码"])
+        frame = _cache_read(cache_dir / f"{code}.csv")
+        dates = frame.get("日期", pd.Series(dtype="datetime64[ns]"))
+        valid_dates = pd.to_datetime(dates, errors="coerce").dropna()
+        latest = valid_dates.max().date() if not valid_dates.empty else None
+        rows.append({
+            "股票代码": code,
+            "股票名称": str(item.get("股票名称", "") or ""),
+            "缓存行数": int(len(frame)),
+            "最早交易日": str(valid_dates.min().date()) if not valid_dates.empty else "",
+            "最后交易日": str(latest) if latest else "",
+            "日期已最新": bool(latest and latest >= asof_trade_date),
+            "统一深缓存就绪": bool(len(frame) >= 250),
+            "需要异常补抓": bool(frame.empty or not latest or latest < asof_trade_date),
+        })
+    return pd.DataFrame(rows)
 
 
 def fetch_pool_history_incremental(pool: pd.DataFrame, days: int, global_cache_dir: str | Path, checkpoint=None, asof_trade_date: date | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
