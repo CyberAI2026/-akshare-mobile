@@ -52,6 +52,18 @@ class TailStageTests(unittest.TestCase):
             self.assertEqual(pool["股票代码"].tolist(), ["603318"])
             self.assertEqual(meta["target_trade_date"], "2026-09-07")
 
+    def test_completed_tail_run_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as td:
+            latest = Path(td)
+            (latest / "last_tail_summary.json").write_text(json.dumps({
+                "trade_date": "2026-09-07",
+                "status": "completed",
+                "pushplus_delivery_ok": True,
+            }), encoding="utf-8")
+            with patch.object(cli, "LATEST", latest):
+                self.assertTrue(cli._tail_completed_for_date(date(2026, 9, 7)))
+                self.assertFalse(cli._tail_completed_for_date(date(2026, 9, 8)))
+
     def test_precheck_persists_candidate_identity(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
