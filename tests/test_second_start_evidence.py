@@ -113,6 +113,7 @@ class SecondStartEvidenceTests(unittest.TestCase):
         self.assertEqual(json.loads(raw), {"ok": True})
         self.assertEqual(create.call_count, 2)
         self.assertEqual(create.call_args.kwargs["text"], {"format": {"type": "json_object"}})
+        self.assertEqual(create.call_args.kwargs["max_output_tokens"], 20000)
 
 
 if __name__ == "__main__":

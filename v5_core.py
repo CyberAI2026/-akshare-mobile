@@ -1021,7 +1021,9 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
         resp=client.responses.create(
             model=model,
             input=prompt,
-            max_output_tokens=12000,
+            # 34只候选逐股给出五维证据时，生产输出曾达到11,988 tokens；
+            # 留出安全余量，避免合法JSON在对象结束前被截断。
+            max_output_tokens=int(os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "20000")),
             text={"format": {"type": "json_object"}},
         )
         text=(resp.output_text or "").strip()

@@ -17,7 +17,7 @@ concurrency:
 jobs:
   recover-ai:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

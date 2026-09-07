@@ -432,6 +432,7 @@ def run_ai() -> None:
 
     completed = cli.now_cn()
     started = pd.Timestamp(state["started_cn"]).to_pydatetime()
+    state.pop("ai_error", None)
     summary = {
         **state,
         "status": "completed", "stage": "completed", "completed_cn": completed.isoformat(),
