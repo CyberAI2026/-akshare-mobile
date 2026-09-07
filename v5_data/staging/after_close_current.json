@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "initialized",
+  "stage": "screen25_complete",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2",
   "started_cn": "2026-09-07T18:06:54.919613+08:00",
@@ -15,5 +15,11 @@
     "scanned": 772,
     "available": 535
   },
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 200,
+  "qa25": {
+    "命中或增量": 586,
+    "总数": 591,
+    "成功": 586
+  }
 }
