@@ -486,11 +486,19 @@ def _series_metrics(g: pd.DataFrame) -> dict:
     ma5_slope = ma5.iloc[-1] / ma5.iloc[-4] - 1 if len(ma5) >= 8 and pd.notna(ma5.iloc[-4]) and ma5.iloc[-4] else np.nan
     ma10_slope = ma10.iloc[-1] / ma10.iloc[-4] - 1 if len(ma10) >= 13 and pd.notna(ma10.iloc[-4]) and ma10.iloc[-4] else np.nan
     short_decline_stopped = bool(pd.notna(ma5_slope) and pd.notna(ma10_slope) and ma5_slope >= -0.01 and ma10_slope >= -0.01)
-    convergence_available = sum(pd.notna(x) for x in [amp_contraction, vol_contraction, turnover_contraction]) + int(pd.notna(ma5_slope) and pd.notna(ma10_slope))
+    # 成交量与换手率在流通股本稳定时几乎是同一信号，不能伪装成两项独立证据。
+    # 两个原始比率仍分别保留用于审计；成熟度只把它们合并为一项“流动性收敛”。
+    liquidity_available = pd.notna(vol_contraction) or pd.notna(turnover_contraction)
+    liquidity_votes = [x <= 1.0 for x in [vol_contraction, turnover_contraction] if pd.notna(x)]
+    liquidity_contraction = bool(liquidity_votes and sum(liquidity_votes) >= (len(liquidity_votes) + 1) // 2)
+    convergence_available = (
+        int(pd.notna(amp_contraction))
+        + int(liquidity_available)
+        + int(pd.notna(ma5_slope) and pd.notna(ma10_slope))
+    )
     convergence_support = sum([
         bool(pd.notna(amp_contraction) and amp_contraction <= 1.0),
-        bool(pd.notna(vol_contraction) and vol_contraction <= 1.0),
-        bool(pd.notna(turnover_contraction) and turnover_contraction <= 1.0),
+        liquidity_contraction,
         short_decline_stopped,
     ])
     if convergence_available < 2:
@@ -515,6 +523,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         "前10日区间振幅": amp_prev10, "振幅收敛比": amp_contraction,
         "近5日平均成交量": vol5, "前10日平均成交量": vol_prev10, "成交量收敛比": vol_contraction,
         "近5日平均换手率": turnover5, "前10日平均换手率": turnover_prev10, "换手率收敛比": turnover_contraction,
+        "流动性收敛证据": liquidity_contraction,
         "MA5_3日斜率": ma5_slope, "MA10_3日斜率": ma10_slope, "短期下行停止证据": short_decline_stopped,
         "整理证据可用项": convergence_available, "整理收敛支持项": convergence_support, "整理成熟度状态": consolidation_state,
         "距250日高点": last / hi250 - 1 if hi250 else np.nan,
@@ -633,13 +642,18 @@ def stage2_rank(metrics: pd.DataFrame, min_n: int = 30, max_n: int = 40, return_
     x["振幅收敛"] = x["振幅收敛比"].le(1.0).fillna(False)
     x["成交量收敛"] = x["成交量收敛比"].le(1.0).fillna(False)
     x["换手率收敛"] = x["换手率收敛比"].le(1.0).fillna(False)
+    liquidity_available = x[["成交量收敛比", "换手率收敛比"]].notna().any(axis=1)
+    liquidity_votes = x[["成交量收敛", "换手率收敛"]].sum(axis=1)
+    liquidity_observed = x[["成交量收敛比", "换手率收敛比"]].notna().sum(axis=1)
+    x["流动性收敛"] = liquidity_available & (liquidity_votes >= ((liquidity_observed + 1) // 2))
     x["短期下行停止"] = (x["MA5_3日斜率"] >= -0.01) & (x["MA10_3日斜率"] >= -0.01)
     x["整理证据可用项"] = x["整理证据可用项"].fillna(
-        x[["振幅收敛比", "成交量收敛比", "换手率收敛比"]].notna().sum(axis=1)
+        x["振幅收敛比"].notna().astype(int)
+        + liquidity_available.astype(int)
         + (x[["MA5_3日斜率", "MA10_3日斜率"]].notna().all(axis=1)).astype(int)
     )
     x["整理收敛支持项"] = x["整理收敛支持项"].fillna(
-        x[["振幅收敛", "成交量收敛", "换手率收敛", "短期下行停止"]].sum(axis=1)
+        x[["振幅收敛", "流动性收敛", "短期下行停止"]].sum(axis=1)
     )
     x["整理成熟"] = x["基础整理条件"] & (x["整理证据可用项"] >= 2) & (x["整理收敛支持项"] >= 2)
     x["中期趋势仍活"] = x["ret40"] >= 0
@@ -650,14 +664,13 @@ def stage2_rank(metrics: pd.DataFrame, min_n: int = 30, max_n: int = 40, return_
 
     x["整理成熟贡献"] = x["整理成熟"].astype(int) * 3
     x["振幅收敛贡献"] = x["振幅收敛"].astype(int)
-    x["成交量收敛贡献"] = x["成交量收敛"].astype(int)
-    x["换手率收敛贡献"] = x["换手率收敛"].astype(int)
+    x["流动性收敛贡献"] = x["流动性收敛"].astype(int)
     x["短期止跌贡献"] = x["短期下行停止"].astype(int)
     x["40日趋势贡献"] = x["中期趋势仍活"].astype(int) * 3
     x["均线趋势辅助贡献"] = x["均线趋势辅助"].astype(int)
     x["稳健上沿贡献"] = np.select([x["稳健上沿核心区"], x["稳健上沿宽区"]], [4, 2], default=0)
     x["重新加速辅助贡献"] = x["适度重新加速"].astype(int)  # 中等证据，权重低于结构证据
-    x["阶段2分"] = x[["整理成熟贡献", "振幅收敛贡献", "成交量收敛贡献", "换手率收敛贡献", "短期止跌贡献",
+    x["阶段2分"] = x[["整理成熟贡献", "振幅收敛贡献", "流动性收敛贡献", "短期止跌贡献",
                        "40日趋势贡献", "均线趋势辅助贡献", "稳健上沿贡献", "重新加速辅助贡献"]].sum(axis=1)
 
     # 只把反复验证较强的“成熟+趋势仍活”作为最低资格；上沿距离和重新加速用于排序，不做绝对门槛。
@@ -665,7 +678,7 @@ def stage2_rank(metrics: pd.DataFrame, min_n: int = 30, max_n: int = 40, return_
     x["阶段2风险提示"] = np.select(
         [x["整理证据可用项"] < 2, x["整理收敛支持项"] < 2, x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret40"] < 0, x["距稳健5日上沿"].abs() > 0.08],
         ["量价/换手整理证据不足", "振幅、量能、换手或短期趋势尚未形成两类收敛支持", "短波动仍偏大", "10日速度仍偏快，整理可能未完成", "40日趋势偏弱", "距离短周期稳健上沿较远"], default="")
-    x["阶段2规则说明"] = "核心：至少两类独立整理收敛证据+40日趋势仍活+稳健5日上沿；缺失量价/换手必须明示；2%-6%单日加速仅为中等证据"
+    x["阶段2规则说明"] = "核心：振幅、流动性（成交量/换手合并）与短期止跌三类证据中至少两类支持+40日趋势仍活；缺失量价/换手必须明示；2%-6%单日加速仅为中等证据"
     selected, audit = _rank_and_audit(x, "阶段2分", min_n, max_n, "阶段2通过", "二级结构筛选")
     return (selected, audit) if return_audit else selected
 
