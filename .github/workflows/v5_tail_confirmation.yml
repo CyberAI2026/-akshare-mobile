@@ -9,8 +9,10 @@ on:
       - "v5_cli.py"
       - "tests/test_tail_stages.py"
   schedule:
-    # 14:36 Asia/Shanghai. Each stage has its own <=10 minute job.
-    - cron: '36 6 * * 1-5'
+    # Dual GitHub cron: 14:32 primary, 14:37 fallback (Asia/Shanghai).
+    # A completed same-day run is idempotently skipped, so OpenAI/PushPlus are not duplicated.
+    - cron: '32 6 * * 1-5'
+    - cron: '37 6 * * 1-5'
 
 permissions:
   contents: write
