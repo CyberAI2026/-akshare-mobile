@@ -23,7 +23,8 @@
     "成功": 586
   },
   "completed_120d_shards": [
-    0
+    0,
+    1
   ],
   "shard_count_120d": 4
 }
