@@ -144,6 +144,66 @@ def run_120d() -> None:
     print(f"AFTER_CLOSE_STAGE_OK stage=120d selected={len(p2)}")
 
 
+
+def _shard_frame(frame: pd.DataFrame, shard_index: int, shard_count: int = 4) -> pd.DataFrame:
+    if shard_count < 1 or shard_index < 0 or shard_index >= shard_count:
+        raise ValueError("invalid shard coordinates")
+    return frame.iloc[shard_index::shard_count].reset_index(drop=True)
+
+
+def run_120d_shard(shard_index: int, shard_count: int = 4) -> None:
+    state, base = _load_state()
+    if state.get("stage") not in {"screen25_complete", "screen120_sharding"}:
+        raise RuntimeError(f"阶段顺序错误：需要 screen25_complete/screen120_sharding，当前为 {state.get('stage')}")
+    completed = sorted({int(x) for x in state.get("completed_120d_shards", [])})
+    required_previous = list(range(shard_index))
+    if completed != required_previous and shard_index not in completed:
+        raise RuntimeError(f"120日分片顺序错误：分片{shard_index}之前需要{required_previous}，当前{completed}")
+    p1 = _read_csv(base / "25d" / "pool_150_200.csv")
+    part = _shard_frame(p1, shard_index, shard_count)
+    d120, q120 = fetch_pool_history_incremental(
+        part, 120, cli.CACHE, cli.checkpoint_factory(base / "120d" / f"shard_{shard_index}")
+    )
+    cli.save_df(base / "stages" / f"d120_part_{shard_index}.csv", d120)
+    cli.save_df(base / "stages" / f"q120_part_{shard_index}.csv", q120)
+    if shard_index not in completed:
+        completed.append(shard_index)
+    state.update({
+        "stage": "screen120_sharding",
+        "completed_120d_shards": sorted(completed),
+        "shard_count_120d": shard_count,
+    })
+    _save_state(state)
+    cli.git_commit(f"V5 after-close 120d shard {shard_index + 1}/{shard_count} {state['stamp']}")
+    print(f"AFTER_CLOSE_STAGE_OK stage=120d-shard-{shard_index} stocks={len(part)}")
+
+
+def run_120d_aggregate(shard_count: int = 4) -> None:
+    state, base = _load_state("screen120_sharding")
+    completed = sorted({int(x) for x in state.get("completed_120d_shards", [])})
+    if completed != list(range(shard_count)):
+        raise RuntimeError(f"120日分片不完整：需要{list(range(shard_count))}，当前{completed}")
+    d_parts = [_read_csv(base / "stages" / f"d120_part_{i}.csv") for i in range(shard_count)]
+    q_parts = [_read_csv(base / "stages" / f"q120_part_{i}.csv") for i in range(shard_count)]
+    d120 = pd.concat(d_parts, ignore_index=True) if d_parts else pd.DataFrame()
+    q120 = pd.concat(q_parts, ignore_index=True) if q_parts else pd.DataFrame()
+    m120 = build_metrics(d120)
+    s2, a2 = stage2_rank(m120, 30, 50, return_audit=True)
+    p2 = s2[["股票代码", "股票名称"]].copy()
+    cli.save_df(base / "120d" / "research_pool_30_50.csv", p2)
+    cli.save_df(base / "120d" / "research_pool_30.csv", p2)
+    cli.save_df(base / "120d" / "stage_audit.csv", a2)
+    cli.save_df(base / "stages" / "q120.csv", q120)
+    cli.save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({
+        "120日日线": d120, "质量校验": q120, "结构指标": m120,
+        "筛选审计": a2, "二级30-50只": s2,
+    }))
+    state.update({"stage": "screen120_complete", "stage2_research_pool": len(p2), "qa120": _qa_cache_summary(q120)})
+    _save_state(state)
+    cli.git_commit(f"V5 after-close 120d aggregate {state['stamp']}")
+    print(f"AFTER_CLOSE_STAGE_OK stage=120d-aggregate selected={len(p2)}")
+
+
 def run_250d() -> None:
     state, base = _load_state("screen120_complete")
     p2 = _read_csv(base / "120d" / "research_pool_30_50.csv")
@@ -300,13 +360,18 @@ def run_ai() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("stage", choices=["init", "25d", "120d", "250d", "market", "ai"])
+    parser.add_argument("stage", choices=["init", "25d", "120d", "120d-shard-0", "120d-shard-1", "120d-shard-2", "120d-shard-3", "120d-aggregate", "250d", "market", "ai"])
     parser.add_argument("--batch", default="")
     args = parser.parse_args()
     actions = {
         "init": lambda: run_init(args.batch or None),
         "25d": run_25d,
         "120d": run_120d,
+        "120d-shard-0": lambda: run_120d_shard(0),
+        "120d-shard-1": lambda: run_120d_shard(1),
+        "120d-shard-2": lambda: run_120d_shard(2),
+        "120d-shard-3": lambda: run_120d_shard(3),
+        "120d-aggregate": run_120d_aggregate,
         "250d": run_250d,
         "market": run_market,
         "ai": run_ai,
