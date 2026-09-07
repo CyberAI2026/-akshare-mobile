@@ -8,6 +8,7 @@ import random
 import re
 import signal
 import time
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -1486,17 +1487,44 @@ def fetch_pool_history_incremental(pool: pd.DataFrame, days: int, global_cache_d
     expected = asof_trade_date or expected_latest_trade_date()
     cache_dir = Path(global_cache_dir); cache_dir.mkdir(parents=True, exist_ok=True)
     total = len(pool)
-    for i, row in pool.reset_index(drop=True).iterrows():
+    items = [row for _, row in pool.reset_index(drop=True).iterrows()]
+
+    # 正常路径仍是纯本地读取。只有统一缓存尚未迁移完成、确实需要逐股补抓的
+    # 股票达到较大规模时，才启用最多4路有限并发；这不是把筛选分析并行化。
+    need = days + (5 if days == 120 else 0)
+    remote_needed = 0
+    for row in items:
+        code = _norm_code(row["股票代码"])
+        cached = _cache_read(cache_dir / f"{code}.csv")
+        latest = cached["日期"].max().date() if (not cached.empty and "日期" in cached and cached["日期"].notna().any()) else None
+        if len(cached) < need or not latest or latest < expected:
+            remote_needed += 1
+    configured_workers = max(1, min(4, int(os.getenv("HISTORY_BACKFILL_WORKERS", "4"))))
+    workers = configured_workers if remote_needed >= 30 else 1
+    print(f"HISTORY_FETCH_PLAN days={days} total={total} remote_needed={remote_needed} workers={workers}")
+
+    def fetch_one(row):
         code = _norm_code(row["股票代码"]); name = str(row.get("股票名称", "") or "")
         df, meta = fetch_history_incremental(code, days, cache_dir / f"{code}.csv", expected)
         if df.empty:
             q = {"股票代码": code, "股票名称": name, "状态": "失败", "交易日数": 0, "前复权源": meta.get("source", ""), "未复权源": meta.get("raw_source", ""), "缓存模式": meta.get("cache_mode", ""), "错误": " | ".join(meta.get("errors", [])[-5:])}
+            return None, q
         else:
-            x = df.copy(); x.insert(0, "股票名称", name); x.insert(0, "股票代码", code); all_rows.append(x)
+            x = df.copy(); x.insert(0, "股票名称", name); x.insert(0, "股票代码", code)
             q = {"股票代码": code, "股票名称": name, "状态": "成功", "交易日数": len(df), "前复权源": meta.get("source", ""), "未复权源": meta.get("raw_source", ""), "缓存模式": meta.get("cache_mode", ""), "未复权匹配日": meta.get("raw_matched", 0), "错误": " | ".join(meta.get("errors", [])[-3:])}
+            return x, q
+
+    if workers == 1:
+        iterator = map(fetch_one, items)
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            iterator = list(executor.map(fetch_one, items))
+    for i, (x, q) in enumerate(iterator):
+        if x is not None:
+            all_rows.append(x)
         qa.append(q)
         if checkpoint:
-            checkpoint(i + 1, total, code, q)
+            checkpoint(i + 1, total, q["股票代码"], q)
     data = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
     return data, pd.DataFrame(qa)
 
