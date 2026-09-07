@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed_ai_failed",
+  "stage": "ai_failed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-07T20:09:12.538190+08:00",
@@ -73,5 +73,6 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "ai_error": "Expecting ',' delimiter: line 1 column 19093 (char 19092)"
 }
