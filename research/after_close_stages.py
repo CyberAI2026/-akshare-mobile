@@ -65,6 +65,28 @@ def _qa_cache_summary(qa: pd.DataFrame) -> dict:
     }
 
 
+STAGE2_EVIDENCE_COLUMNS = [
+    "阶段2通过", "基础整理条件", "整理成熟", "振幅收敛", "流动性收敛",
+    "短期下行停止", "中期趋势仍活", "稳健上沿核心区", "稳健上沿宽区",
+    "阶段2风险提示", "阶段2规则说明",
+]
+
+
+def _attach_stage2_evidence(research_pack: pd.DataFrame, stage2_audit: pd.DataFrame) -> pd.DataFrame:
+    """把二级门禁结论显式带入AI研究包，而不是让模型从原始指标猜测。"""
+    if research_pack.empty or stage2_audit.empty:
+        return research_pack
+    available = [c for c in STAGE2_EVIDENCE_COLUMNS if c in stage2_audit.columns]
+    if not available:
+        return research_pack
+    evidence = stage2_audit[["股票代码", *available]].copy()
+    evidence["股票代码"] = evidence["股票代码"].astype(str).str.zfill(6)
+    evidence = evidence.drop_duplicates("股票代码", keep="first")
+    out = research_pack.drop(columns=[c for c in available if c in research_pack.columns]).copy()
+    out["股票代码"] = out["股票代码"].astype(str).str.zfill(6)
+    return out.merge(evidence, on="股票代码", how="left")
+
+
 def _plan_25d_cache_refresh(
     active_input: pd.DataFrame,
     daily_changes: pd.DataFrame,
@@ -319,6 +341,7 @@ def run_250d() -> None:
         m250 = m250.merge(stage2_audit[["股票代码", "阶段2分"]], on="股票代码", how="left")
     _, lifecycle_audit = stage3_rank(m250, max(1, len(m250)), return_audit=True)
     research_pack = p2.merge(lifecycle_audit, on=["股票代码", "股票名称"], how="left")
+    research_pack = _attach_stage2_evidence(research_pack, stage2_audit)
     cli.save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
     cli.save_df(base / "250d" / "lifecycle_audit.csv", lifecycle_audit)
     cli.save_df(base / "stages" / "q250.csv", q250)
@@ -399,6 +422,9 @@ def run_ai() -> None:
     if state.get("stage") not in {"market_context_complete", "ai_failed"}:
         raise RuntimeError(f"阶段顺序错误：需要 market_context_complete/ai_failed，当前为 {state.get('stage')}")
     research_pack = _read_csv(base / "250d" / "research_pack_30_40.csv")
+    stage2_audit_path = base / "120d" / "stage_audit.csv"
+    if stage2_audit_path.exists():
+        research_pack = _attach_stage2_evidence(research_pack, _read_csv(stage2_audit_path))
     market_sheets = pd.read_excel(base / "market_review.xlsx", sheet_name=None)
     sector_sheets = pd.read_excel(base / "sector_fund_flow.xlsx", sheet_name=None)
     idx = market_sheets.get("五大指数180日", pd.DataFrame())

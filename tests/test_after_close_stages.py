@@ -89,6 +89,17 @@ class AfterCloseStageTests(unittest.TestCase):
         with patch.object(stages.cli, "pushplus_notify", return_value=True):
             self.assertTrue(stages.cli.notify_after_close_success(summary, pd.DataFrame(), meta))
 
+    def test_stage2_gate_evidence_is_attached_to_ai_research_pack(self):
+        research = pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股份"}])
+        audit = pd.DataFrame([{
+            "股票代码": "000001", "阶段2通过": True, "整理成熟": True,
+            "流动性收敛": True, "短期下行停止": True,
+        }])
+        out = stages._attach_stage2_evidence(research, audit).iloc[0]
+        self.assertTrue(bool(out["阶段2通过"]))
+        self.assertTrue(bool(out["整理成熟"]))
+        self.assertTrue(bool(out["流动性收敛"]))
+
     def test_ai_rerun_retries_delivery_without_repeating_openai(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

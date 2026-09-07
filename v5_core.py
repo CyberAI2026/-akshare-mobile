@@ -975,7 +975,14 @@ def to_excel_bytes(sheets: dict[str,pd.DataFrame]) -> bytes:
 
 
 # ---------- OpenAI 分析 ----------
-def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
+def openai_analyze(
+    kind: str,
+    payload: dict,
+    model: str | None = None,
+    output_schema: dict | None = None,
+    schema_name: str = "research_response",
+    max_output_tokens: int | None = None,
+) -> str:
     """调用 Responses API。API 不继承聊天上下文，因此研究边界必须显式写入提示词。"""
     key=os.getenv("OPENAI_API_KEY","").strip()
     if not key:
@@ -1012,34 +1019,44 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
     )
     prompt=common+task+output_rule+"\n任务类型:"+kind+"\n数据(JSON):\n"+json.dumps(payload,ensure_ascii=False,default=str,allow_nan=False)
     requested_at = now_cn().isoformat()
+    request = {
+        "model": model,
+        "input": prompt,
+        "max_output_tokens": max_output_tokens or int(os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "20000")),
+    }
+    if output_schema:
+        request["text"] = {
+            "format": {
+                "type": "json_schema",
+                "name": schema_name,
+                "strict": True,
+                "schema": output_schema,
+            }
+        }
+    else:
+        request["text"] = {"format": {"type": "json_object"}}
     resp = None
     text = ""
     errors = []
-    # 盘后和尾盘调用都要求JSON对象。使用Responses API JSON mode约束语法，
-    # 同时保留一次重试来处理极少数不完整响应或传输中断。
+    completed_ok = False
+    attempts_used = 0
+    # 结构化输出保证契约；保留一次重试处理传输中断或达到输出上限。
     for attempt in range(1, 3):
-        resp=client.responses.create(
-            model=model,
-            input=prompt,
-            # 34只候选逐股给出五维证据时，生产输出曾达到11,988 tokens；
-            # 留出安全余量，避免合法JSON在对象结束前被截断。
-            max_output_tokens=int(os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "20000")),
-            text={"format": {"type": "json_object"}},
-        )
-        text=(resp.output_text or "").strip()
-        status=str(getattr(resp,"status","") or "")
+        attempts_used = attempt
         try:
+            resp=client.responses.create(**request)
+            text=(resp.output_text or "").strip()
+            status=str(getattr(resp,"status","") or "")
+            details=getattr(resp,"incomplete_details",None)
             if status and status != "completed":
-                details=getattr(resp,"incomplete_details",None)
                 raise RuntimeError(f"OpenAI响应未完成: status={status}, details={details}")
             parsed=json.loads(text)
             if not isinstance(parsed,dict):
                 raise ValueError("OpenAI JSON顶层不是对象")
+            completed_ok = True
             break
         except Exception as exc:
             errors.append(f"attempt={attempt}:{type(exc).__name__}:{exc}")
-            if attempt == 2:
-                raise RuntimeError("OpenAI连续两次未返回完整合法JSON；"+" | ".join(errors)) from exc
     usage = getattr(resp, "usage", None)
     input_tokens = getattr(usage, "input_tokens", None) if usage else None
     output_tokens = getattr(usage, "output_tokens", None) if usage else None
@@ -1047,8 +1064,11 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
     # 只保存调用凭证与用量，不保存提示词、第三方正文或密钥。
     audit_dir = Path("v5_data/openai_audit")
     audit_dir.mkdir(parents=True, exist_ok=True)
+    response_status = str(getattr(resp, "status", "") or "") if resp is not None else ""
+    incomplete_details = getattr(resp, "incomplete_details", None)
+    incomplete_reason = getattr(incomplete_details, "reason", None) if incomplete_details else None
     audit_record = {
-        "status": "succeeded",
+        "status": "succeeded" if completed_ok else ("incomplete" if response_status == "incomplete" else "failed"),
         "kind": kind,
         "requested_at_cn": requested_at,
         "completed_at_cn": now_cn().isoformat(),
@@ -1057,20 +1077,31 @@ def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "total_tokens": total_tokens,
+        "response_status": response_status,
+        "incomplete_reason": incomplete_reason,
+        "structured_output": bool(output_schema),
+        "max_output_tokens": request["max_output_tokens"],
         "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
-        "attempt_count": len(errors) + 1,
+        "attempt_count": attempts_used,
+        "errors": errors,
     }
     with (audit_dir / "calls.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(audit_record, ensure_ascii=False) + "\n")
     (audit_dir / "latest.json").write_text(
         json.dumps(audit_record, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    print(
-        "OPENAI_API_CALL_OK "
-        f"requested_at={requested_at} response_id={getattr(resp, 'id', None)} "
-        f"model={getattr(resp, 'model', model)} "
-        f"input_tokens={input_tokens} output_tokens={output_tokens} total_tokens={total_tokens}"
-    )
+    (audit_dir / "latest_output.txt").write_text(text, encoding="utf-8")
+    if completed_ok:
+        print(
+            "OPENAI_API_CALL_OK "
+            f"requested_at={requested_at} response_id={getattr(resp, 'id', None)} "
+            f"model={getattr(resp, 'model', model)} "
+            f"input_tokens={input_tokens} output_tokens={output_tokens} total_tokens={total_tokens}"
+        )
+    if not completed_ok:
+        raise RuntimeError(
+            "OpenAI连续两次未返回完整合法JSON；" + " | ".join(errors)
+        )
     return text
 
 

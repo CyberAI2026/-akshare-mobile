@@ -335,9 +335,10 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
             amplitude=str(r.get("AI振幅判断","未核验") or "未核验")
             turnover=str(r.get("AI换手判断","未核验") or "未核验")
             sector=str(r.get("AI板块共振","未核验") or "未核验")
+            confidence=str(r.get("AI证据置信度","未核验") or "未核验")
             lines.append(
                 f"{pri}. <b>{code} {name}</b><br>"
-                f"结构：{structure}<br>成交量：{volume}<br>振幅：{amplitude}<br>"
+                f"证据置信度：{confidence}<br>结构：{structure}<br>成交量：{volume}<br>振幅：{amplitude}<br>"
                 f"换手：{turnover}<br>板块：{sector}<br>综合证据：{ev}<br>风险：{risk}<br>"
             )
     else:
@@ -601,6 +602,73 @@ def _parse_json_object(text: str) -> dict:
     raise ValueError("OpenAI输出不是合法JSON对象")
 
 
+def _after_close_response_schema() -> dict:
+    """盘后研究的严格输出契约；所有逐股证据必须显式返回。"""
+    text_field = {"type": "string"}
+    return {
+        "type": "object",
+        "properties": {
+            "market_assessment": {
+                "type": "object",
+                "properties": {
+                    "risk_level": text_field,
+                    "summary": text_field,
+                    "next_day_aggressiveness": text_field,
+                },
+                "required": ["risk_level", "summary", "next_day_aggressiveness"],
+                "additionalProperties": False,
+            },
+            "sector_assessment": {
+                "type": "object",
+                "properties": {"status": text_field, "summary": text_field},
+                "required": ["status", "summary"],
+                "additionalProperties": False,
+            },
+            "opinion_assessment": {
+                "type": "object",
+                "properties": {"status": text_field, "summary": text_field},
+                "required": ["status", "summary"],
+                "additionalProperties": False,
+            },
+            "selected_codes": {"type": "array", "items": {"type": "string"}},
+            "decisions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "股票代码": text_field,
+                        "股票名称": text_field,
+                        "decision": {"type": "string", "enum": ["SELECT", "WAIT", "REJECT"]},
+                        "priority": {"type": "integer"},
+                        "confidence_level": {"type": "string", "enum": ["低", "中", "高"]},
+                        "evidence": text_field,
+                        "risk": text_field,
+                        "next_day_watch": text_field,
+                        "structure_assessment": text_field,
+                        "volume_assessment": text_field,
+                        "amplitude_assessment": text_field,
+                        "turnover_assessment": text_field,
+                        "sector_resonance": text_field,
+                    },
+                    "required": [
+                        "股票代码", "股票名称", "decision", "priority", "confidence_level",
+                        "evidence", "risk", "next_day_watch", "structure_assessment",
+                        "volume_assessment", "amplitude_assessment", "turnover_assessment",
+                        "sector_resonance",
+                    ],
+                    "additionalProperties": False,
+                },
+            },
+            "portfolio_note": text_field,
+        },
+        "required": [
+            "market_assessment", "sector_assessment", "opinion_assessment",
+            "selected_codes", "decisions", "portfolio_note",
+        ],
+        "additionalProperties": False,
+    }
+
+
 def next_trade_day(d):
     dates=[x for x in _trade_dates() if x>d]
     if dates:
@@ -787,6 +855,36 @@ def _stock_sector_attribution_payload(candidates: pd.DataFrame, concept_fact_day
         return {"status": "invalid", "error": f"{type(exc).__name__}: {exc}", "stocks": []}
 
 
+def _apply_sector_evidence_gate(
+    selected: list[str], decision_by_code: dict[str, dict], stock_sector_context: dict,
+) -> tuple[list[str], list[str], list[str]]:
+    """用客观同期板块状态校正AI输出，避免价格结构覆盖板块负反馈或缺失。"""
+    sector_by_code={str(item.get("股票代码","")).zfill(6):item
+                    for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
+    kept=list(selected)
+    retreat_downgraded=[]
+    unverified_downgraded=[]
+    for code in list(kept):
+        sector_state=str(sector_by_code.get(code,{}).get("板块共振状态","") or "板块未核验")
+        decision=decision_by_code[code]
+        if sector_state=="同期概念退潮":
+            kept.remove(code)
+            decision["decision"]="WAIT"
+            old_risk=str(decision.get("risk","") or "")
+            decision["risk"]=(old_risk+"；同期概念客观行情退潮，系统保守降为WAIT").strip("；")
+            retreat_downgraded.append(code)
+        elif "未核验" in sector_state:
+            kept.remove(code)
+            decision["decision"]="WAIT"
+            decision["confidence_level"]="低"
+            old_risk=str(decision.get("risk","") or "")
+            decision["risk"]=(old_risk+"；缺少同期板块客观行情，系统保守降为WAIT").strip("；")
+            unverified_downgraded.append(code)
+        elif sector_state=="同期概念分化" and decision.get("confidence_level")=="高":
+            decision["confidence_level"]="中"
+    return kept, retreat_downgraded, unverified_downgraded
+
+
 def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict, sector_tables: dict[str,pd.DataFrame] | None = None) -> tuple[pd.DataFrame, dict, dict]:
     """30 -> 0~10。严格验证代码集合、数量和日期，失败时绝不留下旧观察池冒充新结果。"""
     LATEST.mkdir(parents=True, exist_ok=True)
@@ -811,7 +909,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "selected_codes":["最多10个、必须来自输入30只的6位股票代码"],
         "decisions":[{
             "股票代码":"6位代码","股票名称":"输入名称","decision":"SELECT/WAIT/REJECT",
-            "priority":1,"evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么",
+            "priority":1,"confidence_level":"低/中/高","evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么",
             "structure_assessment":"前期强势、整理区间、短期下行是否停止、距稳健上沿",
             "volume_assessment":"成交量相对前10日是收敛/稳定/扩张/未核验",
             "amplitude_assessment":"近5日振幅及相对前10日是否收敛",
@@ -837,6 +935,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "hard_constraints":[
             "selected_codes只能来自candidates，最多10只，可以0只；实际持仓已经在进入模型前排除，严禁从输入外补入",
             "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
+            "逐股文字保持简洁，每个判断字段只写一项结论和对应数值/板块名，避免重复叙述导致输出截断",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
             "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当单项硬规则；但必须使用输入中的成交量收敛比、换手率收敛比、振幅收敛比和MA5/MA10短期斜率作综合证据",
@@ -851,7 +950,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         ],
         "required_output_schema":schema,
     }
-    raw=openai_analyze("盘后30→0~10次日观察池", payload)
+    raw=openai_analyze(
+        "盘后30→0~10次日观察池", payload,
+        output_schema=_after_close_response_schema(),
+        schema_name="after_close_observation_pool",
+        max_output_tokens=20000,
+    )
+    (base/"ai"/"openai_raw.txt").parent.mkdir(parents=True,exist_ok=True)
+    (base/"ai"/"openai_raw.txt").write_text(raw,encoding="utf-8")
     result=_parse_json_object(raw)
     selected=[str(x).zfill(6) for x in result.get("selected_codes",[]) if str(x).strip()]
     if len(selected)!=len(set(selected)):
@@ -872,7 +978,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
     missing=sorted(allowed-set(decision_by_code))
     if missing:
         raise ValueError(f"OpenAI decisions未覆盖全部30只，缺少{len(missing)}只: {missing[:8]}")
-    required_dimensions=["structure_assessment","volume_assessment","amplitude_assessment","turnover_assessment","sector_resonance"]
+    required_dimensions=["confidence_level","structure_assessment","volume_assessment","amplitude_assessment","turnover_assessment","sector_resonance"]
     for code in list(selected):
         decision=decision_by_code[code]
         if str(decision.get("decision","")).upper()!="SELECT":
@@ -880,19 +986,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         missing_dimensions=[field for field in required_dimensions if not str(decision.get(field,"")).strip()]
         if missing_dimensions:
             raise ValueError(f"OpenAI SELECT缺少二次启动解释维度: {code} {missing_dimensions}")
-    # 同期概念客观行情已经明确退潮时，保守降为WAIT；不让个股价格结构覆盖板块负反馈。
-    sector_by_code={str(item.get("股票代码","")).zfill(6):item
-                    for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
-    downgraded=[]
-    for code in list(selected):
-        if str(sector_by_code.get(code,{}).get("板块共振状态",""))=="同期概念退潮":
-            selected.remove(code)
-            decision_by_code[code]["decision"]="WAIT"
-            old_risk=str(decision_by_code[code].get("risk","") or "")
-            decision_by_code[code]["risk"]=(old_risk+"；同期概念客观行情退潮，系统保守降为WAIT").strip("；")
-            downgraded.append(code)
+    # 板块客观证据是观察池门禁：退潮或未核验均保守降为WAIT；
+    # 分化允许观察，但不得标成高置信度。
+    selected,downgraded,sector_unverified_downgraded=_apply_sector_evidence_gate(
+        selected,decision_by_code,stock_sector_context
+    )
     result["selected_codes"]=selected
     result["sector_retreat_downgraded_codes"]=downgraded
+    result["sector_unverified_downgraded_codes"]=sector_unverified_downgraded
     result["decisions"]=[decision_by_code.get(str(d.get("股票代码","")).zfill(6),d) if isinstance(d,dict) else d for d in decisions]
     # 观察池保留原始量化证据 + AI判断，便于次日尾盘继续分析。
     rows=[]
@@ -902,6 +1003,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         r.update({
             "AI优先级":d.get("priority"),"AI核心证据":d.get("evidence",""),"AI主要风险":d.get("risk",""),
             "次日尾盘观察重点":d.get("next_day_watch",""),
+            "AI证据置信度":d.get("confidence_level","未核验"),
             "AI结构判断":d.get("structure_assessment","未核验"),
             "AI成交量判断":d.get("volume_assessment","未核验"),
             "AI振幅判断":d.get("amplitude_assessment","未核验"),
@@ -910,7 +1012,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         })
         rows.append(r)
     obs=pd.DataFrame(rows) if rows else research_pack.head(0).copy()
-    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点","AI结构判断","AI成交量判断","AI振幅判断","AI换手判断","AI板块共振"]:
+    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点","AI证据置信度","AI结构判断","AI成交量判断","AI振幅判断","AI换手判断","AI板块共振"]:
         if c not in obs.columns: obs[c]=pd.Series(dtype="object")
     if not obs.empty and "AI优先级" in obs.columns:
         obs=obs.sort_values("AI优先级",na_position="last").reset_index(drop=True)
@@ -926,12 +1028,12 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "portfolio_note":result.get("portfolio_note",""),
         "second_start_evidence_version":"v0.6",
         "sector_retreat_downgraded_codes":result.get("sector_retreat_downgraded_codes",[]),
+        "sector_unverified_downgraded_codes":result.get("sector_unverified_downgraded_codes",[]),
         "rule":"仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单",
     }
     save_df(base/"ai"/"observation_pool.csv",obs)
     save_json(base/"ai"/"observation_pool_meta.json",meta)
     save_json(base/"ai"/"observation_pool_analysis.json",result)
-    (base/"ai"/"openai_raw.txt").write_text(raw,encoding="utf-8")
     save_df(LATEST/"observation_pool.csv",obs)
     save_json(LATEST/"observation_pool_meta.json",meta)
     save_json(LATEST/"observation_pool_analysis.json",result)
