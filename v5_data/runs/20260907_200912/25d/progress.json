@@ -1,0 +1,17 @@
+{
+  "done": 591,
+  "total": 591,
+  "code": "920895",
+  "updated_cn": "2026-09-07T20:29:34.974888+08:00",
+  "last": {
+    "股票代码": "920895",
+    "股票名称": "花溪科技",
+    "状态": "成功",
+    "交易日数": 25,
+    "前复权源": "eastmoney",
+    "未复权源": "",
+    "缓存模式": "deep-backfill",
+    "未复权匹配日": 0,
+    "错误": "eastmoney/raw/2:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | sina/raw/1:KeyError:'date' | sina/raw/2:KeyError:'date'"
+  }
+}
