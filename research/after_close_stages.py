@@ -14,6 +14,7 @@ from v5_core import (
     fetch_pool_history_incremental,
     expected_latest_trade_date,
     refresh_history_cache_from_bulk_spot,
+    history_cache_manifest,
     fetch_public_sector_flow,
     load_master_pool,
     maintain_master_pool,
@@ -88,7 +89,10 @@ def run_init(batch_path: str | None) -> None:
 
     cache_asof = expected_latest_trade_date(started)
     cache_refresh = refresh_history_cache_from_bulk_spot(active_input, cli.CACHE, cache_asof)
+    cache_manifest = history_cache_manifest(active_input, cli.CACHE, cache_asof)
     cli.save_json(base / "cache_refresh.json", cache_refresh)
+    cli.save_df(base / "history_cache_manifest.csv", cache_manifest)
+    cli.save_df(cli.LATEST / "history_cache_manifest.csv", cache_manifest)
 
     cli.save_df(base / "stages" / "registry_merged.csv", registry)
     cli.save_df(base / "stages" / "active_input.csv", active_input)
@@ -108,6 +112,9 @@ def run_init(batch_path: str | None) -> None:
         "cache_seed": seed_info,
         "cache_refresh": cache_refresh,
         "cache_asof_trade_date": str(cache_asof),
+        "cache_deep_ready_count": int(cache_manifest["统一深缓存就绪"].sum()) if not cache_manifest.empty else 0,
+        "cache_current_count": int(cache_manifest["日期已最新"].sum()) if not cache_manifest.empty else 0,
+        "cache_fallback_count": int(cache_manifest["需要异常补抓"].sum()) if not cache_manifest.empty else 0,
         "isolated_index_count": len(registry_indices),
     }
     _save_state(state)
