@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "screen120_sharding",
+  "stage": "screen120_complete",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2",
   "started_cn": "2026-09-07T18:06:54.919613+08:00",
@@ -28,5 +28,11 @@
     2,
     3
   ],
-  "shard_count_120d": 4
+  "shard_count_120d": 4,
+  "stage2_research_pool": 31,
+  "qa120": {
+    "命中或增量": 200,
+    "总数": 200,
+    "成功": 200
+  }
 }
