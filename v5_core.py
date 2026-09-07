@@ -1166,7 +1166,157 @@ def seed_global_cache_from_old_runs(root: str | Path, global_cache: str | Path) 
     return {"seeded": seeded, "scanned": scanned, "available": len(best)}
 
 
-def fetch_history_incremental(code: str, days: int, cache_file: str | Path, stale_days: int = 8):
+
+def expected_latest_trade_date(reference: datetime | date | None = None) -> date:
+    """Return the latest closed A-share trading day for cache freshness checks."""
+    if reference is None:
+        reference_dt = datetime.now()
+    elif isinstance(reference, datetime):
+        reference_dt = reference
+    else:
+        reference_dt = datetime.combine(reference, datetime.min.time()).replace(hour=23)
+    candidate = reference_dt.date()
+    if reference_dt.hour < 15:
+        candidate -= timedelta(days=1)
+    for _ in range(15):
+        if is_trade_day(candidate):
+            return candidate
+        candidate -= timedelta(days=1)
+    raise RuntimeError("无法确定最近已收盘交易日")
+
+
+def previous_trade_date(trade_date: date) -> date:
+    candidate = trade_date - timedelta(days=1)
+    for _ in range(15):
+        if is_trade_day(candidate):
+            return candidate
+        candidate -= timedelta(days=1)
+    raise RuntimeError(f"无法确定{trade_date}的上一交易日")
+
+
+def refresh_history_cache_from_bulk_spot(
+    pool: pd.DataFrame,
+    global_cache_dir: str | Path,
+    asof_trade_date: date,
+    spot: pd.DataFrame | None = None,
+) -> dict:
+    """Append one closed day to deep caches using one market-wide snapshot.
+
+    Only caches ending exactly on the previous trading day are eligible. A mismatch
+    between cached qfq close and the snapshot previous close is treated as a
+    possible corporate-action boundary and left for the per-stock history fallback.
+    """
+    cache_dir = Path(global_cache_dir)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    result = {
+        "asof_trade_date": str(asof_trade_date), "source": "", "pool_count": int(len(pool)),
+        "already_current": 0, "bulk_appended": 0, "needs_history_fallback": 0,
+        "missing_cache": 0, "corporate_action_guard": 0, "errors": [],
+    }
+    try:
+        previous = previous_trade_date(asof_trade_date)
+    except Exception as exc:
+        result["errors"].append(f"trade-calendar:{type(exc).__name__}:{exc}")
+        return result
+
+    if spot is None:
+        for source, fetcher in [
+            ("eastmoney-spot", lambda: ak.stock_zh_a_spot_em()),
+            ("sina-spot", lambda: ak.stock_zh_a_spot()),
+        ]:
+            try:
+                candidate = fetcher()
+                if candidate is None or candidate.empty:
+                    raise RuntimeError("空数据")
+                spot = candidate
+                result["source"] = source
+                break
+            except Exception as exc:
+                result["errors"].append(f"{source}:{type(exc).__name__}:{exc}")
+    else:
+        result["source"] = "provided-spot"
+    if spot is None or spot.empty:
+        return result
+
+    aliases = {
+        "code": ["代码", "股票代码", "symbol", "code"],
+        "close": ["最新价", "交易", "trade", "price", "收盘"],
+        "open": ["今开", "开盘", "open"],
+        "high": ["最高", "high"],
+        "low": ["最低", "low"],
+        "previous": ["昨收", "settlement", "preclose", "昨收价"],
+        "volume": ["成交量", "volume"],
+        "amount": ["成交额", "amount"],
+        "turnover": ["换手率", "turnoverratio", "turnover"],
+    }
+    cols = {key: _find_col(spot.columns, names) for key, names in aliases.items()}
+    required = ["code", "close", "open", "high", "low", "previous"]
+    if any(cols[key] is None for key in required):
+        result["errors"].append(f"spot-columns-missing:{[key for key in required if cols[key] is None]}")
+        return result
+
+    quotes = spot.copy()
+    quotes["_code"] = quotes[cols["code"]].map(_norm_code)
+    quotes = quotes[quotes["_code"].str.fullmatch(r"\d{6}", na=False)].drop_duplicates("_code", keep="last")
+    quotes = quotes.set_index("_code", drop=False)
+    for _, item in pool.reset_index(drop=True).iterrows():
+        code = _norm_code(item["股票代码"])
+        cached = _cache_read(cache_dir / f"{code}.csv")
+        if cached.empty or "日期" not in cached.columns or not cached["日期"].notna().any():
+            result["missing_cache"] += 1
+            result["needs_history_fallback"] += 1
+            continue
+        latest = cached["日期"].max().date()
+        if latest >= asof_trade_date:
+            result["already_current"] += 1
+            continue
+        if latest != previous or code not in quotes.index:
+            result["needs_history_fallback"] += 1
+            continue
+        quote = quotes.loc[code]
+        if isinstance(quote, pd.DataFrame):
+            quote = quote.iloc[-1]
+        numeric = {}
+        for key in ["close", "open", "high", "low", "previous", "volume", "amount", "turnover"]:
+            col = cols.get(key)
+            numeric[key] = pd.to_numeric(quote.get(col), errors="coerce") if col else np.nan
+        last_close = pd.to_numeric(cached.iloc[-1].get("收盘价"), errors="coerce")
+        previous_close = numeric["previous"]
+        if (
+            pd.isna(last_close) or pd.isna(previous_close) or previous_close <= 0
+            or abs(float(last_close) / float(previous_close) - 1) > 0.015
+        ):
+            result["corporate_action_guard"] += 1
+            result["needs_history_fallback"] += 1
+            continue
+        close = numeric["close"]
+        if pd.isna(close) or close <= 0:
+            result["needs_history_fallback"] += 1
+            continue
+        row = {
+            "日期": pd.Timestamp(asof_trade_date),
+            "开盘价": numeric["open"] if pd.notna(numeric["open"]) and numeric["open"] > 0 else close,
+            "最高价": numeric["high"] if pd.notna(numeric["high"]) and numeric["high"] > 0 else close,
+            "最低价": numeric["low"] if pd.notna(numeric["low"]) and numeric["low"] > 0 else close,
+            "收盘价": close,
+            "成交量": numeric["volume"],
+            "成交额": numeric["amount"],
+            "换手率": numeric["turnover"],
+            "未复权开盘价": numeric["open"] if pd.notna(numeric["open"]) and numeric["open"] > 0 else close,
+            "未复权最高价": numeric["high"] if pd.notna(numeric["high"]) and numeric["high"] > 0 else close,
+            "未复权最低价": numeric["low"] if pd.notna(numeric["low"]) and numeric["low"] > 0 else close,
+            "未复权收盘价": close,
+            "前复权比例系数": 1.0,
+        }
+        updated = pd.concat([cached, pd.DataFrame([row])], ignore_index=True, sort=False)
+        updated["日期"] = pd.to_datetime(updated["日期"], errors="coerce")
+        updated = updated.sort_values("日期").drop_duplicates("日期", keep="last").tail(280).reset_index(drop=True)
+        updated.to_csv(cache_dir / f"{code}.csv", index=False, encoding="utf-8-sig")
+        result["bulk_appended"] += 1
+    return result
+
+
+def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof_trade_date: date | None = None):
     """全局缓存优先。缓存长度足够时只补最近一小段，不再每日重抓120/250日。
 
     如果缓存长度不足，仍调用原有fetch_history获取完整所需长度；这样新股/首次晋级股票可自动补齐。
@@ -1180,8 +1330,8 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, stal
 
     enough = len(cached) >= need
     latest = cached["日期"].max().date() if (not cached.empty and "日期" in cached and cached["日期"].notna().any()) else None
-    today = datetime.now().date()
-    fresh = bool(latest and (today - latest).days <= stale_days)
+    expected = asof_trade_date or expected_latest_trade_date()
+    fresh = bool(latest and latest >= expected)
 
     if enough and fresh:
         out = cached.copy()
@@ -1209,7 +1359,9 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, stal
             out = cached.copy()
             source = "global-cache(stale-fetch-failed)"
     else:
-        full, meta = fetch_history(code, max(days, 250 if days >= 250 else days))
+        # A remote backfill is expensive; fetch one reusable deep history so the
+        # later 25/120/250-day stages only slice the same cache.
+        full, meta = fetch_history(code, 280)
         if full is None or full.empty:
             return pd.DataFrame(), {"source": meta.get("source", ""), "raw_source": meta.get("raw_source", ""), "errors": meta.get("errors", []), "raw_matched": meta.get("raw_matched", 0), "cache_mode": "full-fetch-failed"}
         out = full.copy(); source = meta.get("source", ""); raw_source = meta.get("raw_source", ""); errors.extend(meta.get("errors", []))
@@ -1231,13 +1383,14 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, stal
     return view, {"source": source, "raw_source": raw_source, "errors": errors, "raw_matched": raw_matched, "cache_mode": "incremental" if "+" in source else "cache/full"}
 
 
-def fetch_pool_history_incremental(pool: pd.DataFrame, days: int, global_cache_dir: str | Path, checkpoint=None) -> tuple[pd.DataFrame, pd.DataFrame]:
+def fetch_pool_history_incremental(pool: pd.DataFrame, days: int, global_cache_dir: str | Path, checkpoint=None, asof_trade_date: date | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
     all_rows, qa = [], []
+    expected = asof_trade_date or expected_latest_trade_date()
     cache_dir = Path(global_cache_dir); cache_dir.mkdir(parents=True, exist_ok=True)
     total = len(pool)
     for i, row in pool.reset_index(drop=True).iterrows():
         code = _norm_code(row["股票代码"]); name = str(row.get("股票名称", "") or "")
-        df, meta = fetch_history_incremental(code, days, cache_dir / f"{code}.csv")
+        df, meta = fetch_history_incremental(code, days, cache_dir / f"{code}.csv", expected)
         if df.empty:
             q = {"股票代码": code, "股票名称": name, "状态": "失败", "交易日数": 0, "前复权源": meta.get("source", ""), "未复权源": meta.get("raw_source", ""), "缓存模式": meta.get("cache_mode", ""), "错误": " | ".join(meta.get("errors", [])[-5:])}
         else:
