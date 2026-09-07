@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 
 sys.modules.setdefault("akshare", MagicMock())
 sys.modules.setdefault("requests", MagicMock())
-from v5_core import build_metrics, stage2_rank
+from v5_core import build_metrics, fetch_pool_history_incremental, stage2_rank
 
 
 def sample_history(contracting: bool = True, with_turnover: bool = True) -> pd.DataFrame:
@@ -69,6 +72,23 @@ class SecondStartEvidenceTests(unittest.TestCase):
         # 振幅、流动性、短期止跌最多是三类独立证据；成交量和换手率不是两票。
         self.assertEqual(metrics["整理证据可用项"], 3)
         self.assertLessEqual(metrics["整理收敛支持项"], 3)
+
+    def test_large_exception_backfill_uses_bounded_parallelism(self):
+        pool = pd.DataFrame({
+            "股票代码": [str(i).zfill(6) for i in range(30)],
+            "股票名称": [f"测试{i}" for i in range(30)],
+        })
+        history = sample_history().drop(columns=["股票代码", "股票名称"])
+        meta = {"source": "test", "raw_source": "test", "errors": [], "raw_matched": len(history), "cache_mode": "deep-backfill"}
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch("v5_core.fetch_history_incremental", return_value=(history, meta)), \
+             patch("v5_core.ThreadPoolExecutor") as executor_cls:
+            executor_cls.return_value.__enter__.return_value.map.side_effect = lambda func, rows: list(map(func, rows))
+            data, qa = fetch_pool_history_incremental(pool, 25, Path(tmp))
+        executor_cls.assert_called_once_with(max_workers=4)
+        self.assertEqual(len(qa), 30)
+        self.assertEqual(qa["状态"].eq("成功").sum(), 30)
+        self.assertEqual(data["股票代码"].nunique(), 30)
 
 
 if __name__ == "__main__":
