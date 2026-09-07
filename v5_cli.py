@@ -330,7 +330,16 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
             pri=r.get("AI优先级","")
             ev=str(r.get("AI核心证据","") or "")
             risk=str(r.get("AI主要风险","") or "")
-            lines.append(f"{pri}. <b>{code} {name}</b><br>证据：{ev}<br>风险：{risk}<br>")
+            structure=str(r.get("AI结构判断","未核验") or "未核验")
+            volume=str(r.get("AI成交量判断","未核验") or "未核验")
+            amplitude=str(r.get("AI振幅判断","未核验") or "未核验")
+            turnover=str(r.get("AI换手判断","未核验") or "未核验")
+            sector=str(r.get("AI板块共振","未核验") or "未核验")
+            lines.append(
+                f"{pri}. <b>{code} {name}</b><br>"
+                f"结构：{structure}<br>成交量：{volume}<br>振幅：{amplitude}<br>"
+                f"换手：{turnover}<br>板块：{sector}<br>综合证据：{ev}<br>风险：{risk}<br>"
+            )
     else:
         lines.append("<br><b>结论：</b>今日OpenAI未选出次日观察标的（0只）。")
     lines.append("<br><small>盘后观察池不是买入名单，需次日14:40–14:45再次确认。</small>")
@@ -746,6 +755,21 @@ def _stock_sector_attribution_payload(candidates: pd.DataFrame, concept_fact_day
                     facts=[fact_map[normalize_concept_name(name)] for name in row["全部概念"]
                            if normalize_concept_name(name) in fact_map]
                     row["同花顺概念指数客观行情"]=facts
+                    current_facts=[fact for fact in facts if str(fact.get("asof_date","")) == str(concept_fact_day)]
+                    states=[str(fact.get("state","")) for fact in current_facts]
+                    if any(("上涨加强" in state or "趋势偏强" in state) for state in states):
+                        resonance="同期概念共振"
+                    elif current_facts and any("退潮" in state for state in states):
+                        resonance="同期概念退潮"
+                    elif current_facts:
+                        resonance="同期概念分化"
+                    elif row["全部概念"]:
+                        resonance="概念已映射但同期行情未核验"
+                    else:
+                        resonance="仅行业映射/概念未核验"
+                    row["板块共振状态"]=resonance
+                    row["同期概念行情数"]=len(current_facts)
+                    row["板块证据说明"]="板块行情只作交叉验证；无同期客观行情时不得写成板块共振"
                     if facts:
                         covered+=1
                 concept_result["candidate_stock_count"]=len(rows)
@@ -787,7 +811,12 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "selected_codes":["最多10个、必须来自输入30只的6位股票代码"],
         "decisions":[{
             "股票代码":"6位代码","股票名称":"输入名称","decision":"SELECT/WAIT/REJECT",
-            "priority":1,"evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么"
+            "priority":1,"evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么",
+            "structure_assessment":"前期强势、整理区间、短期下行是否停止、距稳健上沿",
+            "volume_assessment":"成交量相对前10日是收敛/稳定/扩张/未核验",
+            "amplitude_assessment":"近5日振幅及相对前10日是否收敛",
+            "turnover_assessment":"近5日换手及相对前10日是收敛/稳定/扩张/未核验",
+            "sector_resonance":"同期共振/分化/退潮/独立个股/未核验，并列明行业或概念"
         }],
         "portfolio_note":"只描述观察池层面的风险偏好，不给最终买入仓位"
     }
@@ -810,8 +839,11 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
-            "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当硬规则",
+            "不要把固定MA距离、固定量缩、固定距20日高点、累计涨幅直接当单项硬规则；但必须使用输入中的成交量收敛比、换手率收敛比、振幅收敛比和MA5/MA10短期斜率作综合证据",
+            "每只decision必须分别填写structure_assessment、volume_assessment、amplitude_assessment、turnover_assessment、sector_resonance；缺失字段写未核验，禁止用价格上涨代替量价、换手或板块证据",
+            "整理证据可用项少于2、整理收敛支持项少于2或阶段2通过为false时不得SELECT",
             "按大盘—行业/概念—个股三层研判；同花顺概念指数是客观行情增强证据，不能替代个股结构，也不能单独生成候选",
+            "板块共振状态为同期概念退潮时原则上WAIT/REJECT；若仍SELECT必须给出同期行业共振的客观输入证据。板块未核验或仅行业映射时不得表述为板块共振",
             "同花顺概念指数只能使用其asof_date及以前数据；未匹配或抓取失败必须写未核验，不得猜测",
             "sector_data_status为实验性未启用时，不得臆测板块结论，sector_assessment必须明确数据未启用",
             "market_opinion_text_mining只是公开复盘正文的聚合观点，不是行情事实；可作风险提醒和共识/分歧证据，不得单独生成候选",
@@ -851,10 +883,15 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         r.update({
             "AI优先级":d.get("priority"),"AI核心证据":d.get("evidence",""),"AI主要风险":d.get("risk",""),
             "次日尾盘观察重点":d.get("next_day_watch",""),
+            "AI结构判断":d.get("structure_assessment","未核验"),
+            "AI成交量判断":d.get("volume_assessment","未核验"),
+            "AI振幅判断":d.get("amplitude_assessment","未核验"),
+            "AI换手判断":d.get("turnover_assessment","未核验"),
+            "AI板块共振":d.get("sector_resonance","未核验"),
         })
         rows.append(r)
     obs=pd.DataFrame(rows) if rows else research_pack.head(0).copy()
-    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点"]:
+    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点","AI结构判断","AI成交量判断","AI振幅判断","AI换手判断","AI板块共振"]:
         if c not in obs.columns: obs[c]=pd.Series(dtype="object")
     if not obs.empty and "AI优先级" in obs.columns:
         obs=obs.sort_values("AI优先级",na_position="last").reset_index(drop=True)
