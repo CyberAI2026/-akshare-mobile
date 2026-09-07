@@ -31,7 +31,7 @@ jobs:
           from pathlib import Path
           import pandas as pd
           import v5_cli as cli
-          from research.private_trade_ledger import active_position_codes, decrypt_transactions
+          from research.private_trade_ledger import active_position_codes, build_positions, decrypt_transactions
 
           key=(os.getenv("TRADING_DATA_KEY") or "").strip()
           if not key:
@@ -44,9 +44,26 @@ jobs:
           expected="600801"
           if expected not in active:
               raise SystemExit("FAIL: expected active position is absent after decryption")
+          positions=build_positions(transactions)
+          target_positions=positions[(positions["股票代码"]==expected) & (positions["持仓数量"]>0)]
+          target_trades=transactions[(transactions["股票代码"]==expected) & (transactions["操作"]=="买入")]
+          detail_ok=(
+              len(target_positions)==1
+              and int(target_positions.iloc[0]["持仓数量"])==2100
+              and str(target_positions.iloc[0]["股票名称"])=="华新建材"
+              and any(
+                  str(row["交易日期"])=="2026-09-03"
+                  and abs(float(row["成交价格"])-24.80)<0.001
+                  and int(row["成交数量"])==2100
+                  and abs(float(row["成交金额"])-52080.0)<0.01
+                  for _,row in target_trades.iterrows()
+              )
+          )
+          if not detail_ok:
+              raise SystemExit("FAIL: encrypted ledger details do not match the expected backfill")
           probe=pd.DataFrame({"股票代码":[expected,"000001"],"股票名称":["",""]})
           remaining,excluded=cli.exclude_active_trades(probe)
           if expected not in excluded or expected in set(remaining["股票代码"].astype(str)):
               raise SystemExit("FAIL: active holding was not excluded from recommendation candidates")
-          print(f"PRIVATE_LEDGER_TEST_OK active_position_count={len(active)} expected_code_present=true exclusion_ok=true")
+          print(f"PRIVATE_LEDGER_TEST_OK active_position_count={len(active)} expected_code_present=true details_ok=true exclusion_ok=true")
           PY
