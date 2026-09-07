@@ -65,6 +65,46 @@ def _qa_cache_summary(qa: pd.DataFrame) -> dict:
     }
 
 
+def _plan_25d_cache_refresh(
+    active_input: pd.DataFrame,
+    daily_changes: pd.DataFrame,
+    manifest: pd.DataFrame,
+    minimum_ready: int = 150,
+) -> pd.DataFrame:
+    """Choose a bounded set of stale caches to refresh before the broad screen.
+
+    Today's submitted names always have priority. Older master-pool names are
+    refreshed only when the already-current universe would otherwise be too
+    small for the 150-200 stock first stage. This keeps the stage bounded while
+    ensuring stale rows never compete with current rows in the ranking.
+    """
+    if active_input.empty:
+        return active_input.copy()
+    info = manifest.copy()
+    if info.empty:
+        return active_input.copy()
+    info["股票代码"] = info["股票代码"].astype(str).str.zfill(6)
+    info["缓存行数"] = pd.to_numeric(info.get("缓存行数"), errors="coerce").fillna(0)
+    info["日期已最新"] = info.get("日期已最新", False).fillna(False).astype(bool)
+    ready = info["日期已最新"] & (info["缓存行数"] >= 25)
+    daily_codes = set(
+        daily_changes.get("股票代码", pd.Series(dtype=str)).astype(str).str.zfill(6)
+    )
+    refresh_codes = set(info.loc[~ready & info["股票代码"].isin(daily_codes), "股票代码"])
+
+    projected_ready = int(ready.sum()) + len(refresh_codes)
+    target_ready = min(int(minimum_ready), len(active_input))
+    if projected_ready < target_ready:
+        extra_needed = target_ready - projected_ready
+        old_stale = info.loc[~ready & ~info["股票代码"].isin(refresh_codes)].copy()
+        old_stale["_latest"] = pd.to_datetime(old_stale.get("最后交易日"), errors="coerce")
+        old_stale = old_stale.sort_values(["_latest", "缓存行数"], ascending=[False, False])
+        refresh_codes.update(old_stale.head(extra_needed)["股票代码"].astype(str))
+
+    codes = active_input["股票代码"].astype(str).str.zfill(6)
+    return active_input.loc[codes.isin(refresh_codes)].reset_index(drop=True)
+
+
 def run_init(batch_path: str | None) -> None:
     started = cli.now_cn()
     stamp = started.strftime("%Y%m%d_%H%M%S")
@@ -126,7 +166,50 @@ def run_init(batch_path: str | None) -> None:
 def run_25d() -> None:
     state, base = _load_state("initialized")
     active_input = _read_csv(base / "stages" / "active_input.csv")
-    d25, q25 = fetch_pool_history_incremental(active_input, 25, cli.CACHE, cli.checkpoint_factory(base / "25d"))
+    initial_manifest = _read_csv(base / "history_cache_manifest.csv")
+    daily_changes = _read_csv(base / "每日提交变动.csv")
+    refresh_pool = _plan_25d_cache_refresh(active_input, daily_changes, initial_manifest)
+    if not refresh_pool.empty:
+        _, refresh_qa = fetch_pool_history_incremental(
+            refresh_pool, 25, cli.CACHE, cli.checkpoint_factory(base / "25d" / "refresh")
+        )
+    else:
+        refresh_qa = pd.DataFrame()
+    cli.save_df(base / "25d" / "refresh_qa.csv", refresh_qa)
+
+    expected = expected_latest_trade_date(pd.Timestamp(state["started_cn"]).to_pydatetime())
+    final_manifest = history_cache_manifest(active_input, cli.CACHE, expected)
+    cli.save_df(base / "history_cache_manifest_after_25d_refresh.csv", final_manifest)
+    cli.save_df(cli.LATEST / "history_cache_manifest.csv", final_manifest)
+    current_mask = (
+        final_manifest["日期已最新"].fillna(False).astype(bool)
+        & (pd.to_numeric(final_manifest["缓存行数"], errors="coerce").fillna(0) >= 25)
+    )
+    ready_codes = set(final_manifest.loc[current_mask, "股票代码"].astype(str).str.zfill(6))
+    code_series = active_input["股票代码"].astype(str).str.zfill(6)
+    ready_pool = active_input.loc[code_series.isin(ready_codes)].reset_index(drop=True)
+    minimum_ready = min(150, len(active_input))
+    if len(ready_pool) < minimum_ready:
+        raise RuntimeError(
+            f"25日当日有效缓存仅{len(ready_pool)}只，低于最低研究容量{minimum_ready}只；"
+            "已禁止用过期行情补足排名"
+        )
+
+    d25, ready_qa = fetch_pool_history_incremental(
+        ready_pool, 25, cli.CACHE, cli.checkpoint_factory(base / "25d" / "screen")
+    )
+    deferred = final_manifest.loc[~current_mask].copy()
+    deferred_qa = pd.DataFrame({
+        "股票代码": deferred.get("股票代码", pd.Series(dtype=str)),
+        "股票名称": deferred.get("股票名称", pd.Series(dtype=str)),
+        "状态": "延期（缓存非当日）",
+        "交易日数": pd.to_numeric(deferred.get("缓存行数"), errors="coerce").fillna(0).astype(int),
+        "前复权源": "global-cache",
+        "未复权源": "global-cache",
+        "缓存模式": "deferred-stale-not-ranked",
+        "错误": "当日行情未通过新鲜度校验，本轮不参与排名",
+    })
+    q25 = pd.concat([ready_qa, deferred_qa], ignore_index=True, sort=False)
     m25 = build_metrics(d25)
     s1, a1 = stage1_rank(m25, 150, 200, return_audit=True)
     p1 = s1[["股票代码", "股票名称"]].copy()
@@ -135,7 +218,12 @@ def run_25d() -> None:
     cli.save_df(base / "25d" / "stage_audit.csv", a1)
     cli.save_df(base / "stages" / "q25.csv", q25)
     cli.save_bytes(base / "25d" / "result.xlsx", to_excel_bytes({"25日日线": d25, "质量校验": q25, "粗筛指标": m25, "筛选审计": a1, "一级结果": s1}))
-    state.update({"stage": "screen25_complete", "stage1": len(p1), "qa25": _qa_cache_summary(q25)})
+    state.update({
+        "stage": "screen25_complete", "stage1": len(p1), "qa25": _qa_cache_summary(q25),
+        "cache25_refresh_requested": len(refresh_pool),
+        "cache25_current_ranked": len(ready_pool),
+        "cache25_stale_deferred": len(deferred),
+    })
     _save_state(state)
     cli.git_commit(f"V5 after-close 25d {state['stamp']}")
     print(f"AFTER_CLOSE_STAGE_OK stage=25d selected={len(p1)}")

@@ -1397,6 +1397,7 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
     source = "global-cache"
     raw_source = "global-cache"
     cache_mode = "local-cache"
+    cache_changed = False
 
     enough = len(cached) >= need
     latest = cached["日期"].max().date() if (not cached.empty and "日期" in cached and cached["日期"].notna().any()) else None
@@ -1426,6 +1427,7 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
             source = f"global-cache+{used}"
             raw_source = "global-cache"
             cache_mode = "per-stock-incremental"
+            cache_changed = True
         else:
             out = cached.copy()
             source = "global-cache(stale-fetch-failed)"
@@ -1438,12 +1440,17 @@ def fetch_history_incremental(code: str, days: int, cache_file: str | Path, asof
             return pd.DataFrame(), {"source": meta.get("source", ""), "raw_source": meta.get("raw_source", ""), "errors": meta.get("errors", []), "raw_matched": meta.get("raw_matched", 0), "cache_mode": "full-fetch-failed"}
         out = full.copy(); source = meta.get("source", ""); raw_source = meta.get("raw_source", ""); errors.extend(meta.get("errors", []))
         cache_mode = "deep-backfill"
+        cache_changed = True
 
     if out is None or out.empty:
         return pd.DataFrame(), {"source": source, "raw_source": raw_source, "errors": errors, "raw_matched": 0, "cache_mode": "empty"}
     out["日期"] = pd.to_datetime(out["日期"], errors="coerce")
     out = out.sort_values("日期").drop_duplicates("日期", keep="last").tail(max(280, need + 20)).reset_index(drop=True)
-    out.to_csv(cache_file, index=False, encoding="utf-8-sig")
+    # A fresh cache is immutable input for this stage. Rewriting hundreds of
+    # unchanged files made the 25-day screening job spend most of its bounded
+    # runtime on disk I/O and produced noisy commits. Only persist real updates.
+    if cache_changed:
+        out.to_csv(cache_file, index=False, encoding="utf-8-sig")
 
     view = out.tail(need).copy()
     if days == 120 and "成交量" in view.columns:

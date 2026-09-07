@@ -52,6 +52,37 @@ class AfterCloseStageTests(unittest.TestCase):
         self.assertEqual(sum(len(part) for part in parts), len(frame))
         self.assertLessEqual(max(len(part) for part in parts), 51)
 
+    def test_25d_refresh_prioritizes_today_and_avoids_refreshing_entire_master(self):
+        active = pd.DataFrame({
+            "股票代码": ["000001", "000002", "000003", "000004", "000005"],
+            "股票名称": ["A", "B", "C", "D", "E"],
+        })
+        daily = pd.DataFrame({"股票代码": ["000002", "000003"]})
+        manifest = pd.DataFrame([
+            {"股票代码": "000001", "缓存行数": 25, "日期已最新": True, "最后交易日": "2026-09-07"},
+            {"股票代码": "000002", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-04"},
+            {"股票代码": "000003", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-03"},
+            {"股票代码": "000004", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-02"},
+            {"股票代码": "000005", "缓存行数": 25, "日期已最新": True, "最后交易日": "2026-09-07"},
+        ])
+        planned = stages._plan_25d_cache_refresh(active, daily, manifest, minimum_ready=3)
+        self.assertEqual(set(planned["股票代码"]), {"000002", "000003"})
+
+    def test_25d_refresh_adds_recent_old_names_only_when_capacity_needs_them(self):
+        active = pd.DataFrame({
+            "股票代码": ["000001", "000002", "000003", "000004"],
+            "股票名称": ["A", "B", "C", "D"],
+        })
+        daily = pd.DataFrame({"股票代码": ["000002"]})
+        manifest = pd.DataFrame([
+            {"股票代码": "000001", "缓存行数": 25, "日期已最新": True, "最后交易日": "2026-09-07"},
+            {"股票代码": "000002", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-01"},
+            {"股票代码": "000003", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-04"},
+            {"股票代码": "000004", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-02"},
+        ])
+        planned = stages._plan_25d_cache_refresh(active, daily, manifest, minimum_ready=3)
+        self.assertEqual(set(planned["股票代码"]), {"000002", "000003"})
+
     def test_after_close_notifier_returns_delivery_receipt(self):
         summary = {"target_trade_date": "2026-09-07"}
         meta = {"market_assessment": {}}
