@@ -35,7 +35,23 @@ jobs:
           cache: 'pip'
       - run: pip install -r requirements.txt
       - name: Resume only the failed OpenAI stage
-        run: python -m research.after_close_stages ai
+        shell: bash
+        run: |
+          RECOVERY_STATE=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          state = json.loads(Path('v5_data/staging/after_close_current.json').read_text(encoding='utf-8'))
+          print(f"{state.get('stage')}:{state.get('status')}")
+          PY
+          )
+          if [ "$RECOVERY_STATE" = "ai_failed:completed_ai_failed" ] || [ "$RECOVERY_STATE" = "completed:completed_push_failed" ]; then
+            python -m research.after_close_stages ai
+          elif [ "$RECOVERY_STATE" = "completed:completed" ]; then
+            echo "AI recovery already completed; skip idempotently."
+          else
+            echo "Unexpected recovery state: $RECOVERY_STATE"
+            exit 1
+          fi
       - name: Upload recovery artifact
         if: always()
         uses: actions/upload-artifact@v4
