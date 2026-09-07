@@ -40,7 +40,9 @@ class SecondStartEvidenceTests(unittest.TestCase):
         metrics = build_metrics(sample_history()).iloc[0]
         self.assertLess(metrics["成交量收敛比"], 1.0)
         self.assertLess(metrics["换手率收敛比"], 1.0)
+        self.assertTrue(bool(metrics["流动性收敛证据"]))
         self.assertGreaterEqual(metrics["整理证据可用项"], 3)
+        self.assertEqual(metrics["整理证据可用项"], 3)
         self.assertGreaterEqual(metrics["整理收敛支持项"], 2)
         self.assertIn(metrics["整理成熟度状态"], {"收敛较充分", "部分收敛/待确认"})
 
@@ -61,6 +63,12 @@ class SecondStartEvidenceTests(unittest.TestCase):
         row = metrics.iloc[0]
         self.assertTrue(pd.isna(row["换手率收敛比"]))
         self.assertGreaterEqual(row["整理证据可用项"], 2)
+
+    def test_volume_and_turnover_are_not_double_counted(self):
+        metrics = build_metrics(sample_history()).iloc[0]
+        # 振幅、流动性、短期止跌最多是三类独立证据；成交量和换手率不是两票。
+        self.assertEqual(metrics["整理证据可用项"], 3)
+        self.assertLessEqual(metrics["整理收敛支持项"], 3)
 
 
 if __name__ == "__main__":
