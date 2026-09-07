@@ -82,9 +82,9 @@ jobs:
             BATCH='${{ inputs.batch_path }}'
           fi
           if [ -n "$BATCH" ]; then
-            python research/after_close_stages.py init --batch "$BATCH"
+            python -m research.after_close_stages init --batch "$BATCH"
           else
-            python research/after_close_stages.py init
+            python -m research.after_close_stages init
           fi
 
   screen-25d:
@@ -131,7 +131,7 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
       - run: pip install -r requirements.txt
-      - run: python research/after_close_stages.py ai
+      - run: python -m research.after_close_stages ai
       - name: Upload V5 result artifact
         if: always()
         uses: actions/upload-artifact@v4
