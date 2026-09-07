@@ -49,7 +49,7 @@ jobs:
           target_trades=transactions[(transactions["股票代码"]==expected) & (transactions["操作"]=="买入")]
           position_qty_ok=len(target_positions)==1 and int(target_positions.iloc[0]["持仓数量"])==2100
           name_ok=len(target_positions)==1 and str(target_positions.iloc[0]["股票名称"])=="华新建材"
-          date_ok=any(str(row["交易日期"])=="2026-09-03" for _,row in target_trades.iterrows())
+          date_ok=any(str(row["交易日期"])=="2026-09-04" for _,row in target_trades.iterrows())
           price_ok=any(abs(float(row["成交价格"])-24.80)<0.001 for _,row in target_trades.iterrows())
           trade_qty_ok=any(int(row["成交数量"])==2100 for _,row in target_trades.iterrows())
           amount_ok=any(abs(float(row["成交金额"])-52080.0)<0.01 for _,row in target_trades.iterrows())
