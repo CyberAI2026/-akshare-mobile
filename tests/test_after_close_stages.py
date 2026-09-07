@@ -43,6 +43,15 @@ class AfterCloseStageTests(unittest.TestCase):
         self.assertEqual(out["成功"], 2)
         self.assertEqual(out["命中或增量"], 2)
 
+    def test_120d_shards_are_disjoint_and_complete(self):
+        frame = pd.DataFrame({"股票代码": [f"{i:06d}" for i in range(203)]})
+        parts = [stages._shard_frame(frame, i, 4) for i in range(4)]
+        combined = pd.concat(parts, ignore_index=True)
+        self.assertEqual(len(combined), len(frame))
+        self.assertEqual(set(combined["股票代码"]), set(frame["股票代码"]))
+        self.assertEqual(sum(len(part) for part in parts), len(frame))
+        self.assertLessEqual(max(len(part) for part in parts), 51)
+
     def test_after_close_notifier_returns_delivery_receipt(self):
         summary = {"target_trade_date": "2026-09-07"}
         meta = {"market_assessment": {}}
