@@ -12,6 +12,8 @@ from v5_core import (
     build_metrics,
     fetch_market_review,
     fetch_pool_history_incremental,
+    expected_latest_trade_date,
+    refresh_history_cache_from_bulk_spot,
     fetch_public_sector_flow,
     load_master_pool,
     maintain_master_pool,
@@ -84,6 +86,10 @@ def run_init(batch_path: str | None) -> None:
         registry = registry[~registry["股票代码"].astype(str).isin(bad_codes)].reset_index(drop=True)
         cli.save_df(base / "隔离指数.csv", registry_indices)
 
+    cache_asof = expected_latest_trade_date(started)
+    cache_refresh = refresh_history_cache_from_bulk_spot(active_input, cli.CACHE, cache_asof)
+    cli.save_json(base / "cache_refresh.json", cache_refresh)
+
     cli.save_df(base / "stages" / "registry_merged.csv", registry)
     cli.save_df(base / "stages" / "active_input.csv", active_input)
     cli.save_df(base / "每日提交变动.csv", changes)
@@ -100,6 +106,8 @@ def run_init(batch_path: str | None) -> None:
         "master_before_screen": len(active_input),
         "bootstrapped_from_v4": bootstrapped,
         "cache_seed": seed_info,
+        "cache_refresh": cache_refresh,
+        "cache_asof_trade_date": str(cache_asof),
         "isolated_index_count": len(registry_indices),
     }
     _save_state(state)
