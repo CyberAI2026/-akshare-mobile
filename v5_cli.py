@@ -924,6 +924,8 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market_assessment":result.get("market_assessment",{}),"sector_assessment":result.get("sector_assessment",{}),
         "opinion_assessment":result.get("opinion_assessment",{}),"opinion_context":opinion_context,
         "portfolio_note":result.get("portfolio_note",""),
+        "second_start_evidence_version":"v0.6",
+        "sector_retreat_downgraded_codes":result.get("sector_retreat_downgraded_codes",[]),
         "rule":"仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单",
     }
     save_df(base/"ai"/"observation_pool.csv",obs)
