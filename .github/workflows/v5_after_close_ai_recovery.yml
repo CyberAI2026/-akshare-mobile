@@ -1,5 +1,7 @@
 name: V5 After-Close AI Recovery
 
+# V5.6 replay validates structured output and the programmatic sector-evidence gate.
+
 on:
   workflow_dispatch:
   push:

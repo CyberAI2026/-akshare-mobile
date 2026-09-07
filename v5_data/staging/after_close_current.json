@@ -1,6 +1,6 @@
 {
-  "status": "completed",
-  "stage": "completed",
+  "status": "completed_ai_failed",
+  "stage": "ai_failed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-07T20:09:12.538190+08:00",
