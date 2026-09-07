@@ -32,6 +32,8 @@ jobs:
       run_pipeline: ${{ steps.scope.outputs.run_pipeline }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
