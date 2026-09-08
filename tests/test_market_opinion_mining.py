@@ -67,6 +67,21 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertEqual(saved["discovered"],discovered)
         discover.assert_called_once()
 
+    def test_quality_pool_accumulates_and_deduplicates_between_runs(self):
+        with tempfile.TemporaryDirectory() as td, patch.object(opinion,"ROOT",Path(td)), \
+             patch.object(opinion,"now_cn",return_value=datetime(2026,9,8,21,10,tzinfo=ZoneInfo("Asia/Shanghai"))):
+            first_sources=[{"article_id":"a","title":"A","url":"https://www.tgb.cn/a/1"}]
+            first_mined=[{"article_id":"a","quality_flags":[]}]
+            sources,mined=opinion.merge_staged_quality_pool("2026-09-08","2026-09-09",first_sources,first_mined)
+            self.assertEqual([x["article_id"] for x in sources],["a"])
+            second_sources=[first_sources[0],{"article_id":"b","title":"B","url":"https://www.tgb.cn/a/2"}]
+            second_mined=[first_mined[0],{"article_id":"b","quality_flags":[]}]
+            sources,mined=opinion.merge_staged_quality_pool("2026-09-08","2026-09-09",second_sources,second_mined)
+            self.assertEqual([x["article_id"] for x in sources],["a","b"])
+            saved=opinion.json.loads((Path(td)/"staging"/"2026-09-08.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(saved["sources"]),2)
+            self.assertNotIn("body",saved)
+
     def test_pushplus_acceptance_keeps_shortcode_without_claiming_delivery(self):
         response=MagicMock(status_code=200,text='{"code":200}')
         response.json.return_value={"code":200,"msg":"执行成功","data":"short-code-1"}
