@@ -43,7 +43,8 @@
   "cache25_current_ranked": 588,
   "cache25_stale_deferred": 15,
   "completed_120d_shards": [
-    0
+    0,
+    1
   ],
   "shard_count_120d": 4
 }
