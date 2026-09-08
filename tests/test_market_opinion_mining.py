@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 from research.market_opinion_mining import (
     apply_sample_status,
     compute_concept_index_metrics,
+    current_summary_source_urls,
     group_attention_sectors,
     parse_published_at,
     render_source_links,
@@ -184,6 +185,20 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         rows=topic_api_candidates_from_payload(payload,1,date(2026,9,8))
         self.assertEqual([x["url"] for x in rows],["https://www.tgb.cn/a/fresh"])
         self.assertEqual(topic_api_post_date(current_ms),date(2026,9,8))
+
+    def test_unchanged_source_set_can_suppress_duplicate_summary_and_push(self):
+        with tempfile.TemporaryDirectory() as td, patch.object(opinion,"ROOT",Path(td)):
+            Path(td,"latest.json").write_text(opinion.json.dumps({
+                "source_date":"2026-09-08",
+                "sources":[
+                    {"url":"https://www.tgb.cn/a/a"},
+                    {"url":"https://www.tgb.cn/a/b"},
+                ],
+            }),encoding="utf-8")
+            self.assertEqual(current_summary_source_urls("2026-09-08"),{
+                "https://www.tgb.cn/a/a","https://www.tgb.cn/a/b",
+            })
+            self.assertEqual(current_summary_source_urls("2026-09-09"),set())
 
     def test_partial_sample_keeps_full_consensus_fields(self):
         summary={
