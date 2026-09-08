@@ -858,7 +858,7 @@ def _stock_sector_attribution_payload(candidates: pd.DataFrame, concept_fact_day
 def _apply_sector_evidence_gate(
     selected: list[str], decision_by_code: dict[str, dict], stock_sector_context: dict,
 ) -> tuple[list[str], list[str], list[str]]:
-    """用客观同期板块状态校正AI输出，避免价格结构覆盖板块负反馈或缺失。"""
+    """退潮可剔除；未核验只降置信度并保留为次日条件观察。"""
     sector_by_code={str(item.get("股票代码","")).zfill(6):item
                     for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
     kept=list(selected)
@@ -874,15 +874,57 @@ def _apply_sector_evidence_gate(
             decision["risk"]=(old_risk+"；同期概念客观行情退潮，系统保守降为WAIT").strip("；")
             retreat_downgraded.append(code)
         elif "未核验" in sector_state:
-            kept.remove(code)
-            decision["decision"]="WAIT"
             decision["confidence_level"]="低"
             old_risk=str(decision.get("risk","") or "")
-            decision["risk"]=(old_risk+"；缺少同期板块客观行情，系统保守降为WAIT").strip("；")
+            decision["risk"]=(old_risk+"；缺少同期板块客观行情，保留为条件观察，待14:40-14:45核验").strip("；")
             unverified_downgraded.append(code)
         elif sector_state=="同期概念分化" and decision.get("confidence_level")=="高":
             decision["confidence_level"]="中"
     return kept, retreat_downgraded, unverified_downgraded
+
+
+def _cap_observation_pool(selected: list[str], decision_by_code: dict[str, dict],
+                          stock_sector_context: dict, cap: int = 3) -> tuple[list[str], list[str], dict[str, float]]:
+    """Cap with auditable 70% model priority and 30% objective sector evidence."""
+    if len(selected) <= cap:
+        return list(selected), [], {code: 1.0 for code in selected}
+    sector_by_code={str(item.get("股票代码","")).zfill(6):str(item.get("板块共振状态","") or "板块未核验")
+                    for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
+    ordered=sorted(selected,key=lambda code:(float(decision_by_code[code].get("priority",999) or 999),selected.index(code)))
+    denominator=max(len(ordered)-1,1)
+    scores={}
+    for rank,code in enumerate(ordered):
+        structure_score=1-rank/denominator
+        state=sector_by_code.get(code,"板块未核验")
+        sector_score=1.0 if state=="同期概念共振" else 0.5 if state=="同期概念分化" else 0.25
+        scores[code]=round(0.70*structure_score+0.30*sector_score,6)
+    kept=sorted(ordered,key=lambda code:(-scores[code],float(decision_by_code[code].get("priority",999) or 999)))[:cap]
+    trimmed=[code for code in selected if code not in kept]
+    for code in trimmed:
+        decision_by_code[code]["decision"]="WAIT"
+        old_risk=str(decision_by_code[code].get("risk","") or "")
+        decision_by_code[code]["risk"]=(old_risk+f"；观察池超过{cap}只，按个股结构70%和板块证据30%排序后未入围").strip("；")
+    return kept,trimmed,scores
+
+
+def _post_gate_portfolio_note(selected: list[str], retreat: list[str], conditional: list[str],
+                              trimmed: list[str] | None = None) -> str:
+    """Build the authoritative note from the post-gate pool, not the model's pre-gate count."""
+    selected_text="、".join(selected) if selected else "无"
+    note=(
+        f"程序板块证据门禁后，正式观察池共{len(selected)}只（{selected_text}）；"
+        "仅供次日14:40-14:45尾盘确认，不是直接买入名单。"
+    )
+    gate_notes=[]
+    if retreat:
+        gate_notes.append(f"板块退潮降级WAIT：{'、'.join(retreat)}")
+    if conditional:
+        gate_notes.append(f"同期板块证据未核验、保留为条件观察：{'、'.join(conditional)}")
+    if trimmed:
+        gate_notes.append(f"超过3只后按结构70%和板块30%排序未入围：{'、'.join(trimmed)}")
+    if gate_notes:
+        note += " " + "；".join(gate_notes) + "。"
+    return note
 
 
 def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict, sector_tables: dict[str,pd.DataFrame] | None = None) -> tuple[pd.DataFrame, dict, dict]:
@@ -986,18 +1028,32 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         missing_dimensions=[field for field in required_dimensions if not str(decision.get(field,"")).strip()]
         if missing_dimensions:
             raise ValueError(f"OpenAI SELECT缺少二次启动解释维度: {code} {missing_dimensions}")
-    # 板块客观证据是观察池门禁：退潮或未核验均保守降为WAIT；
-    # 分化允许观察，但不得标成高置信度。
+    # 板块退潮可剔除；未核验只作为条件观察，不能直接淘汰。
     selected,downgraded,sector_unverified_downgraded=_apply_sector_evidence_gate(
         selected,decision_by_code,stock_sector_context
     )
+    selected,pool_cap_trimmed,pool_ranking_scores=_cap_observation_pool(
+        selected,decision_by_code,stock_sector_context,cap=3
+    )
+    sector_state_by_code={str(item.get("股票代码","")).zfill(6):str(item.get("板块共振状态","") or "板块未核验")
+                          for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
+    sector_divergence_conditional=[code for code in selected if sector_state_by_code.get(code)=="同期概念分化"]
+    result["model_portfolio_note_before_sector_gate"]=str(result.get("portfolio_note","") or "").strip()
+    result["portfolio_note"]=_post_gate_portfolio_note(
+        selected,downgraded,sector_unverified_downgraded,pool_cap_trimmed
+    )
     result["selected_codes"]=selected
     result["sector_retreat_downgraded_codes"]=downgraded
-    result["sector_unverified_downgraded_codes"]=sector_unverified_downgraded
+    result["sector_unverified_downgraded_codes"]=[]
+    result["sector_unverified_conditional_codes"]=sector_unverified_downgraded
+    result["sector_divergence_conditional_codes"]=sector_divergence_conditional
+    result["pool_cap_trimmed_codes"]=pool_cap_trimmed
+    result["pool_ranking_scores_70_30"]=pool_ranking_scores
     result["decisions"]=[decision_by_code.get(str(d.get("股票代码","")).zfill(6),d) if isinstance(d,dict) else d for d in decisions]
     # 观察池保留原始量化证据 + AI判断，便于次日尾盘继续分析。
     rows=[]
     base_map={str(r["股票代码"]).zfill(6):r for r in research_pack.to_dict("records")}
+    conditional_codes=set(sector_unverified_downgraded)|set(sector_divergence_conditional)
     for code in selected:
         r=dict(base_map[code]); d=decision_by_code[code]
         r.update({
@@ -1009,10 +1065,11 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             "AI振幅判断":d.get("amplitude_assessment","未核验"),
             "AI换手判断":d.get("turnover_assessment","未核验"),
             "AI板块共振":d.get("sector_resonance","未核验"),
+            "观察池身份":"条件观察" if code in conditional_codes else "核心观察",
         })
         rows.append(r)
     obs=pd.DataFrame(rows) if rows else research_pack.head(0).copy()
-    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点","AI证据置信度","AI结构判断","AI成交量判断","AI振幅判断","AI换手判断","AI板块共振"]:
+    for c in ["AI优先级","AI核心证据","AI主要风险","次日尾盘观察重点","AI证据置信度","AI结构判断","AI成交量判断","AI振幅判断","AI换手判断","AI板块共振","观察池身份"]:
         if c not in obs.columns: obs[c]=pd.Series(dtype="object")
     if not obs.empty and "AI优先级" in obs.columns:
         obs=obs.sort_values("AI优先级",na_position="last").reset_index(drop=True)
@@ -1029,6 +1086,10 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "second_start_evidence_version":"v0.6",
         "sector_retreat_downgraded_codes":result.get("sector_retreat_downgraded_codes",[]),
         "sector_unverified_downgraded_codes":result.get("sector_unverified_downgraded_codes",[]),
+        "sector_unverified_conditional_codes":result.get("sector_unverified_conditional_codes",[]),
+        "sector_divergence_conditional_codes":result.get("sector_divergence_conditional_codes",[]),
+        "pool_cap_trimmed_codes":result.get("pool_cap_trimmed_codes",[]),
+        "pool_ranking_scores_70_30":result.get("pool_ranking_scores_70_30",{}),
         "rule":"仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单",
     }
     save_df(base/"ai"/"observation_pool.csv",obs)
