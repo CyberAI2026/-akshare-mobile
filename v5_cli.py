@@ -1360,7 +1360,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
         "market_assessment":{"overall_score_0_100":0,"trade_suitability":"适合/谨慎/不适合","risk_level":"低/中/高","change_vs_previous_close":"改善/接近/恶化","summary":"实时市场判断","overall_new_position_cap_pct":0},
         "sector_assessment":{"status":"正式可用/实验性未启用","active_sectors":["活跃板块及强弱状态"],"capital_inflow_leaders":["资金净流入靠前板块"],"summary":"14:45板块环境判断；无正式数据时明确写未启用"},
         "selected_codes":["最多5个，必须来自观察池；可以为空"],
-        "decisions":[{"股票代码":"6位代码","decision":"TRADE/WAIT/REJECT","buy_zone_low":0,"buy_zone_high":0,"position_pct_total_capital":0,"structure_stop_price":0,"fundamental_reason":"基本面与行业定位","technical_reason":"技术结构","capital_reason":"实时及近10日资金","event_reason":"事件驱动；没有则写无明确事件","sector_reason":"所属板块及强弱","evidence":"综合证据","risk":"主要风险"}],
+        "decisions":[{"股票代码":"6位代码","decision":"TRADE/WAIT/REJECT","buy_zone_low":0,"buy_zone_high":0,"position_pct_total_capital":0,"structure_stop_price":0,"fundamental_reason":"基本面与行业定位","technical_reason":"技术结构与形态","price_volume_reason":"5分钟价格与成交量配合","turnover_reason":"换手率相对自身历史的活跃度","volume_ratio_reason":"实时量比及是否过热/不足","capital_reason":"实时及近10日资金","event_reason":"事件驱动；没有则写无明确事件","sector_reason":"所属板块及强弱","evidence":"综合证据","risk":"主要风险"}],
         "portfolio_note":"组合与T+1风险说明"
     }
     completed_concept_day=previous_trade_day(now_cn().date())
@@ -1383,6 +1383,7 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             "结构止损是结构参考，不是保证最大亏损；A股T+1下当日买入不可卖出，隔夜跳空可能扩大损失",
             "若实时市场恶化、个股重新加速不足/过度、结构破坏或证据冲突，允许WAIT/REJECT",
             "不得仅凭机械确认分做最终决定；确认分只是辅助字段",
+            "每只TRADE必须分别评价形态、5分钟量价关系、换手率和实时量比；它们是相互校验的证据，不得把成交量与换手重复计票，也不得凭单项放量或上涨直接下单；输入缺失必须写未核验",
             "按大盘—行业/概念—个股三层研判；板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论",
             "尾盘所用同花顺概念日线只允许截至上一完整交易日，严禁把当日收盘后数据倒灌到14:45决策",
             "基本面、资金面、事件面或个股板块映射缺失时必须明确写未核验，不得用常识补全；TRADE必须分别给出基本面、技术面、资金面、事件面和板块证据"
@@ -1421,12 +1422,14 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             if stop<=0 or stop>=high: raise ValueError(f"{code}结构止损非法")
             mid=(low+high)/2; risk=(mid-stop)/mid if mid>0 else None
         if dec=="TRADE":
-            required_reasons=["fundamental_reason","technical_reason","capital_reason","event_reason","sector_reason"]
+            required_reasons=["fundamental_reason","technical_reason","price_volume_reason","turnover_reason","volume_ratio_reason","capital_reason","event_reason","sector_reason"]
             empty_reasons=[key for key in required_reasons if not str(d.get(key,"")).strip()]
             if empty_reasons: raise ValueError(f"{code}缺少多维下单理由: {empty_reasons}")
         rows.append({"股票代码":code,"股票名称":name_map.get(code,""),"decision":dec,"买入区间下沿":low if low else None,"买入区间上沿":high if high else None,
                      "建议仓位占总资金%":pos,"结构止损参考":stop if stop else None,"结构风险距离":risk,"核心证据":d.get("evidence",""),"主要风险":d.get("risk","")})
         rows[-1].update({"基本面理由":d.get("fundamental_reason",""),"技术面理由":d.get("technical_reason",""),
+                         "量价关系理由":d.get("price_volume_reason",""),"换手率理由":d.get("turnover_reason",""),
+                         "量比理由":d.get("volume_ratio_reason",""),
                          "资金面理由":d.get("capital_reason",""),"事件面理由":d.get("event_reason",""),"板块理由":d.get("sector_reason","")})
     if total_pos > cap + 1e-6: raise ValueError(f"TRADE仓位合计{total_pos:.2f}%超过总体上限{cap:.2f}%")
     out=pd.DataFrame(rows)
