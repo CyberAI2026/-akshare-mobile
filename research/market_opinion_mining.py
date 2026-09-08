@@ -303,11 +303,32 @@ def review_quality_reasons(title: str, body: str) -> list[str]:
     return reasons
 
 
-def topic_api_candidates_from_payload(payload: dict, page_no: int) -> list[dict]:
-    """Convert the public #每日复盘 latest-feed payload into article candidates."""
+def topic_api_post_date(value) -> date | None:
+    """Normalize the topic feed's millisecond/second/printable publication time."""
+    if value is None or value == "":
+        return None
+    try:
+        numeric=float(value)
+        if numeric>10_000_000_000:
+            numeric/=1000
+        return datetime.fromtimestamp(numeric,TZ).date()
+    except (TypeError,ValueError,OverflowError,OSError):
+        parsed=parse_published_at(str(value))
+        return parsed.date() if parsed else None
+
+
+def topic_api_candidates_from_payload(
+    payload: dict, page_no: int, target_day: date | None = None
+) -> list[dict]:
+    """Convert current-day rows in the public #每日复盘 latest feed into candidates."""
     dto=(payload or {}).get("dto", {}) or {}
     rows=[]
     for item in dto.get("list", []) or []:
+        # Filter by the feed timestamp before ranking. Otherwise old high-read posts can
+        # crowd freshly published reviews out of ARTICLE_LIMIT.
+        post_day=topic_api_post_date(item.get("postTime"))
+        if target_day is not None and post_day is not None and post_day!=target_day:
+            continue
         # Replies, short-form posts and video/news items do not expose a normal /a/ article body.
         if str(item.get("topicType", "")).upper() in {"R", "W", "VD", "CLS"}:
             continue
@@ -325,13 +346,14 @@ def topic_api_candidates_from_payload(payload: dict, page_no: int) -> list[dict]
         rows.append({
             "url":urljoin("https://www.tgb.cn",f"/a/{topic_id}"),
             "title_hint":title,"read_count":read_count,"score":score,
+            "post_date":post_day.isoformat() if post_day else "",
             "list_url":f"{TOPIC_API_URL}?flag=N&pageNo={page_no}&talkSeq={TOPIC_SEQ}",
         })
     return rows
 
 
 def discover_topic_api_candidates() -> list[dict]:
-    """Read multiple pages of the public latest feed; article pages remain the date authority."""
+    """Read multiple pages of the public latest feed, prioritizing current-day rows."""
     rows=[]
     for page_no in range(1,max(1,TOPIC_DISCOVERY_PAGES)+1):
         try:
@@ -344,7 +366,7 @@ def discover_topic_api_candidates() -> list[dict]:
             response.raise_for_status()
             payload=response.json()
             dto=(payload or {}).get("dto", {}) or {}
-            rows.extend(topic_api_candidates_from_payload(payload,page_no))
+            rows.extend(topic_api_candidates_from_payload(payload,page_no,source_date()))
             page_num=int(dto.get("pageNum") or page_no)
             if page_no>=page_num:
                 break
