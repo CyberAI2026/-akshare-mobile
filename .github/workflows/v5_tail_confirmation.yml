@@ -11,6 +11,7 @@ on:
       - "docs/HOLDING_EXIT_POLICY.md"
       - "tests/test_tail_stages.py"
       - "tests/test_holding_exit.py"
+      - "v5_data/control/tail_fallback_trigger.json"
   schedule:
     # Three staggered GitHub crons reduce silent scheduler misses.
     # A completed same-day run is idempotently skipped, so OpenAI/PushPlus are not duplicated.
@@ -42,7 +43,8 @@ jobs:
 
   precheck-1440:
     needs: validate
-    if: github.event_name != 'push'
+    # Ordinary code pushes validate only. A dedicated fallback-file commit is an authorized production trigger.
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[tail-fallback]')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
