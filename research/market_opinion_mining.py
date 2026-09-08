@@ -34,6 +34,7 @@ LIST_URLS = [
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 AStockResearch/1.0"
 TOPIC_API_URL = "https://www.tgb.cn/talk/getTalkByFlag"
 TOPIC_SEQ = "21325"
+TOPIC_SEQS = ("143895", "21325")  # #复盘 first, #每日复盘 second
 TOPIC_DISCOVERY_PAGES = int(os.getenv("OPINION_TOPIC_DISCOVERY_PAGES", "6"))
 ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "30"))
 MIN_ARTICLE_COUNT = int(os.getenv("OPINION_MIN_ARTICLES", "15"))
@@ -323,7 +324,8 @@ def topic_api_post_date(value) -> date | None:
 
 
 def topic_api_candidates_from_payload(
-    payload: dict, page_no: int, target_day: date | None = None
+    payload: dict, page_no: int, target_day: date | None = None,
+    talk_seq: str = TOPIC_SEQ,
 ) -> list[dict]:
     """Convert current-day rows in the public #每日复盘 latest feed into candidates."""
     dto=(payload or {}).get("dto", {}) or {}
@@ -352,41 +354,45 @@ def topic_api_candidates_from_payload(
             "url":urljoin("https://www.tgb.cn",f"/a/{topic_id}"),
             "title_hint":title,"read_count":read_count,"score":score,
             "post_date":post_day.isoformat() if post_day else "",
-            "list_url":f"{TOPIC_API_URL}?flag=N&pageNo={page_no}&talkSeq={TOPIC_SEQ}",
+            "list_url":f"{TOPIC_API_URL}?flag=N&pageNo={page_no}&talkSeq={talk_seq}",
         })
     return rows
 
 
 def discover_topic_api_candidates() -> list[dict]:
-    """Read multiple pages of the public latest feed, prioritizing current-day rows."""
+    """Read the dedicated #复盘 and #每日复盘 latest feeds, current day first."""
     rows=[]
-    for page_no in range(1,max(1,TOPIC_DISCOVERY_PAGES)+1):
-        try:
-            response=requests.get(
-                TOPIC_API_URL,
-                params={
-                    "flag":"N","pageNo":page_no,"talkSeq":TOPIC_SEQ,
-                    "_opinion_ts":int(time.time()//60),
-                },
-                headers={
-                    "User-Agent":UA,"Accept-Language":"zh-CN,zh;q=0.9",
-                    "Cache-Control":"no-cache","Pragma":"no-cache",
-                },
-                timeout=25,
-            )
-            response.raise_for_status()
-            payload=response.json()
-            dto=(payload or {}).get("dto", {}) or {}
-            rows.extend(topic_api_candidates_from_payload(payload,page_no,source_date()))
-            page_num=int(dto.get("pageNum") or page_no)
-            if page_no>=page_num:
+    for talk_seq in TOPIC_SEQS:
+        for page_no in range(1,max(1,TOPIC_DISCOVERY_PAGES)+1):
+            try:
+                response=requests.get(
+                    TOPIC_API_URL,
+                    params={
+                        "flag":"N","pageNo":page_no,"talkSeq":talk_seq,
+                        "_opinion_ts":int(time.time()//60),
+                    },
+                    headers={
+                        "User-Agent":UA,"Accept-Language":"zh-CN,zh;q=0.9",
+                        "Cache-Control":"no-cache","Pragma":"no-cache",
+                    },
+                    timeout=25,
+                )
+                response.raise_for_status()
+                payload=response.json()
+                dto=(payload or {}).get("dto", {}) or {}
+                rows.extend(topic_api_candidates_from_payload(
+                    payload,page_no,source_date(),talk_seq
+                ))
+                page_num=int(dto.get("pageNum") or page_no)
+                if page_no>=page_num:
+                    break
+            except Exception as exc:
+                print(
+                    f"OPINION_TOPIC_API_FAILED talk_seq={talk_seq} page={page_no} "
+                    f"error={type(exc).__name__}:{str(exc)[:160]}",
+                    flush=True,
+                )
                 break
-        except Exception as exc:
-            print(
-                f"OPINION_TOPIC_API_FAILED page={page_no} error={type(exc).__name__}:{str(exc)[:160]}",
-                flush=True,
-            )
-            break
     return rows
 
 
