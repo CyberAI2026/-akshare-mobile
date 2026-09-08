@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-08",
   "trade_date": "2026-09-08",
-  "updated_at_cn": "2026-09-08T21:06:30.782607+08:00",
+  "updated_at_cn": "2026-09-08T22:05:52.455344+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -57,6 +57,21 @@
       "body_chars": 18855,
       "body_sha256": "62d01264b247e9679e7abbeecdc61559fd8ceec135ea87413f8b4a81a1340db7",
       "published_at_cn": "2026-09-08T15:11:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "8bb1686e8eb0e661",
+      "title": "盘前情报 · 2026-09-08 周二（一分钟复盘）_Dillon230_淘股吧",
+      "url": "https://www.tgb.cn/a/2uULJFFxWpb",
+      "read_count": 0,
+      "body_chars": 1622,
+      "body_sha256": "8bb1686e8eb0e66100c8abce6df0467e7f87a12e4139b86b87450ce0c332c1ac",
+      "published_at_cn": "2026-09-08T07:35:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -438,6 +453,78 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "8bb1686e8eb0e661",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵"
+      ],
+      "market_summary": "作者认为AI算力硬件为主线且领涨，龙版传媒成为唯一空间龙；半导体需警惕冲高兑现。",
+      "sectors": [
+        {
+          "name": "AI算力硬件",
+          "stance": "加强",
+          "evidence": "作者称其为主线，PCB涨7.62%、元件涨6.72%领涨。"
+        },
+        {
+          "name": "出版传媒",
+          "stance": "活跃",
+          "evidence": "作者称其为情绪总龙线，关联重组及AI漫剧。"
+        },
+        {
+          "name": "半导体",
+          "stance": "分化",
+          "evidence": "作者提示涨幅达3%后谨防兑现，关注平低开后的回封。"
+        },
+        {
+          "name": "航海装备",
+          "stance": "不明确",
+          "evidence": "作者称该板块未进入TOP5，船舶仅上涨2.43%。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "出版传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "沪电",
+          "sector": "AI算力硬件",
+          "role": "高关注"
+        },
+        {
+          "name": "源杰",
+          "sector": "AI算力硬件",
+          "role": "高关注"
+        },
+        {
+          "name": "光迅",
+          "sector": "AI算力硬件",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "关注竞价成交额是否较昨日同期缩量，以及是否低于1.95万亿预案阈值",
+        "关注半导体平开或低开后的回封表现",
+        "关注AI算力硬件回踩表现"
+      ],
+      "numeric_claims": [
+        "昨日预判兑现率60%（3项正确、2项错误）",
+        "龙版传媒封住6板",
+        "涨停93家、跌停2家、炸板19家",
+        "封板率83.0%",
+        "船舶上涨2.43%",
+        "PCB上涨7.62%",
+        "元件上涨6.72%",
+        "沪电净买17.43亿",
+        "源杰净买13.17亿",
+        "光迅净买10.97亿"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
