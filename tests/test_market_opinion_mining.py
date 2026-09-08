@@ -26,6 +26,7 @@ from research.market_opinion_mining import (
     target_trade_date,
     title_review_date_matches,
     topic_api_candidates_from_payload,
+    topic_api_post_date,
 )
 from research import market_opinion_mining as opinion
 
@@ -171,6 +172,18 @@ class OpinionSectorGroupingTests(unittest.TestCase):
             "https://www.tgb.cn/a/abc123","https://www.tgb.cn/a/def456",
         ])
         self.assertTrue(all("pageNo=2" in x["list_url"] for x in rows))
+
+    def test_topic_api_current_day_precedes_old_high_read_posts(self):
+        cn=ZoneInfo("Asia/Shanghai")
+        current_ms=int(datetime(2026,9,8,21,7,tzinfo=cn).timestamp()*1000)
+        old_ms=int(datetime(2026,9,7,23,0,tzinfo=cn).timestamp()*1000)
+        payload={"dto":{"list":[
+            {"topicType":"T","newTopicID":"fresh","subject":"9月8日市场复盘与板块轮动","viewNum":"3","postTime":current_ms},
+            {"topicType":"T","newTopicID":"old","subject":"高阅读历史市场复盘","viewNum":"99999","postTime":old_ms},
+        ]}}
+        rows=topic_api_candidates_from_payload(payload,1,date(2026,9,8))
+        self.assertEqual([x["url"] for x in rows],["https://www.tgb.cn/a/fresh"])
+        self.assertEqual(topic_api_post_date(current_ms),date(2026,9,8))
 
     def test_partial_sample_keeps_full_consensus_fields(self):
         summary={
