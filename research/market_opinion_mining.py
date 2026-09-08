@@ -414,7 +414,8 @@ def discover_articles() -> list[dict]:
                 if node:
                     contexts.append(clean_text(node.get_text(" ", strip=True)))
             context = min((x for x in contexts if any(t in x for t in date_tokens)), key=len, default=contexts[-1])
-            if not any(t in context or t in title for t in date_tokens):
+            relative_recent=bool(re.search(r"(?:刚刚|\\d+\\s*分钟前|\\d+\\s*小时前)",context))
+            if not any(t in context or t in title for t in date_tokens) and not relative_recent:
                 continue
             score = 0
             score += 4 if any(k in title for k in REVIEW_TERMS) else 0
@@ -966,7 +967,21 @@ def apply_sample_status(summary: dict, article_count: int) -> dict:
     return summary
 
 
+def current_summary_source_urls(source_day: str) -> set[str]:
+    path=ROOT/"latest.json"
+    if not path.exists():
+        return set()
+    try:
+        data=json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    if str(data.get("source_date") or "")!=source_day:
+        return set()
+    return {str(item.get("url") or "") for item in data.get("sources",[]) if item.get("url")}
+
+
 def run_aggregate_stage(key: str, stage_root: Path) -> None:
+    previous_urls=current_summary_source_urls(source_date().isoformat())
     sources,mined,source_day,trade_day=load_batch_stages(stage_root)
     sources,mined,rejected=retain_ai_verified_quality(sources,mined)
     if rejected:
@@ -974,6 +989,13 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
     sources,mined=merge_staged_quality_pool(source_day,trade_day,sources,mined)
     if not sources:
         raise RuntimeError("所有文章均未通过正文规则与OpenAI二次质量复核")
+    current_urls={str(item.get("url") or "") for item in sources if item.get("url")}
+    if previous_urls and current_urls==previous_urls:
+        print(
+            f"OPINION_NO_NEW_QUALITY_ARTICLES source_date={source_day} articles={len(sources)} "
+            "aggregate_skipped=true push_skipped=true",flush=True,
+        )
+        return
     should_finalize,finalization_reason=opinion_finalization(len(sources))
     if not should_finalize:
         print(
