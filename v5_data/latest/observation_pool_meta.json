@@ -6,7 +6,7 @@
   "source_candidate_count": 34,
   "ai_candidate_count_after_active_trade_exclusion": 34,
   "excluded_active_trade_count": 0,
-  "observation_count": 1,
+  "observation_count": 3,
   "model": "gpt-5.6-terra",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "source_run": "v5_data/runs/20260907_200912",
@@ -247,12 +247,20 @@
       "source_platform": "淘股吧公开复盘"
     }
   },
-  "portfolio_note": "观察池仅保留3只整理证据相对完整、靠近稳健上沿且未出现明确长期下降修复标签的个股。市场仍处修复后验证阶段，次日以14:40-14:45的上沿承接、量换是否保持收敛及板块是否持续为核心，不将观察池视为最终买入结论。",
+  "portfolio_note": "程序板块证据门禁后，正式观察池共3只（002041、002329、600368）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：002329、600368。",
   "second_start_evidence_version": "v0.6",
   "sector_retreat_downgraded_codes": [],
-  "sector_unverified_downgraded_codes": [
+  "sector_unverified_downgraded_codes": [],
+  "rule": "盘后最多3只；板块未核验保留为条件观察；仅供次日14:40-14:45尾盘确认，不是直接买入名单",
+  "sector_unverified_conditional_codes": [
     "002329",
     "600368"
   ],
-  "rule": "仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单"
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "002041": 1.0,
+    "002329": 1.0,
+    "600368": 1.0
+  }
 }

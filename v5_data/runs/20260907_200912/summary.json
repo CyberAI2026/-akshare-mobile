@@ -94,7 +94,7 @@
     }
   },
   "python_final": "30-50只软容量研究包（不机械生成前10）",
-  "observation_pool_count": 1,
+  "observation_pool_count": 3,
   "target_trade_date": "2026-09-08",
   "openai_model": "gpt-5.6-terra",
   "market_assessment": {
