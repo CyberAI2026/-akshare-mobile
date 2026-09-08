@@ -3,10 +3,10 @@ name: V5 Market Opinion Mining
 on:
   workflow_dispatch:
   schedule:
-    # Beijing 20:30 starts collection. From 21:00 onward, publish once 15 quality
-    # reviews are ready; otherwise re-crawl at 21:30 and finalize at 22:00.
+    # Beijing 20:30 starts collection. Re-evaluate every 10 minutes from
+    # 21:00 through 21:50; 22:00 is the partial-sample deadline.
     - cron: "30 12 * * *"
-    - cron: "0,30 13 * * *"
+    - cron: "0-50/10 13 * * *"
     - cron: "0 14 * * *"
   push:
     # Manual recovery commits may include [run-opinion] to execute the bounded pipeline.
@@ -15,6 +15,7 @@ on:
       - "research/market_opinion_mining.py"
       - "tests/test_market_opinion_mining.py"
       - ".github/workflows/v5_market_opinion.yml"
+      - "v5_data/control/opinion_fallback_trigger.json"
 
 permissions:
   contents: write
