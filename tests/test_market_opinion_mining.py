@@ -14,6 +14,7 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from research.market_opinion_mining import (
+    apply_sample_status,
     compute_concept_index_metrics,
     group_attention_sectors,
     parse_published_at,
@@ -24,6 +25,7 @@ from research.market_opinion_mining import (
     source_date,
     target_trade_date,
     title_review_date_matches,
+    topic_api_candidates_from_payload,
 )
 from research import market_opinion_mining as opinion
 
@@ -156,6 +158,35 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertIn("https://www.tgb.cn/a/abc",rendered)
         self.assertIn("复盘 &lt;一&gt;",rendered)
         self.assertNotIn("example.com",rendered)
+
+
+    def test_topic_api_pages_expand_latest_review_discovery(self):
+        payload={"dto":{"list":[
+            {"topicType":"T","newTopicID":"abc123","subject":"9.8市场复盘与板块轮动","viewNum":"888"},
+            {"topicType":"W","newTopicID":"short1","subject":"短说说不是文章","viewNum":99},
+            {"topicType":"T","newTopicID":"def456","subject":"收盘情绪及明日策略","viewNum":12},
+        ]}}
+        rows=topic_api_candidates_from_payload(payload,2)
+        self.assertEqual([x["url"] for x in rows],[
+            "https://www.tgb.cn/a/abc123","https://www.tgb.cn/a/def456",
+        ])
+        self.assertTrue(all("pageNo=2" in x["list_url"] for x in rows))
+
+    def test_partial_sample_keeps_full_consensus_fields(self):
+        summary={
+            "market_consensus":{"stance":"谨慎","phase":["分歧"],"summary":"现有样本形成的摘要","confidence":"中"},
+            "market_disagreements":["农业持续性存在分歧"],
+            "sector_consensus":[{"sector":"农业","mention_count":4,"stance":"加强"}],
+            "stock_attention":[{"stock":"亚盛集团","mention_count":3}],
+            "tomorrow_consensus_watch":["观察农业分化"],
+            "limitations":[],
+        }
+        out=apply_sample_status(summary,7)
+        self.assertEqual(out["market_consensus"]["summary"],"现有样本形成的摘要")
+        self.assertEqual(out["market_consensus"]["confidence"],"低")
+        self.assertTrue(out["sector_consensus"])
+        self.assertTrue(out["stock_attention"])
+        self.assertIn("基于现有合格样本",out["sample_status"])
 
 
 if __name__ == "__main__":
