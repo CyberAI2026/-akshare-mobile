@@ -119,7 +119,12 @@ def fetch_html(url: str) -> str:
         try:
             r = requests.get(
                 url,
-                headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"},
+                headers={
+                    "User-Agent": UA,
+                    "Accept-Language": "zh-CN,zh;q=0.9",
+                    "Cache-Control": "no-cache",
+                    "Pragma": "no-cache",
+                },
                 timeout=25,
             )
             r.raise_for_status()
@@ -359,8 +364,14 @@ def discover_topic_api_candidates() -> list[dict]:
         try:
             response=requests.get(
                 TOPIC_API_URL,
-                params={"flag":"N","pageNo":page_no,"talkSeq":TOPIC_SEQ},
-                headers={"User-Agent":UA,"Accept-Language":"zh-CN,zh;q=0.9"},
+                params={
+                    "flag":"N","pageNo":page_no,"talkSeq":TOPIC_SEQ,
+                    "_opinion_ts":int(time.time()//60),
+                },
+                headers={
+                    "User-Agent":UA,"Accept-Language":"zh-CN,zh;q=0.9",
+                    "Cache-Control":"no-cache","Pragma":"no-cache",
+                },
                 timeout=25,
             )
             response.raise_for_status()
@@ -400,7 +411,9 @@ def discover_articles() -> list[dict]:
     # Secondary routes: visible HTML lists. These remain useful if the JSON feed is
     # temporarily unavailable and also surface editorial/recommended review posts.
     for list_url in LIST_URLS:
-        html = fetch_html(list_url)
+        separator="&" if "?" in list_url else "?"
+        live_url=f"{list_url}{separator}_opinion_ts={int(time.time()//60)}"
+        html = fetch_html(live_url)
         soup = BeautifulSoup(html, "html.parser")
         for a in soup.select('a[href*="/a/"]'):
             href = urljoin(list_url, a.get("href", ""))
