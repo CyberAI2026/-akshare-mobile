@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-08",
   "trade_date": "2026-09-08",
-  "updated_at_cn": "2026-09-09T01:13:55.990169+08:00",
+  "updated_at_cn": "2026-09-09T01:54:55.049949+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -162,6 +162,21 @@
       "body_chars": 3240,
       "body_sha256": "5902e51a544eba84d9a87bbf88ae48eefc22d88f0f807d2010783548454cead6",
       "published_at_cn": "2026-09-08T17:21:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "613173b0cb9178d9",
+      "title": "26.9.8 四板pk价值+首二判断_人人一724_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVHMcMqZ8H",
+      "read_count": 1018,
+      "body_chars": 8936,
+      "body_sha256": "613173b0cb9178d9b356a47af19b8a195fb55cadd81d48d44774137d49d53b97",
+      "published_at_cn": "2026-09-08T21:07:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1337,6 +1352,90 @@
         "读者传媒2板",
         "地产涨停6只，均为首板",
         "剔除6G概念后，光通信涨停3只"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "613173b0cb9178d9",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为高位四板竞争存在不确定性，接力性价比偏低；低位首二虽有布局机会，但尚未看到明确主升与新题材。",
+      "sectors": [
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "作者以龙版此前AI应用仅少量发酵作为参考。"
+        },
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称二板潜在主升偏科技，但对股性和股本存疑。"
+        },
+        {
+          "name": "浙江",
+          "stance": "活跃",
+          "evidence": "作者提及午后药箱浙江积极，并关注地域伴飞指引。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版",
+          "sector": "AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "爱",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "百",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "亚",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "国芳",
+          "sector": "不明确",
+          "role": "不明确"
+        },
+        {
+          "name": "捷荣",
+          "sector": "不明确",
+          "role": "不明确"
+        },
+        {
+          "name": "读者",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "六国",
+          "sector": "不明确",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "四板候选能否与龙版走势明确分离",
+        "爱是否获得题材发酵并走出有效承接",
+        "二板梯队及是否出现新题材"
+      ],
+      "numeric_claims": [
+        "龙版未站稳7板",
+        "4板共有3位选手",
+        "9月3日至4日AI应用发酵约2至3个",
+        "收盘2板共计12只股票",
+        "二板晋级率14.8%",
+        "作者称指引标瑞接近11:00上板"
       ],
       "quality_flags": [
         "广告"
