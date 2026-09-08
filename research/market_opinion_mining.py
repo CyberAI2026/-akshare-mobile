@@ -31,7 +31,7 @@ LIST_URLS = [
     "https://www.tgb.cn/newIndex/4",
     "https://www.tgb.cn/newIndex/5",
 ]
-UA = "AStockResearch/1.0 (private research; low-frequency; contact via repository owner)"
+UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36 AStockResearch/1.0"
 TOPIC_API_URL = "https://www.tgb.cn/talk/getTalkByFlag"
 TOPIC_SEQ = "21325"
 TOPIC_DISCOVERY_PAGES = int(os.getenv("OPINION_TOPIC_DISCOVERY_PAGES", "6"))
