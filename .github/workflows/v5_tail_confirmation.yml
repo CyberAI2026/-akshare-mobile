@@ -7,7 +7,9 @@ on:
     paths:
       - ".github/workflows/v5_tail_confirmation.yml"
       - "v5_cli.py"
+      - "research/holding_exit.py"
       - "tests/test_tail_stages.py"
+      - "tests/test_holding_exit.py"
   schedule:
     # Three staggered GitHub crons reduce silent scheduler misses.
     # A completed same-day run is idempotently skipped, so OpenAI/PushPlus are not duplicated.
@@ -35,7 +37,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: |
           python -m py_compile v5_cli.py
-          python -m unittest tests/test_tail_stages.py tests/test_v5_data_layers.py tests/test_recommendation_feedback.py
+          python -m unittest tests/test_tail_stages.py tests/test_holding_exit.py tests/test_v5_data_layers.py tests/test_recommendation_feedback.py
 
   precheck-1440:
     needs: validate
@@ -127,7 +129,7 @@ jobs:
               "title": "A股二次启动系统｜尾盘任务故障",
               "content": (
                   f"尾盘分段任务在 {now} 运行失败。<br>"
-                  "本次不得依据系统执行买入；请检查GitHub Actions日志。<br>"
+                  "本次买入建议或持仓卖出扫描不完整，不得把缺失结果当作继续持有；请检查GitHub Actions日志。<br>"
                   "运行地址：https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
               ),
               "template": "html",

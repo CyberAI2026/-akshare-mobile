@@ -15,6 +15,8 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
+from research.holding_exit import active_position_cycles, evaluate_holding_exits, saved_structure_stops
+
 from v5_core import (
     STRATEGY_VERSION,
     build_metrics,
@@ -149,6 +151,33 @@ def active_trade_codes(
             except Exception as exc:
                 print("private trade ledger warning:", type(exc).__name__, str(exc)[:160])
     return _active_recommendation_codes(registry_path)
+
+
+def load_active_positions_for_exit(trade_date) -> pd.DataFrame:
+    """Load actual positions for the 14:45 sell scan; never silently omit an encrypted ledger."""
+    if not PRIVATE_TRADE_LEDGER.exists():
+        return pd.DataFrame()
+    key = os.getenv("TRADING_DATA_KEY", "").strip()
+    if not key:
+        raise RuntimeError("存在加密交易台账但TRADING_DATA_KEY缺失，禁止省略持仓卖出扫描")
+    from research.private_trade_ledger import decrypt_transactions
+
+    transactions = decrypt_transactions(PRIVATE_TRADE_LEDGER.read_bytes(), key)
+    return active_position_cycles(transactions, trade_date)
+
+
+def save_private_exit_decisions(frame: pd.DataFrame, *paths: Path):
+    """Persist the audit trail encrypted because it contains actual holdings and cost basis."""
+    if frame is None or frame.empty:
+        return
+    key = os.getenv("TRADING_DATA_KEY", "").strip()
+    if not key:
+        raise RuntimeError("TRADING_DATA_KEY缺失，无法加密保存持仓卖出决策")
+    from cryptography.fernet import Fernet
+
+    blob = Fernet(key.encode("utf-8")).encrypt(frame.to_json(orient="records", force_ascii=False).encode("utf-8"))
+    for path in paths:
+        save_bytes(path, blob)
 
 def exclude_active_trades(frame: pd.DataFrame, registry_path: str | Path = RECOMMENDATION_REGISTRY) -> tuple[pd.DataFrame, list[str]]:
     out = frame.copy() if frame is not None else pd.DataFrame()
@@ -347,7 +376,7 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     return pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
 
 
-def notify_tail_success(final_df: pd.DataFrame, meta: dict):
+def notify_tail_success(final_df: pd.DataFrame, meta: dict, holding_exits: pd.DataFrame | None = None):
     ma=meta.get("market_assessment",{}) or {}
     selected=set(str(x).zfill(6) for x in meta.get("selected_codes",[]) or [])
     snap=meta.get("market_snapshot",{}) or {}
@@ -389,6 +418,22 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict):
             for _,r in others.iterrows():
                 other_lines.append(f"{_esc(str(r.get('股票代码','')).zfill(6))} {_esc(r.get('股票名称',''))}｜<strong>{_esc(r.get('decision','WAIT'))}</strong><br>{_esc(r.get('核心证据',''))}")
             lines.append(_section("其余观察股", "<br><br>".join(other_lines), "#64748b"))
+    if holding_exits is not None and not holding_exits.empty:
+        action_label={"HOLD":"继续持有","HOLD_T1":"T+1暂不可卖","REDUCE_50":"卖出一半","EXIT_ALL":"全部卖出"}
+        holding_lines=[]
+        for _,r in holding_exits.iterrows():
+            action=str(r.get("卖出建议","HOLD"))
+            holding_lines.append(
+                f"<strong>{_esc(str(r.get('股票代码','')).zfill(6))} {_esc(r.get('股票名称',''))}</strong>｜"
+                f"<strong>{_esc(action_label.get(action,action))}</strong>"
+                f"{(' '+str(int(r.get('建议卖出数量',0)))+'股') if int(r.get('建议卖出数量',0) or 0)>0 else ''}<br>"
+                f"现价 {_esc(r.get('当前价','—'))}｜成本 {_esc(r.get('平均成本','—'))}｜最高收盘 {_esc(r.get('最高收盘价','—'))}<br>"
+                f"最高浮盈 {_fmt_pct(r.get('最高浮盈%'))}｜高点回撤 {_fmt_pct(r.get('距高点回撤%'))}｜结构线 {_esc(r.get('结构止损参考','—'))}<br>"
+                f"{_esc(r.get('规则理由',''))}"
+            )
+        lines.append(_section("现有持仓卖出扫描", "<hr style='border:0;border-top:1px solid #e2e8f0'>".join(holding_lines), "#b45309"))
+    else:
+        lines.append(_section("现有持仓卖出扫描", "当前没有已登记的实际持仓。", "#64748b"))
     if meta.get("portfolio_note"): lines.append(_section("组合与风险",_esc(meta.get('portfolio_note')),"#b45309"))
     lines.append("<div style='font-size:12px;color:#64748b;margin-top:12px'>盘后请在系统“交易与持仓”页确认实际成交：数量为0或未填写表示未买；忘记登记可在以后补录。<br>T+1：结构止损不是最大亏损保证，隔夜跳空可能扩大实际损失。</div></div>")
     return pushplus_notify("A股二次启动｜14:45尾盘决策", "".join(lines))
@@ -1485,7 +1530,7 @@ def run_tail_precheck():
 
 
 def run_tail_finalize():
-    """14:45短任务：读取14:40预采样，补抓市场/板块并完成OpenAI与微信决策。"""
+    """14:45短任务：同时完成观察池买入判断和全部实际持仓卖出扫描。"""
     today0 = now_cn().date()
     if _tail_completed_for_date(today0):
         print(f"TAIL_ALREADY_COMPLETED trade_date={today0}; redundant finalize skipped")
@@ -1511,20 +1556,37 @@ def run_tail_finalize():
     candidate_context = context_sheets
 
     wait_until_cn(14, 45)
-    snap45, min45, qa45 = fetch_realtime_package(pool)
+    positions = load_active_positions_for_exit(today)
+    holding_universe = positions[["股票代码", "股票名称"]].copy() if not positions.empty else pd.DataFrame(columns=["股票代码", "股票名称"])
+    universe = pd.concat([pool[["股票代码", "股票名称"]], holding_universe], ignore_index=True)
+    universe["股票代码"] = universe["股票代码"].astype(str).str.zfill(6)
+    universe = universe.drop_duplicates("股票代码", keep="first").reset_index(drop=True)
+    snap45, min45, qa45 = fetch_realtime_package(universe)
     conf = confirmation_metrics(snap45, min45)
+    holding_exits = evaluate_holding_exits(
+        positions, snap45, min45, CACHE, saved_structure_stops(RECOMMENDATION_REGISTRY)
+    )
+    # Public research artifacts retain observation-pool data only. Actual holding codes,
+    # costs and actions are kept out of plaintext git files.
+    public_codes = set(pool["股票代码"].astype(str).str.zfill(6))
+    def public_rows(frame: pd.DataFrame) -> pd.DataFrame:
+        if frame is None or frame.empty or "股票代码" not in frame:
+            return frame
+        return frame[frame["股票代码"].astype(str).str.zfill(6).isin(public_codes)].copy()
+    public_snap45, public_min45 = public_rows(snap45), public_rows(min45)
+    public_conf, public_qa45 = public_rows(conf), public_rows(qa45)
     idx, breadth, market_qa = fetch_market_review(180)
     sector_tables, sector_qa = fetch_public_sector_flow(fetched_at=now_cn())
     sector_tables_for_ai, sector_validation = _sector_readiness(sector_tables, sector_qa)
     market_history, market_context = update_market_history(breadth, phase="14:45", keep_days=180)
     stamp = now_cn().strftime("%H%M%S")
-    sheets={"14点45实时快照":snap45,"当日5分钟K线":min45,"确认指标":conf,"实时市场":breadth,
+    sheets={"14点45实时快照":public_snap45,"当日5分钟K线":public_min45,"确认指标":public_conf,"实时市场":breadth,
             "市场历史180":market_history,"市场滚动上下文":market_context,"指数180日":idx,
-            "数据质量":qa45,"市场质量":market_qa,"板块质量":sector_qa,**sector_tables}
+            "数据质量":public_qa45,"市场质量":market_qa,"板块质量":sector_qa,**sector_tables}
     save_bytes(base / f"1445_confirmation_{stamp}.xlsx", to_excel_bytes(sheets))
     payload = {
         "data_time_cn": now_cn().isoformat(), "trade_date": str(today), "pool_count": len(pool),
-        "confirmation": conf.to_dict("records"), "market": breadth.to_dict("records"),
+        "confirmation": public_conf.to_dict("records"), "market": breadth.to_dict("records"),
         "market_context": market_context.to_dict("records"), "sector_validation": sector_validation,
         "status": "data_ready_before_ai",
     }
@@ -1544,8 +1606,16 @@ def run_tail_finalize():
         payload["feedback_registration"] = feedback_registration
         payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
         final_meta["market_snapshot"] = _json_clean(breadth.iloc[0].to_dict()) if not breadth.empty else {}
+        final_meta["holding_exit_summary"] = {
+            "position_count": int(len(holding_exits)),
+            "exit_all_count": int((holding_exits.get("卖出建议", pd.Series(dtype=str)) == "EXIT_ALL").sum()),
+            "reduce_count": int((holding_exits.get("卖出建议", pd.Series(dtype=str)) == "REDUCE_50").sum()),
+        }
+        save_private_exit_decisions(
+            holding_exits, base / "holding_exit_decisions.enc", LATEST / "holding_exit_decisions.enc"
+        )
         save_json(base/"final_decision_meta.json", final_meta); save_json(LATEST/"final_decision_meta.json", final_meta)
-        push_ok = bool(notify_tail_success(final_decisions, final_meta))
+        push_ok = bool(notify_tail_success(final_decisions, final_meta, holding_exits))
         payload["pushplus_delivery_ok"] = push_ok
         payload["status"] = "completed" if push_ok else "completed_push_failed"
         save_json(base/"tail_summary.json",payload); save_json(LATEST/"last_tail_summary.json",payload)
