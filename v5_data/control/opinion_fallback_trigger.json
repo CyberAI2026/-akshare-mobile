@@ -1,6 +1,6 @@
 {
-  "beijing_time": "2026-09-08T23:14:00+08:00",
+  "beijing_time": "2026-09-08T23:20:00+08:00",
   "source_date": "2026-09-08",
-  "watchdog_stage": "relative_time_current_day_redo",
-  "main_sha": "591341ec67435b7af22d8218e44a55c36a86143f"
+  "watchdog_stage": "browser_compatible_current_day_redo",
+  "main_sha": "1989bdddd9355b911387818fbf48c221edcff3a2"
 }
