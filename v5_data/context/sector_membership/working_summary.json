@@ -3,13 +3,13 @@
   "phase": "第二阶段板块映射影子库",
   "version": "sector-membership-shadow-v0.4.0",
   "snapshot_date": "2026-09-08",
-  "captured_at_cn": "2026-09-08T00:26:25.540752+08:00",
-  "master_stock_count": 591,
-  "mapping_rows": 1711,
-  "mapped_stock_count": 584,
-  "any_coverage": 0.988156,
-  "industry_coverage": 0.988156,
-  "concept_coverage": 0.58714,
+  "captured_at_cn": "2026-09-08T23:04:41.734550+08:00",
+  "master_stock_count": 603,
+  "mapping_rows": 1734,
+  "mapped_stock_count": 596,
+  "any_coverage": 0.988391,
+  "industry_coverage": 0.988391,
+  "concept_coverage": 0.583748,
   "board_counts": {
     "行业": 31,
     "概念": 34
@@ -17,9 +17,9 @@
   "failed_board_requests": 4,
   "board_failure_rate": 0.050633,
   "source_stock_coverage": {
-    "概念:sina_sector_membership_via_akshare": 0.58714,
-    "行业:shenwan_industry_membership_via_akshare": 0.988156,
-    "行业:sina_sector_membership_via_akshare": 0.147208
+    "概念:sina_sector_membership_via_akshare": 0.583748,
+    "行业:shenwan_industry_membership_via_akshare": 0.988391,
+    "行业:sina_sector_membership_via_akshare": 0.145937
   },
   "formal_ready": false,
   "ai_enabled": true,
