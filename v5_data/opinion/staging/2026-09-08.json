@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-08",
   "trade_date": "2026-09-08",
-  "updated_at_cn": "2026-09-09T00:49:34.993857+08:00",
+  "updated_at_cn": "2026-09-09T01:13:55.990169+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -72,6 +72,21 @@
       "body_chars": 2647,
       "body_sha256": "255b2130495c8db859bac1807d54525c1bad84ace2244739c57c1e9f6a9d88a3",
       "published_at_cn": "2026-09-08T07:42:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "257b1d4cb6aae6e4",
+      "title": "9.8柚小柚复盘：有企稳迹象，择机加仓_柚小柚_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVic3SVG9n",
+      "read_count": 28,
+      "body_chars": 1359,
+      "body_sha256": "257b1d4cb6aae6e45bffc841a8a0fbbb305c3f7aeecef16dceebe6354cf70476",
+      "published_at_cn": "2026-09-08T15:09:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -275,6 +290,21 @@
       ]
     },
     {
+      "article_id": "9cf63670d4c10bee",
+      "title": "9月8日复盘及盘后新闻发酵_环球股市逻辑社_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVTn8uUE5w",
+      "read_count": 12,
+      "body_chars": 4107,
+      "body_sha256": "9cf63670d4c10bee4e47f38f6fca62377a57d05dd7f30312769f8163e30d6292",
+      "published_at_cn": "2026-09-08T23:49:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "a41de732e29cd513",
       "title": "沪指红，创指绿，AI硬件链集体“跳水”！_风云产业投研_淘股吧",
       "url": "https://www.tgb.cn/a/2uVnaPqERGD",
@@ -282,6 +312,21 @@
       "body_chars": 3922,
       "body_sha256": "a41de732e29cd5133f3f701a0eebef021797c9cbf72a7521ca2b7c1e01beca2a",
       "published_at_cn": "2026-09-08T16:19:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ac46e2680e6ad621",
+      "title": "9.8监管升级是机会_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2uUSV6xc7IJ",
+      "read_count": 72,
+      "body_chars": 1961,
+      "body_sha256": "ac46e2680e6ad621a6ff0803daba63e2dc3b470a0967ba9c1a3b958826ce1aa1",
+      "published_at_cn": "2026-09-08T09:15:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -357,6 +402,21 @@
       "body_chars": 2050,
       "body_sha256": "cd9aa3c4255ec3fae3a3bfeda8fd6af7237cdd8a4f9fd9e9f0b76ab9df169d4d",
       "published_at_cn": "2026-09-08T18:26:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "d26ab524636764b0",
+      "title": "9.8云端 复盘日记_向上看云端_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVG6Uj2Jce",
+      "read_count": 51,
+      "body_chars": 2321,
+      "body_sha256": "d26ab524636764b0552633dd697a33499cdc15ca5680117d0916f570ae1f0fe6",
+      "published_at_cn": "2026-09-08T20:44:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -828,6 +888,39 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "257b1d4cb6aae6e4",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为冲高回落符合预期，市场仍在震荡磨底但已有企稳迹象；需观察承接及外围消息落地，后续或有修复。",
+      "sectors": [
+        {
+          "name": "国产算力",
+          "stance": "不明确",
+          "evidence": "作者将国产算力列为观察板块，未明确判断强弱。"
+        },
+        {
+          "name": "红利",
+          "stance": "不明确",
+          "evidence": "作者将红利列为观察板块，未明确判断强弱。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "市场能否出现承接",
+        "本周震荡幅度是否逐步收窄",
+        "外围消息落地后的方向确认"
+      ],
+      "numeric_claims": [
+        "作者称当日量能为19784亿元。",
+        "作者称量能增量139亿元，变化0.71%。"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
@@ -2029,6 +2122,97 @@
       ]
     },
     {
+      "article_id": "9cf63670d4c10bee",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵",
+        "分歧"
+      ],
+      "market_summary": "作者认为科技短期尚未到位、农业最强，农业与消费或延续至本周；连板高度受压，低位后排晋级随机性较大。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称当日农业最强，化工、农药均为其延伸。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者认为消费是农业补涨，且节日前尚未到兑现时点。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称午后医药因农业强势而回流，农药占比较多。"
+        },
+        {
+          "name": "科技",
+          "stance": "不明确",
+          "evidence": "作者认为科技时间未到，预计月中才出现右侧拐点。"
+        },
+        {
+          "name": "机器人",
+          "stance": "退潮",
+          "evidence": "作者认为该板块没有炒作逻辑，爱仕达仅有溢价后掉队预期。"
+        },
+        {
+          "name": "铜",
+          "stance": "活跃",
+          "evidence": "作者称会关注铜方向精艺股份的预期差。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "消费",
+          "role": "核心"
+        },
+        {
+          "name": "万向德农",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "风险"
+        },
+        {
+          "name": "精艺股份",
+          "sector": "铜",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业及消费主线的延续强度",
+        "龙版传媒断板后高位情绪与连板高度压制",
+        "万向德农、金健米业及精艺股份的表现"
+      ],
+      "numeric_claims": [
+        "哈药最高涨幅为213",
+        "金健米业涨幅为150多",
+        "作者预估金健米业最好或至180至190",
+        "敦煌种业近一个月累计涨幅57.34%",
+        "敦煌种业近一个月累计换手率394.29%",
+        "本川智能拟投建项目金额分别不超过20亿元和10亿元",
+        "长高电气中标金额合计约2.99亿元",
+        "江波龙首次回购成交总金额4.48亿元"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
       "article_id": "a41de732e29cd513",
       "market_stance": "中性",
       "market_phase": [
@@ -2138,6 +2322,84 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "ac46e2680e6ad621",
+      "market_stance": "谨慎",
+      "market_phase": [],
+      "market_summary": "作者认为监管仍严但核心股若因监管分歧或现机会；科技在无量下仅看反弹，进攻机会偏向农业、AI应用及短剧。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "不明确",
+          "evidence": "作者称没有外部市场影响，但在无量情况下只看反弹。"
+        },
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者认为投机进攻机会大概率在农业，并关注低位补涨。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "加强",
+          "evidence": "作者将AI应用列为投机进攻机会方向之一。"
+        },
+        {
+          "name": "短剧",
+          "stance": "活跃",
+          "evidence": "作者将短剧列为投机进攻机会方向之一。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者认为消费存在次级进攻或轮动机会。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "活跃",
+          "evidence": "作者认为贵金属调整后可关注低位或水下机会。"
+        },
+        {
+          "name": "医药",
+          "stance": "不明确",
+          "evidence": "作者称医药弱修复两天，相关低吸仓位将陆续止盈。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "金J",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "亚S",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "龙b",
+          "sector": "AI应用",
+          "role": "高关注"
+        },
+        {
+          "name": "国F",
+          "sector": "消费",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "监管下核心股是否出现分歧及前排表现",
+        "农业低位30CM补涨与金J异动情况",
+        "AI应用龙b是否缩量加速"
+      ],
+      "numeric_claims": [
+        "医药板块弱修复两天",
+        "农业低位关注30CM补涨"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
       ]
     },
     {
@@ -2572,6 +2834,53 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "d26ab524636764b0",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "修复"
+      ],
+      "market_summary": "作者认为市场仍是拉扯震荡，退潮迹象未明显，但科技修复后再度消化、资金与板块分歧，需控制操作节奏。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称科技情绪昨日略修复，今日又进入消化阶段，效应依旧分化。"
+        },
+        {
+          "name": "光通信",
+          "stance": "活跃",
+          "evidence": "作者认为光通信板块安全垫较充足，后续或受光博会带动。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "烽火通信",
+          "sector": "光通信",
+          "role": "高关注"
+        },
+        {
+          "name": "工业富联",
+          "sector": "科技",
+          "role": "高关注"
+        },
+        {
+          "name": "麦格米特",
+          "sector": "科技",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技板块资金及情绪能否企稳",
+        "整体量能是否支持企稳",
+        "麦格米特127-132区间表现"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
+        "明显情绪化"
       ]
     },
     {
