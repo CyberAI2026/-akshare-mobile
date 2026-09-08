@@ -124,6 +124,9 @@ def evaluate_holding_exits(
         # Once it has, trail structural support upward to the completed-day MA10.
         structural_stop = max(saved_stop, ma10 if math.isfinite(max_gain) and max_gain >= 0.05 else 0.0)
         last_two = minute_closes.tail(2)
+        data_complete = bool(
+            math.isfinite(current_price) and current_price > 0 and structural_stop > 0 and len(last_two) == 2
+        )
         structure_broken = bool(
             structural_stop > 0 and len(last_two) == 2 and
             (last_two < structural_stop).all() and math.isfinite(current_price) and current_price < structural_stop
@@ -131,7 +134,9 @@ def evaluate_holding_exits(
         trailing_active = bool(math.isfinite(max_gain) and max_gain >= 0.08)
         pullback_hit = bool(trailing_active and math.isfinite(drawdown) and drawdown >= 0.05)
         sellable = int(pos.get("可卖数量", 0) or 0)
-        if sellable <= 0:
+        if not data_complete:
+            action, qty, reason = "DATA_ERROR", 0, "实时价、两根5分钟收盘或结构止损缺失，禁止把缺失结果解释为继续持有"
+        elif sellable <= 0:
             action, qty, reason = "HOLD_T1", 0, "当日新增持仓不可卖；仅提示结构风险"
         elif structure_broken:
             action, qty, reason = "EXIT_ALL", sellable, "连续两根5分钟收盘低于结构止损，结构破位优先全部退出"

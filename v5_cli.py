@@ -1566,6 +1566,8 @@ def run_tail_finalize():
     holding_exits = evaluate_holding_exits(
         positions, snap45, min45, CACHE, saved_structure_stops(RECOMMENDATION_REGISTRY)
     )
+    if not holding_exits.empty and (holding_exits["卖出建议"] == "DATA_ERROR").any():
+        raise RuntimeError("实际持仓卖出扫描关键数据不完整；禁止默认输出继续持有")
     # Public research artifacts retain observation-pool data only. Actual holding codes,
     # costs and actions are kept out of plaintext git files.
     public_codes = set(pool["股票代码"].astype(str).str.zfill(6))

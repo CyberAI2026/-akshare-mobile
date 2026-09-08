@@ -45,6 +45,12 @@ class HoldingExitTests(unittest.TestCase):
             self.assertEqual(out.iloc[0]["卖出建议"], "REDUCE_50")
             self.assertEqual(int(out.iloc[0]["建议卖出数量"]), 1000)
 
+    def test_missing_realtime_data_is_not_hold(self):
+        with tempfile.TemporaryDirectory() as td:
+            pos = active_position_cycles(transactions(), date(2026, 9, 8))
+            out = evaluate_holding_exits(pos, pd.DataFrame(), pd.DataFrame(), td, {})
+            self.assertEqual(out.iloc[0]["卖出建议"], "DATA_ERROR")
+
 
 if __name__ == "__main__":
     unittest.main()
