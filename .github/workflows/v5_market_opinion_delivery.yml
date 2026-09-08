@@ -36,3 +36,26 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Deliver latest same-day summary once
         run: python research/market_opinion_mining.py --stage push
+
+  failure-alert:
+    needs: deliver
+    if: failure() && (github.event_name != 'schedule' || github.event.schedule == '40 13 * * *')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Notify missing same-day opinion report
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          token=(os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token: raise SystemExit(0)
+          payload={"token":token,"title":"A股二次启动｜21点观点报告未生成",
+                   "content":"21:40最终兜底仍未找到当日淘股吧复盘报告；系统没有发送旧报告，请检查采集任务。",
+                   "template":"html","channel":"wechat"}
+          req=urllib.request.Request("https://www.pushplus.plus/send",data=json.dumps(payload,ensure_ascii=False).encode(),headers={"Content-Type":"application/json"},method="POST")
+          with urllib.request.urlopen(req,timeout=20) as resp: result=json.loads(resp.read().decode())
+          if int(result.get("code",-1))!=200: raise SystemExit(str(result))
+          PY

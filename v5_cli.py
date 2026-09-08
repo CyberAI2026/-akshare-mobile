@@ -1568,11 +1568,25 @@ def run_tail():
     run_tail_finalize()
 
 
+def _close_audit_completed_for_date(trade_date) -> bool:
+    path=LATEST/"latest_close_audit.json"
+    if not path.exists():
+        return False
+    try:
+        audit=json.loads(path.read_text(encoding="utf-8"))
+    except (OSError,ValueError,TypeError):
+        return False
+    return str(audit.get("trade_date",""))==str(trade_date) and audit.get("pushplus_delivery_ok") is True
+
+
 def run_close_audit():
     """15:10复核14:45市场宽度与正式收盘，避免把尾盘快照误读成收盘数据。"""
     today = now_cn().date()
     if not is_trade_day(today):
         print("Not a China A-share trading day; skip."); return
+    if _close_audit_completed_for_date(today):
+        print(f"CLOSE_AUDIT_ALREADY_COMPLETED trade_date={today}; redundant run skipped")
+        return
     if now_cn().hour * 60 + now_cn().minute < 15 * 60 + 5:
         raise RuntimeError("收盘复核最早只能在15:05运行")
     tail_path = LATEST / "last_tail_payload.json"

@@ -74,8 +74,32 @@ jobs:
           python -m py_compile research/market_opinion_mining.py
           python -m unittest tests/test_market_opinion_mining.py
 
-  opinion-batches:
+  discover:
     needs: [preflight, validate]
+    if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      OPINION_ARTICLE_LIMIT: "30"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Discover same-day articles once
+        run: python research/market_opinion_mining.py --stage discover --stage-root opinion_stage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: market-opinion-discovery-${{ github.run_id }}
+          path: opinion_stage/discovery.json
+          if-no-files-found: error
+          retention-days: 1
+
+  opinion-batches:
+    needs: [preflight, validate, discover]
     if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -100,6 +124,10 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: market-opinion-discovery-${{ github.run_id }}
+          path: opinion_stage
       - name: Mine one bounded article batch
         run: |
           python research/market_opinion_mining.py \
@@ -117,8 +145,8 @@ jobs:
           retention-days: 1
 
   aggregate:
-    needs: [preflight, opinion-batches]
-    if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
+    needs: [preflight, discover, opinion-batches]
+    if: always() && needs.preflight.outputs.should_run == 'true' && needs.discover.result == 'success' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -157,3 +185,27 @@ jobs:
           path: v5_data/opinion/
           if-no-files-found: warn
           retention-days: 14
+
+  failure-alert:
+    needs: [preflight, discover, opinion-batches, aggregate]
+    if: always() && needs.preflight.outputs.should_run == 'true' && (needs.discover.result == 'failure' || needs.aggregate.result == 'failure')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Notify opinion pipeline failure
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          token=(os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token: raise SystemExit(0)
+          payload={"token":token,"title":"A股二次启动｜市场观点任务故障",
+                   "content":"当日淘股吧复盘采集或聚合失败，未生成正式报告。系统没有发送旧报告，请检查GitHub Actions。",
+                   "template":"html","channel":"wechat"}
+          req=urllib.request.Request("https://www.pushplus.plus/send",data=json.dumps(payload,ensure_ascii=False).encode(),headers={"Content-Type":"application/json"},method="POST")
+          with urllib.request.urlopen(req,timeout=20) as resp:
+              result=json.loads(resp.read().decode())
+          if int(result.get("code",-1))!=200: raise SystemExit(str(result))
+          PY

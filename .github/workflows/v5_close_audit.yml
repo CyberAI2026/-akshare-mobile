@@ -2,8 +2,8 @@ name: V5 Tail-to-Close Breadth Audit
 
 on:
   schedule:
-    # 15:10 Beijing time on weekdays.
-    - cron: '10 7 * * 1-5'
+    # Staggered 15:07/15:17/15:27 retries; completed runs skip idempotently.
+    - cron: '7,17,27 7 * * 1-5'
   workflow_dispatch:
   push:
     branches: [main]
@@ -43,3 +43,26 @@ jobs:
           name: V5-close-audit-${{ github.run_id }}
           path: v5_data/market/close_audit/
           retention-days: 30
+
+  failure-alert:
+    needs: close-audit
+    if: failure() && (github.event_name != 'schedule' || github.event.schedule == '27 7 * * 1-5')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Notify final close-audit failure
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          token=(os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token: raise SystemExit(0)
+          payload={"token":token,"title":"A股二次启动｜收盘复核故障",
+                   "content":"15:27最终兜底仍未完成收盘复核；可能缺少当日尾盘快照，请检查尾盘工作流。",
+                   "template":"html","channel":"wechat"}
+          req=urllib.request.Request("https://www.pushplus.plus/send",data=json.dumps(payload,ensure_ascii=False).encode(),headers={"Content-Type":"application/json"},method="POST")
+          with urllib.request.urlopen(req,timeout=20) as resp: result=json.loads(resp.read().decode())
+          if int(result.get("code",-1))!=200: raise SystemExit(str(result))
+          PY

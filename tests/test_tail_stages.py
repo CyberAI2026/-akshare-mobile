@@ -64,6 +64,16 @@ class TailStageTests(unittest.TestCase):
                 self.assertTrue(cli._tail_completed_for_date(date(2026, 9, 7)))
                 self.assertFalse(cli._tail_completed_for_date(date(2026, 9, 8)))
 
+    def test_completed_close_audit_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as td:
+            latest=Path(td)
+            (latest/"latest_close_audit.json").write_text(json.dumps({
+                "trade_date":"2026-09-07","pushplus_delivery_ok":True,
+            }),encoding="utf-8")
+            with patch.object(cli,"LATEST",latest):
+                self.assertTrue(cli._close_audit_completed_for_date(date(2026,9,7)))
+                self.assertFalse(cli._close_audit_completed_for_date(date(2026,9,8)))
+
     def test_precheck_persists_candidate_identity(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)

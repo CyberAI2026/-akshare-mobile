@@ -97,13 +97,22 @@ def wait_until_cn(env_name: str) -> None:
 
 
 def fetch_html(url: str) -> str:
-    r = requests.get(
-        url,
-        headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"},
-        timeout=25,
-    )
-    r.raise_for_status()
-    return r.text
+    last_error=None
+    for attempt in range(1,4):
+        try:
+            r = requests.get(
+                url,
+                headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"},
+                timeout=25,
+            )
+            r.raise_for_status()
+            return r.text
+        except Exception as exc:
+            last_error=exc
+            print(f"OPINION_HTTP_RETRY attempt={attempt} url={url} error={type(exc).__name__}",flush=True)
+            if attempt<3:
+                time.sleep(attempt*2)
+    raise last_error
 
 
 def clean_text(text: str) -> str:
@@ -664,11 +673,30 @@ def fetch_selected_articles(selected: list[dict]) -> list[dict]:
     return articles
 
 
+def run_discover_stage(stage_root: Path) -> None:
+    """Discover once so parallel batch jobs do not simultaneously hammer the source site."""
+    wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
+    discovered=discover_articles()
+    if not discovered:
+        raise RuntimeError("没有发现当日淘股吧复盘文章")
+    stage_root.mkdir(parents=True,exist_ok=True)
+    payload={"source_date":source_date().isoformat(),"discovered":discovered}
+    (stage_root/"discovery.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8")
+    print(f"OPINION_DISCOVERY_STAGE_OK source_date={payload['source_date']} discovered={len(discovered)}",flush=True)
+
+
 def run_batch_stage(key: str, batch_index: int, batch_count: int, stage_root: Path) -> None:
     if batch_index<0 or batch_index>=batch_count:
         raise ValueError(f"batch-index必须在0到{batch_count-1}之间")
-    wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
-    discovered=discover_articles()
+    discovery_path=stage_root/"discovery.json"
+    if discovery_path.exists():
+        discovery=json.loads(discovery_path.read_text(encoding="utf-8"))
+        if str(discovery.get("source_date"))!=source_date().isoformat():
+            raise RuntimeError("文章发现清单日期与当前源日期不一致")
+        discovered=discovery.get("discovered",[]) or []
+    else:
+        wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
+        discovered=discover_articles()
     selected=[item for index,item in enumerate(discovered) if index%batch_count==batch_index]
     articles=fetch_selected_articles(selected)
     mined=[]
@@ -785,11 +813,11 @@ def run_delivery_stage() -> None:
     path=ROOT/"latest.json"
     if not path.exists():
         print("OPINION_DELIVERY_NOT_READY reason=latest_missing",flush=True)
-        return
+        raise RuntimeError("当日市场观点摘要尚未生成")
     data=json.loads(path.read_text(encoding="utf-8"))
     if str(data.get("source_date") or data.get("trade_date"))!=source_date().isoformat():
         print(f"OPINION_DELIVERY_NOT_READY reason=stale source_date={data.get('source_date')}",flush=True)
-        return
+        raise RuntimeError(f"市场观点摘要仍是旧日期: {data.get('source_date')}")
     if deliver_data(data):
         commit(f"Record market opinion delivery {data.get('source_date')}")
 
@@ -839,15 +867,17 @@ def run_full_stage(key: str) -> None:
 
 def main() -> None:
     parser=argparse.ArgumentParser()
-    parser.add_argument("--stage",choices=["full","batch","aggregate","push"],default="full")
+    parser.add_argument("--stage",choices=["full","discover","batch","aggregate","push"],default="full")
     parser.add_argument("--batch-index",type=int,default=0)
     parser.add_argument("--batch-count",type=int,default=5)
     parser.add_argument("--stage-root",default="opinion_stage")
     args=parser.parse_args()
     key = os.getenv("OPENAI_API_KEY", "").strip()
-    if args.stage!="push" and not key:
+    if args.stage not in {"push","discover"} and not key:
         raise RuntimeError("OPENAI_API_KEY未配置，不能执行正文观点挖掘")
-    if args.stage=="batch":
+    if args.stage=="discover":
+        run_discover_stage(Path(args.stage_root))
+    elif args.stage=="batch":
         run_batch_stage(key,args.batch_index,args.batch_count,Path(args.stage_root))
     elif args.stage=="aggregate":
         run_aggregate_stage(key,Path(args.stage_root))

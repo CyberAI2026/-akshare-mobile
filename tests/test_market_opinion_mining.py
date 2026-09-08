@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 sys.modules.setdefault("bs4", MagicMock())
@@ -25,6 +27,26 @@ from research import market_opinion_mining as opinion
 
 
 class OpinionSectorGroupingTests(unittest.TestCase):
+    def test_fetch_html_retries_transient_timeout(self):
+        response=MagicMock(text="ok")
+        response.raise_for_status.return_value=None
+        with patch.object(opinion.requests,"get",side_effect=[TimeoutError("temporary"),response]) as get, \
+             patch.object(opinion.time,"sleep"):
+            self.assertEqual(opinion.fetch_html("https://www.tgb.cn/test"),"ok")
+        self.assertEqual(get.call_count,2)
+
+    def test_discovery_stage_is_saved_once_for_parallel_batches(self):
+        discovered=[{"url":"https://www.tgb.cn/a/1","title_hint":"复盘文章","read_count":1,"score":6,"list_url":"x"}]
+        with tempfile.TemporaryDirectory() as td, \
+             patch.object(opinion,"wait_until_cn"), \
+             patch.object(opinion,"discover_articles",return_value=discovered) as discover, \
+             patch.object(opinion,"source_date",return_value=date(2026,9,7)):
+            opinion.run_discover_stage(Path(td))
+            saved=opinion.json.loads((Path(td)/"discovery.json").read_text(encoding="utf-8"))
+        self.assertEqual(saved["source_date"],"2026-09-07")
+        self.assertEqual(saved["discovered"],discovered)
+        discover.assert_called_once()
+
     def test_pushplus_acceptance_keeps_shortcode_without_claiming_delivery(self):
         response=MagicMock(status_code=200,text='{"code":200}')
         response.json.return_value={"code":200,"msg":"执行成功","data":"short-code-1"}
