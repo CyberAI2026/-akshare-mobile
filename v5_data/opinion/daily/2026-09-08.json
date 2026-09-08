@@ -1,7 +1,7 @@
 {
   "trade_date": "2026-09-08",
   "source_date": "2026-09-08",
-  "generated_at_cn": "2026-09-08T22:05:54.181889+08:00",
+  "generated_at_cn": "2026-09-08T22:51:35.536923+08:00",
   "method": "full-text transient mining; raw article bodies not persisted",
   "selection_standard": {
     "publication_date": "文章页面可核验的发表日期必须等于采集日",
@@ -745,40 +745,214 @@
   ],
   "daily_consensus": {
     "market_consensus": {
-      "stance": "样本不足",
-      "phase": [],
-      "confidence": "低",
-      "summary": "当天仅取得7篇合格复盘，低于15篇正式门槛，不形成正式市场共识。"
+      "stance": "谨慎",
+      "phase": [
+        "分歧",
+        "轮动",
+        "混沌"
+      ],
+      "summary": "多数作者认为市场虽仍有较高成交和局部接力热度，但指数震荡、沪强深弱或高开回落特征明显，资金在农业、资源、消费、医药等低位或防御方向间轮动；科技成长方向普遍出现冲高回落、兑现或内部强弱分化，市场主线尚未形成稳定统一共识。",
+      "confidence": "低"
     },
-    "market_disagreements": [],
-    "sector_consensus": [],
-    "stock_attention": [],
-    "tomorrow_consensus_watch": [],
+    "market_disagreements": [
+      "AI算力硬件/科技的定位存在显著分歧：多数文章认为算力、通信、半导体或TMT面临兑现、跳水或脉冲式反弹，少数文章则认为AI算力硬件仍是领涨主线。",
+      "出版传媒及AI应用的持续性判断不一致：部分作者认为其仍有情绪龙头和早盘资金承接，另有作者提示龙版传媒高位炸板或高位负反馈风险。",
+      "医药午后活跃获得多篇提及，但对其性质存在分歧：有作者视为轮动升温方向，也有作者认为启动偏晚、投机属性较强，持续性尚待验证。",
+      "农业被广泛认定为最强方向，但多篇文章同时提示其连续上涨后已进入或可能进入内部加剧分化阶段。"
+    ],
+    "sector_consensus": [
+      {
+        "sector": "农业/种植业/农化",
+        "mention_count": 5,
+        "consensus": "多篇文章将农业及其种植、粮食、农化分支视为当日最强或核心方向，连板高度和板块扩散均较突出；但连续走强后，次日内部淘汰与分化风险也被反复提示。",
+        "stance": "加强",
+        "representative_stocks": [
+          "敦煌种业",
+          "亚盛集团",
+          "金正大",
+          "金健米业"
+        ]
+      },
+      {
+        "sector": "有色金属/资源能源",
+        "mention_count": 4,
+        "consensus": "有色、油气、煤炭等被多篇文章归入低位周期、防御或高低切轮动承接方向，整体表现相对活跃，但多数作者未将其定义为唯一主线。",
+        "stance": "活跃",
+        "representative_stocks": [
+          "北方铜业"
+        ]
+      },
+      {
+        "sector": "化工/化肥",
+        "mention_count": 3,
+        "consensus": "基础化工、农化和化肥均获资金关注，部分文章认为其受农业行情或低位周期防御逻辑带动走强，延续性仍需后续验证。",
+        "stance": "活跃",
+        "representative_stocks": [
+          "金正大",
+          "集泰股份",
+          "赤天化"
+        ]
+      },
+      {
+        "sector": "医药/CRO/创新药",
+        "mention_count": 3,
+        "consensus": "医药相关方向午后活跃并获得轮动资金关注，但启动时点偏后、板块内部强度和持续性尚未形成一致确认。",
+        "stance": "分化",
+        "representative_stocks": [
+          "五洲医疗",
+          "奥浦迈",
+          "澳洋科技"
+        ]
+      },
+      {
+        "sector": "消费/零售",
+        "mention_count": 4,
+        "consensus": "消费、零售及食品饮料被多篇文章视为高低切或补涨轮动方向，存在局部连板和活跃表现，但整体更偏辅助性承接而非市场唯一核心。",
+        "stance": "活跃",
+        "representative_stocks": [
+          "国芳集团",
+          "百大集团",
+          "中百集团"
+        ]
+      },
+      {
+        "sector": "AI算力硬件/通信/电子",
+        "mention_count": 6,
+        "consensus": "该方向被广泛讨论，但观点明显冲突：多数文章观察到通信炸板、CPO跳水、算力熄火或高位兑现，少数文章仍将AI算力硬件定义为主线。因此其整体处于高位分歧和强弱分化状态。",
+        "stance": "分化",
+        "representative_stocks": [
+          "中际旭创",
+          "兴森科技",
+          "沪电",
+          "源杰",
+          "光迅",
+          "中石科技"
+        ]
+      },
+      {
+        "sector": "出版传媒/AI应用",
+        "mention_count": 5,
+        "consensus": "出版传媒和AI应用具备连板及情绪载体，但板块强化程度不稳定，高位龙头反馈被视为判断持续性的关键，整体呈现前排强、后排分化特征。",
+        "stance": "分化",
+        "representative_stocks": [
+          "龙版传媒",
+          "中国出版",
+          "读者传媒"
+        ]
+      }
+    ],
+    "stock_attention": [
+      {
+        "stock": "龙版传媒",
+        "mention_count": 4,
+        "sectors": [
+          "出版传媒",
+          "AI应用"
+        ],
+        "roles": [
+          "龙头",
+          "核心",
+          "风险"
+        ]
+      },
+      {
+        "stock": "敦煌种业",
+        "mention_count": 4,
+        "sectors": [
+          "农业",
+          "种植业"
+        ],
+        "roles": [
+          "龙头",
+          "核心",
+          "高关注"
+        ]
+      },
+      {
+        "stock": "亚盛集团",
+        "mention_count": 3,
+        "sectors": [
+          "农业",
+          "种植业"
+        ],
+        "roles": [
+          "核心",
+          "龙头"
+        ]
+      },
+      {
+        "stock": "中国出版",
+        "mention_count": 3,
+        "sectors": [
+          "出版传媒",
+          "AI应用"
+        ],
+        "roles": [
+          "核心"
+        ]
+      },
+      {
+        "stock": "爱仕达",
+        "mention_count": 2,
+        "sectors": [
+          "机器人",
+          "小家电"
+        ],
+        "roles": [
+          "高关注",
+          "核心"
+        ]
+      },
+      {
+        "stock": "中石科技",
+        "mention_count": 2,
+        "sectors": [
+          "通信",
+          "液冷"
+        ],
+        "roles": [
+          "风险"
+        ]
+      }
+    ],
+    "tomorrow_consensus_watch": [
+      "农业及农化链在连续走强后能否维持前排强度、实现板块扩散，或出现内部加剧分化。",
+      "AI算力、通信、电子等科技方向在冲高回落和炸板后，能否获得修复，及前排个股对后排的带动效果。",
+      "龙版传媒及出版传媒高位标的的开盘、换手和收盘反馈，以观察高位情绪是否出现负反馈扩散。",
+      "上证关键区间附近的方向选择、两市成交额能否放大，以及量能是否支持新的主线持续性。",
+      "医药等午后轮动方向能否获得次日资金持续流入和个股强度确认。"
+    ],
     "limitations": [
-      "当天合格样本不足；没有使用旧文章或低质量帖子补足数量。"
+      "当天仅取得7篇合格复盘，低于15篇正式门槛；以下仍基于现有样本归纳，置信度应降低。",
+      "全部来源均带有广告标记，部分文章还存在明显情绪化表达，观点可能受作者风格和传播目的影响。",
+      "文章对科技主线的判断存在明显冲突，可能反映观察时点、样本口径或交易风格不同，不能将其视为统一市场事实。",
+      "行业名称存在交叉与口径不一，例如AI硬件、算力、通信、电子、CPO和液冷之间存在重叠，聚合时已按相近主题归类。",
+      "文中点位、成交额、涨停数量及个股角色均为作者叙述或统计口径，不构成独立核验结果。"
     ],
     "article_count": 7,
     "source_platform": "淘股吧公开复盘",
-    "sample_status": "样本不足，非正式摘要",
+    "sample_status": "样本不足，基于现有合格样本的非正式摘要",
     "finalization": {
       "reason": "deadline_partial",
       "quality_article_count": 7,
       "minimum_quality_articles": 15,
-      "finalized_at_cn": "2026-09-08T22:05:52.456232+08:00",
+      "finalized_at_cn": "2026-09-08T22:51:17.009300+08:00",
       "ai_quality_rejected_count": 0
     },
     "ths_concept_index": {
-      "status": "not_applicable",
+      "status": "unavailable",
       "asof_date": "2026-09-08",
       "items": [],
-      "note": "文章样本没有形成可匹配的概念板块。"
+      "note": "客观指数数据与文章观点分开记录。",
+      "matched_concepts": 0,
+      "failed_concepts": 0
     }
   },
   "finalization": {
     "reason": "deadline_partial",
     "quality_article_count": 7,
     "minimum_quality_articles": 15,
-    "finalized_at_cn": "2026-09-08T22:05:52.456232+08:00",
+    "finalized_at_cn": "2026-09-08T22:51:17.009300+08:00",
     "ai_quality_rejected_count": 0
   }
 }
