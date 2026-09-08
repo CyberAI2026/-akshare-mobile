@@ -8,6 +8,7 @@ on:
       - ".github/workflows/v5_tail_confirmation.yml"
       - "v5_cli.py"
       - "research/holding_exit.py"
+      - "docs/HOLDING_EXIT_POLICY.md"
       - "tests/test_tail_stages.py"
       - "tests/test_holding_exit.py"
   schedule:
