@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   close-audit:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
