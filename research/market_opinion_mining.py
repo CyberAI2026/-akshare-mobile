@@ -32,6 +32,9 @@ LIST_URLS = [
     "https://www.tgb.cn/newIndex/5",
 ]
 UA = "AStockResearch/1.0 (private research; low-frequency; contact via repository owner)"
+TOPIC_API_URL = "https://www.tgb.cn/talk/getTalkByFlag"
+TOPIC_SEQ = "21325"
+TOPIC_DISCOVERY_PAGES = int(os.getenv("OPINION_TOPIC_DISCOVERY_PAGES", "6"))
 ARTICLE_LIMIT = int(os.getenv("OPINION_ARTICLE_LIMIT", "30"))
 MIN_ARTICLE_COUNT = int(os.getenv("OPINION_MIN_ARTICLES", "15"))
 BATCH_SIZE = int(os.getenv("OPINION_BATCH_SIZE", "4"))
@@ -300,6 +303,60 @@ def review_quality_reasons(title: str, body: str) -> list[str]:
     return reasons
 
 
+def topic_api_candidates_from_payload(payload: dict, page_no: int) -> list[dict]:
+    """Convert the public #每日复盘 latest-feed payload into article candidates."""
+    dto=(payload or {}).get("dto", {}) or {}
+    rows=[]
+    for item in dto.get("list", []) or []:
+        # Replies, short-form posts and video/news items do not expose a normal /a/ article body.
+        if str(item.get("topicType", "")).upper() in {"R", "W", "VD", "CLS"}:
+            continue
+        topic_id=str(item.get("newTopicID") or item.get("newTopicIDNew") or "").strip()
+        title=clean_text(str(item.get("subject") or ""))
+        if not topic_id or len(title)<6:
+            continue
+        try:
+            read_count=int(item.get("viewNum") or 0)
+        except (TypeError,ValueError):
+            read_count=0
+        score=2
+        score+=4 if any(k in title for k in REVIEW_TERMS) else 0
+        score+=min(5,int(read_count>=100)+int(read_count>=500)+int(read_count>=1000)+int(read_count>=3000))
+        rows.append({
+            "url":urljoin("https://www.tgb.cn",f"/a/{topic_id}"),
+            "title_hint":title,"read_count":read_count,"score":score,
+            "list_url":f"{TOPIC_API_URL}?flag=N&pageNo={page_no}&talkSeq={TOPIC_SEQ}",
+        })
+    return rows
+
+
+def discover_topic_api_candidates() -> list[dict]:
+    """Read multiple pages of the public latest feed; article pages remain the date authority."""
+    rows=[]
+    for page_no in range(1,max(1,TOPIC_DISCOVERY_PAGES)+1):
+        try:
+            response=requests.get(
+                TOPIC_API_URL,
+                params={"flag":"N","pageNo":page_no,"talkSeq":TOPIC_SEQ},
+                headers={"User-Agent":UA,"Accept-Language":"zh-CN,zh;q=0.9"},
+                timeout=25,
+            )
+            response.raise_for_status()
+            payload=response.json()
+            dto=(payload or {}).get("dto", {}) or {}
+            rows.extend(topic_api_candidates_from_payload(payload,page_no))
+            page_num=int(dto.get("pageNum") or page_no)
+            if page_no>=page_num:
+                break
+        except Exception as exc:
+            print(
+                f"OPINION_TOPIC_API_FAILED page={page_no} error={type(exc).__name__}:{str(exc)[:160]}",
+                flush=True,
+            )
+            break
+    return rows
+
+
 def discover_articles() -> list[dict]:
     seen: set[str] = set()
     rows: list[dict] = []
@@ -309,6 +366,17 @@ def discover_articles() -> list[dict]:
         f"{target.month}-{target.day}", f"{target.month}.{target.day}",
         f"{target.month}月{target.day}日",
     }
+
+    # Primary route: the topic's public latest-feed pages. Publication dates are
+    # verified again on every article page, so older feed rows cannot enter the pool.
+    for item in discover_topic_api_candidates():
+        href=str(item.get("url") or "")
+        if href and href not in seen:
+            seen.add(href)
+            rows.append(item)
+
+    # Secondary routes: visible HTML lists. These remain useful if the JSON feed is
+    # temporarily unavailable and also surface editorial/recommended review posts.
     for list_url in LIST_URLS:
         html = fetch_html(list_url)
         soup = BeautifulSoup(html, "html.parser")
@@ -324,11 +392,10 @@ def discover_articles() -> list[dict]:
                 if node:
                     contexts.append(clean_text(node.get_text(" ", strip=True)))
             context = min((x for x in contexts if any(t in x for t in date_tokens)), key=len, default=contexts[-1])
-            # 必须能在标题或邻近列表项中确认目标交易日，避免把旧文章混入当日共识。
             if not any(t in context or t in title for t in date_tokens):
                 continue
             score = 0
-            score += 4 if any(k in title for k in ["复盘", "收盘", "市场", "情绪", "板块", "明日"]) else 0
+            score += 4 if any(k in title for k in REVIEW_TERMS) else 0
             score += 2
             reads = re.search(r"(\d+)\s*阅读", context)
             read_count = int(reads.group(1)) if reads else 0
@@ -861,6 +928,22 @@ def deliver_data(data: dict) -> bool:
     return bool(request_receipt.get("accepted"))
 
 
+def apply_sample_status(summary: dict, article_count: int) -> dict:
+    """Keep full aggregation fields at the deadline while clearly labelling low confidence."""
+    if article_count<MIN_ARTICLE_COUNT:
+        summary["sample_status"]="样本不足，基于现有合格样本的非正式摘要"
+        limitations=list(summary.get("limitations", []) or [])
+        note=f"当天仅取得{article_count}篇合格复盘，低于{MIN_ARTICLE_COUNT}篇正式门槛；以下仍基于现有样本归纳，置信度应降低。"
+        if note not in limitations:
+            limitations.insert(0,note)
+        summary["limitations"]=limitations
+        market=summary.setdefault("market_consensus",{})
+        market["confidence"]="低"
+    else:
+        summary["sample_status"]="正式样本"
+    return summary
+
+
 def run_aggregate_stage(key: str, stage_root: Path) -> None:
     sources,mined,source_day,trade_day=load_batch_stages(stage_root)
     sources,mined,rejected=retain_ai_verified_quality(sources,mined)
@@ -877,23 +960,14 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
         )
         commit(f"Update market opinion quality pool {source_day}")
         return
+    client,model=build_client(key)
+    summary=aggregate(client,model,mined,sources)
+    summary=apply_sample_status(summary,len(sources))
     if len(sources)<MIN_ARTICLE_COUNT:
-        summary={
-            "market_consensus":{
-                "stance":"样本不足","phase":[],"confidence":"低",
-                "summary":f"当天仅取得{len(sources)}篇合格复盘，低于{MIN_ARTICLE_COUNT}篇正式门槛，不形成正式市场共识。",
-            },
-            "market_disagreements":[],"sector_consensus":[],"stock_attention":[],
-            "tomorrow_consensus_watch":[],
-            "limitations":["当天合格样本不足；没有使用旧文章或低质量帖子补足数量。"],
-            "article_count":len(sources),"source_platform":"淘股吧公开复盘",
-            "sample_status":"样本不足，非正式摘要",
-        }
-        print(f"OPINION_SAMPLE_INSUFFICIENT articles={len(sources)} minimum={MIN_ARTICLE_COUNT}",flush=True)
-    else:
-        client,model=build_client(key)
-        summary=aggregate(client,model,mined,sources)
-        summary["sample_status"]="正式样本"
+        print(
+            f"OPINION_SAMPLE_INSUFFICIENT_FULL_SUMMARY articles={len(sources)} "
+            f"minimum={MIN_ARTICLE_COUNT}",flush=True,
+        )
     summary["finalization"]={
         "reason":finalization_reason,
         "quality_article_count":len(sources),
