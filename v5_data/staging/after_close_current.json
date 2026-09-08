@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "lifecycle250_complete",
+  "stage": "market_context_complete",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-08T16:05:49.367428+08:00",
@@ -66,5 +66,15 @@
     "命中或增量": 46,
     "总数": 46,
     "成功": 46
+  },
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
   }
 }
