@@ -2,19 +2,24 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import signal
 import time
 from contextlib import contextmanager
+from datetime import date
 from pathlib import Path
 
 import akshare as ak
 import pandas as pd
 
 
-START_DATE = "20250801"
-END_DATE = "20260904"
-SINA_START_DATE = "2025-08-01"
-SINA_END_DATE = "2026-09-04"
+# A full 250-trading-day pre-entry window is needed for trades opened from
+# March 2026 onward.  Keep the end date dynamic so a recovery run never stops
+# at the date of the first study.
+START_DATE = os.getenv("HISTORICAL_RESEARCH_START_DATE", "20250101")
+END_DATE = os.getenv("HISTORICAL_RESEARCH_END_DATE", date.today().strftime("%Y%m%d"))
+SINA_START_DATE = f"{START_DATE[:4]}-{START_DATE[4:6]}-{START_DATE[6:8]}"
+SINA_END_DATE = f"{END_DATE[:4]}-{END_DATE[4:6]}-{END_DATE[6:8]}"
 BATCH_COUNT = 9
 
 

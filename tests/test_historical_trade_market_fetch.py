@@ -11,6 +11,10 @@ from research import historical_trade_market_fetch as fetcher
 
 
 class HistoricalTradeMarketFetchTests(unittest.TestCase):
+    def test_range_covers_full_250_day_pre_entry_window(self):
+        self.assertLessEqual(fetcher.START_DATE, "20250101")
+        self.assertGreaterEqual(fetcher.END_DATE, "20260908")
+
     def test_universe_is_normalized_and_deduplicated(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "u.csv"

@@ -34,7 +34,9 @@ jobs:
       matrix:
         batch: [0, 1, 2, 3, 4, 5, 6, 7, 8]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Public history retrieval may legitimately exceed one ChatGPT work slice.
+    # The job remains bounded and each matrix batch persists its own checkpoint.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -52,4 +54,4 @@ jobs:
           name: historical-market-batch-${{ matrix.batch }}
           path: historical_market_artifact/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
