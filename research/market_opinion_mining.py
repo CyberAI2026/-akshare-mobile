@@ -729,7 +729,12 @@ def run_batch_stage(key: str, batch_index: int, batch_count: int, stage_root: Pa
     else:
         wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
         discovered=discover_articles()
-    selected=[item for index,item in enumerate(discovered) if index%batch_count==batch_index]
+    staged_sources,_,_,_=load_staged_quality_pool(source_date().isoformat())
+    staged_urls={str(item.get("url", "")) for item in staged_sources if item.get("url")}
+    selected=[
+        item for index,item in enumerate(discovered)
+        if index%batch_count==batch_index and str(item.get("url", "")) not in staged_urls
+    ]
     articles=fetch_selected_articles(selected)
     mined=[]
     if articles:
@@ -773,9 +778,54 @@ def load_batch_stages(stage_root: Path) -> tuple[list[dict],list[dict],str,str]:
     missing=sorted(set(sources_by_id)-set(mined_by_id))
     if missing:
         raise RuntimeError(f"汇总前缺失article_id: {missing}")
-    if not sources:
-        raise RuntimeError("所有短批次均未取得可分析的公开正文")
     return sources,mined,next(iter(source_days)),next(iter(trade_days))
+
+
+def staged_quality_path(source_day: str) -> Path:
+    return ROOT/"staging"/f"{source_day}.json"
+
+
+def load_staged_quality_pool(source_day: str) -> tuple[list[dict],list[dict],str,str]:
+    path=staged_quality_path(source_day)
+    if not path.exists():
+        return [],[],source_day,""
+    try:
+        data=json.loads(path.read_text(encoding="utf-8"))
+    except (OSError,ValueError,TypeError):
+        return [],[],source_day,""
+    if str(data.get("source_date", ""))!=source_day:
+        return [],[],source_day,""
+    return (
+        data.get("sources",[]) or [],data.get("article_mining",[]) or [],
+        source_day,str(data.get("trade_date", "")),
+    )
+
+
+def merge_staged_quality_pool(source_day: str, trade_day: str,
+                              sources: list[dict], mined: list[dict]) -> tuple[list[dict],list[dict]]:
+    old_sources,old_mined,_,old_trade_day=load_staged_quality_pool(source_day)
+    sources_by_id={str(item.get("article_id", "")):item for item in old_sources if item.get("article_id")}
+    mined_by_id={str(item.get("article_id", "")):item for item in old_mined if item.get("article_id")}
+    for item in sources:
+        article_id=str(item.get("article_id", ""))
+        if article_id:
+            sources_by_id[article_id]=item
+    for item in mined:
+        article_id=str(item.get("article_id", ""))
+        if article_id:
+            mined_by_id[article_id]=item
+    common=sorted(set(sources_by_id)&set(mined_by_id))
+    merged_sources=[sources_by_id[key] for key in common]
+    merged_mined=[mined_by_id[key] for key in common]
+    path=staged_quality_path(source_day)
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_text(json.dumps({
+        "source_date":source_day,"trade_date":trade_day or old_trade_day,
+        "updated_at_cn":now_cn().isoformat(),
+        "method":"incremental AI-verified quality pool; raw article bodies not persisted",
+        "sources":merged_sources,"article_mining":merged_mined,
+    },ensure_ascii=False,indent=2),encoding="utf-8")
+    return merged_sources,merged_mined
 
 
 def delivery_path(source_day: str) -> Path:
@@ -816,6 +866,7 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
     sources,mined,rejected=retain_ai_verified_quality(sources,mined)
     if rejected:
         print(f"OPINION_AI_QUALITY_REJECTED count={len(rejected)}",flush=True)
+    sources,mined=merge_staged_quality_pool(source_day,trade_day,sources,mined)
     if not sources:
         raise RuntimeError("所有文章均未通过正文规则与OpenAI二次质量复核")
     should_finalize,finalization_reason=opinion_finalization(len(sources))
@@ -824,6 +875,7 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
             f"OPINION_WAIT_FOR_MORE source_date={source_day} quality_articles={len(sources)} "
             f"minimum={MIN_ARTICLE_COUNT} reason={finalization_reason}", flush=True,
         )
+        commit(f"Update market opinion quality pool {source_day}")
         return
     if len(sources)<MIN_ARTICLE_COUNT:
         summary={
