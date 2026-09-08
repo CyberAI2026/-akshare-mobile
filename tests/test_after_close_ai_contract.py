@@ -13,7 +13,8 @@ from unittest.mock import patch
 sys.modules.setdefault("akshare", MagicMock())
 sys.modules.setdefault("requests", MagicMock())
 
-from v5_cli import _after_close_response_schema, _apply_sector_evidence_gate
+from v5_cli import (_after_close_response_schema, _apply_sector_evidence_gate,
+                    _cap_observation_pool, _post_gate_portfolio_note)
 from v5_core import openai_analyze
 
 
@@ -28,7 +29,7 @@ class AfterCloseAIContractTests(unittest.TestCase):
         ]:
             self.assertIn(field, item["required"])
 
-    def test_sector_gate_downgrades_retreat_and_unverified(self):
+    def test_sector_gate_removes_retreat_but_keeps_unverified_conditionally(self):
         selected = ["000001", "000002", "000003"]
         decisions = {
             code: {"decision": "SELECT", "confidence_level": "高", "risk": ""}
@@ -40,11 +41,27 @@ class AfterCloseAIContractTests(unittest.TestCase):
             {"股票代码": "000003", "板块共振状态": "概念已映射但同期行情未核验"},
         ]}
         kept, retreat, unverified = _apply_sector_evidence_gate(selected, decisions, context)
-        self.assertEqual(kept, ["000001"])
+        self.assertEqual(kept, ["000001", "000003"])
         self.assertEqual(retreat, ["000002"])
         self.assertEqual(unverified, ["000003"])
         self.assertEqual(decisions["000002"]["decision"], "WAIT")
+        self.assertEqual(decisions["000003"]["decision"], "SELECT")
         self.assertEqual(decisions["000003"]["confidence_level"], "低")
+
+    def test_pool_over_three_uses_70_30_ranking(self):
+        selected=["000001","000002","000003","000004"]
+        decisions={code:{"decision":"SELECT","priority":i+1,"risk":""} for i,code in enumerate(selected)}
+        context={"stocks":[
+            {"股票代码":"000001","板块共振状态":"板块未核验"},
+            {"股票代码":"000002","板块共振状态":"同期概念共振"},
+            {"股票代码":"000003","板块共振状态":"同期概念分化"},
+            {"股票代码":"000004","板块共振状态":"同期概念共振"},
+        ]}
+        kept,trimmed,scores=_cap_observation_pool(selected,decisions,context,cap=3)
+        self.assertEqual(len(kept),3)
+        self.assertEqual(trimmed,["000004"])
+        self.assertGreater(scores["000002"],scores["000003"])
+        self.assertEqual(decisions["000004"]["decision"],"WAIT")
 
     def test_sector_divergence_cannot_remain_high_confidence(self):
         decisions = {"000001": {"decision": "SELECT", "confidence_level": "高", "risk": ""}}
@@ -54,6 +71,14 @@ class AfterCloseAIContractTests(unittest.TestCase):
         self.assertFalse(retreat)
         self.assertFalse(unverified)
         self.assertEqual(decisions["000001"]["confidence_level"], "中")
+
+    def test_post_gate_portfolio_note_uses_final_pool_count(self):
+        note = _post_gate_portfolio_note(
+            ["002041", "002329", "600368"], [], ["002329", "600368"]
+        )
+        self.assertIn("正式观察池共3只（002041、002329、600368）", note)
+        self.assertIn("002329、600368", note)
+        self.assertIn("条件观察", note)
 
     def test_openai_call_uses_structured_output_contract(self):
         captured = {}
