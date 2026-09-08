@@ -1,4 +1,5 @@
 name: Historical Trade Market Research
+# Full public-history refresh requested 2026-09-08.
 
 on:
   push:
