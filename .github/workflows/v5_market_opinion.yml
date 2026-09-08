@@ -3,10 +3,11 @@ name: V5 Market Opinion Mining
 on:
   workflow_dispatch:
   schedule:
-    # Daily 20:30/20:50/21:10 Beijing, including weekends and exchange holidays.
-    # The preflight below makes later attempts no-cost skips after a same-day result.
-    - cron: "30,50 12 * * *"
-    - cron: "10 13 * * *"
+    # Beijing 20:30 starts collection. From 21:00 onward, publish once 15 quality
+    # reviews are ready; otherwise re-crawl at 21:30 and finalize at 22:00.
+    - cron: "30 12 * * *"
+    - cron: "0,30 13 * * *"
+    - cron: "0 14 * * *"
   push:
     # Manual recovery commits may include [run-opinion] to execute the bounded pipeline.
     branches: [main]
@@ -46,7 +47,11 @@ jobs:
           complete=False
           if path.exists():
               try:
-                  complete=str(json.loads(path.read_text(encoding="utf-8")).get("source_date"))==today
+                  data=json.loads(path.read_text(encoding="utf-8"))
+                  same_day=str(data.get("source_date"))==today
+                  count=len(data.get("sources",[]) or [])
+                  reason=str((data.get("finalization",{}) or {}).get("reason", ""))
+                  complete=same_day and (count>=15 or reason=="deadline_partial")
               except Exception:
                   complete=False
           should_run=force or not complete
@@ -81,7 +86,7 @@ jobs:
     timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
-      OPINION_ARTICLE_LIMIT: "30"
+      OPINION_ARTICLE_LIMIT: "80"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -102,18 +107,18 @@ jobs:
     needs: [preflight, validate, discover]
     if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 8
       matrix:
-        batch: [0, 1, 2, 3, 4]
+        batch: [0, 1, 2, 3, 4, 5, 6, 7]
     env:
       TZ: Asia/Shanghai
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: gpt-5.6-terra
       OPINION_OPENAI_MODEL: gpt-5.6-terra
-      OPINION_ARTICLE_LIMIT: "30"
+      OPINION_ARTICLE_LIMIT: "80"
       OPINION_MIN_ARTICLES: "15"
       OPINION_OPENAI_TIMEOUT_SECONDS: "180"
       OPINION_OPENAI_MAX_RETRIES: "0"
@@ -133,7 +138,7 @@ jobs:
           python research/market_opinion_mining.py \
             --stage batch \
             --batch-index ${{ matrix.batch }} \
-            --batch-count 5 \
+            --batch-count 8 \
             --stage-root opinion_stage
       - name: Upload structured batch only
         if: always()

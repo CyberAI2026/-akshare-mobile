@@ -1,0 +1,85 @@
+name: V5 Long-Run Progress Watchdog
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  inspect-progress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Check long workflows still have an active job
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          from datetime import datetime, timezone
+
+          repo=os.environ["REPOSITORY"]
+          token=os.environ["GH_TOKEN"]
+          monitored={
+              "V5 After-Close Research",
+              "V5 Market Opinion Mining",
+              "V5 Tail Confirmation",
+          }
+
+          def api(path):
+              req=urllib.request.Request(
+                  f"https://api.github.com/repos/{repo}{path}",
+                  headers={"Authorization":f"Bearer {token}","Accept":"application/vnd.github+json"},
+              )
+              with urllib.request.urlopen(req,timeout=20) as resp:
+                  return json.loads(resp.read().decode("utf-8"))
+
+          now=datetime.now(timezone.utc)
+          runs=api("/actions/runs?status=in_progress&per_page=100").get("workflow_runs",[])
+          stalled=[]
+          for run in runs:
+              if run.get("name") not in monitored:
+                  continue
+              started=datetime.fromisoformat(str(run["run_started_at"]).replace("Z","+00:00"))
+              elapsed=(now-started).total_seconds()/60
+              if elapsed<30:
+                  continue
+              jobs=api(f"/actions/runs/{run['id']}/jobs?per_page=100").get("jobs",[])
+              active=[job for job in jobs if job.get("status") in {"queued","in_progress","waiting","pending"}]
+              stale_active=[]
+              for job in active:
+                  stamp=job.get("started_at")
+                  if stamp and job.get("status")=="in_progress":
+                      job_started=datetime.fromisoformat(str(stamp).replace("Z","+00:00"))
+                      if (now-job_started).total_seconds()/60>30:
+                          stale_active.append(job.get("name","unknown"))
+              print(f"WATCHDOG run={run['id']} name={run['name']} elapsed={elapsed:.1f} active_jobs={len(active)}")
+              if not active or stale_active:
+                  stalled.append({"id":run["id"],"name":run["name"],"elapsed":round(elapsed,1),"stale_jobs":stale_active,"url":run.get("html_url","")})
+
+          if not stalled:
+              print("WATCHDOG_OK no_stalled_long_run")
+              raise SystemExit(0)
+          push_token=(os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not push_token:
+              raise RuntimeError(f"检测到疑似卡住任务但PUSHPLUS_TOKEN缺失: count={len(stalled)}")
+          details="<br>".join(
+              f"{x['name']}｜已运行{x['elapsed']}分钟｜疑似卡住作业：{','.join(x['stale_jobs']) or '无活动作业'}<br>{x['url']}"
+              for x in stalled
+          )
+          payload={"token":push_token,"title":"A股二次启动｜GitHub长任务疑似卡住",
+                   "content":details+"<br>系统未强制终止；请依据阶段断点检查后恢复。",
+                   "template":"html","channel":"wechat"}
+          req=urllib.request.Request("https://www.pushplus.plus/send",data=json.dumps(payload,ensure_ascii=False).encode("utf-8"),headers={"Content-Type":"application/json"},method="POST")
+          with urllib.request.urlopen(req,timeout=20) as resp:
+              result=json.loads(resp.read().decode("utf-8"))
+          if int(result.get("code",-1))!=200:
+              raise RuntimeError(f"PushPlus拒绝巡检告警: {result}")
+          PY

@@ -43,10 +43,24 @@ THS_CONCEPT_LIMIT = int(os.getenv("OPINION_THS_CONCEPT_LIMIT", "10"))
 MARKET_TERMS = ("市场", "大盘", "指数", "情绪", "成交额", "涨停", "跌停", "赚钱效应", "亏钱效应")
 SECTOR_TERMS = ("板块", "题材", "主线", "周期", "轮动", "资金", "分歧", "退潮", "修复")
 REVIEW_TERMS = ("复盘", "收盘", "市场", "情绪", "板块", "明日", "策略")
+CRITICAL_QUALITY_FLAGS = ("单股为主", "缺少大盘", "缺少市场", "缺少板块")
 
 
 def now_cn() -> datetime:
     return datetime.now(TZ)
+
+
+def opinion_finalization(article_count: int, current: datetime | None = None) -> tuple[bool, str]:
+    """Publish no earlier than 21:00; wait for 15 quality reviews until the 22:00 deadline."""
+    current = current or now_cn()
+    minutes = current.hour * 60 + current.minute
+    if minutes < 21 * 60:
+        return False, "before_21_release"
+    if article_count >= MIN_ARTICLE_COUNT:
+        return True, "quality_target_met"
+    if minutes >= 22 * 60:
+        return True, "deadline_partial"
+    return False, "awaiting_more_quality_articles"
 
 
 def source_date(current: datetime | None = None) -> date:
@@ -525,6 +539,7 @@ def save_results(articles: list[dict], mined: list[dict], summary: dict) -> None
         "sources": sources,
         "article_mining": mined,
         "daily_consensus": summary,
+        "finalization": summary.get("finalization", {}),
     }
     (daily / f"{day}.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     (ROOT / "latest.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -660,6 +675,23 @@ def public_article_metadata(article: dict) -> dict:
     }
 
 
+def retain_ai_verified_quality(sources: list[dict], mined: list[dict]) -> tuple[list[dict], list[dict], list[dict]]:
+    """Apply the second quality gate after full-text AI extraction; never pad the count."""
+    mined_by_id={str(item.get("article_id", "")):item for item in mined}
+    kept_sources=[];kept_mined=[];rejected=[]
+    for source in sources:
+        article_id=str(source.get("article_id", ""))
+        analysis=mined_by_id.get(article_id, {})
+        flags=[str(x) for x in (analysis.get("quality_flags", []) or [])]
+        critical=sorted({flag for flag in flags if any(term in flag for term in CRITICAL_QUALITY_FLAGS)})
+        if critical:
+            rejected.append({"article_id":article_id,"title":source.get("title", ""),"reasons":critical})
+            continue
+        kept_sources.append(source)
+        kept_mined.append(analysis)
+    return kept_sources,kept_mined,rejected
+
+
 def fetch_selected_articles(selected: list[dict]) -> list[dict]:
     articles=[]
     for meta in selected:
@@ -781,6 +813,18 @@ def deliver_data(data: dict) -> bool:
 
 def run_aggregate_stage(key: str, stage_root: Path) -> None:
     sources,mined,source_day,trade_day=load_batch_stages(stage_root)
+    sources,mined,rejected=retain_ai_verified_quality(sources,mined)
+    if rejected:
+        print(f"OPINION_AI_QUALITY_REJECTED count={len(rejected)}",flush=True)
+    if not sources:
+        raise RuntimeError("所有文章均未通过正文规则与OpenAI二次质量复核")
+    should_finalize,finalization_reason=opinion_finalization(len(sources))
+    if not should_finalize:
+        print(
+            f"OPINION_WAIT_FOR_MORE source_date={source_day} quality_articles={len(sources)} "
+            f"minimum={MIN_ARTICLE_COUNT} reason={finalization_reason}", flush=True,
+        )
+        return
     if len(sources)<MIN_ARTICLE_COUNT:
         summary={
             "market_consensus":{
@@ -798,6 +842,13 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
         client,model=build_client(key)
         summary=aggregate(client,model,mined,sources)
         summary["sample_status"]="正式样本"
+    summary["finalization"]={
+        "reason":finalization_reason,
+        "quality_article_count":len(sources),
+        "minimum_quality_articles":MIN_ARTICLE_COUNT,
+        "finalized_at_cn":now_cn().isoformat(),
+        "ai_quality_rejected_count":len(rejected),
+    }
     summary["ths_concept_index"]=fetch_ths_concept_facts(
         summary.get("sector_consensus",[]) or [],date.fromisoformat(source_day)
     )
@@ -818,6 +869,10 @@ def run_delivery_stage() -> None:
     if str(data.get("source_date") or data.get("trade_date"))!=source_date().isoformat():
         print(f"OPINION_DELIVERY_NOT_READY reason=stale source_date={data.get('source_date')}",flush=True)
         raise RuntimeError(f"市场观点摘要仍是旧日期: {data.get('source_date')}")
+    article_count=len(data.get("sources",[]) or [])
+    reason=str((data.get("finalization",{}) or {}).get("reason", ""))
+    if article_count<MIN_ARTICLE_COUNT and reason!="deadline_partial":
+        raise RuntimeError("高质量文章尚未达到15篇且未到22:00兜底，不得提前发送低样本摘要")
     if deliver_data(data):
         commit(f"Record market opinion delivery {data.get('source_date')}")
 

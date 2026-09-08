@@ -19,6 +19,8 @@ from research.market_opinion_mining import (
     parse_published_at,
     render_source_links,
     review_quality_reasons,
+    opinion_finalization,
+    retain_ai_verified_quality,
     source_date,
     target_trade_date,
     title_review_date_matches,
@@ -27,6 +29,24 @@ from research import market_opinion_mining as opinion
 
 
 class OpinionSectorGroupingTests(unittest.TestCase):
+    def test_opinion_waits_until_fifteen_or_22_deadline(self):
+        cn=ZoneInfo("Asia/Shanghai")
+        self.assertEqual(opinion_finalization(15,datetime(2026,9,8,20,55,tzinfo=cn)),(False,"before_21_release"))
+        self.assertEqual(opinion_finalization(15,datetime(2026,9,8,21,0,tzinfo=cn)),(True,"quality_target_met"))
+        self.assertEqual(opinion_finalization(12,datetime(2026,9,8,21,30,tzinfo=cn)),(False,"awaiting_more_quality_articles"))
+        self.assertEqual(opinion_finalization(12,datetime(2026,9,8,22,0,tzinfo=cn)),(True,"deadline_partial"))
+
+    def test_ai_quality_gate_rejects_single_stock_or_missing_dimensions(self):
+        sources=[{"article_id":"a","title":"综合复盘"},{"article_id":"b","title":"个人持仓"}]
+        mined=[
+            {"article_id":"a","quality_flags":["广告"]},
+            {"article_id":"b","quality_flags":["单股为主","缺少板块"]},
+        ]
+        kept,analyses,rejected=retain_ai_verified_quality(sources,mined)
+        self.assertEqual([x["article_id"] for x in kept],["a"])
+        self.assertEqual([x["article_id"] for x in analyses],["a"])
+        self.assertEqual(rejected[0]["article_id"],"b")
+
     def test_fetch_html_retries_transient_timeout(self):
         response=MagicMock(text="ok")
         response.raise_for_status.return_value=None

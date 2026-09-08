@@ -7,8 +7,9 @@ on:
     paths:
       - "v5_data/opinion/delivery_requests/**"
   schedule:
-    # Beijing 21:00/21:20/21:40. Later attempts safely skip after PushPlus accepts the request.
-    - cron: "0,20,40 13 * * *"
+    # Redundant delivery checks after the mining runs; 22:10 is the final deadline check.
+    - cron: "5,25,45 13 * * *"
+    - cron: "10 14 * * *"
 
 permissions:
   contents: write
@@ -39,7 +40,7 @@ jobs:
 
   failure-alert:
     needs: deliver
-    if: failure() && (github.event_name != 'schedule' || github.event.schedule == '40 13 * * *')
+    if: failure() && (github.event_name != 'schedule' || github.event.schedule == '10 14 * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -52,8 +53,8 @@ jobs:
           import json,os,urllib.request
           token=(os.getenv("PUSHPLUS_TOKEN") or "").strip()
           if not token: raise SystemExit(0)
-          payload={"token":token,"title":"A股二次启动｜21点观点报告未生成",
-                   "content":"21:40最终兜底仍未找到当日淘股吧复盘报告；系统没有发送旧报告，请检查采集任务。",
+          payload={"token":token,"title":"A股二次启动｜22点观点报告未生成",
+                   "content":"22:10最终兜底仍未找到当日淘股吧复盘报告；系统没有发送旧报告，请检查采集任务。",
                    "template":"html","channel":"wechat"}
           req=urllib.request.Request("https://www.pushplus.plus/send",data=json.dumps(payload,ensure_ascii=False).encode(),headers={"Content-Type":"application/json"},method="POST")
           with urllib.request.urlopen(req,timeout=20) as resp: result=json.loads(resp.read().decode())
