@@ -16,6 +16,8 @@ from zoneinfo import ZoneInfo
 from research.market_opinion_mining import (
     apply_sample_status,
     compute_concept_index_metrics,
+    concept_search_terms,
+    match_ths_concepts,
     current_summary_source_urls,
     group_attention_sectors,
     parse_published_at,
@@ -150,6 +152,21 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         reasons=review_quality_reasons("个人实盘",single_stock)
         self.assertIn("市场维度不足",reasons)
         self.assertIn("板块/周期维度不足",reasons)
+
+    def test_composite_sector_names_match_ths_sized_concepts(self):
+        terms=concept_search_terms("农业农化（种业、粮食、糖、化肥、农药）")
+        self.assertIn("种业",terms)
+        self.assertIn("化肥",terms)
+        catalog={
+            "种业":("种业","885123"),
+            "化肥":("化肥","885456"),
+            "液冷服务器":("液冷服务器","885789"),
+        }
+        matched=match_ths_concepts(
+            ["农业农化（种业、粮食、糖、化肥、农药）","科技硬件（液冷）"],
+            catalog,3,
+        )
+        self.assertEqual(matched,[("种业","885123"),("化肥","885456"),("液冷服务器","885789")])
 
     def test_ths_concept_metrics_separate_daily_and_five_day_state(self):
         import pandas as pd
