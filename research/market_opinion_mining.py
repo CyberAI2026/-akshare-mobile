@@ -176,6 +176,49 @@ def normalize_concept_name(value: str) -> str:
     return re.sub(r"(?:概念|板块)$","",value)
 
 
+CONCEPT_KEYWORDS=(
+    "农业","农化","种业","粮食","糖","化肥","农药",
+    "AI算力","算力","光通信","CPO","PCB","半导体","液冷",
+    "出版","传媒","AI应用","医药","医疗服务","CRO",
+    "大消费","消费","商业连锁","零售","化工",
+    "资源","油气","有色","煤炭",
+)
+
+
+def concept_search_terms(value: str) -> list[str]:
+    """Expand an aggregated opinion-sector label into THS-sized concepts."""
+    raw=str(value or "").strip()
+    candidates=[raw]
+    candidates.extend(re.split(r"[（(、，,/／+&）)\s]+|(?:及|和)",raw))
+    normalized=normalize_concept_name(raw)
+    candidates.extend(keyword for keyword in CONCEPT_KEYWORDS if normalize_concept_name(keyword) in normalized)
+    terms=[]
+    for candidate in candidates:
+        term=normalize_concept_name(candidate)
+        if term and term not in terms:
+            terms.append(term)
+    return terms
+
+
+def match_ths_concepts(wanted: list[str], catalog: dict[str, tuple[str,str]],
+                       limit: int) -> list[tuple[str,str]]:
+    """Prefer exact aliases, then bounded substring matches for composite labels."""
+    matched=[]
+    for opinion_name in wanted:
+        for term in concept_search_terms(opinion_name):
+            found=catalog.get(term)
+            if found is None and len(term)>=3:
+                keys=[key for key in catalog if term in key or key in term]
+                if keys:
+                    key=min(keys,key=lambda x:(abs(len(x)-len(term)),len(x),x))
+                    found=catalog[key]
+            if found and found not in matched:
+                matched.append(found)
+                if len(matched)>=limit:
+                    return matched
+    return matched
+
+
 def compute_concept_index_metrics(frame: pd.DataFrame, name: str, code: str = "") -> dict | None:
     if frame is None or frame.empty or "日期" not in frame or "收盘价" not in frame:
         return None
@@ -241,14 +284,8 @@ def fetch_ths_concept_facts(sectors: list[dict], day: date, limit: int | None = 
             key=normalize_concept_name(raw_name)
             if key and key not in catalog:
                 catalog[key]=(raw_name,str(row[code_col]).strip() if code_col else "")
-        matched=[]
         effective_limit=max(1,int(limit or THS_CONCEPT_LIMIT))
-        for opinion_name in wanted:
-            found=catalog.get(normalize_concept_name(opinion_name))
-            if found and found not in matched:
-                matched.append(found)
-            if len(matched)>=effective_limit:
-                break
+        matched=match_ths_concepts(wanted,catalog,effective_limit)
         start=(day-timedelta(days=20)).strftime("%Y%m%d")
         end=day.strftime("%Y%m%d")
         def one(pair):
