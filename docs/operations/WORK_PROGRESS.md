@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-09 19:52 Asia/Shanghai
+Updated: 2026-09-09 19:55 Asia/Shanghai
 
 ## Overall goal
 
@@ -14,7 +14,7 @@ Canonical long-work policy:
 ## Current production baseline
 
 - Production repository: `CyberAI2026/-akshare-mobile`.
-- Production `main` at this checkpoint: `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
+- Production `main` at this checkpoint: `37464d5ff9e508827a321dd8c472eef473908b93`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
 - Assets `main`: `a1cd70e5e124cbd0474f599e380cb5f2a54491e7`.
 - Queued/in-progress GitHub Actions at recovery check: none.
@@ -47,11 +47,9 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## In progress
 
-- Operation `LOCK-20260909-tail-external-scheduler` remains active for scheduler
-  deployment and verification.
-- Validation runs `34347519957` (official market count) and `34347518649` (THS
-  public sector data) were still in progress at this checkpoint. Do not duplicate
-  or rerun them.
+- None. `LOCK-20260909-tail-external-scheduler` is closed after the verified code
+  and checkpoint commits. Cloudflare deployment requires a new lock after account
+  connection and secret availability are verified.
 
 ## Pending
 
@@ -61,6 +59,9 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   Actions token as Worker secret `GITHUB_ACTIONS_TOKEN`; never commit the token.
 - Deploy and inspect the Worker health endpoint, observability, and three cron
   triggers at 14:26, 14:31, and 14:35 Asia/Shanghai.
+- Treat data-test runs `34347519957` and `34347518649` as `retry` only if a later
+  production task depends on fresh live-source acceptance; do not rerun them merely
+  to turn the checks green.
 - Verify the next natural tail cycle without backfilling the missed date.
 - Verify the next natural 20:30-22:15 opinion cycle.
 
@@ -97,15 +98,22 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - API acceptance does not prove terminal WeChat receipt.
 - The user confirmed the formal requirement is the 14:40 intraday tail notification,
   not a 16:40 post-close list.
+- Shared-path validation run `34347519957` failed because Eastmoney closed both
+  candidate requests; deterministic tests passed. Run `34347518649` failed because
+  two THS responses ended prematurely; 8 of 10 tables succeeded. These transient
+  source failures are independent of the scheduler implementation and are recorded
+  without automatic rerun.
 
 ## Latest reliable checkpoint
 
 The nine-rule skill is durable. The external scheduler code and duplicate-alert
-correction are committed through `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
-Tail validation-only run `34347518574` succeeded with no production side effect.
-Two shared-path data validation runs remain active and must not be duplicated. The
-next action is to record their conclusions, then deploy only after the Cloudflare
-connection and least-privilege secret are available.
+correction are committed through `bb4656cda80f633581d59547791d5a2b7bbfcd32`,
+with checkpoint commit `37464d5ff9e508827a321dd8c472eef473908b93`.
+Tail validation-only run `34347518574` succeeded with no production side effect;
+all runs are complete. Two unrelated live-source tests failed transiently and are
+recorded as `retry`, not rerun. The operation lock is closed. The exact next action
+is read-only verification of the Cloudflare connection, followed by a new deployment
+lock, secret configuration, Worker deployment, and natural-cycle acceptance.
 
 ## Rollback point
 
