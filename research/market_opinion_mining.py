@@ -54,9 +54,17 @@ def now_cn() -> datetime:
     return datetime.now(TZ)
 
 
-def opinion_finalization(article_count: int, current: datetime | None = None) -> tuple[bool, str]:
-    """Publish no earlier than 21:00; wait for 15 quality reviews until the 22:00 deadline."""
+def opinion_finalization(
+    article_count: int, current: datetime | None = None, article_day: date | None = None
+) -> tuple[bool, str]:
+    """Finalize the article day after 21:00, including delayed runs after midnight."""
     current = current or now_cn()
+    if article_day is not None and article_day < current.date():
+        return (
+            True,
+            "overnight_quality_target_met" if article_count >= MIN_ARTICLE_COUNT
+            else "deadline_partial",
+        )
     minutes = current.hour * 60 + current.minute
     if minutes < 21 * 60:
         return False, "before_21_release"
@@ -1015,7 +1023,9 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
             "aggregate_skipped=true push_skipped=true",flush=True,
         )
         return
-    should_finalize,finalization_reason=opinion_finalization(len(sources))
+    should_finalize,finalization_reason=opinion_finalization(
+        len(sources),article_day=date.fromisoformat(source_day)
+    )
     if not should_finalize:
         print(
             f"OPINION_WAIT_FOR_MORE source_date={source_day} quality_articles={len(sources)} "
