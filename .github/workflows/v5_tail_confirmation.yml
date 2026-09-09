@@ -46,7 +46,9 @@ jobs:
     # Ordinary code pushes validate only. A dedicated fallback-file commit is an authorized production trigger.
     if: github.event_name != 'push' || contains(github.event.head_commit.message, '[tail-fallback]')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # External dispatch may intentionally arrive a few minutes before the 14:32
+    # safe window, and this stage then waits for the 14:40 sample.
+    timeout-minutes: 25
     env:
       TZ: Asia/Shanghai
       GITHUB_REPO: ${{ github.repository }}
@@ -76,7 +78,7 @@ jobs:
   finalize-1445:
     needs: precheck-1440
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       TZ: Asia/Shanghai
       GITHUB_REPO: ${{ github.repository }}

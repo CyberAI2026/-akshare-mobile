@@ -41,6 +41,7 @@ from v5_core import (
 )
 
 TZ = ZoneInfo("Asia/Shanghai")
+MAX_TAIL_EARLY_WAIT_MINUTES = 15
 ROOT = Path("v5_data")
 OLD_ROOT = Path("v4_data")
 CACHE = ROOT / "cache" / "history"
@@ -1494,7 +1495,18 @@ def _enforce_tail_stage_window(stage: str):
     earliest = 14 * 60 + (32 if stage == "precheck" else 40)
     latest = 14 * 60 + (44 if stage == "precheck" else 55)
     if minutes_now < earliest:
-        raise RuntimeError(f"{stage}在{now0:%H:%M}过早启动；允许窗口从{earliest//60:02d}:{earliest%60:02d}开始")
+        wait_minutes = earliest - minutes_now
+        if wait_minutes > MAX_TAIL_EARLY_WAIT_MINUTES:
+            raise RuntimeError(f"{stage}在{now0:%H:%M}过早启动；允许窗口从{earliest//60:02d}:{earliest%60:02d}开始")
+        print(
+            f"TAIL_EARLY_BOUNDED_WAIT stage={stage} now={now0:%H:%M} "
+            f"target={earliest//60:02d}:{earliest%60:02d}"
+        )
+        wait_until_cn(earliest // 60, earliest % 60)
+        now0 = now_cn()
+        minutes_now = now0.hour * 60 + now0.minute
+        if minutes_now < earliest:
+            raise RuntimeError(f"{stage}有界等待后仍早于安全窗：{now0:%H:%M}")
     if minutes_now > latest:
         msg=f"尾盘{stage}在{now0:%H:%M}才启动，超过安全窗；未用收盘后数据冒充尾盘信号。"
         pushplus_notify("A股二次启动｜尾盘任务迟到", msg)

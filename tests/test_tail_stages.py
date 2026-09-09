@@ -26,6 +26,24 @@ class TailStageTests(unittest.TestCase):
              patch.object(cli, "now_cn", return_value=datetime(2026, 9, 7, 14, 45, tzinfo=CN)):
             self.assertEqual(cli._enforce_tail_stage_window("finalize"), date(2026, 9, 7))
 
+    def test_precheck_can_wait_from_bounded_early_dispatch(self):
+        with patch.object(cli, "is_trade_day", return_value=True), \
+             patch.object(cli, "now_cn", side_effect=[
+                 datetime(2026, 9, 7, 14, 28, tzinfo=CN),
+                 datetime(2026, 9, 7, 14, 32, tzinfo=CN),
+             ]), \
+             patch.object(cli, "wait_until_cn") as wait:
+            self.assertEqual(cli._enforce_tail_stage_window("precheck"), date(2026, 9, 7))
+            wait.assert_called_once_with(14, 32)
+
+    def test_excessively_early_dispatch_still_fails(self):
+        with patch.object(cli, "is_trade_day", return_value=True), \
+             patch.object(cli, "now_cn", return_value=datetime(2026, 9, 7, 14, 0, tzinfo=CN)), \
+             patch.object(cli, "wait_until_cn") as wait:
+            with self.assertRaisesRegex(RuntimeError, "过早启动"):
+                cli._enforce_tail_stage_window("precheck")
+            wait.assert_not_called()
+
     def test_late_stage_fails_without_using_close_data(self):
         with patch.object(cli, "is_trade_day", return_value=True), \
              patch.object(cli, "now_cn", return_value=datetime(2026, 9, 7, 15, 1, tzinfo=CN)), \
