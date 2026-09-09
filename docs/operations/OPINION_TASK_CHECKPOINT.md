@@ -157,3 +157,16 @@ Next verification unit:
 - Push the single engineering commit and confirm the resulting Market Opinion workflow runs validation only.
 - Observe the natural 14:32–14:45 tail cycle; never backfill the missed 2026-09-08 tail signal.
 - Observe the natural 20:30–22:15 opinion cycle for source-set idempotency and the hard no-low-sample rule.
+
+Verification result:
+
+- Production commit: `d3e9b9ad1bb9086d672f84bca67fcc8ae1cfca4a`.
+- Validation run: https://github.com/CyberAI2026/-akshare-mobile/actions/runs/34312385306 — success.
+- Executed jobs: preflight and validate only.
+- Skipped jobs: discover, opinion batches, aggregate, concept refresh, and failure alert.
+- OpenAI calls: 0.
+- PushPlus calls: 0.
+- Production opinion and delivery artifacts: unchanged.
+- Lock status after this checkpoint commit: closed; natural-cycle observation does not hold an artificial manual write lock.
+
+Latest reliable checkpoint: release and source-set idempotency hardening is committed and validation-only tested. The next incomplete unit is the natural 2026-09-09 tail cycle, followed by the natural opinion cycle.
