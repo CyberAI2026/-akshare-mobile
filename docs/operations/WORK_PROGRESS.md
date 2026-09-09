@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-09 19:37 Asia/Shanghai
+Updated: 2026-09-09 19:52 Asia/Shanghai
 
 ## Overall goal
 
@@ -14,7 +14,7 @@ Canonical long-work policy:
 ## Current production baseline
 
 - Production repository: `CyberAI2026/-akshare-mobile`.
-- Production `main`: `94d963c045596a52820ebd333efe66a7e6ffca55`.
+- Production `main` at this checkpoint: `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
 - Assets `main`: `a1cd70e5e124cbd0474f599e380cb5f2a54491e7`.
 - Queued/in-progress GitHub Actions at recovery check: none.
@@ -34,20 +34,33 @@ Canonical long-work policy:
 - The canonical nine-rule resumable-operations skill was committed as
   `94d963c045596a52820ebd333efe66a7e6ffca55`; skill validation and
   `git diff --check` succeeded, and the commit started no GitHub Actions run.
+- External scheduler implementation commit:
+  `e371ae2a4e5011eeeaf6576f22ee6735ca914b50`.
+- Duplicate late-alert correction commit:
+  `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
+- Local verification: Python compilation, 41 deterministic Python tests, 6 Worker
+  idempotency tests, workflow YAML parsing, and `git diff --check` all succeeded.
+- Tail validation-only push run `34347518574` succeeded; precheck, finalize, and
+  failure-alert were skipped, with zero OpenAI and PushPlus calls.
 
 Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## In progress
 
-- None. Operation `LOCK-20260909-strong-stock-resumable-policy` is closed.
+- Operation `LOCK-20260909-tail-external-scheduler` remains active for scheduler
+  deployment and verification.
+- Validation runs `34347519957` (official market count) and `34347518649` (THS
+  public sector data) were still in progress at this checkpoint. Do not duplicate
+  or rerun them.
 
 ## Pending
 
 - Select and deploy an external reliable scheduler for tail workflow dispatch,
   retaining GitHub cron and ChatGPT checks as fallbacks/monitors.
-- Resolve whether the user's requested `16:40` means a post-close next-day list or
-  whether the intended requirement remains the established `14:40` intraday tail
-  recommendation. Do not change the production schedule until resolved.
+- Connect the authorized Cloudflare account and store a repository-scoped GitHub
+  Actions token as Worker secret `GITHUB_ACTIONS_TOKEN`; never commit the token.
+- Deploy and inspect the Worker health endpoint, observability, and three cron
+  triggers at 14:26, 14:31, and 14:35 Asia/Shanghai.
 - Verify the next natural tail cycle without backfilling the missed date.
 - Verify the next natural 20:30-22:15 opinion cycle.
 
@@ -57,6 +70,9 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - `.codex/skills/strong-stock-resumable-operations/references/operating-policy.md`.
 - `.codex/skills/strong-stock-resumable-operations/agents/openai.yaml`.
 - `docs/operations/WORK_PROGRESS.md`.
+- `.github/workflows/v5_tail_confirmation.yml`.
+- `v5_cli.py` and `tests/test_tail_stages.py`.
+- `infrastructure/cloudflare-tail-scheduler/`.
 
 ## Important artifacts and receipts
 
@@ -66,6 +82,12 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   `e59ae4a019d34db8a466603c8c9acec3`; WeChat terminal receipt remains unverified.
 - Tail decision and close-audit artifacts remain dated 2026-09-04; no 2026-09-09
   tail OpenAI call or PushPlus request exists.
+- Delayed schedule run `34347240627` started at 19:45 and was rejected by the safe
+  time gate at 19:47. It made no OpenAI call and produced no recommendation, but
+  sent two accepted failure-notification requests under the old duplicate-alert
+  behavior. The first short code was `7e8402e1f789438ca33773ec007c3cc6`;
+  neither API acceptance proves terminal WeChat receipt. The duplicate path is
+  removed by `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
 
 ## Known issues and risks
 
@@ -73,15 +95,17 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - ChatGPT scheduled tasks are also not a hard-real-time production scheduler.
 - No independent external scheduler is deployed yet.
 - API acceptance does not prove terminal WeChat receipt.
-- Time semantics (`14:40` intraday versus `16:40` post-close) must be explicit.
+- The user confirmed the formal requirement is the 14:40 intraday tail notification,
+  not a 16:40 post-close list.
 
 ## Latest reliable checkpoint
 
-The nine-rule skill is durably saved at
-`94d963c045596a52820ebd333efe66a7e6ffca55`. It produced no Actions, OpenAI, or
-PushPlus side effect, has no strategy impact, and its operation lock is closed.
-External scheduler deployment is the next separate operation and requires live
-authorization plus an explicit schedule decision.
+The nine-rule skill is durable. The external scheduler code and duplicate-alert
+correction are committed through `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
+Tail validation-only run `34347518574` succeeded with no production side effect.
+Two shared-path data validation runs remain active and must not be duplicated. The
+next action is to record their conclusions, then deploy only after the Cloudflare
+connection and least-privilege secret are available.
 
 ## Rollback point
 
