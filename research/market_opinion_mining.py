@@ -77,6 +77,12 @@ def opinion_finalization(
 
 def source_date(current: datetime | None = None) -> date:
     current = current or now_cn()
+    override=os.getenv("OPINION_SOURCE_DATE_OVERRIDE","").strip()
+    if override:
+        requested=date.fromisoformat(override)
+        if requested>current.date() or (current.date()-requested).days>3:
+            raise RuntimeError(f"OPINION_SOURCE_DATE_OVERRIDE超出安全窗口: {requested}")
+        return requested
     day = current.date() - timedelta(days=1) if current.hour < 6 else current.date()
     return day
 
