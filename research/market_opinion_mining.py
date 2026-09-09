@@ -57,22 +57,18 @@ def now_cn() -> datetime:
 def opinion_finalization(
     article_count: int, current: datetime | None = None, article_day: date | None = None
 ) -> tuple[bool, str]:
-    """Finalize the article day after 21:00, including delayed runs after midnight."""
+    """Release only at/after 22:00 and only when the quality pool has at least 15."""
     current = current or now_cn()
     if article_day is not None and article_day < current.date():
-        return (
-            True,
-            "overnight_quality_target_met" if article_count >= MIN_ARTICLE_COUNT
-            else "deadline_partial",
-        )
+        if article_count >= MIN_ARTICLE_COUNT:
+            return True, "overnight_minimum_met"
+        return False, "minimum_quality_articles_not_met"
     minutes = current.hour * 60 + current.minute
-    if minutes < 21 * 60:
-        return False, "before_21_release"
+    if minutes < 22 * 60:
+        return False, "collect_until_22"
     if article_count >= MIN_ARTICLE_COUNT:
-        return True, "quality_target_met"
-    if minutes >= 22 * 60:
-        return True, "deadline_partial"
-    return False, "awaiting_more_quality_articles"
+        return True, "deadline_minimum_met"
+    return False, "minimum_quality_articles_not_met"
 
 
 def source_date(current: datetime | None = None) -> date:
@@ -1006,6 +1002,13 @@ def summary_fingerprint(data: dict) -> str:
 
 def deliver_data(data: dict) -> bool:
     source_day=str(data.get("source_date") or data.get("trade_date") or "")
+    article_count=len(data.get("sources",[]) or [])
+    if article_count<MIN_ARTICLE_COUNT:
+        print(
+            f"OPINION_DELIVERY_BLOCKED source_date={source_day} articles={article_count} "
+            f"minimum={MIN_ARTICLE_COUNT}",flush=True,
+        )
+        return False
     target_day=str(data.get("trade_date") or "")
     fingerprint=summary_fingerprint(data)
     receipt_path=delivery_path(source_day)
@@ -1156,8 +1159,8 @@ def run_delivery_stage() -> None:
         raise RuntimeError(f"市场观点摘要仍是旧日期: {data.get('source_date')}")
     article_count=len(data.get("sources",[]) or [])
     reason=str((data.get("finalization",{}) or {}).get("reason", ""))
-    if article_count<MIN_ARTICLE_COUNT and reason!="deadline_partial":
-        raise RuntimeError("高质量文章尚未达到15篇且未到22:00兜底，不得提前发送低样本摘要")
+    if article_count<MIN_ARTICLE_COUNT:
+        raise RuntimeError("高质量文章不足15篇，禁止发送市场观点摘要")
     if deliver_data(data):
         commit(f"Record market opinion delivery {data.get('source_date')}")
 
