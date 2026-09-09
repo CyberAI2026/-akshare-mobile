@@ -119,6 +119,14 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertTrue(title_review_date_matches("9月3日主题复盘", target))
         self.assertTrue(title_review_date_matches("退潮期空仓！附9.4明日市场核心策略", target))
 
+    def test_source_date_override_is_bounded_for_recovery(self):
+        cn=ZoneInfo("Asia/Shanghai")
+        with patch.dict(opinion.os.environ,{"OPINION_SOURCE_DATE_OVERRIDE":"2026-09-08"},clear=False):
+            self.assertEqual(source_date(datetime(2026,9,9,11,30,tzinfo=cn)),date(2026,9,8))
+        with patch.dict(opinion.os.environ,{"OPINION_SOURCE_DATE_OVERRIDE":"2026-09-20"},clear=False):
+            with self.assertRaises(RuntimeError):
+                source_date(datetime(2026,9,9,11,30,tzinfo=cn))
+
     def test_weekend_articles_target_next_trading_day(self):
         current=datetime(2026,9,5,20,30,tzinfo=ZoneInfo("Asia/Shanghai"))
         calendar=[date(2026,9,4),date(2026,9,7)]
