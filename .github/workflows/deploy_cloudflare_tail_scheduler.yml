@@ -1,0 +1,56 @@
+name: Deploy Cloudflare Tail Scheduler
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type DEPLOY to deploy the production scheduler"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-cloudflare-tail-scheduler
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ inputs.confirmation == 'DEPLOY' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: infrastructure/cloudflare-tail-scheduler
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify required secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_ACTIONS_TOKEN: ${{ secrets.TAIL_DISPATCH_GITHUB_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$GITHUB_ACTIONS_TOKEN"
+
+      - name: Test scheduler
+        run: npm test
+
+      - name: Deploy scheduler and upload dispatch token
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: infrastructure/cloudflare-tail-scheduler
+          command: deploy
+          secrets: |
+            GITHUB_ACTIONS_TOKEN
+        env:
+          GITHUB_ACTIONS_TOKEN: ${{ secrets.TAIL_DISPATCH_GITHUB_TOKEN }}

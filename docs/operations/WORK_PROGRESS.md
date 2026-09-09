@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-09 22:50 Asia/Shanghai
+Updated: 2026-09-09 23:02 Asia/Shanghai
 
 ## Overall goal
 
@@ -14,8 +14,8 @@ Canonical long-work policy:
 ## Current production baseline
 
 - Production repository: `CyberAI2026/-akshare-mobile`.
-- Production `main` before this checkpoint-only commit:
-  `512c30f367ddf96f7d654ce9aa3815995eab586f`.
+- Production `main` before the Cloudflare deployment-workflow commit:
+  `0a830869c09c2faf35c22115782327741bd25165`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
 - Assets `main` last reverified in this resumed operation:
   `e9dd4f86e2776a018a05dd2e1d3186de1a710457`.
@@ -64,23 +64,28 @@ Canonical long-work policy:
   `b63581f334dc12cff29126d6789c1a455fc34412`; run `34365758249` succeeded and
   committed its durable receipt in `512c30f367ddf96f7d654ce9aa3815995eab586f`.
   No second request with the same delivery key is permitted.
+- D+3 repair checkpoint commit `8941b270a2652049e228ad78f17d18f399271dff`
+  was followed by routine sector-library run `34367940059` and no-notify feedback
+  refresh run `34369050929`; both succeeded. Their data commits advanced `main` to
+  `0a830869c09c2faf35c22115782327741bd25165` without OpenAI or PushPlus calls.
 
 Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## In progress
 
-- None. `LOCK-20260909-tail-external-scheduler` is closed. The resumed defect lock
-  `LOCK-20260909-feedback-t3-schema-repair` is also closed after verified code,
-  artifacts, the single correction request, and this checkpoint update. Cloudflare
-  deployment requires a new lock after account connection and secret availability
-  are verified.
+- `LOCK-20260909-cloudflare-ci-deploy`: the ChatGPT Cloudflare plugin installation
+  failed although its catalog status is enabled/available and it has no unresolved
+  dependencies. A non-interactive GitHub Actions deployment path is being added so
+  credentials can stay in repository Secrets rather than chat or a temporary Work
+  environment. No deployment has been triggered.
 
 ## Pending
 
 - Select and deploy an external reliable scheduler for tail workflow dispatch,
   retaining GitHub cron and ChatGPT checks as fallbacks/monitors.
-- Connect the authorized Cloudflare account and store a repository-scoped GitHub
-  Actions token as Worker secret `GITHUB_ACTIONS_TOKEN`; never commit the token.
+- Store `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and the repository-scoped
+  `TAIL_DISPATCH_GITHUB_TOKEN` as GitHub Actions secrets; never commit or paste them.
+- Manually dispatch `Deploy Cloudflare Tail Scheduler` with confirmation `DEPLOY`.
 - Deploy and inspect the Worker health endpoint, observability, and three cron
   triggers at 14:26, 14:31, and 14:35 Asia/Shanghai.
 - Treat data-test runs `34347519957` and `34347518649` as `retry` only if a later
@@ -104,6 +109,7 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - `.github/workflows/v5_after_close.yml`.
 - `v5_data/control/feedback_correction_trigger.json`.
 - `v5_data/feedback/delivery_receipts.json`.
+- `.github/workflows/deploy_cloudflare_tail_scheduler.yml`.
 
 ## Important artifacts and receipts
 
@@ -132,6 +138,9 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - GitHub scheduled workflows are best-effort and have delayed or failed to start.
 - ChatGPT scheduled tasks are also not a hard-real-time production scheduler.
 - No independent external scheduler is deployed yet.
+- The ChatGPT Cloudflare plugin connection attempt failed. Its catalog metadata is
+  available/enabled with no missing dependency, so the failure is recorded as a
+  connector/OAuth installation issue; GitHub Actions deployment is the fallback.
 - API acceptance does not prove terminal WeChat receipt.
 - The D+3 cache-schema and refresh-order defects are repaired. The next natural
   recommendation-feedback cycle remains an acceptance check for the new chain;
@@ -151,10 +160,11 @@ Corrected data and the one allowed correction receipt are durably committed thro
 `512c30f367ddf96f7d654ce9aa3815995eab586f`. Runs `34365360439`, `34365361053`,
 and `34365758249` all succeeded; no run is queued or in progress. This repair used
 zero OpenAI calls and exactly one correction PushPlus request. Its delivery key is
-now protected against replay. Both production write locks are closed. The exact
-next action is read-only verification of the Cloudflare connection, followed by a
-new deployment lock, secret configuration, Worker deployment, and natural-cycle
-acceptance.
+now protected against replay. The D+3 repair locks are closed.
+`LOCK-20260909-cloudflare-ci-deploy` is active only for the deployment workflow and
+documentation unit. The exact next action after its verified commit is user-side
+creation of the three GitHub Actions secrets, followed by one confirmed deployment
+run and natural-cycle acceptance.
 
 ## Rollback point
 
