@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-09 19:40 Asia/Shanghai
+Updated: 2026-09-09 19:37 Asia/Shanghai
 
 ## Overall goal
 
@@ -14,7 +14,7 @@ Canonical long-work policy:
 ## Current production baseline
 
 - Production repository: `CyberAI2026/-akshare-mobile`.
-- Production `main`: `e515f3745e101cef279cc0de5c0b5c4284624444`.
+- Production `main`: `94d963c045596a52820ebd333efe66a7e6ffca55`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
 - Assets `main`: `a1cd70e5e124cbd0474f599e380cb5f2a54491e7`.
 - Queued/in-progress GitHub Actions at recovery check: none.
@@ -31,18 +31,18 @@ Canonical long-work policy:
 - The missed 2026-09-09 tail run is recorded without post-close fabrication.
 - Both ChatGPT tail-watchdog prompts were hardened in place; no duplicate automation
   was created and no production side effect occurred during that correction.
+- The canonical nine-rule resumable-operations skill was committed as
+  `94d963c045596a52820ebd333efe66a7e6ffca55`; skill validation and
+  `git diff --check` succeeded, and the commit started no GitHub Actions run.
 
 Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## In progress
 
-- Operation `LOCK-20260909-strong-stock-resumable-policy`: project-level skill and
-  unified checkpoint are being added. Scope is documentation/skill metadata only;
-  no Actions, OpenAI, PushPlus, or strategy effect is authorized.
+- None. Operation `LOCK-20260909-strong-stock-resumable-policy` is closed.
 
 ## Pending
 
-- Commit and validate the project-level resumable-operations skill.
 - Select and deploy an external reliable scheduler for tail workflow dispatch,
   retaining GitHub cron and ChatGPT checks as fallbacks/monitors.
 - Resolve whether the user's requested `16:40` means a post-close next-day list or
@@ -77,14 +77,13 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## Latest reliable checkpoint
 
-Production remains at `e515f3745e101cef279cc0de5c0b5c4284624444`,
-with no running Actions and no active manual lock before this documentation-only
-unit. The next safe action is to validate and commit the new project skill, then
-close its lock. External scheduler deployment is a separate operation and requires
-live authorization plus an explicit schedule decision.
+The nine-rule skill is durably saved at
+`94d963c045596a52820ebd333efe66a7e6ffca55`. It produced no Actions, OpenAI, or
+PushPlus side effect, has no strategy impact, and its operation lock is closed.
+External scheduler deployment is the next separate operation and requires live
+authorization plus an explicit schedule decision.
 
 ## Rollback point
 
 - Before this documentation/skill unit:
   `e515f3745e101cef279cc0de5c0b5c4284624444`.
-
