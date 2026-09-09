@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-09 19:55 Asia/Shanghai
+Updated: 2026-09-09 22:50 Asia/Shanghai
 
 ## Overall goal
 
@@ -14,9 +14,11 @@ Canonical long-work policy:
 ## Current production baseline
 
 - Production repository: `CyberAI2026/-akshare-mobile`.
-- Production `main` at this checkpoint: `37464d5ff9e508827a321dd8c472eef473908b93`.
+- Production `main` before this checkpoint-only commit:
+  `512c30f367ddf96f7d654ce9aa3815995eab586f`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
-- Assets `main`: `a1cd70e5e124cbd0474f599e380cb5f2a54491e7`.
+- Assets `main` last reverified in this resumed operation:
+  `e9dd4f86e2776a018a05dd2e1d3186de1a710457`.
 - Queued/in-progress GitHub Actions at recovery check: none.
 - Active manual production write lock at recovery check: none.
 
@@ -42,14 +44,36 @@ Canonical long-work policy:
   idempotency tests, workflow YAML parsing, and `git diff --check` all succeeded.
 - Tail validation-only push run `34347518574` succeeded; precheck, finalize, and
   failure-alert were skipped, with zero OpenAI and PushPlus calls.
+- Recommendation D+3 defect repair commit:
+  `654bff49f7d542851be61d6f8bac130385e8afb4`. The defect was that cached bars use
+  `收盘价`/`最低价` while feedback evaluation only accepted `收盘`/`最低`; therefore the
+  2026-09-04 recommendation was incorrectly recorded as `推荐日收盘缺失` and the
+  2026-09-09 scheduled report showed a zero D+3 sample.
+- The repair normalizes cached/raw bar columns, evaluates cache before importing
+  the live-data dependency, adds durable delivery-key receipts, and refreshes
+  feedback after the final after-close cache commit. It does not change selection,
+  watch-pool, position, capital, stop-loss, or take-profit strategy.
+- Ten deterministic recommendation-feedback tests, workflow YAML parsing,
+  `git diff --check`, and a real cached-data no-notify rebuild passed. The rebuild
+  matured `600801 华新建材` on D+3 (2026-09-09) at `25.10`, return `+1.2097%`, with
+  no three-day stop touch.
+- Validation runs `34365360439` and `34365361053` completed successfully with no
+  OpenAI call and no PushPlus request. Run `34365360439` committed the corrected
+  recommendation artifacts.
+- One explicit idempotent correction was requested by commit
+  `b63581f334dc12cff29126d6789c1a455fc34412`; run `34365758249` succeeded and
+  committed its durable receipt in `512c30f367ddf96f7d654ce9aa3815995eab586f`.
+  No second request with the same delivery key is permitted.
 
 Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## In progress
 
-- None. `LOCK-20260909-tail-external-scheduler` is closed after the verified code
-  and checkpoint commits. Cloudflare deployment requires a new lock after account
-  connection and secret availability are verified.
+- None. `LOCK-20260909-tail-external-scheduler` is closed. The resumed defect lock
+  `LOCK-20260909-feedback-t3-schema-repair` is also closed after verified code,
+  artifacts, the single correction request, and this checkpoint update. Cloudflare
+  deployment requires a new lock after account connection and secret availability
+  are verified.
 
 ## Pending
 
@@ -74,6 +98,12 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - `.github/workflows/v5_tail_confirmation.yml`.
 - `v5_cli.py` and `tests/test_tail_stages.py`.
 - `infrastructure/cloudflare-tail-scheduler/`.
+- `research/recommendation_feedback.py`.
+- `tests/test_recommendation_feedback.py`.
+- `.github/workflows/v5_recommendation_feedback.yml`.
+- `.github/workflows/v5_after_close.yml`.
+- `v5_data/control/feedback_correction_trigger.json`.
+- `v5_data/feedback/delivery_receipts.json`.
 
 ## Important artifacts and receipts
 
@@ -89,6 +119,13 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   behavior. The first short code was `7e8402e1f789438ca33773ec007c3cc6`;
   neither API acceptance proves terminal WeChat receipt. The duplicate path is
   removed by `bb4656cda80f633581d59547791d5a2b7bbfcd32`.
+- The original incorrect 2026-09-09 feedback request was accepted under short code
+  `120236caa21a4922968952c6bd23b6bc`; it reported zero D+3 samples and is superseded,
+  not silently overwritten.
+- The correction request used delivery key
+  `feedback-correction-2026-09-09-d3-schema-v1` and was accepted at 22:46 China time
+  with short code `f50cf6d28d6a400aab2c62f8aa8a811f`. The persisted status is
+  `request_accepted`; terminal WeChat delivery remains unverified.
 
 ## Known issues and risks
 
@@ -96,6 +133,9 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 - ChatGPT scheduled tasks are also not a hard-real-time production scheduler.
 - No independent external scheduler is deployed yet.
 - API acceptance does not prove terminal WeChat receipt.
+- The D+3 cache-schema and refresh-order defects are repaired. The next natural
+  recommendation-feedback cycle remains an acceptance check for the new chain;
+  it is not authorization to replay the corrected 2026-09-09 delivery.
 - The user confirmed the formal requirement is the 14:40 intraday tail notification,
   not a 16:40 post-close list.
 - Shared-path validation run `34347519957` failed because Eastmoney closed both
@@ -106,16 +146,17 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
 
 ## Latest reliable checkpoint
 
-The nine-rule skill is durable. The external scheduler code and duplicate-alert
-correction are committed through `bb4656cda80f633581d59547791d5a2b7bbfcd32`,
-with checkpoint commit `37464d5ff9e508827a321dd8c472eef473908b93`.
-Tail validation-only run `34347518574` succeeded with no production side effect;
-all runs are complete. Two unrelated live-source tests failed transiently and are
-recorded as `retry`, not rerun. The operation lock is closed. The exact next action
-is read-only verification of the Cloudflare connection, followed by a new deployment
-lock, secret configuration, Worker deployment, and natural-cycle acceptance.
+The D+3 repair is committed through `654bff49f7d542851be61d6f8bac130385e8afb4`.
+Corrected data and the one allowed correction receipt are durably committed through
+`512c30f367ddf96f7d654ce9aa3815995eab586f`. Runs `34365360439`, `34365361053`,
+and `34365758249` all succeeded; no run is queued or in progress. This repair used
+zero OpenAI calls and exactly one correction PushPlus request. Its delivery key is
+now protected against replay. Both production write locks are closed. The exact
+next action is read-only verification of the Cloudflare connection, followed by a
+new deployment lock, secret configuration, Worker deployment, and natural-cycle
+acceptance.
 
 ## Rollback point
 
-- Before this documentation/skill unit:
-  `e515f3745e101cef279cc0de5c0b5c4284624444`.
+- Before the D+3 engineering repair:
+  `dc724dcb0910fda903cd0609d0b35b05d91e7fc5`.
