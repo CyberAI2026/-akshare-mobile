@@ -68,7 +68,10 @@ jobs:
                   same_day=str(data.get("source_date"))==today
                   count=len(data.get("sources",[]) or [])
                   reason=str((data.get("finalization",{}) or {}).get("reason", ""))
-                  complete=same_day and (count>=15 or reason=="deadline_partial")
+                  complete=(
+                      same_day and count>=15
+                      and reason in {"deadline_minimum_met","overnight_minimum_met"}
+                  )
               except Exception:
                   complete=False
           should_run=force or not complete

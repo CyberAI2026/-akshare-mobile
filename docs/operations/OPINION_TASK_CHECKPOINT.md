@@ -130,3 +130,30 @@ Correction history:
 - Run 34309692212 validated the complete combined state successfully.
 
 Latest reliable checkpoint: the corrected release gate is committed and validated. The next natural 20:30–22:00 cycle should be observed without a manual production trigger. Rollback point before this policy correction: ddb85e9b76b3be709c6a45fa2d8d4d607b6dd184.
+
+## Reliability Hardening — 2026-09-09 Account Handoff
+
+Operation lock: `LOCK-20260909-1238-opinion-tail-reliability`.
+
+Scope and policy impact:
+
+- Removed the remaining `deadline_partial` completion paths from the primary and 21:30 fallback workflows.
+- Delivery now enforces the 22:00/minimum-15 gate independently of aggregation.
+- Delivery idempotency now keys on the quality-approved source collection, so a concept-only refresh cannot cause another PushPlus request for the same sources.
+- The legacy full-stage path now persists an insufficient quality pool without creating a low-sample `latest.json` report.
+- Existing ChatGPT Work opinion automations were updated in place; no duplicate automation was created.
+- The available automation plan has a five-active-task limit, so the existing 14:38 secondary tail watchdog could not be enabled. The 14:32 tail watchdog remains enabled and the repository retains three staggered tail crons.
+- No stock-selection, observation-pool, position, capital, stop-loss, or take-profit rule changed.
+
+Local verification before commit:
+
+- `python -m py_compile research/market_opinion_mining.py`: success.
+- 59 deterministic opinion, tail, holding-exit, data-layer, and feedback tests: success.
+- OpenAI calls: 0.
+- PushPlus calls: 0 (tests use mocked responses only).
+
+Next verification unit:
+
+- Push the single engineering commit and confirm the resulting Market Opinion workflow runs validation only.
+- Observe the natural 14:32–14:45 tail cycle; never backfill the missed 2026-09-08 tail signal.
+- Observe the natural 20:30–22:15 opinion cycle for source-set idempotency and the hard no-low-sample rule.

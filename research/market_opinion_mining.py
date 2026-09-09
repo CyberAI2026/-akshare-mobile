@@ -995,8 +995,13 @@ def delivery_path(source_day: str) -> Path:
     return ROOT/"delivery"/f"{source_day}.json"
 
 
-def summary_fingerprint(data: dict) -> str:
-    payload=json.dumps(data.get("daily_consensus",{}),ensure_ascii=False,sort_keys=True)
+def source_set_fingerprint(data: dict) -> str:
+    """Use the quality-approved source collection as the delivery idempotency key."""
+    payload=json.dumps(sorted(
+        str(item.get("url") or item.get("article_id") or "")
+        for item in (data.get("sources",[]) or [])
+        if item.get("url") or item.get("article_id")
+    ),ensure_ascii=False)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -1009,12 +1014,28 @@ def deliver_data(data: dict) -> bool:
             f"minimum={MIN_ARTICLE_COUNT}",flush=True,
         )
         return False
+    should_finalize,reason=opinion_finalization(
+        article_count,article_day=date.fromisoformat(source_day)
+    )
+    if not should_finalize:
+        print(
+            f"OPINION_DELIVERY_BLOCKED source_date={source_day} articles={article_count} "
+            f"reason={reason}",flush=True,
+        )
+        return False
     target_day=str(data.get("trade_date") or "")
-    fingerprint=summary_fingerprint(data)
+    fingerprint=source_set_fingerprint(data)
     receipt_path=delivery_path(source_day)
     if receipt_path.exists():
         old=json.loads(receipt_path.read_text(encoding="utf-8"))
-        if old.get("summary_sha256")==fingerprint and old.get("status") in {"delivered","request_accepted"}:
+        accepted=old.get("status") in {"delivered","request_accepted"}
+        same_source_set=old.get("source_set_sha256")==fingerprint
+        legacy_same_set=(
+            not old.get("source_set_sha256")
+            and str(old.get("source_date") or "")==source_day
+            and int(old.get("article_count") or 0)==article_count
+        )
+        if accepted and (same_source_set or legacy_same_set):
             print(f"OPINION_DELIVERY_ALREADY_DONE source_date={source_day}",flush=True)
             return False
     request_receipt=push_summary(data.get("daily_consensus",{}),source_day,target_day,data.get("sources",[]) or [])
@@ -1023,28 +1044,12 @@ def deliver_data(data: dict) -> bool:
         receipt_path.write_text(json.dumps({
             "status":"request_accepted","delivery_confirmation":"unverified",
             "source_date":source_day,"trade_date":target_day,
-            "accepted_at_cn":now_cn().isoformat(),"summary_sha256":fingerprint,
+            "accepted_at_cn":now_cn().isoformat(),"source_set_sha256":fingerprint,
             "article_count":len(data.get("sources",[]) or []),
             "pushplus_short_code":request_receipt.get("short_code",""),
             "pushplus_message":request_receipt.get("response_message",""),
         },ensure_ascii=False,indent=2),encoding="utf-8")
     return bool(request_receipt.get("accepted"))
-
-
-def apply_sample_status(summary: dict, article_count: int) -> dict:
-    """Keep full aggregation fields at the deadline while clearly labelling low confidence."""
-    if article_count<MIN_ARTICLE_COUNT:
-        summary["sample_status"]="样本不足，基于现有合格样本的非正式摘要"
-        limitations=list(summary.get("limitations", []) or [])
-        note=f"当天仅取得{article_count}篇合格复盘，低于{MIN_ARTICLE_COUNT}篇正式门槛；以下仍基于现有样本归纳，置信度应降低。"
-        if note not in limitations:
-            limitations.insert(0,note)
-        summary["limitations"]=limitations
-        market=summary.setdefault("market_consensus",{})
-        market["confidence"]="低"
-    else:
-        summary["sample_status"]="正式样本"
-    return summary
 
 
 def current_summary_source_urls(source_day: str) -> set[str]:
@@ -1088,12 +1093,7 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
         return
     client,model=build_client(key)
     summary=aggregate(client,model,mined,sources)
-    summary=apply_sample_status(summary,len(sources))
-    if len(sources)<MIN_ARTICLE_COUNT:
-        print(
-            f"OPINION_SAMPLE_INSUFFICIENT_FULL_SUMMARY articles={len(sources)} "
-            f"minimum={MIN_ARTICLE_COUNT}",flush=True,
-        )
+    summary["sample_status"]="正式样本"
     summary["finalization"]={
         "reason":finalization_reason,
         "quality_article_count":len(sources),
@@ -1186,19 +1186,29 @@ def run_full_stage(key: str) -> None:
     actual={str(x.get("article_id","")) for x in mined}
     if expected-actual:
         raise RuntimeError(f"逐篇分析缺失article_id: {sorted(expected-actual)}")
-    if len(articles)<MIN_ARTICLE_COUNT:
-        summary={
-            "market_consensus":{"stance":"样本不足","phase":[],"confidence":"低",
-                                "summary":f"当天仅取得{len(articles)}篇合格复盘，低于{MIN_ARTICLE_COUNT}篇正式门槛，不形成正式市场共识。"},
-            "market_disagreements":[],"sector_consensus":[],"stock_attention":[],
-            "tomorrow_consensus_watch":[],
-            "limitations":["当天合格样本不足；没有使用旧文章或低质量帖子补足数量。"],
-            "article_count":len(articles),"source_platform":"淘股吧公开复盘",
-            "sample_status":"样本不足，非正式摘要",
-        }
-    else:
-        summary=aggregate(client,model,mined,articles)
-        summary["sample_status"]="正式样本"
+    articles,mined,rejected=retain_ai_verified_quality(articles,mined)
+    source_day=source_date().isoformat()
+    trade_day=target_trade_date().isoformat()
+    articles,mined=merge_staged_quality_pool(source_day,trade_day,articles,mined)
+    should_finalize,finalization_reason=opinion_finalization(
+        len(articles),article_day=date.fromisoformat(source_day)
+    )
+    if not should_finalize:
+        print(
+            f"OPINION_WAIT_FOR_MORE source_date={source_day} quality_articles={len(articles)} "
+            f"minimum={MIN_ARTICLE_COUNT} reason={finalization_reason}",flush=True,
+        )
+        commit(f"Update market opinion quality pool {source_day}")
+        return
+    summary=aggregate(client,model,mined,articles)
+    summary["sample_status"]="正式样本"
+    summary["finalization"]={
+        "reason":finalization_reason,
+        "quality_article_count":len(articles),
+        "minimum_quality_articles":MIN_ARTICLE_COUNT,
+        "finalized_at_cn":now_cn().isoformat(),
+        "ai_quality_rejected_count":len(rejected),
+    }
     summary["ths_concept_index"]=fetch_ths_concept_facts(
         summary.get("sector_consensus",[]) or [],source_date()
     )

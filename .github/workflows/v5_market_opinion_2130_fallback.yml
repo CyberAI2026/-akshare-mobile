@@ -52,7 +52,10 @@ jobs:
                   if str(data.get("source_date")) == today:
                       article_count = len(data.get("sources", []) or [])
                       reason = str((data.get("finalization", {}) or {}).get("reason", ""))
-                      complete = article_count >= 15 or reason == "deadline_partial"
+                      complete = (
+                          article_count >= 15
+                          and reason in {"deadline_minimum_met", "overnight_minimum_met"}
+                      )
               except Exception as exc:
                   print(f"FALLBACK_LATEST_PARSE_WARNING {exc}")
 

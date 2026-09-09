@@ -14,7 +14,6 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 from research.market_opinion_mining import (
-    apply_sample_status,
     compute_concept_index_metrics,
     concept_search_terms,
     match_ths_concepts,
@@ -233,21 +232,40 @@ class OpinionSectorGroupingTests(unittest.TestCase):
             })
             self.assertEqual(current_summary_source_urls("2026-09-09"),set())
 
-    def test_partial_sample_keeps_full_consensus_fields(self):
-        summary={
-            "market_consensus":{"stance":"谨慎","phase":["分歧"],"summary":"现有样本形成的摘要","confidence":"中"},
-            "market_disagreements":["农业持续性存在分歧"],
-            "sector_consensus":[{"sector":"农业","mention_count":4,"stance":"加强"}],
-            "stock_attention":[{"stock":"亚盛集团","mention_count":3}],
-            "tomorrow_consensus_watch":["观察农业分化"],
-            "limitations":[],
+    def test_delivery_idempotency_uses_source_set_not_changed_summary(self):
+        data={
+            "source_date":"2026-09-08",
+            "trade_date":"2026-09-08",
+            "sources":[{"url":f"https://www.tgb.cn/a/{i}"} for i in range(15)],
+            "daily_consensus":{"market_consensus":{"summary":"refreshed facts"}},
         }
-        out=apply_sample_status(summary,7)
-        self.assertEqual(out["market_consensus"]["summary"],"现有样本形成的摘要")
-        self.assertEqual(out["market_consensus"]["confidence"],"低")
-        self.assertTrue(out["sector_consensus"])
-        self.assertTrue(out["stock_attention"])
-        self.assertIn("基于现有合格样本",out["sample_status"])
+        with tempfile.TemporaryDirectory() as td, \
+             patch.object(opinion,"ROOT",Path(td)), \
+             patch.object(opinion,"now_cn",return_value=datetime(2026,9,9,1,0,tzinfo=ZoneInfo("Asia/Shanghai"))), \
+             patch.object(opinion,"push_summary") as push:
+            receipt=opinion.delivery_path("2026-09-08")
+            receipt.parent.mkdir(parents=True,exist_ok=True)
+            receipt.write_text(opinion.json.dumps({
+                "status":"request_accepted",
+                "source_date":"2026-09-08",
+                "article_count":15,
+            }),encoding="utf-8")
+            self.assertFalse(opinion.deliver_data(data))
+        push.assert_not_called()
+
+    def test_delivery_is_blocked_before_2200_even_with_fifteen(self):
+        data={
+            "source_date":"2026-09-08",
+            "trade_date":"2026-09-08",
+            "sources":[{"url":f"https://www.tgb.cn/a/{i}"} for i in range(15)],
+            "daily_consensus":{},
+        }
+        with tempfile.TemporaryDirectory() as td, \
+             patch.object(opinion,"ROOT",Path(td)), \
+             patch.object(opinion,"now_cn",return_value=datetime(2026,9,8,21,45,tzinfo=ZoneInfo("Asia/Shanghai"))), \
+             patch.object(opinion,"push_summary") as push:
+            self.assertFalse(opinion.deliver_data(data))
+        push.assert_not_called()
 
 
 if __name__ == "__main__":
