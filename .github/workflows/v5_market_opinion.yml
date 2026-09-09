@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Beijing 20:30 starts collection. Re-evaluate every 10 minutes from
-    # 21:00 through 21:50; 22:00 is the partial-sample deadline.
+    # 21:00 through 21:50; 22:00 releases all quality articles only if at least 15 exist.
     - cron: "30 12 * * *"
     - cron: "0-50/10 13 * * *"
     - cron: "0 14 * * *"
@@ -215,7 +215,7 @@ jobs:
       OPINION_OPENAI_MAX_RETRIES: "0"
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
       OPINION_MIN_ARTICLES: "15"
-      # 汇总完成即发送；样本不足时只发送明确的低样本提示，不用旧文凑数。
+      # 22:00后且合格样本不少于15篇才汇总发送；全部合格文章一并纳入。
       OPINION_PUSH_AFTER_AGGREGATE: "1"
     steps:
       - uses: actions/checkout@v4
