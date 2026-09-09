@@ -170,3 +170,38 @@ Verification result:
 - Lock status after this checkpoint commit: closed; natural-cycle observation does not hold an artificial manual write lock.
 
 Latest reliable checkpoint: release and source-set idempotency hardening is committed and validation-only tested. The next incomplete unit is the natural 2026-09-09 tail cycle, followed by the natural opinion cycle.
+
+## Tail Reliability Correction — 2026-09-09 16:44 Asia/Shanghai
+
+Correction to the earlier automation-limit note:
+
+- The 20:32 opinion-first fallback was paused because the repository already has a 20:30 primary schedule and the enabled 21:02/22:02 opinion fallback can recover later.
+- The existing 14:38 secondary tail watchdog was then enabled without creating a new automation. Five active-task slots remain in use.
+
+New incident evidence:
+
+- The 14:32 tail watchdog actually started at 14:30, before its former allowed action window, and produced no trigger commit.
+- The 14:38 secondary watchdog started at 14:37 but also produced no trigger commit.
+- As of 16:42, GitHub Actions contained no 2026-09-09 `V5 Tail Confirmation` run and no 2026-09-09 `V5 Tail-to-Close Breadth Audit` run.
+- `final_decision_meta.json`, `last_tail_summary.json`, and `latest_close_audit.json` therefore remain dated 2026-09-04.
+- The latest OpenAI audit remains the 2026-09-08 after-close observation-pool call; no 2026-09-09 tail model call occurred.
+- No 2026-09-09 tail PushPlus request occurred.
+- The 2026-09-09 tail signal is a real missed run and must never be backfilled from closing data.
+
+Future reliability correction:
+
+- The 14:32 watchdog now permits creating its trigger from 14:29 through 14:44 so an early automation start can enqueue the workflow before the code-level 14:32 precheck gate.
+- Both tail watchdogs now use `observation_pool_meta.target_trade_date == today` as a fallback trade-day signal when the authoritative calendar cannot be read; they may no longer silently classify that case as a non-trading day.
+- Both watchdogs must verify that a new Tail Confirmation run appears after the trigger commit.
+- Idempotency remains mandatory: an existing queued, in-progress, or valid same-day completion blocks another trigger; a failed run may be retried only after proving it made no OpenAI or PushPlus side effect.
+
+Verification and side effects:
+
+- Existing automations updated in place; no new automation created.
+- GitHub production runs triggered by this correction: 0.
+- OpenAI calls: 0.
+- PushPlus calls: 0.
+- Strategy impact: none.
+- Operation lock `LOCK-20260909-1238-opinion-tail-reliability`: closed after this checkpoint.
+
+Latest reliable checkpoint: the missed 2026-09-09 tail incident is recorded without fabrication, and both future watchdog prompts are hardened. The next natural production verification is the 2026-09-09 20:30–22:15 opinion cycle; the next tail-trigger verification is the following A-share trading day at 14:29–14:45.
