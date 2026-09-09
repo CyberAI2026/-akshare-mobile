@@ -205,17 +205,24 @@ def match_ths_concepts(wanted: list[str], catalog: dict[str, tuple[str,str]],
     """Prefer exact aliases, then bounded substring matches for composite labels."""
     matched=[]
     for opinion_name in wanted:
-        for term in concept_search_terms(opinion_name):
+        terms=concept_search_terms(opinion_name)
+        for term in terms:
             found=catalog.get(term)
-            if found is None and len(term)>=3:
-                keys=[key for key in catalog if term in key or key in term]
-                if keys:
-                    key=min(keys,key=lambda x:(abs(len(x)-len(term)),len(x),x))
-                    found=catalog[key]
             if found and found not in matched:
                 matched.append(found)
                 if len(matched)>=limit:
                     return matched
+        for term in terms:
+            if catalog.get(term) is not None or len(term)<2:
+                continue
+            keys=[key for key in catalog if term in key or key in term]
+            if keys:
+                key=min(keys,key=lambda x:(abs(len(x)-len(term)),len(x),x))
+                found=catalog[key]
+                if found not in matched:
+                    matched.append(found)
+                    if len(matched)>=limit:
+                        return matched
     return matched
 
 
