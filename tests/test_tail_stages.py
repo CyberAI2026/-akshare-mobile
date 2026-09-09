@@ -50,7 +50,7 @@ class TailStageTests(unittest.TestCase):
              patch.object(cli, "pushplus_notify", return_value=True) as notify:
             with self.assertRaisesRegex(RuntimeError, "超过安全窗"):
                 cli._enforce_tail_stage_window("finalize")
-            notify.assert_called_once()
+            notify.assert_not_called()
 
     def test_load_pool_enforces_target_date_and_trade_lock(self):
         with tempfile.TemporaryDirectory() as td:

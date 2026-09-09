@@ -1509,7 +1509,8 @@ def _enforce_tail_stage_window(stage: str):
             raise RuntimeError(f"{stage}有界等待后仍早于安全窗：{now0:%H:%M}")
     if minutes_now > latest:
         msg=f"尾盘{stage}在{now0:%H:%M}才启动，超过安全窗；未用收盘后数据冒充尾盘信号。"
-        pushplus_notify("A股二次启动｜尾盘任务迟到", msg)
+        # The workflow's centralized failure-alert owns notification. Sending here
+        # as well produced two PushPlus requests for one delayed scheduled run.
         raise RuntimeError(msg)
     return today
 
