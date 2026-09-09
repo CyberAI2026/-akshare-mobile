@@ -1,6 +1,6 @@
 {
-  "beijing_time": "2026-09-09T11:48:22.039+08:00",
-  "source_date": "2026-09-08",
-  "watchdog_stage": "refresh_ths_concept_facts",
-  "main_sha": "3939726132009a398757d7eea8450142707bd77d"
+  "beijing_time": "2026-09-09T21:03:20+08:00",
+  "source_date": "2026-09-09",
+  "watchdog_stage": "retry_2102",
+  "main_sha": "5f241ca6debd636ce0cdbd4a67ce1ac0aa8dd442"
 }
