@@ -43,7 +43,10 @@ jobs:
           from pathlib import Path
           from zoneinfo import ZoneInfo
           event=os.environ.get("GITHUB_EVENT_NAME","")
-          force=event=="workflow_dispatch" or (event=="push" and "[run-opinion]" in os.environ.get("HEAD_MESSAGE",""))
+          message=os.environ.get("HEAD_MESSAGE","")
+          force=event=="workflow_dispatch" or (
+              event=="push" and ("[run-opinion]" in message or "[refresh-opinion-concepts]" in message)
+          )
           current=datetime.now(ZoneInfo("Asia/Shanghai"))
           default_day=current.date()-timedelta(days=1) if current.hour<6 else current.date()
           source_day=default_day.isoformat()
@@ -93,6 +96,37 @@ jobs:
         run: |
           python -m py_compile research/market_opinion_mining.py
           python -m unittest tests/test_market_opinion_mining.py
+
+  concept-refresh:
+    needs: [preflight, validate]
+    if: needs.validate.result == 'success' && github.event_name == 'push' && contains(github.event.head_commit.message, '[refresh-opinion-concepts]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      OPINION_SOURCE_DATE_OVERRIDE: ${{ needs.preflight.outputs.source_date }}
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      OPINION_MIN_ARTICLES: "15"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Refresh objective THS concept facts without OpenAI
+        run: python research/market_opinion_mining.py --stage concept-refresh
+      - name: Upload refreshed opinion database
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-opinion-concept-refresh-${{ github.run_id }}
+          path: v5_data/opinion/
+          if-no-files-found: warn
+          retention-days: 14
 
   discover:
     needs: [preflight, validate]
