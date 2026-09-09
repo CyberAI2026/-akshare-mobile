@@ -1,7 +1,7 @@
 {
   "trade_date": "2026-09-08",
   "source_date": "2026-09-08",
-  "generated_at_cn": "2026-09-09T11:38:27.724704+08:00",
+  "generated_at_cn": "2026-09-09T11:50:17.991924+08:00",
   "method": "full-text transient mining; raw article bodies not persisted",
   "selection_standard": {
     "publication_date": "文章页面可核验的发表日期必须等于采集日",
@@ -3649,12 +3649,114 @@
       "ai_quality_rejected_count": 5
     },
     "ths_concept_index": {
-      "status": "unavailable",
+      "status": "ready",
       "asof_date": "2026-09-08",
-      "items": [],
+      "items": [
+        {
+          "concept": "粮食概念",
+          "ths_code": "308956",
+          "asof_date": "2026-09-08",
+          "one_day_pct": 3.47,
+          "five_day_pct": 3.5,
+          "volume_ratio_5d": 1.17,
+          "state": "上涨加强",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "化肥",
+          "ths_code": "301104",
+          "asof_date": "2026-09-08",
+          "one_day_pct": 4.26,
+          "five_day_pct": 1.22,
+          "volume_ratio_5d": 1.29,
+          "state": "上涨加强",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "农业种植",
+          "ths_code": "308016",
+          "asof_date": "2026-09-08",
+          "one_day_pct": 3.12,
+          "five_day_pct": 2.83,
+          "volume_ratio_5d": 1.19,
+          "state": "上涨加强",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "PCB概念",
+          "ths_code": "308832",
+          "asof_date": "2026-09-08",
+          "one_day_pct": -0.18,
+          "five_day_pct": 1.03,
+          "volume_ratio_5d": 1.17,
+          "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "第三代半导体",
+          "ths_code": "308700",
+          "asof_date": "2026-09-08",
+          "one_day_pct": -0.68,
+          "five_day_pct": -1.03,
+          "volume_ratio_5d": 0.95,
+          "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "液冷服务器",
+          "ths_code": "309061",
+          "asof_date": "2026-09-08",
+          "one_day_pct": -0.82,
+          "five_day_pct": 0.4,
+          "volume_ratio_5d": 0.92,
+          "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "算力租赁",
+          "ths_code": "309068",
+          "asof_date": "2026-09-08",
+          "one_day_pct": -0.09,
+          "five_day_pct": -0.81,
+          "volume_ratio_5d": 0.89,
+          "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "AI应用",
+          "ths_code": "309264",
+          "asof_date": "2026-09-08",
+          "one_day_pct": 0.55,
+          "five_day_pct": -0.42,
+          "volume_ratio_5d": 0.92,
+          "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "文化传媒概念",
+          "ths_code": "300806",
+          "asof_date": "2026-09-08",
+          "one_day_pct": 1.41,
+          "five_day_pct": 2.03,
+          "volume_ratio_5d": 0.9,
+          "state": "上涨加强",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "医药电商",
+          "ths_code": "301565",
+          "asof_date": "2026-09-08",
+          "one_day_pct": 1.62,
+          "five_day_pct": -0.2,
+          "volume_ratio_5d": 1.22,
+          "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        }
+      ],
       "note": "客观指数数据与文章观点分开记录。",
-      "matched_concepts": 0,
-      "failed_concepts": 0
+      "matched_concepts": 10,
+      "failed_concepts": 0,
+      "refreshed_at_cn": "2026-09-09T11:50:17.991910+08:00"
     }
   },
   "finalization": {
