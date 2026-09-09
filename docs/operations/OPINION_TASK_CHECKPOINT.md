@@ -98,3 +98,35 @@ Rollback points:
 
 - Before historical recovery: a597c6fb756a87291baddda9a482e83764d84877.
 - Before THS matching/refresh changes: 2afda51aeb36236305120575c1e8ea95c50b5f24.
+
+
+## Policy Correction — 2026-09-09
+
+User-confirmed release policy supersedes the earlier partial-deadline behavior:
+
+- 15 quality articles is the minimum release threshold, not an immediate-send target.
+- Scheduled runs from 20:30 through 21:50 continue discovery and accumulate every quality-approved article.
+- No aggregate report or PushPlus request is allowed before 22:00, even when 15 or more articles are already present.
+- At or after 22:00, publish only when the quality pool contains at least 15 articles.
+- Include the entire quality pool (bounded by the configured discovery safety limit), not only the first 15.
+- If fewer than 15 quality articles exist at the deadline, persist the staging pool and the real insufficiency state but do not publish a low-sample summary.
+
+Implementation:
+
+- f6e31ad9b76d1d2e4735c74a66cfc031fc665a8a — enforce the 22:00 and minimum-15 gates.
+- b99ce197401e686037cbd5b2a5c3e5234c241353 — update deterministic gate tests.
+- d572b0488952cbc26ade5aa33c093b5c3a51a591 — align workflow documentation.
+- Final validation run: https://github.com/CyberAI2026/-akshare-mobile/actions/runs/34309692212
+- Validation job: https://github.com/CyberAI2026/-akshare-mobile/actions/runs/34309692212/job/102333653120
+- Production stages skipped during validation: concept-refresh, discover, article batches, aggregate, failure alert.
+- OpenAI calls: 0.
+- PushPlus calls: 0.
+- Production data changes: none.
+
+Correction history:
+
+- Run 34309655031 failed because the implementation commit ran against the preceding test expectations.
+- Run 34309682420 was superseded and cancelled after the workflow-comment commit.
+- Run 34309692212 validated the complete combined state successfully.
+
+Latest reliable checkpoint: the corrected release gate is committed and validated. The next natural 20:30–22:00 cycle should be observed without a manual production trigger. Rollback point before this policy correction: ddb85e9b76b3be709c6a45fa2d8d4d607b6dd184.
