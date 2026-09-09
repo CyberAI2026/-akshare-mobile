@@ -39,6 +39,10 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertEqual(opinion_finalization(15,datetime(2026,9,8,21,0,tzinfo=cn)),(True,"quality_target_met"))
         self.assertEqual(opinion_finalization(12,datetime(2026,9,8,21,30,tzinfo=cn)),(False,"awaiting_more_quality_articles"))
         self.assertEqual(opinion_finalization(12,datetime(2026,9,8,22,0,tzinfo=cn)),(True,"deadline_partial"))
+        self.assertEqual(
+            opinion_finalization(32,datetime(2026,9,9,1,55,tzinfo=cn),date(2026,9,8)),
+            (True,"overnight_quality_target_met"),
+        )
 
     def test_ai_quality_gate_rejects_single_stock_or_missing_dimensions(self):
         sources=[{"article_id":"a","title":"综合复盘"},{"article_id":"b","title":"个人持仓"}]
