@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-08",
   "trade_date": "2026-09-08",
-  "updated_at_cn": "2026-09-09T01:54:55.049949+08:00",
+  "updated_at_cn": "2026-09-09T11:37:16.737983+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -477,6 +477,21 @@
       "body_chars": 10809,
       "body_sha256": "fd815cc751fedf3b3488c300dce43c31a705017e7a5c49fd4dd1874d892e1134",
       "published_at_cn": "2026-09-08T20:40:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ffb147f8214d7b7a",
+      "title": "0908看图_guitar_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVM3wLlJCJ",
+      "read_count": 65,
+      "body_chars": 1863,
+      "body_sha256": "ffb147f8214d7b7a2ebd68b85bfdc6fd0ad75f863926c6708b1939109ed2d0ae",
+      "published_at_cn": "2026-09-08T22:07:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -3330,6 +3345,61 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ffb147f8214d7b7a",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为地缘风险压制整体风险偏好，但AI算力硬件受产业利好支撑而强于大盘；存储内部及中概股表现分化。",
+      "sectors": [
+        {
+          "name": "半导体",
+          "stance": "加强",
+          "evidence": "作者称半导体产业链为亮点，AI硬件主线只是高低切换。"
+        },
+        {
+          "name": "存储芯片",
+          "stance": "分化",
+          "evidence": "原厂与模组环节分化加剧，部分海外标的涨跌不一。"
+        },
+        {
+          "name": "光通信",
+          "stance": "加强",
+          "evidence": "作者称AI数据中心光互联景气延续，映射A股修复预期。"
+        },
+        {
+          "name": "创新药",
+          "stance": "退潮",
+          "evidence": "作者提到诺华、安进大跌，大药企集体重挫。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "美国通胀数据对美联储政策路径的影响",
+        "AI算力硬件产业利好持续性",
+        "地缘风险及国际油价变化"
+      ],
+      "numeric_claims": [
+        "英特尔上涨9.05%",
+        "AMD上涨5.90%",
+        "阿斯麦上涨2.91%",
+        "费城半导体指数上涨1.30%",
+        "希捷上涨6.49%",
+        "SK海力士上涨4.83%",
+        "美光下跌1.61%",
+        "闪迪下跌0.12%",
+        "Lumentum上涨11.04%",
+        "康宁上涨7.56%",
+        "Coherent上涨7.10%",
+        "诺华下跌13.93%",
+        "安进下跌10.08%",
+        "英特尔消费级CPU拟涨价10%"
+      ],
+      "quality_flags": [
+        "无"
       ]
     }
   ]
