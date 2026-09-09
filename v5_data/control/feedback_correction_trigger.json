@@ -1,0 +1,15 @@
+{
+  "operation_lock": "LOCK-20260909-feedback-t3-schema-repair",
+  "delivery_key": "feedback-correction-2026-09-09-d3-schema-v1",
+  "asof": "2026-09-09",
+  "title": "A股二次启动｜推荐跟踪更正",
+  "reason": "更正此前因行情缓存字段不兼容而错误显示为0的D+3样本",
+  "expected": {
+    "stock_code": "600801",
+    "stock_name": "华新建材",
+    "D+3_date": "2026-09-09",
+    "D+3_close": 25.1,
+    "D+3_return_pct": 1.2097,
+    "D+3_sample_count": 1
+  }
+}
