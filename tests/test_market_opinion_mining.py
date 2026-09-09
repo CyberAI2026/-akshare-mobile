@@ -35,15 +35,19 @@ from research import market_opinion_mining as opinion
 
 
 class OpinionSectorGroupingTests(unittest.TestCase):
-    def test_opinion_waits_until_fifteen_or_22_deadline(self):
+    def test_opinion_collects_all_until_22_and_requires_fifteen(self):
         cn=ZoneInfo("Asia/Shanghai")
-        self.assertEqual(opinion_finalization(15,datetime(2026,9,8,20,55,tzinfo=cn)),(False,"before_21_release"))
-        self.assertEqual(opinion_finalization(15,datetime(2026,9,8,21,0,tzinfo=cn)),(True,"quality_target_met"))
-        self.assertEqual(opinion_finalization(12,datetime(2026,9,8,21,30,tzinfo=cn)),(False,"awaiting_more_quality_articles"))
-        self.assertEqual(opinion_finalization(12,datetime(2026,9,8,22,0,tzinfo=cn)),(True,"deadline_partial"))
+        self.assertEqual(opinion_finalization(15,datetime(2026,9,8,20,55,tzinfo=cn)),(False,"collect_until_22"))
+        self.assertEqual(opinion_finalization(28,datetime(2026,9,8,21,50,tzinfo=cn)),(False,"collect_until_22"))
+        self.assertEqual(opinion_finalization(12,datetime(2026,9,8,22,0,tzinfo=cn)),(False,"minimum_quality_articles_not_met"))
+        self.assertEqual(opinion_finalization(33,datetime(2026,9,8,22,0,tzinfo=cn)),(True,"deadline_minimum_met"))
         self.assertEqual(
             opinion_finalization(32,datetime(2026,9,9,1,55,tzinfo=cn),date(2026,9,8)),
-            (True,"overnight_quality_target_met"),
+            (True,"overnight_minimum_met"),
+        )
+        self.assertEqual(
+            opinion_finalization(12,datetime(2026,9,9,1,55,tzinfo=cn),date(2026,9,8)),
+            (False,"minimum_quality_articles_not_met"),
         )
 
     def test_ai_quality_gate_rejects_single_stock_or_missing_dimensions(self):
