@@ -1109,6 +1109,42 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
     print(f"OPINION_AGGREGATE_STAGE_OK source_date={source_day} trade_date={trade_day} articles={len(sources)}",flush=True)
 
 
+def run_concept_refresh_stage() -> None:
+    """Refresh objective THS facts for an existing summary without another AI call."""
+    path=ROOT/"latest.json"
+    if not path.exists():
+        raise RuntimeError("市场观点摘要不存在，不能单独刷新概念行情")
+    data=json.loads(path.read_text(encoding="utf-8"))
+    source_day=str(data.get("source_date") or "")
+    expected=source_date().isoformat()
+    if source_day!=expected:
+        raise RuntimeError(f"概念行情刷新日期不匹配: latest={source_day} expected={expected}")
+    summary=data.get("daily_consensus",{}) or {}
+    facts=fetch_ths_concept_facts(
+        summary.get("sector_consensus",[]) or [],date.fromisoformat(source_day)
+    )
+    if not (facts.get("items") or []):
+        raise RuntimeError(
+            f"同花顺概念指数未取得有效行情: matched={facts.get('matched_concepts',0)} "
+            f"failed={facts.get('failed_concepts',0)} note={facts.get('note','')}"
+        )
+    facts["refreshed_at_cn"]=now_cn().isoformat()
+    summary["ths_concept_index"]=facts
+    data["daily_consensus"]=summary
+    data["generated_at_cn"]=now_cn().isoformat()
+    rendered=json.dumps(data,ensure_ascii=False,indent=2)
+    path.write_text(rendered,encoding="utf-8")
+    daily_path=ROOT/"daily"/f"{data.get('trade_date')}.json"
+    daily_path.parent.mkdir(parents=True,exist_ok=True)
+    daily_path.write_text(rendered,encoding="utf-8")
+    delivered=deliver_data(data)
+    commit(f"Refresh THS concept facts {source_day}")
+    print(
+        f"OPINION_CONCEPT_REFRESH_OK source_date={source_day} "
+        f"items={len(facts.get('items',[]) or [])} push_accepted={delivered}",flush=True,
+    )
+
+
 def run_delivery_stage() -> None:
     path=ROOT/"latest.json"
     if not path.exists():
@@ -1171,13 +1207,13 @@ def run_full_stage(key: str) -> None:
 
 def main() -> None:
     parser=argparse.ArgumentParser()
-    parser.add_argument("--stage",choices=["full","discover","batch","aggregate","push"],default="full")
+    parser.add_argument("--stage",choices=["full","discover","batch","aggregate","concept-refresh","push"],default="full")
     parser.add_argument("--batch-index",type=int,default=0)
     parser.add_argument("--batch-count",type=int,default=5)
     parser.add_argument("--stage-root",default="opinion_stage")
     args=parser.parse_args()
     key = os.getenv("OPENAI_API_KEY", "").strip()
-    if args.stage not in {"push","discover"} and not key:
+    if args.stage not in {"push","discover","concept-refresh"} and not key:
         raise RuntimeError("OPENAI_API_KEY未配置，不能执行正文观点挖掘")
     if args.stage=="discover":
         run_discover_stage(Path(args.stage_root))
@@ -1185,6 +1221,8 @@ def main() -> None:
         run_batch_stage(key,args.batch_index,args.batch_count,Path(args.stage_root))
     elif args.stage=="aggregate":
         run_aggregate_stage(key,Path(args.stage_root))
+    elif args.stage=="concept-refresh":
+        run_concept_refresh_stage()
     elif args.stage=="push":
         run_delivery_stage()
     else:
