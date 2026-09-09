@@ -16,6 +16,7 @@ ROOT = Path("v5_data/feedback")
 REGISTRY = ROOT / "recommendations.csv"
 LATEST_DAILY = ROOT / "latest_daily.json"
 LATEST_WEEKLY = ROOT / "latest_weekly.json"
+DELIVERY_RECEIPTS = ROOT / "delivery_receipts.json"
 NAME_MASTER = Path("v5_data/reference/a_share_code_name_master.csv")
 
 BASE_COLUMNS = [
@@ -67,6 +68,25 @@ def _number(value):
         return None if pd.isna(x) else x
     except Exception:
         return None
+
+
+def normalize_bar_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    """Accept both AKShare raw names and the project's normalized history schema."""
+    out = frame.copy() if frame is not None else pd.DataFrame()
+    aliases = {
+        "收盘": ("收盘价",),
+        "最低": ("最低价",),
+        "最高": ("最高价",),
+        "开盘": ("开盘价",),
+    }
+    for canonical, candidates in aliases.items():
+        if canonical in out:
+            continue
+        for candidate in candidates:
+            if candidate in out:
+                out[canonical] = out[candidate]
+                break
+    return out
 
 
 def _load_attribution() -> dict:
@@ -170,13 +190,11 @@ def register_tail_recommendations(final_decisions: pd.DataFrame, final_meta: dic
 
 
 def fetch_bars(code: str, start_date: str, end_date: str) -> pd.DataFrame:
-    import akshare as ak
-
     cache = Path("v5_data/cache/history") / f"{code}.csv"
     cached = pd.DataFrame()
     if cache.exists():
         try:
-            cached = pd.read_csv(cache)
+            cached = normalize_bar_columns(pd.read_csv(cache))
             cached["日期"] = pd.to_datetime(cached["日期"], errors="coerce").dt.date
         except Exception:
             cached = pd.DataFrame()
@@ -184,6 +202,8 @@ def fetch_bars(code: str, start_date: str, end_date: str) -> pd.DataFrame:
     end = pd.to_datetime(end_date).date()
     if not cached.empty and cached["日期"].min() <= start and cached["日期"].max() >= end:
         return cached
+    import akshare as ak
+
     try:
         raw = ak.stock_zh_a_hist(
             symbol=code, period="daily",
@@ -195,6 +215,7 @@ def fetch_bars(code: str, start_date: str, end_date: str) -> pd.DataFrame:
         raise
     if raw is None or raw.empty:
         return cached
+    raw = normalize_bar_columns(raw)
     raw["日期"] = pd.to_datetime(raw["日期"], errors="coerce").dt.date
     return raw.sort_values("日期").drop_duplicates("日期")
 
@@ -204,7 +225,7 @@ def evaluate_record(row: pd.Series, bars: pd.DataFrame, asof=None) -> dict:
     if bars is None or bars.empty:
         return {"数据状态": "行情缺失"}
     rec_date = pd.to_datetime(row["推荐日期"]).date()
-    x = bars.copy()
+    x = normalize_bar_columns(bars)
     x["日期"] = pd.to_datetime(x["日期"], errors="coerce").dt.date
     x = x[x["日期"] >= rec_date].sort_values("日期").drop_duplicates("日期")
     if asof is not None:
@@ -298,18 +319,59 @@ def build_weekly_summary(records: pd.DataFrame, asof) -> dict:
     return summary
 
 
-def pushplus(title: str, content: str):
+def _accepted_delivery(delivery_key: str):
+    if not delivery_key or not DELIVERY_RECEIPTS.exists():
+        return None
+    try:
+        payload = json.loads(DELIVERY_RECEIPTS.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return None
+    for receipt in payload.get("receipts", []):
+        if receipt.get("delivery_key") == delivery_key and receipt.get("status") == "request_accepted":
+            return receipt
+    return None
+
+
+def pushplus(title: str, content: str, delivery_key: str = ""):
+    accepted = _accepted_delivery(delivery_key)
+    if accepted:
+        print(f"PushPlus feedback skipped: delivery already accepted key={delivery_key}")
+        return accepted
     token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
     if not token:
         print("PushPlus skipped: token missing")
-        return
+        return None
     body = json.dumps({"token": token, "title": title, "content": content, "template": "html", "channel": "wechat"}, ensure_ascii=False).encode()
     req = urllib.request.Request("https://www.pushplus.plus/send", data=body, headers={"Content-Type": "application/json"}, method="POST")
     with urllib.request.urlopen(req, timeout=20) as resp:
-        print("PushPlus feedback receipt:", resp.read().decode(errors="replace")[:300])
+        raw = resp.read().decode(errors="replace")
+        print("PushPlus feedback receipt:", raw[:300])
+    result = json.loads(raw)
+    receipt = {
+        "delivery_key": delivery_key,
+        "title": title,
+        "requested_at_cn": now_cn().isoformat(),
+        "status": "request_accepted" if int(result.get("code", -1)) == 200 else "request_rejected",
+        "code": result.get("code"),
+        "short_code": result.get("data"),
+        "message": result.get("msg"),
+        "terminal_delivery_verified": False,
+    }
+    if delivery_key:
+        DELIVERY_RECEIPTS.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            saved = json.loads(DELIVERY_RECEIPTS.read_text(encoding="utf-8")) if DELIVERY_RECEIPTS.exists() else {}
+        except (OSError, ValueError, TypeError):
+            saved = {}
+        receipts = [x for x in saved.get("receipts", []) if x.get("delivery_key") != delivery_key]
+        receipts.append(receipt)
+        DELIVERY_RECEIPTS.write_text(json.dumps({"receipts": receipts}, ensure_ascii=False, indent=2), encoding="utf-8")
+    if receipt["status"] != "request_accepted":
+        raise RuntimeError(f"PushPlus feedback request rejected: {result}")
+    return receipt
 
 
-def update_all(asof=None, notify=True) -> dict:
+def update_all(asof=None, notify=True, notify_title="A股二次启动｜推荐跟踪反馈", delivery_key="") -> dict:
     asof = asof or now_cn().date()
     if not REGISTRY.exists():
         ROOT.mkdir(parents=True, exist_ok=True)
@@ -360,7 +422,7 @@ def update_all(asof=None, notify=True) -> dict:
             for item in daily["due_cohorts"][f"D+{h}"]:
                 rows.append(f"{item['股票代码']} {item['股票名称']}：{item[f'D+{h}涨跌幅%']}%")
         rows.append(f"<b>止损触发：</b>3日{weekly['3日止损触发率%']}%｜5日{weekly['5日止损触发率%']}%")
-        pushplus("A股二次启动｜推荐跟踪反馈", "<br>".join(rows))
+        pushplus(notify_title, "<br>".join(rows), delivery_key=delivery_key)
     return {"daily": daily, "weekly": weekly}
 
 
@@ -369,9 +431,11 @@ def main():
     parser.add_argument("command", choices=["update"])
     parser.add_argument("--asof", default="")
     parser.add_argument("--no-notify", action="store_true")
+    parser.add_argument("--notify-title", default="A股二次启动｜推荐跟踪反馈")
+    parser.add_argument("--delivery-key", default="")
     args = parser.parse_args()
     asof = pd.to_datetime(args.asof).date() if args.asof else now_cn().date()
-    result = update_all(asof, not args.no_notify)
+    result = update_all(asof, not args.no_notify, args.notify_title, args.delivery_key)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

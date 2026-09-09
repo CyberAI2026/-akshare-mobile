@@ -34,6 +34,29 @@ class RecommendationFeedbackTests(unittest.TestCase):
         summary=rf.build_daily_summary(pd.DataFrame([{"数据状态":out["数据状态"]}]),pd.Timestamp("2026-09-04").date())
         self.assertEqual(summary["tracking"],1)
 
+    def test_normalized_cache_schema_matures_third_trading_day(self):
+        bars = pd.DataFrame({
+            "日期": pd.to_datetime(["2026-09-04", "2026-09-07", "2026-09-08", "2026-09-09"]),
+            "收盘价": [24.8, 24.44, 25.01, 25.10],
+            "最低价": [23.82, 24.40, 24.32, 24.82],
+        })
+        row = pd.Series({"推荐日期": "2026-09-04", "推荐日收盘价": 24.8, "结构止损位": 23.82})
+        out = rf.evaluate_record(row, bars, pd.Timestamp("2026-09-09").date())
+        self.assertEqual(out["D+3日期"], "2026-09-09")
+        self.assertEqual(out["D+3收盘价"], 25.10)
+        self.assertAlmostEqual(out["D+3涨跌幅%"], 1.2097)
+        self.assertFalse(out["3日内触碰止损"])
+
+    def test_accepted_delivery_key_is_not_sent_twice(self):
+        with tempfile.TemporaryDirectory() as td:
+            receipts = Path(td) / "receipts.json"
+            receipts.write_text('{"receipts":[{"delivery_key":"correction-v1","status":"request_accepted"}]}', encoding="utf-8")
+            with patch.object(rf, "DELIVERY_RECEIPTS", receipts), \
+                 patch.object(rf.urllib.request, "urlopen") as urlopen:
+                result = rf.pushplus("title", "body", delivery_key="correction-v1")
+            self.assertEqual(result["status"], "request_accepted")
+            urlopen.assert_not_called()
+
     def test_register_is_idempotent_and_anchor_is_pending(self):
         decisions = pd.DataFrame([{
             "股票代码": "000001", "股票名称": "平安银行", "decision": "TRADE",
