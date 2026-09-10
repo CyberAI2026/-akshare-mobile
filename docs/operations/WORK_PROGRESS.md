@@ -94,6 +94,16 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   `ebc3a7d7ebd970371a33607c9c84f2bb86fa4224`. Ten targeted tests passed with no
   external OpenAI or PushPlus call. Next unit: remove stage count forcing and change
   the post-model observation cap from 3 to 10.
+  Unit 2 is verified on branch `codex/limitup-25d-v07-20260910`: every stale active
+  cache is attempted; 26 closes support exactly 25 session-to-session limit checks;
+  all eligible names advance through 25d, 120d, and 250d without count targets;
+  250d now filters rather than audit-only pass-through; the post-model hard cap is
+  10; and a zero-candidate path saves a valid empty pool without OpenAI. Manual
+  strategy replay supports `notify=false`, which suppresses both formal and failure
+  PushPlus messages. Python compilation, workflow YAML parsing, `git diff --check`,
+  29 targeted tests, and 106 broader non-historical operational tests passed. Test
+  OpenAI/PushPlus output was mocked. Next unit: merge once to main, accept the single
+  validation-only workflow, then dispatch exactly one no-notify replay.
 - `LOCK-20260910-after-close-25d-recovery` is closed. The repaired recovery run
   `34471878484` completed successfully through feedback refresh. No manual rerun is
   pending and the failure-alert job for the successful run was skipped.
