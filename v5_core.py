@@ -11,6 +11,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Iterable
 from zoneinfo import ZoneInfo
@@ -21,7 +22,7 @@ import pandas as pd
 import requests
 
 APP_VERSION = "V5.5-second-start-evidence-layer"
-STRATEGY_VERSION = "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3"
+STRATEGY_VERSION = "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3"
 CN_TZ = ZoneInfo("Asia/Shanghai")
 
 
@@ -462,6 +463,63 @@ def fetch_pool_history(pool: pd.DataFrame, days: int, checkpoint=None, cache_dir
 
 
 # ---------- 研究筛选（可版本化，避免把规则写死在抓取层） ----------
+def _recent_limit_up_evidence(g: pd.DataFrame, sessions: int = 25) -> dict:
+    """Return auditable board-specific limit-up evidence for the latest sessions.
+
+    Raw (unadjusted) closes are mandatory so corporate-action adjustments cannot
+    manufacture a false limit-up. One extra prior close is used to evaluate all
+    25 requested sessions, including the generated trade date.
+    """
+    code = _norm_code(g.get("股票代码", pd.Series(dtype=str)).iloc[-1]) if not g.empty else ""
+    name = str(g.get("股票名称", pd.Series(dtype=str)).iloc[-1]) if not g.empty else ""
+    limit_pct, board = _price_limit_rule(code, name)
+    empty = {
+        "最近25日曾涨停": False,
+        "25日内涨停次数": 0,
+        "最近涨停日期": "",
+        "涨停板规则": board,
+        "涨停核验交易日数": 0,
+        "25日最大单日涨幅": np.nan,
+    }
+    if "未复权收盘价" not in g.columns or "日期" not in g.columns:
+        return empty
+
+    view = g.sort_values("日期").tail(sessions + 1).copy()
+    raw_close = pd.to_numeric(view["未复权收盘价"], errors="coerce")
+    dates = pd.to_datetime(view["日期"], errors="coerce")
+    hits: list[str] = []
+    daily_returns: list[float] = []
+    verified = 0
+    rate = Decimal(str(limit_pct)) / Decimal("100")
+    for i in range(1, len(view)):
+        previous = raw_close.iloc[i - 1]
+        current = raw_close.iloc[i]
+        trade_date = dates.iloc[i]
+        if pd.isna(previous) or pd.isna(current) or previous <= 0 or pd.isna(trade_date):
+            continue
+        verified += 1
+        daily_pct = float(current / previous - 1) * 100
+        daily_returns.append(daily_pct)
+        theoretical = (Decimal(str(float(previous))) * (Decimal("1") + rate)).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+        close_at_limit = abs(Decimal(str(float(current))) - theoretical) <= Decimal("0.005")
+        # The range guard rejects ordinary no-price-limit IPO surges. Exact rounded
+        # limit price remains the primary test, including low-priced rounding cases.
+        plausible_limited_day = limit_pct - 0.25 <= daily_pct <= limit_pct + 0.80
+        if close_at_limit and plausible_limited_day:
+            hits.append(trade_date.date().isoformat())
+
+    return {
+        "最近25日曾涨停": bool(hits),
+        "25日内涨停次数": len(hits),
+        "最近涨停日期": hits[-1] if hits else "",
+        "涨停板规则": board,
+        "涨停核验交易日数": verified,
+        "25日最大单日涨幅": max(daily_returns) if daily_returns else np.nan,
+    }
+
+
 def _series_metrics(g: pd.DataFrame) -> dict:
     g = g.sort_values("日期").copy()
     c = pd.to_numeric(g["收盘价"], errors="coerce")
@@ -518,6 +576,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
             robust_upper = vals[1]
     lo5 = float(l.tail(min(5, len(l))).min()) if len(l) else np.nan
     lo10 = float(l.tail(min(10, len(l))).min()) if len(l) else np.nan
+    limit_up_evidence = _recent_limit_up_evidence(g, sessions=25)
     return {
         "最新收盘": last, "ret1": ret(1), "ret5": ret(5), "ret10": ret(10), "ret20": ret(20), "ret40": ret(40), "ret60": ret(60), "ret120": ret(120),
         "amp5": amp5, "距20日高点": last / hi20 - 1 if hi20 else np.nan,
@@ -537,6 +596,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         "近5日低点": lo5, "近10日低点": lo10,
         "距近5日低点": last / lo5 - 1 if pd.notna(lo5) and lo5 > 0 else np.nan,
         "距近10日低点": last / lo10 - 1 if pd.notna(lo10) and lo10 > 0 else np.nan,
+        **limit_up_evidence,
     }
 
 
@@ -594,13 +654,14 @@ def _rank_and_audit(x: pd.DataFrame, score_col: str, min_n: int, max_n: int, eli
     return selected, audit
 
 def stage1_rank(metrics: pd.DataFrame, min_n: int = 150, max_n: int = 200, return_audit: bool = False):
-    """25日一级：宽松粗筛，只做方向性压缩，不把弱证据写成硬门槛。
+    """25日一级：先要求最近25个交易日至少出现一次实际涨停。
 
     研究约束：
     - 不使用“距20日高点越近越好”作为核心得分；
     - 不使用精确MA20距离作为资格线；
     - 5日振幅只用于识别仍然极端的短波动，不假设某个固定振幅最优；
-    - 本层不是买点判断，只把明显弱/乱的状态排到后面。
+    - 涨停按未复权收盘价和所属板块的常规涨停价核验；
+    - 本层不是买点判断，通过涨停资格后再以既有方向/波动证据排序。
     """
     x = metrics.copy()
     if x.empty:
@@ -616,11 +677,17 @@ def stage1_rank(metrics: pd.DataFrame, min_n: int = 150, max_n: int = 200, retur
     # 仅作为很宽的结构辅助，不使用20日最高点距离做核心排序。
     x["短沿附近辅助"] = x["距稳健5日上沿"].between(-0.10, 0.06, inclusive="both").astype(int)
     x["阶段1分"] = x[["20日方向证据", "MA20上方证据", "短波动非极端证据", "10日不过热证据", "10日非急跌证据", "短沿附近辅助"]].sum(axis=1)
-    x["阶段1通过"] = x["最新收盘"].notna() & (x["最新收盘"] > 0)
+    if "最近25日曾涨停" not in x.columns:
+        x["最近25日曾涨停"] = False
+    x["阶段1通过"] = (
+        x["最新收盘"].notna()
+        & (x["最新收盘"] > 0)
+        & x["最近25日曾涨停"].fillna(False).astype(bool)
+    )
     x["阶段1风险提示"] = np.select(
         [x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret20"] < 0],
         ["近5日波动仍偏大", "近10日速度偏快", "20日方向仍偏弱"], default="")
-    x["阶段1规则说明"] = "宽松粗筛：方向/非极端波动/不过热；不以精确MA距离或距20日高点为硬规则"
+    x["阶段1规则说明"] = "硬资格：最近25个交易日（含当日）至少一次按板块涨停价核验的实际涨停；通过后再按方向/非极端波动/不过热排序"
     selected, audit = _rank_and_audit(x, "阶段1分", min_n, max_n, "阶段1通过", "一级粗筛")
     return (selected, audit) if return_audit else selected
 
