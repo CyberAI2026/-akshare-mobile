@@ -93,6 +93,28 @@ class SecondStartEvidenceTests(unittest.TestCase):
         self.assertEqual(qa["状态"].eq("成功").sum(), 30)
         self.assertEqual(data["股票代码"].nunique(), 30)
 
+    def test_history_fetch_retries_only_failed_symbols(self):
+        pool = pd.DataFrame({
+            "股票代码": ["000001", "000002"],
+            "股票名称": ["甲", "乙"],
+        })
+        history = sample_history().drop(columns=["股票代码", "股票名称"])
+        ok = {"source": "test", "raw_source": "test", "errors": [],
+              "raw_matched": len(history), "cache_mode": "deep-backfill"}
+        failed = {"source": "", "raw_source": "", "errors": ["temporary disconnect"],
+                  "raw_matched": 0, "cache_mode": "full-fetch-failed"}
+        responses = [(pd.DataFrame(), failed), (history, ok), (history, ok)]
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch("v5_core.fetch_history_incremental", side_effect=responses) as fetch, \
+             patch("v5_core.time.sleep") as sleep:
+            data, qa = fetch_pool_history_incremental(
+                pool, 25, Path(tmp), asof_trade_date=pd.Timestamp("2026-09-10").date()
+            )
+        self.assertEqual(fetch.call_count, 3)
+        sleep.assert_called_once_with(2)
+        self.assertEqual(qa["状态"].tolist(), ["成功", "成功"])
+        self.assertEqual(data["股票代码"].nunique(), 2)
+
     def test_openai_json_mode_retries_malformed_response_once(self):
         responses = [
             SimpleNamespace(output_text='{"broken":', status="completed", usage=None, id="r1", model="test"),

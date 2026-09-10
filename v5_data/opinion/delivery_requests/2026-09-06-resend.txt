@@ -1,2 +1,0 @@
-Reason: user reported the 2026-09-06 market-opinion message was not received.
-Scope: one audited retry; no research or strategy rules changed.

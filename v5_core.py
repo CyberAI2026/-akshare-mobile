@@ -1578,11 +1578,40 @@ def fetch_pool_history_incremental(pool: pd.DataFrame, days: int, global_cache_d
             return x, q
 
     if workers == 1:
-        iterator = map(fetch_one, items)
+        results = list(map(fetch_one, items))
     else:
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            iterator = list(executor.map(fetch_one, items))
-    for i, (x, q) in enumerate(iterator):
+            results = list(executor.map(fetch_one, items))
+
+    # A small number of upstream disconnects should not invalidate an otherwise
+    # complete bounded stage. Retry only failed symbols, sequentially, so successful
+    # downloads and caches are never repeated and the upstream is not hit by another
+    # parallel burst.
+    retry_rounds = max(0, min(2, int(os.getenv("HISTORY_FETCH_RETRY_ROUNDS", "1"))))
+    for retry_round in range(1, retry_rounds + 1):
+        failed_indexes = [i for i, (x, _) in enumerate(results) if x is None]
+        if not failed_indexes:
+            break
+        print(
+            f"HISTORY_FETCH_RETRY round={retry_round} "
+            f"failed={len(failed_indexes)} sequential=true"
+        )
+        time.sleep(min(5, retry_round * 2))
+        for i in failed_indexes:
+            retried_x, retried_q = fetch_one(items[i])
+            if retried_x is not None:
+                results[i] = (retried_x, retried_q)
+            else:
+                first_q = results[i][1]
+                retried_q["错误"] = " | ".join(
+                    part for part in [
+                        str(first_q.get("错误", "")).strip(),
+                        f"retry-{retry_round}:{str(retried_q.get('错误', '')).strip()}",
+                    ] if part
+                )
+                results[i] = (None, retried_q)
+
+    for i, (x, q) in enumerate(results):
         if x is not None:
             all_rows.append(x)
         qa.append(q)

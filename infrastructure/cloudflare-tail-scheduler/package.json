@@ -1,8 +1,0 @@
-{
-  "name": "strong-stock-tail-scheduler",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --test"
-  }
-}

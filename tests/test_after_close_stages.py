@@ -83,6 +83,44 @@ class AfterCloseStageTests(unittest.TestCase):
         planned = stages._plan_25d_cache_refresh(active, daily, manifest, minimum_ready=3)
         self.assertEqual(set(planned["股票代码"]), {"000002", "000003"})
 
+    def test_25d_capacity_failure_persists_partial_refresh_before_raising(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            base = root / "run"
+            (base / "stages").mkdir(parents=True)
+            latest = root / "latest"
+            latest.mkdir()
+            active = pd.DataFrame({
+                "股票代码": ["000001", "000002", "000003"],
+                "股票名称": ["甲", "乙", "丙"],
+            })
+            active.to_csv(base / "stages" / "active_input.csv", index=False)
+            active.assign(缓存行数=25, 日期已最新=False).to_csv(
+                base / "history_cache_manifest.csv", index=False
+            )
+            active.iloc[:0].to_csv(base / "每日提交变动.csv", index=False)
+            final_manifest = active.assign(
+                缓存行数=[25, 25, 24], 日期已最新=[True, True, False]
+            )
+            state = {
+                "stage": "initialized", "status": "running", "folder": str(base),
+                "stamp": "test", "started_cn": "2026-09-10T19:00:00+08:00",
+            }
+            with patch.object(stages, "_load_state", return_value=(state, base)), \
+                 patch.object(stages, "_plan_25d_cache_refresh", return_value=active), \
+                 patch.object(stages, "fetch_pool_history_incremental", return_value=(pd.DataFrame(), pd.DataFrame())), \
+                 patch.object(stages, "history_cache_manifest", return_value=final_manifest), \
+                 patch.object(stages, "_save_state") as save_state, \
+                 patch.object(stages.cli, "LATEST", latest), \
+                 patch.object(stages.cli, "CACHE", root / "cache"), \
+                 patch.object(stages.cli, "git_commit") as git_commit:
+                with self.assertRaisesRegex(RuntimeError, "当日有效缓存仅2只"):
+                    stages.run_25d()
+            self.assertEqual(state["stage"], "initialized")
+            self.assertEqual(state["cache25_refresh_shortfall"], 1)
+            save_state.assert_called_once_with(state)
+            git_commit.assert_called_once()
+
     def test_after_close_notifier_returns_delivery_receipt(self):
         summary = {"target_trade_date": "2026-09-07"}
         meta = {"market_assessment": {}}

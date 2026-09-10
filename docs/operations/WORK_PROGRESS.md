@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-09 23:02 Asia/Shanghai
+Updated: 2026-09-10 19:24 Asia/Shanghai
 
 ## Overall goal
 
@@ -14,8 +14,8 @@ Canonical long-work policy:
 ## Current production baseline
 
 - Production repository: `CyberAI2026/-akshare-mobile`.
-- Production `main` before the Cloudflare deployment-workflow commit:
-  `0a830869c09c2faf35c22115782327741bd25165`.
+- Production `main` before the 2026-09-10 after-close incident repair:
+  `20308a749d543e63e2f5ee99659d3358d2cb479e`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
 - Assets `main` last reverified in this resumed operation:
   `e9dd4f86e2776a018a05dd2e1d3186de1a710457`.
@@ -78,6 +78,10 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   dependencies. A non-interactive GitHub Actions deployment path is being added so
   credentials can stay in repository Secrets rather than chat or a temporary Work
   environment. No deployment has been triggered.
+- `LOCK-20260910-after-close-25d-recovery`: run `34468821550` initialized saved run
+  `20260910_185940` but stopped at the 25-day capacity gate after only 148 of the
+  required 150 symbols obtained current-day history. Engineering retry/checkpoint
+  hardening is verified locally; production commit and failed-stage recovery remain.
 
 ## Pending
 
@@ -170,3 +174,31 @@ run and natural-cycle acceptance.
 
 - Before the D+3 engineering repair:
   `dc724dcb0910fda903cd0609d0b35b05d91e7fc5`.
+
+## 2026-09-10 After-Close 25-Day Incident
+
+- Failed production run: `34468821550`; failed job: `102844755037`.
+- The daily batch and immutable initialization completed. Commit
+  `20308a749d543e63e2f5ee99659d3358d2cb479e` preserves the 652-symbol active pool,
+  120-symbol daily batch, cache manifest, and run folder `20260910_185940`.
+- Both bulk spot sources failed during initialization: Eastmoney closed the
+  connection and Sina returned non-JSON HTML. The bounded per-symbol refresh then
+  obtained current 25-day history for 148 of the planned 150 symbols.
+- The hard 150-symbol capacity gate correctly refused to rank stale history. This
+  failure is not a zero-stock observation-pool result.
+- The 120-day, 250-day, market-context, AI-finalize, feedback-refresh, and formal
+  after-close delivery jobs did not execute. OpenAI calls: 0. Formal PushPlus calls:
+  0. One failure alert was already sent and must not be duplicated.
+- Engineering correction: retry only failed history symbols once and sequentially;
+  if the capacity gate still fails, persist successful cache updates, refresh QA,
+  current manifest, shortfall, and state before raising. The minimum capacity and
+  every screening/trading rule remain unchanged.
+- Verification before production commit: 18 targeted tests and 102 broader
+  non-historical operational tests passed; Python compilation, workflow-independent
+  behavior, and `git diff --check` passed. Test OpenAI/PushPlus messages were mocked;
+  no external call occurred.
+- Latest reliable checkpoint: initialization data is committed at `20308a...`; the
+  verified engineering patch is local and not yet in production. Next action: commit
+  the patch atomically, verify validation-only Actions, then rerun only the failed
+  job and its previously skipped downstream jobs after rechecking idempotency.
+- Incident rollback point: `20308a749d543e63e2f5ee99659d3358d2cb479e`.

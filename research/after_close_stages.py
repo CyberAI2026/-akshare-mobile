@@ -212,6 +212,21 @@ def run_25d() -> None:
     ready_pool = active_input.loc[code_series.isin(ready_codes)].reset_index(drop=True)
     minimum_ready = min(150, len(active_input))
     if len(ready_pool) < minimum_ready:
+        # Preserve every successful download and its QA before failing the capacity
+        # gate. A later failed-job rerun then fetches only the remaining stale names
+        # instead of discarding the completed part of this stage with the runner.
+        state.update({
+            "status": "running",
+            "stage": "initialized",
+            "cache25_refresh_requested": len(refresh_pool),
+            "cache25_refresh_ready": len(ready_pool),
+            "cache25_refresh_shortfall": minimum_ready - len(ready_pool),
+            "cache25_refresh_last_attempt_cn": cli.now_cn().isoformat(),
+            "qa25_refresh": _qa_cache_summary(refresh_qa),
+        })
+        _save_state(state)
+        cli.save_json(base / "meta.json", state)
+        cli.git_commit(f"V5 after-close 25d refresh partial {state.get('stamp', '')}".strip())
         raise RuntimeError(
             f"25日当日有效缓存仅{len(ready_pool)}只，低于最低研究容量{minimum_ready}只；"
             "已禁止用过期行情补足排名"

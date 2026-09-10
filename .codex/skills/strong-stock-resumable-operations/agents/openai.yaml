@@ -1,8 +1,0 @@
-interface:
-  display_name: "Strong Stock Resumable Operations"
-  short_description: "可断点恢复的生产运营与单写者交接规则"
-  default_prompt: "Use $strong-stock-resumable-operations to inspect the saved production state, resume from the latest verified checkpoint, and persist each small verified unit."
-
-policy:
-  allow_implicit_invocation: true
-

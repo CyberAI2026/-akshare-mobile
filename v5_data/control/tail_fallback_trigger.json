@@ -1,8 +1,0 @@
-{
-  "triggered_at_cn": "2026-09-10T14:37:04+08:00",
-  "trade_date": "2026-09-10",
-  "watchdog_stage": "14:32-main-fallback",
-  "main_sha_before_trigger": "227fe98f4186e9f87853517bc198c90cce11cfec",
-  "trigger_reason": "no same-day queued/in_progress/valid completed V5 Tail Confirmation run; no same-day tail OpenAI call; no same-day PushPlus receipt",
-  "observation_pool_target_trade_date": "2026-09-10"
-}
