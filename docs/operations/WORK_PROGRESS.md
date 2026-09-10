@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-10 19:24 Asia/Shanghai
+Updated: 2026-09-10 19:58 Asia/Shanghai
 
 ## Overall goal
 
@@ -16,9 +16,11 @@ Canonical long-work policy:
 - Production repository: `CyberAI2026/-akshare-mobile`.
 - Production `main` before the 2026-09-10 after-close incident repair:
   `20308a749d543e63e2f5ee99659d3358d2cb479e`.
+- Current production `main` after completed recovery and feedback refresh:
+  `42f887f2b4a99b586ea6b0d3ee4670590bf8ed9f`.
 - Assets repository: `CyberAI2026/strong-stock-research-assets`.
 - Assets `main` last reverified in this resumed operation:
-  `e9dd4f86e2776a018a05dd2e1d3186de1a710457`.
+  `8b174581cef6e7ffc3906d089ede69da04a203da`.
 - Queued/in-progress GitHub Actions at recovery check: none.
 - Active manual production write lock at recovery check: none.
 
@@ -78,10 +80,9 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   dependencies. A non-interactive GitHub Actions deployment path is being added so
   credentials can stay in repository Secrets rather than chat or a temporary Work
   environment. No deployment has been triggered.
-- `LOCK-20260910-after-close-25d-recovery`: run `34468821550` initialized saved run
-  `20260910_185940` but stopped at the 25-day capacity gate after only 148 of the
-  required 150 symbols obtained current-day history. Engineering retry/checkpoint
-  hardening is verified locally; production commit and failed-stage recovery remain.
+- `LOCK-20260910-after-close-25d-recovery` is closed. The repaired recovery run
+  `34471878484` completed successfully through feedback refresh. No manual rerun is
+  pending and the failure-alert job for the successful run was skipped.
 
 ## Pending
 
@@ -219,3 +220,46 @@ run and natural-cycle acceptance.
 - Immediate next action: create a normal forward correction commit whose full tree
   reproduces the complete `20308a...` parent plus only the five verified incident
   repair files. Verify repository completeness before any workflow recovery.
+
+### Completed recovery acceptance
+
+- Forward correction commit `b0dd5596ce525ec81708e8fedb2af5acf63e507c`
+  restored the complete repository tree and retained the five verified incident
+  repair files. Required files including `requirements.txt` and both staged
+  after-close workflows were reverified before the recovered pipeline advanced.
+- Because the forward correction necessarily appeared as a wide path addition from
+  the malformed parent, GitHub path filters started several workflows. The new
+  after-close run `34471878484` became the sole recovery run; no third run was
+  dispatched. An unintended historical-market workflow also ran to completion, but
+  its outputs were not inspected, interpreted, or used by this operations window.
+- Saved production run `v5_data/runs/20260910_193457` completed at
+  2026-09-10 19:53:54 Asia/Shanghai in 18.95 minutes. The 25-day stage refreshed only
+  29 remaining stale symbols, ranked 594 current symbols, and selected 197. All four
+  120-day shards succeeded; aggregate selected 39. The 250-day stage retained the
+  same 39-symbol research pool.
+- Market context completed successfully. Sector flow was recorded separately as
+  `实验性有警告`; it was disabled as AI evidence and did not masquerade as verified
+  same-day concept performance.
+- AI finalize made exactly one successful OpenAI call using `gpt-5.6-terra`:
+  response `resp_002d03320acdd8e9006aa29a09efa887d1abfecb178d20ef41`,
+  48,698 input tokens, 9,030 output tokens, 57,728 total tokens. It produced two
+  conditional observation symbols for target trade date 2026-09-11: `600165` and
+  `600368`. These remain a 14:40-14:45 confirmation pool, not a direct buy list.
+- Formal PushPlus request succeeded once on attempt 1 with API receipt
+  `6d64d6a046344907bd6760a1e1ab5dbc`. Persisted status is
+  `pushplus_delivery_ok=true`; API acceptance still does not prove terminal WeChat
+  receipt. The final feedback refresh was `--no-notify` and succeeded.
+- Workflow run `34471878484` finished with every production stage successful and
+  `failure-alert` skipped. Artifact `V5-after-close-34`, id `10150582374`, digest
+  `sha256:05f5970d34a52b917e487292da85b8d52b02845c033903bd8002be55a2966f38`,
+  is retained through 2026-09-24.
+- Final recovery commits: AI result
+  `e81b340e4510367c258a1bd5f5c45ddc30172e2b`; no-notify feedback refresh and current
+  production baseline `42f887f2b4a99b586ea6b0d3ee4670590bf8ed9f`.
+- Known follow-up: the inline after-close `failure-alert` is not idempotent across
+  rerun attempts and produced a duplicate alert during failed attempt 2. Repair it
+  as a separate engineering-only task before authorizing any failed-job rerun.
+- Latest reliable checkpoint: production results, run metadata, observation pool,
+  model evidence, API receipt, feedback refresh, and artifact are all durable at
+  `42f887f2b4a99b586ea6b0d3ee4670590bf8ed9f`. No after-close recovery write lock or
+  rerun remains active.
