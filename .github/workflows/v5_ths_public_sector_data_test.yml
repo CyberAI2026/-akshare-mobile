@@ -1,0 +1,119 @@
+name: V5 THS Public Sector Data Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "v5_core.py"
+      - "v5_cli.py"
+      - "tests/test_v5_data_layers.py"
+      - ".github/workflows/v5_ths_public_sector_data_test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  ths-sector-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+
+      - name: Test THS public concept and industry fund-flow data
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import pandas as pd
+          import v5_core as core
+
+          out=Path("ths_public_sector_test")
+          out.mkdir(exist_ok=True)
+          tables,q=core.fetch_public_sector_flow()
+          summary={}
+          for name,df in tables.items():
+            df.to_csv(out/f"{name}.csv",index=False,encoding="utf-8-sig")
+            summary[name]={"rows":int(len(df)),"columns":list(map(str,df.columns))}
+          q.to_csv(out/"qa.csv",index=False,encoding="utf-8-sig")
+
+          # 生成轻量榜单，便于人工验收，不进入正式策略。
+          for src in ["concept_now","industry_now"]:
+            p=out/f"{src}.csv"
+            if not p.exists(): continue
+            df=pd.read_csv(p)
+            if df.empty: continue
+            net_col=next((c for c in df.columns if str(c).strip()=="净额"),None)
+            pct_col=next((c for c in df.columns if "涨跌幅" in str(c) and "领涨股" not in str(c)),None)
+            if net_col:
+              df["_净额数"]=pd.to_numeric(df[net_col].astype(str).str.replace("亿","",regex=False).str.replace("万","",regex=False),errors="coerce")
+              df.sort_values("_净额数",ascending=False).head(20).drop(columns=["_净额数"]).to_csv(out/f"{src}_top20_netin.csv",index=False,encoding="utf-8-sig")
+            if pct_col:
+              df["_涨幅数"]=pd.to_numeric(df[pct_col].astype(str).str.replace("%","",regex=False),errors="coerce")
+              df.sort_values("_涨幅数",ascending=False).head(20).drop(columns=["_涨幅数"]).to_csv(out/f"{src}_top20_gain.csv",index=False,encoding="utf-8-sig")
+
+          print(q.to_string(index=False))
+
+          failures=q[q["状态"]=="失败"] if not q.empty else q
+          required={"交易日期","业务时区","抓取时间","板块类型","周期","资金单位","数据源","数据源URL","行业"}
+          metadata_bad=[name for name,df in tables.items() if not required.issubset(set(df.columns))]
+          duplicate_bad=[name for name,df in tables.items() if df["行业"].astype(str).duplicated().any()]
+          timezone_bad=[name for name,df in tables.items() if not (df["业务时区"].eq("Asia/Shanghai").all() and df["抓取时间"].astype(str).str.endswith("+0800").all())]
+          warnings=q[q["状态"]=="警告"] if not q.empty else q
+          if len(tables)!=10 or not failures.empty or metadata_bad or duplicate_bad or timezone_bad:
+              raise SystemExit(
+                  f"FAIL: 板块数据不满足结构门槛 tables={len(tables)}/10 failures={len(failures)} "
+                  f"metadata_bad={metadata_bad} duplicate_bad={duplicate_bad} timezone_bad={timezone_bad}"
+              )
+          status="正式可用" if warnings.empty else "实验性有警告"
+          summary["validation_status"]=status
+          summary["warning_count"]=int(len(warnings))
+          (out/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(f"THS_PUBLIC_SECTOR_TEST_{'OK' if warnings.empty else 'PROVISIONAL'} tables={len(tables)}/10 warnings={len(warnings)} status={status}")
+          PY
+
+      - name: Test one THS concept-index history and derived metrics
+        shell: bash
+        run: |
+          python - <<'PY'
+          from datetime import date, timedelta
+          import json
+          from pathlib import Path
+          import akshare as ak
+          from research.market_opinion_mining import compute_concept_index_metrics
+
+          catalog=ak.stock_board_concept_name_ths()
+          name_col=next(c for c in ["name","概念名称","板块名称","名称"] if c in catalog)
+          code_col=next((c for c in ["code","概念代码","板块代码","代码"] if c in catalog),None)
+          preferred=["机器人概念","人工智能","DeepSeek概念","阿里巴巴概念"]
+          available=set(catalog[name_col].astype(str))
+          selected=next((name for name in preferred if name in available),str(catalog.iloc[0][name_col]))
+          row=catalog[catalog[name_col].astype(str).eq(selected)].iloc[0]
+          code=str(row[code_col]) if code_col else ""
+          end=date.today(); start=end-timedelta(days=30)
+          history=ak.stock_board_concept_index_ths(
+              symbol=selected,start_date=start.strftime("%Y%m%d"),end_date=end.strftime("%Y%m%d")
+          )
+          metrics=compute_concept_index_metrics(history,selected,code)
+          if metrics is None:
+              raise SystemExit(f"FAIL: 同花顺概念指数无足够历史数据 concept={selected} rows={len(history)}")
+          Path("ths_public_sector_test/concept_index_metrics.json").write_text(
+              json.dumps(metrics,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+          print("THS_CONCEPT_INDEX_TEST_OK",json.dumps(metrics,ensure_ascii=False))
+          PY
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-THS-public-sector-data-test
+          path: ths_public_sector_test/
+          retention-days: 7

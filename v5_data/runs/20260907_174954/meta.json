@@ -1,0 +1,19 @@
+{
+  "status": "running",
+  "stage": "initialized",
+  "engine": "V5.3-auditable-market-sector-layer",
+  "strategy": "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2",
+  "started_cn": "2026-09-07T17:49:54.360112+08:00",
+  "stamp": "20260907_174954",
+  "folder": "v5_data/runs/20260907_174954",
+  "batch_path": "v5_data/inbox/daily_20260907_recovery2.csv",
+  "batch_count": 139,
+  "master_before_screen": 591,
+  "bootstrapped_from_v4": false,
+  "cache_seed": {
+    "seeded": 0,
+    "scanned": 772,
+    "available": 535
+  },
+  "isolated_index_count": 0
+}

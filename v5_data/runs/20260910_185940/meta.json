@@ -1,0 +1,37 @@
+{
+  "status": "running",
+  "stage": "initialized",
+  "engine": "V5.3-auditable-market-sector-layer",
+  "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
+  "started_cn": "2026-09-10T18:59:40.903291+08:00",
+  "stamp": "20260910_185940",
+  "folder": "v5_data/runs/20260910_185940",
+  "batch_path": "v5_data/inbox/daily_20260910_105817.csv",
+  "batch_count": 120,
+  "master_before_screen": 652,
+  "bootstrapped_from_v4": false,
+  "cache_seed": {
+    "seeded": 0,
+    "scanned": 772,
+    "available": 535
+  },
+  "cache_refresh": {
+    "asof_trade_date": "2026-09-10",
+    "source": "",
+    "pool_count": 652,
+    "already_current": 0,
+    "bulk_appended": 0,
+    "needs_history_fallback": 0,
+    "missing_cache": 0,
+    "corporate_action_guard": 0,
+    "errors": [
+      "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+      "sina-spot:JSONDecodeError:Can not decode value starting with character '<'"
+    ]
+  },
+  "cache_asof_trade_date": "2026-09-10",
+  "cache_deep_ready_count": 351,
+  "cache_current_count": 0,
+  "cache_fallback_count": 652,
+  "isolated_index_count": 0
+}

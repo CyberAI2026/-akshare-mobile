@@ -1,0 +1,58 @@
+name: Historical Trade Market Research
+# Full public-history refresh requested 2026-09-08.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/historical_trade_market_fetch.py"
+      - "research/reference/study_universe_2026.csv"
+      - "tests/test_historical_trade_market_fetch.py"
+      - ".github/workflows/historical_trade_market_research.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest tests/test_historical_trade_market_fetch.py
+
+  fetch-market:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        batch: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    runs-on: ubuntu-latest
+    # Public history retrieval may legitimately exceed one ChatGPT work slice.
+    # The job remains bounded and each matrix batch persists its own checkpoint.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: >-
+          python research/historical_trade_market_fetch.py
+          --universe research/reference/study_universe_2026.csv
+          --batch-index ${{ matrix.batch }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: historical-market-batch-${{ matrix.batch }}
+          path: historical_market_artifact/
+          if-no-files-found: warn
+          retention-days: 30

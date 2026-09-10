@@ -202,3 +202,20 @@ run and natural-cycle acceptance.
   the patch atomically, verify validation-only Actions, then rerun only the failed
   job and its previously skipped downstream jobs after rechecking idempotency.
 - Incident rollback point: `20308a749d543e63e2f5ee99659d3358d2cb479e`.
+
+### Recovery correction record
+
+- Engineering commit `b361cbc5d4b93ee4b3fb3dccae01bcc953414c9d` was created through
+  the GitHub tree API, but the API did not inherit the supplied base tree. Its root
+  contained only the five modified files (nine recursive tree entries), temporarily
+  omitting the rest of the repository from `main`. The complete parent tree and all
+  initialized production data remain intact at `20308a749d543e63e2f5ee99659d3358d2cb479e`.
+- Failed-jobs attempt 2 checked out `b361cbc...` and stopped in `actions/setup-python`
+  because `requirements.txt` was absent. The 25-day code did not run, no history was
+  fetched, OpenAI calls were 0, and formal after-close PushPlus calls were 0.
+- The non-idempotent `failure-alert` job sent another failure alert on attempt 2.
+  This duplicate is recorded explicitly and requires a separate idempotency fix;
+  no further failed-job rerun is allowed before that fix.
+- Immediate next action: create a normal forward correction commit whose full tree
+  reproduces the complete `20308a...` parent plus only the five verified incident
+  repair files. Verify repository completeness before any workflow recovery.

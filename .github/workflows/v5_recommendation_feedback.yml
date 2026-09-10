@@ -1,0 +1,103 @@
+name: V5 Recommendation Feedback and Sector Attribution
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "research/recommendation_feedback.py"
+      - "research/stock_sector_attribution.py"
+      - "v5_data/context/sector_membership/**"
+      - "tests/test_recommendation_feedback.py"
+      - ".github/workflows/v5_recommendation_feedback.yml"
+      - "v5_data/control/feedback_correction_trigger.json"
+  schedule:
+    # 15:35 and 19:40 Beijing time on weekdays.
+    - cron: "35 7 * * 1-5"
+    - cron: "40 11 * * 1-5"
+
+permissions:
+  contents: write
+
+concurrency:
+  # Serialize feedback/attribution runs without letting a long membership build
+  # occupy or evict this queue.
+  group: v5-recommendation-feedback
+  cancel-in-progress: false
+
+jobs:
+  feedback-and-attribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Deterministic tests
+        run: |
+          python -m py_compile research/recommendation_feedback.py research/stock_sector_attribution.py
+          python -m unittest tests/test_recommendation_feedback.py
+      - name: Update recommendation cohorts after close
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '35 7 * * 1-5'
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" == *"[feedback-correction]"* ]]; then
+            TRIGGER="v5_data/control/feedback_correction_trigger.json"
+            ASOF=$(jq -r '.asof' "$TRIGGER")
+            TITLE=$(jq -r '.title' "$TRIGGER")
+            KEY=$(jq -r '.delivery_key' "$TRIGGER")
+            python research/recommendation_feedback.py update \
+              --asof "$ASOF" --notify-title "$TITLE" --delivery-key "$KEY"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            python research/recommendation_feedback.py update --no-notify
+          else
+            python research/recommendation_feedback.py update
+          fi
+      - name: Build stock-to-multiple-sector attribution
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '40 11 * * 1-5'
+        shell: bash
+        run: |
+          MEMBERSHIP="v5_data/context/sector_membership/working.csv.gz"
+          if [ ! -f "$MEMBERSHIP" ]; then
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "Sector membership not committed yet; attribution will run automatically after the mapping commit."
+              exit 0
+            fi
+            echo "Required sector membership is missing: $MEMBERSHIP"
+            exit 1
+          fi
+          python research/stock_sector_attribution.py \
+            --membership "$MEMBERSHIP"
+      - name: Commit versioned feedback
+        run: |
+          git config user.name "V5 Feedback Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add --all -- v5_data/feedback
+          if [ -d v5_data/stock_sector_attribution ]; then
+            git add --all -- v5_data/stock_sector_attribution
+          fi
+          if git diff --cached --quiet; then
+            echo "No feedback changes to commit"
+          else
+            git commit -m "V5 recommendation feedback $(date +%F-%H%M)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-feedback-${{ github.run_id }}
+          path: |
+            v5_data/feedback/
+            v5_data/stock_sector_attribution/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,153 @@
+name: V5 Tail Confirmation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/v5_tail_confirmation.yml"
+      - "v5_cli.py"
+      - "research/holding_exit.py"
+      - "docs/HOLDING_EXIT_POLICY.md"
+      - "tests/test_tail_stages.py"
+      - "tests/test_holding_exit.py"
+      - "v5_data/control/tail_fallback_trigger.json"
+  schedule:
+    # Three staggered GitHub crons reduce silent scheduler misses.
+    # A completed same-day run is idempotently skipped, so OpenAI/PushPlus are not duplicated.
+    - cron: '32 6 * * 1-5'
+    - cron: '36 6 * * 1-5'
+    - cron: '40 6 * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-tail-confirmation
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: |
+          python -m py_compile v5_cli.py
+          python -m unittest tests/test_tail_stages.py tests/test_holding_exit.py tests/test_v5_data_layers.py tests/test_recommendation_feedback.py
+
+  precheck-1440:
+    needs: validate
+    # Ordinary code pushes validate only. A dedicated fallback-file commit is an authorized production trigger.
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[tail-fallback]')
+    runs-on: ubuntu-latest
+    # External dispatch may intentionally arrive a few minutes before the 14:32
+    # safe window, and this stage then waits for the 14:40 sample.
+    timeout-minutes: 25
+    env:
+      TZ: Asia/Shanghai
+      GITHUB_REPO: ${{ github.repository }}
+      GITHUB_BRANCH: ${{ github.ref_name }}
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: Capture 14:40 candidate data
+        run: python v5_cli.py tail_precheck
+      - name: Upload precheck artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-tail-precheck-${{ github.run_number }}
+          path: v5_data/tail/
+          if-no-files-found: warn
+          retention-days: 14
+
+  finalize-1445:
+    needs: precheck-1440
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: Asia/Shanghai
+      GITHUB_REPO: ${{ github.repository }}
+      GITHUB_BRANCH: ${{ github.ref_name }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - name: Complete 14:45 market and OpenAI decision
+        run: python v5_cli.py tail_finalize
+      - name: Upload final artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: V5-tail-final-${{ github.run_number }}
+          path: v5_data/
+          if-no-files-found: warn
+          retention-days: 14
+
+  failure-alert:
+    needs: [precheck-1440, finalize-1445]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    steps:
+      - name: Send one failure alert through PushPlus
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          token = (os.getenv("PUSHPLUS_TOKEN") or "").strip()
+          if not token:
+              print("PUSHPLUS_TOKEN missing; failure alert cannot be sent")
+              raise SystemExit(0)
+          now = datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds")
+          payload = {
+              "token": token,
+              "title": "A股二次启动系统｜尾盘任务故障",
+              "content": (
+                  f"尾盘分段任务在 {now} 运行失败。<br>"
+                  "本次买入建议或持仓卖出扫描不完整，不得把缺失结果当作继续持有；请检查GitHub Actions日志。<br>"
+                  "运行地址：https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              ),
+              "template": "html",
+              "channel": "wechat",
+          }
+          req = urllib.request.Request(
+              "https://www.pushplus.plus/send",
+              data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+              headers={"Content-Type": "application/json; charset=utf-8"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=20) as resp:
+              result = json.loads(resp.read().decode("utf-8", errors="replace"))
+              if int(result.get("code", -1)) != 200:
+                  raise SystemExit(f"PushPlus failure alert rejected: {result}")
+          PY

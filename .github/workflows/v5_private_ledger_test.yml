@@ -1,0 +1,71 @@
+name: V5 Private Ledger Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/v5_private_ledger_test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-private-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Verify encrypted ledger and recommendation exclusion
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import pandas as pd
+          import v5_cli as cli
+          from research.private_trade_ledger import active_position_codes, build_positions, decrypt_transactions
+
+          key=(os.getenv("TRADING_DATA_KEY") or "").strip()
+          if not key:
+              raise SystemExit("FAIL: TRADING_DATA_KEY missing in GitHub Actions Secrets")
+          ledger=Path("v5_data/private/trades.enc")
+          if not ledger.exists() or ledger.stat().st_size < 100:
+              raise SystemExit("FAIL: encrypted ledger missing or invalid")
+          transactions=decrypt_transactions(ledger.read_bytes(),key)
+          active=active_position_codes(transactions)
+          expected="600801"
+          if expected not in active:
+              raise SystemExit("FAIL: expected active position is absent after decryption")
+          positions=build_positions(transactions)
+          target_positions=positions[(positions["股票代码"]==expected) & (positions["持仓数量"]>0)]
+          target_trades=transactions[(transactions["股票代码"]==expected) & (transactions["操作"]=="买入")]
+          position_qty_ok=len(target_positions)==1 and int(target_positions.iloc[0]["持仓数量"])==2100
+          name_ok=len(target_positions)==1 and str(target_positions.iloc[0]["股票名称"])=="华新建材"
+          date_ok=any(str(row["交易日期"])=="2026-09-04" for _,row in target_trades.iterrows())
+          price_ok=any(abs(float(row["成交价格"])-24.80)<0.001 for _,row in target_trades.iterrows())
+          trade_qty_ok=any(int(row["成交数量"])==2100 for _,row in target_trades.iterrows())
+          amount_ok=any(abs(float(row["成交金额"])-52080.0)<0.01 for _,row in target_trades.iterrows())
+          detail_ok=position_qty_ok and name_ok and date_ok and price_ok and trade_qty_ok and amount_ok
+          print(
+              "PRIVATE_LEDGER_DETAIL_FLAGS "
+              f"position_qty_ok={str(position_qty_ok).lower()} "
+              f"name_ok={str(name_ok).lower()} date_ok={str(date_ok).lower()} "
+              f"price_ok={str(price_ok).lower()} trade_qty_ok={str(trade_qty_ok).lower()} "
+              f"amount_ok={str(amount_ok).lower()}"
+          )
+          if not detail_ok:
+              raise SystemExit("FAIL: encrypted ledger details do not match the expected backfill")
+          probe=pd.DataFrame({"股票代码":[expected,"000001"],"股票名称":["",""]})
+          remaining,excluded=cli.exclude_active_trades(probe)
+          if expected not in excluded or expected in set(remaining["股票代码"].astype(str)):
+              raise SystemExit("FAIL: active holding was not excluded from recommendation candidates")
+          print(f"PRIVATE_LEDGER_TEST_OK active_position_count={len(active)} expected_code_present=true details_ok=true exclusion_ok=true")
+          PY

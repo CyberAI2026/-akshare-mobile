@@ -1,0 +1,14 @@
+{
+  "status": "running",
+  "engine": "V5.3-auditable-market-sector-layer",
+  "strategy": "research_v0.5-evidence-aligned+pool-v0.3+market-v0.3+sector-v0.1+ai-v0.2",
+  "started_cn": "2026-09-04T18:06:51.443108+08:00",
+  "batch_count": 85,
+  "master_before_screen": 573,
+  "bootstrapped_from_v4": false,
+  "cache_seed": {
+    "seeded": 0,
+    "scanned": 772,
+    "available": 535
+  }
+}

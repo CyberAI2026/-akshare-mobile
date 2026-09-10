@@ -1,0 +1,55 @@
+{
+  "status": "valid",
+  "generated_trade_date": "2026-09-08",
+  "target_trade_date": "2026-09-09",
+  "generated_at_cn": "2026-09-08T16:24:43.195780+08:00",
+  "source_candidate_count": 46,
+  "ai_candidate_count_after_active_trade_exclusion": 46,
+  "excluded_active_trade_count": 0,
+  "observation_count": 3,
+  "model": "gpt-5.6-terra",
+  "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
+  "source_run": "v5_data/runs/20260908_160549",
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "市场宽度当日修复，上涨3417家、涨停73家、跌停0家且成交额较前日增加；但主要指数近5日至60日仍多数走弱，强势股观察应重结构确认。",
+    "next_day_aggressiveness": "中性"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "农化、种植、油气、煤化工等当日较强，农业主题多周期涨幅靠前；候选股的板块成分时点与当日不完全一致，除明确客观行业数据外均不作为个股共振确认。"
+  },
+  "opinion_assessment": {
+    "status": "未启用",
+    "summary": "公开复盘正文挖掘状态为stale，来源日期与本次行情日期不一致；不将其作为行情事实或选股依据。"
+  },
+  "opinion_context": {
+    "status": "stale",
+    "source_trade_date": "2026-09-07",
+    "reason": "观点日期与行情日期不一致"
+  },
+  "portfolio_note": "程序板块证据门禁后，正式观察池共3只（000526、002012、002329）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：000526、002012、002329、300765、603009；超过3只后按结构70%和板块30%排序未入围：300765、603009。",
+  "second_start_evidence_version": "v0.6",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "000526",
+    "002012",
+    "002329",
+    "300765",
+    "603009"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [
+    "300765",
+    "603009"
+  ],
+  "pool_ranking_scores_70_30": {
+    "000526": 0.775,
+    "002012": 0.6,
+    "002329": 0.425,
+    "300765": 0.25,
+    "603009": 0.075
+  },
+  "rule": "仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单"
+}

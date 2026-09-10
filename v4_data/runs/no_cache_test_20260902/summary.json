@@ -1,0 +1,10 @@
+{
+  "strategy": "research_v0.4",
+  "initial": 5,
+  "stage1": 5,
+  "stage2": 5,
+  "stage3": 5,
+  "completed": "2026-09-02T02:19:33.794024",
+  "folder": "v4_data/runs/no_cache_test_20260902",
+  "ai_precheck": "OPENAI_API_KEY 未配置；本次仅完成数据与机械排序。"
+}

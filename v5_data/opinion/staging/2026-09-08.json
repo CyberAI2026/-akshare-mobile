@@ -1,0 +1,3406 @@
+{
+  "source_date": "2026-09-08",
+  "trade_date": "2026-09-08",
+  "updated_at_cn": "2026-09-09T11:37:16.737983+08:00",
+  "method": "incremental AI-verified quality pool; raw article bodies not persisted",
+  "sources": [
+    {
+      "article_id": "0362c8f4e0ec0e19",
+      "title": "今日复盘9.8_哪一步才算好_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVrx8pF5cz",
+      "read_count": 64,
+      "body_chars": 2378,
+      "body_sha256": "0362c8f4e0ec0e19899baeca563d07476bff0778c92264961f93ca7b890f71d7",
+      "published_at_cn": "2026-09-08T17:20:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "054253af24aaad3a",
+      "title": "9.8收评：别瞎慌！盘面稳得很，不放量就不用跑_唐主任稳盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVITBdDSQ8",
+      "read_count": 76,
+      "body_chars": 2336,
+      "body_sha256": "054253af24aaad3a06cd837e44d5e5956e45e66859fc81f1e7b6d8daafdb66e2",
+      "published_at_cn": "2026-09-08T21:23:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "1109ea9d86b13fbe",
+      "title": "9.7 外强中干_八进八出瓢子龙_淘股吧",
+      "url": "https://www.tgb.cn/a/2uUhlNGBdVI",
+      "read_count": 706,
+      "body_chars": 2201,
+      "body_sha256": "1109ea9d86b13fbe461bfecfc0e6f9c1ec1409d64e99689920970c20d3f615f6",
+      "published_at_cn": "2026-09-08T00:30:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "22064ef7dd0786e8",
+      "title": "2026年9月8日复盘_Honeyzzz_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVnVDIB5nB",
+      "read_count": 92,
+      "body_chars": 3199,
+      "body_sha256": "22064ef7dd0786e81f6626928fb9cccb91ce92b03b262b3155ddfdb809ac4cbd",
+      "published_at_cn": "2026-09-08T16:29:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "255b2130495c8db8",
+      "title": "9.8早盘：港股提前爆拉20%！AI硬件情绪拉满，今天别追后排接盘_唐主任稳盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2uUMeX1RMom",
+      "read_count": 168,
+      "body_chars": 2647,
+      "body_sha256": "255b2130495c8db859bac1807d54525c1bad84ace2244739c57c1e9f6a9d88a3",
+      "published_at_cn": "2026-09-08T07:42:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "257b1d4cb6aae6e4",
+      "title": "9.8柚小柚复盘：有企稳迹象，择机加仓_柚小柚_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVic3SVG9n",
+      "read_count": 28,
+      "body_chars": 1359,
+      "body_sha256": "257b1d4cb6aae6e45bffc841a8a0fbbb305c3f7aeecef16dceebe6354cf70476",
+      "published_at_cn": "2026-09-08T15:09:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "2698257c6500b0fb",
+      "title": "海龙复盘｜09.08A股复盘：存量电风扇行情，无统一主线，算力脉冲熄火，医药午后异动如何看_海龙看盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVsxIDYo67",
+      "read_count": 0,
+      "body_chars": 2953,
+      "body_sha256": "2698257c6500b0fb0c6a4da6afea9405a606cbcd481edbead42ff44b5d8f87d8",
+      "published_at_cn": "2026-09-08T17:34:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "2901873111e8c976",
+      "title": "9.8 复盘，盘面热闹，但是我感觉一般般。_麒麟登峰_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVu89H46k2",
+      "read_count": 99,
+      "body_chars": 1939,
+      "body_sha256": "2901873111e8c976cefa0e177428063753ca750c68998d3ed5d58b97fcec1516",
+      "published_at_cn": "2026-09-08T17:56:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "2fcaaa764fa6ab87",
+      "title": "9.8：科技硬件共振指数震荡，情绪抱团走强_会飞的外星人_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVGLKsC8uo",
+      "read_count": 51,
+      "body_chars": 1838,
+      "body_sha256": "2fcaaa764fa6ab8764ef29650afeaa3ba06b7dd5af1ac6f4e2a1efe38755c8e1",
+      "published_at_cn": "2026-09-08T20:53:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "36c4274db9ae21bd",
+      "title": "[红包]9.8 朦胧的市场最好了，太明牌一点都不好玩_青锋问道_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVuETWZygc",
+      "read_count": 662,
+      "body_chars": 11553,
+      "body_sha256": "36c4274db9ae21bd5f706846513564f509a91657ed855d45adcc6411f09ff890",
+      "published_at_cn": "2026-09-08T18:04:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "5902e51a544eba84",
+      "title": "9.8复盘：科技反弹一日游，农业加强成主流_子语观市_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVrCeZeimr",
+      "read_count": 0,
+      "body_chars": 3240,
+      "body_sha256": "5902e51a544eba84d9a87bbf88ae48eefc22d88f0f807d2010783548454cead6",
+      "published_at_cn": "2026-09-08T17:21:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "613173b0cb9178d9",
+      "title": "26.9.8 四板pk价值+首二判断_人人一724_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVHMcMqZ8H",
+      "read_count": 1018,
+      "body_chars": 8936,
+      "body_sha256": "613173b0cb9178d9b356a47af19b8a195fb55cadd81d48d44774137d49d53b97",
+      "published_at_cn": "2026-09-08T21:07:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "62d01264b247e967",
+      "title": "9.8号复盘：小剑小芳，今天竞价925分教你识别农业+Ai应用，盘面百亿资金异动痕迹！_主升龙头空空龙_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVilLNUcei",
+      "read_count": 0,
+      "body_chars": 18855,
+      "body_sha256": "62d01264b247e9679e7abbeecdc61559fd8ceec135ea87413f8b4a81a1340db7",
+      "published_at_cn": "2026-09-08T15:11:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "6f2202aaad3ec379",
+      "title": "《9月8日收盘复盘：创业板跌超1%，农业化肥接力，热点开始明显切换》_机智的量化交易员_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVkUxERyAy",
+      "read_count": 45,
+      "body_chars": 4353,
+      "body_sha256": "6f2202aaad3ec3791e4a3955d70772e22a49cbd704d210d27cbcf99552d12617",
+      "published_at_cn": "2026-09-08T15:47:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "7a1132161aa51825",
+      "title": "​继续空看戏，放不出来量就不行 看看未来几天有没有机会 2026年9月8日复盘_龙血树炒家_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVBFAuqhDB",
+      "read_count": 95,
+      "body_chars": 2233,
+      "body_sha256": "7a1132161aa518259bcb7d2c0855ab0d68d9b45d9bd3012a3c2e32cf8e9b91df",
+      "published_at_cn": "2026-09-08T19:42:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "7c0f347950061a42",
+      "title": "昨日预测：2号种子集泰股份成功涨停——明日种子：1号中国出版，2号敦煌种业。_光神涅槃_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVn6tMS5qZ",
+      "read_count": 1377,
+      "body_chars": 9228,
+      "body_sha256": "7c0f347950061a425a6af5e5c88c8b9d68ccc07d21e85d768f22dd4d09bc1841",
+      "published_at_cn": "2026-09-08T16:18:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "8b144c592311dfad",
+      "title": "9-8复盘 | 最高板从 6 板掉到 4 板，涨停却多了_燃青_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVRGHmx04U",
+      "read_count": 5,
+      "body_chars": 4303,
+      "body_sha256": "8b144c592311dfad7ddd8170e77edfbf8650ebfcf15297f904e4b37d2f48b7e3",
+      "published_at_cn": "2026-09-08T23:26:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "8bb1686e8eb0e661",
+      "title": "盘前情报 · 2026-09-08 周二（一分钟复盘）_Dillon230_淘股吧",
+      "url": "https://www.tgb.cn/a/2uULJFFxWpb",
+      "read_count": 0,
+      "body_chars": 1622,
+      "body_sha256": "8bb1686e8eb0e66100c8abce6df0467e7f87a12e4139b86b87450ce0c332c1ac",
+      "published_at_cn": "2026-09-08T07:35:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "91b0aba40784e5fa",
+      "title": "260908（周二）盘后复盘｜指数分化，农业霸屏涨停潮，龙版传媒冲击7连板炸板，连板高度骤降至4板_邵柳智_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVMC8QbQFr",
+      "read_count": 7,
+      "body_chars": 7225,
+      "body_sha256": "91b0aba40784e5fae23aa43ab785ea904ce8563e7f1dabf18e40f50d6a79ce00",
+      "published_at_cn": "2026-09-08T22:15:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "99455faa535b1e0e",
+      "title": "[红包]明晚直播：教你龙切龙丨9.08：锁住农补涨龙，切入传媒新龙_南山游龙_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVojt2d9gJ",
+      "read_count": 14890,
+      "body_chars": 11206,
+      "body_sha256": "99455faa535b1e0ecdbb589041e28e338ecca4813f39fc8d340909a6ee9e2fc9",
+      "published_at_cn": "2026-09-08T16:35:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "9cf63670d4c10bee",
+      "title": "9月8日复盘及盘后新闻发酵_环球股市逻辑社_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVTn8uUE5w",
+      "read_count": 12,
+      "body_chars": 4107,
+      "body_sha256": "9cf63670d4c10bee4e47f38f6fca62377a57d05dd7f30312769f8163e30d6292",
+      "published_at_cn": "2026-09-08T23:49:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a41de732e29cd513",
+      "title": "沪指红，创指绿，AI硬件链集体“跳水”！_风云产业投研_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVnaPqERGD",
+      "read_count": 30,
+      "body_chars": 3922,
+      "body_sha256": "a41de732e29cd5133f3f701a0eebef021797c9cbf72a7521ca2b7c1e01beca2a",
+      "published_at_cn": "2026-09-08T16:19:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ac46e2680e6ad621",
+      "title": "9.8监管升级是机会_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2uUSV6xc7IJ",
+      "read_count": 72,
+      "body_chars": 1961,
+      "body_sha256": "ac46e2680e6ad621a6ff0803daba63e2dc3b470a0967ba9c1a3b958826ce1aa1",
+      "published_at_cn": "2026-09-08T09:15:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "b34bdfc1b3411582",
+      "title": "复盘——与天争命者长盛不衰_fe作手_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVTZG9QKZJ",
+      "read_count": 8,
+      "body_chars": 1763,
+      "body_sha256": "b34bdfc1b3411582e4664f7547badaf2f6093067adc514f78328a3824b9c9a7e",
+      "published_at_cn": "2026-09-08T23:58:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "bbb20a08237b5417",
+      "title": "泸州渔夫 | 2026年9月8日复盘_笃亿_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVqJenY64x",
+      "read_count": 53,
+      "body_chars": 2860,
+      "body_sha256": "bbb20a08237b54179a790a519af127b9f8fcb8255fefc095c13244742660547a",
+      "published_at_cn": "2026-09-08T17:09:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "bcef00cc7c0e8898",
+      "title": "9.9早盘前瞻:市场情绪继续高潮，某游资却悄悄空仓了！明天方向看这里！_庄哥说股_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVndkUiyYn",
+      "read_count": 3813,
+      "body_chars": 14087,
+      "body_sha256": "bcef00cc7c0e88981729140d118923b00c4d831ac30260792284e51fcf3b5da2",
+      "published_at_cn": "2026-09-08T16:19:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ca7c6924d0a87a1e",
+      "title": "9.8.复盘_王全海_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVJYSPLpep",
+      "read_count": 65,
+      "body_chars": 4810,
+      "body_sha256": "ca7c6924d0a87a1e1df567f6682003b70e6fc77b5889db6744a4a334d3bec280",
+      "published_at_cn": "2026-09-08T21:38:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "cd9aa3c4255ec3fa",
+      "title": "2026年9月8日 复盘记录_超短臭袜攻击_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVwirCCC0y",
+      "read_count": 0,
+      "body_chars": 2050,
+      "body_sha256": "cd9aa3c4255ec3fae3a3bfeda8fd6af7237cdd8a4f9fd9e9f0b76ab9df169d4d",
+      "published_at_cn": "2026-09-08T18:26:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "d26ab524636764b0",
+      "title": "9.8云端 复盘日记_向上看云端_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVG6Uj2Jce",
+      "read_count": 51,
+      "body_chars": 2321,
+      "body_sha256": "d26ab524636764b0552633dd697a33499cdc15ca5680117d0916f570ae1f0fe6",
+      "published_at_cn": "2026-09-08T20:44:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "de1c78abec588c83",
+      "title": "20260908复盘丨无量反弹难延续_山风细雨_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVmMW7Obuf",
+      "read_count": 58,
+      "body_chars": 4833,
+      "body_sha256": "de1c78abec588c83e8fe4721d06846fcb59681adf0c56da535b3bd8f4db867aa",
+      "published_at_cn": "2026-09-08T16:13:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "efdb8403d2d5224b",
+      "title": "沪指红，创指绿，AI硬件链集体“跳水”！_风云AI赛事_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVn0IosW2b",
+      "read_count": 32,
+      "body_chars": 3921,
+      "body_sha256": "efdb8403d2d5224b7cc6c7b2e478a876098e0ba75a31a14c580bebffdb6f6391",
+      "published_at_cn": "2026-09-08T16:16:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "fd815cc751fedf3b",
+      "title": "持有中国出版！附9.9明日市场核心策略_连板龙头作手_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVFORsx9J0",
+      "read_count": 1,
+      "body_chars": 10809,
+      "body_sha256": "fd815cc751fedf3b3488c300dce43c31a705017e7a5c49fd4dd1874d892e1134",
+      "published_at_cn": "2026-09-08T20:40:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ffb147f8214d7b7a",
+      "title": "0908看图_guitar_淘股吧",
+      "url": "https://www.tgb.cn/a/2uVM3wLlJCJ",
+      "read_count": 65,
+      "body_chars": 1863,
+      "body_sha256": "ffb147f8214d7b7a2ebd68b85bfdc6fd0ad75f863926c6708b1939109ed2d0ae",
+      "published_at_cn": "2026-09-08T22:07:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    }
+  ],
+  "article_mining": [
+    {
+      "article_id": "0362c8f4e0ec0e19",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧",
+        "发酵"
+      ],
+      "market_summary": "作者认为指数沪强深弱、个股赚钱面尚可，资金从高位科技切向农业、资源及医药等低估值和事件驱动方向。",
+      "sectors": [
+        {
+          "name": "农业农化",
+          "stance": "加强",
+          "evidence": "作者定义其为最强主线，称种业、化肥、农药出现批量涨停。"
+        },
+        {
+          "name": "有色金属",
+          "stance": "活跃",
+          "evidence": "作者称工业金属走强，铜方向表现突出。"
+        },
+        {
+          "name": "油气煤炭",
+          "stance": "活跃",
+          "evidence": "作者称资源周期板块同步走强，属于顺周期轮动。"
+        },
+        {
+          "name": "传媒出版",
+          "stance": "活跃",
+          "evidence": "作者称传媒出版延续强势，中国出版三连板、读者传媒二连板。"
+        },
+        {
+          "name": "医药CXO",
+          "stance": "活跃",
+          "evidence": "作者称医保谈判催化下，CXO及创新药尾盘拉升。"
+        },
+        {
+          "name": "半导体",
+          "stance": "退潮",
+          "evidence": "作者称半导体等前期高位科技赛道集体回调。"
+        },
+        {
+          "name": "AI硬件",
+          "stance": "退潮",
+          "evidence": "作者称AI算力及硬件资金兑现，筹码出现松动。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业农化",
+          "role": "龙头"
+        },
+        {
+          "name": "中国出版",
+          "sector": "传媒出版",
+          "role": "核心"
+        },
+        {
+          "name": "读者传媒",
+          "sector": "传媒出版",
+          "role": "跟随"
+        },
+        {
+          "name": "奥浦迈",
+          "sector": "医药CXO",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业农化主线的持续性",
+        "科技成长赛道资金兑现是否延续",
+        "CXO与创新药午后拉升能否延续"
+      ],
+      "numeric_claims": [
+        "上证指数3940.55点，涨0.20%",
+        "深证成指13703.21点，跌0.52%",
+        "创业板指3359.72点，跌1.15%",
+        "科创50跌1.52%",
+        "沪深300跌0.36%",
+        "北证50跌0.97%",
+        "两市成交额约1.96至1.98万亿元，较前一日增加约140亿元",
+        "超3400只个股上涨",
+        "亚盛集团4连板",
+        "中国出版3连板",
+        "读者传媒2连板"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "054253af24aaad3a",
+      "market_stance": "偏多",
+      "market_phase": [
+        "修复",
+        "分歧",
+        "发酵"
+      ],
+      "market_summary": "作者认为市场量能未显著放大，科技与金融轮动使盘面整体稳定；农业为最强情绪线，但高位农业及传媒均需防范分歧兑现。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "活跃",
+          "evidence": "作者认为科技内部轮动稳定，PCB带队，当前处于反抽阶段。"
+        },
+        {
+          "name": "PCB",
+          "stance": "加强",
+          "evidence": "作者称PCB有沪电股份等带队，且涨停向板块扩散。"
+        },
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者判断农业是后续最强情绪线，但提示随时准备兑现。"
+        },
+        {
+          "name": "零售",
+          "stance": "分化",
+          "evidence": "作者称百大、国芳走强，但认为后排会逐步走弱。"
+        },
+        {
+          "name": "医药",
+          "stance": "修复",
+          "evidence": "作者认为医药仍在轮动磨底，并将慢慢轮动修复。"
+        },
+        {
+          "name": "AI传媒",
+          "stance": "分化",
+          "evidence": "作者称AI传媒主动分歧断板、较前日走弱，仅天舟文化超预期。"
+        },
+        {
+          "name": "数字货币",
+          "stance": "不明确",
+          "evidence": "作者将其定义为老抱团，认为受外围影响较大。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "中际旭创",
+          "sector": "科技",
+          "role": "核心"
+        },
+        {
+          "name": "沪电股份",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "深南电路",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "百大集团",
+          "sector": "零售",
+          "role": "龙头"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "零售",
+          "role": "跟随"
+        },
+        {
+          "name": "楚天龙",
+          "sector": "数字货币",
+          "role": "核心"
+        },
+        {
+          "name": "泰格医药",
+          "sector": "医药",
+          "role": "核心"
+        },
+        {
+          "name": "天舟文化",
+          "sector": "AI传媒",
+          "role": "核心"
+        },
+        {
+          "name": "中国出版",
+          "sector": "AI传媒",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "银行与证券走势对市场风向的指示",
+        "PCB能否延续带队并扩大科技反抽",
+        "农业高位情绪及AI传媒分歧消化情况"
+      ],
+      "numeric_claims": [
+        "金健米业换手率72%",
+        "金健米业17个交易日上涨1.5倍",
+        "全天成交量较前日微增100多亿元",
+        "泰格医药下午拉升8个点"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "1109ea9d86b13fbe",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "修复"
+      ],
+      "market_summary": "作者认为上证连续高开走低，短线接力赚钱效应回暖，但AI硬科技外强中干且筹码拥挤，后续或继续承压。",
+      "sectors": [
+        {
+          "name": "AI硬件",
+          "stance": "退潮",
+          "evidence": "作者称AI硬科技外强中干、筹码拥挤，更倾向其不再是后续核心。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者称消费低位补涨明显多于AI视频。"
+        },
+        {
+          "name": "AI视频",
+          "stance": "分化",
+          "evidence": "作者称消费低位补涨明显多于AI视频。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "国芳集团",
+          "sector": "消费",
+          "role": "龙头"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "不明确",
+          "role": "龙头"
+        },
+        {
+          "name": "恒盛能源",
+          "sector": "AI硬科技",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "大盘能否反弹，以及是否继续调整",
+        "上证反弹能否突破3980.2",
+        "国芳集团面对100%严重异常波动后的表现"
+      ],
+      "numeric_claims": [
+        "趋势风格指数为25",
+        "二进三成功率为50%",
+        "若走bBc浪，作者称可能跌破3850.86",
+        "反弹突破3980.2将证伪一种调整路径",
+        "4c浪极限点位为跌破3674.40",
+        "国芳集团将面对100%的严重异常波动"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "22064ef7dd0786e8",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵",
+        "分歧"
+      ],
+      "market_summary": "作者认为农业已向化肥、农产品加工等上下游发散，成为主线；个股高换手分歧加大，养殖能否跟随仍待观察。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称农业已发散至化肥、农产品加工、农化制品等，是毋庸置疑的主线。"
+        },
+        {
+          "name": "化工",
+          "stance": "活跃",
+          "evidence": "作者认为化工偏防守，但提及赤天化猛冲、华昌化工涨停。"
+        },
+        {
+          "name": "养殖业",
+          "stance": "不明确",
+          "evidence": "作者看好猪模块逻辑，但希望农业主线带动养殖，尚待验证。"
+        },
+        {
+          "name": "零售",
+          "stance": "活跃",
+          "evidence": "百大集团猛攻、中百跟随，国芳集团表现引起作者关注。"
+        },
+        {
+          "name": "大消费",
+          "stance": "分化",
+          "evidence": "作者认为华天酒店、云南旅游表现普通，后续关注优先级降低。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新赛股份",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "罗牛山",
+          "sector": "养殖业",
+          "role": "高关注"
+        },
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "百大集团",
+          "sector": "零售",
+          "role": "核心"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "零售",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "罗牛山在高换手放量分歧后的走势",
+        "农业主线对养殖业猪模块的带动",
+        "国芳集团二次涨停放量及接近历史高点后的表现"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "255b2130495c8db8",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为AI硬件获港股情绪提振，但预期为前排晋级、后排兑现的分化，建议以开盘承接判断强弱。",
+      "sectors": [
+        {
+          "name": "AI硬件",
+          "stance": "加强",
+          "evidence": "作者称其为第一主线，认为光模块、PCB、半导体材料获资金共识。"
+        },
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "作者称农业为科技分歧时的防守方向，并以亚盛集团为核心。"
+        },
+        {
+          "name": "机器人",
+          "stance": "不明确",
+          "evidence": "作者认为是事件驱动的低位轮动，持续性不如主线。"
+        },
+        {
+          "name": "空间计算",
+          "stance": "不明确",
+          "evidence": "作者认为是事件驱动的低位轮动，持续性不如主线。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "退潮",
+          "evidence": "作者称龙版传媒独苗撑高度，板块资金持续撤离。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "剑桥科技",
+          "sector": "AI硬件",
+          "role": "龙头"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "AI硬件",
+          "role": "核心"
+        },
+        {
+          "name": "美格智能",
+          "sector": "AI硬件",
+          "role": "高关注"
+        },
+        {
+          "name": "集泰股份",
+          "sector": "AI硬件",
+          "role": "高关注"
+        },
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "开盘半小时内AI硬件前排的承接强弱",
+        "高开后获利盘兑现及炸板变化",
+        "农业能否在科技分歧时承接轮动资金"
+      ],
+      "numeric_claims": [
+        "剑桥科技港股涨24.37%",
+        "中际旭创涨近20%",
+        "炸板率从55%降至16.96%",
+        "打板平均收益4.53%",
+        "龙版传媒6板",
+        "80只首板占大半",
+        "作者预期前排开盘高开3%-5%",
+        "作者将高开5%以上后排及高开7%以上后排视为需警惕情形"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "257b1d4cb6aae6e4",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为冲高回落符合预期，市场仍在震荡磨底但已有企稳迹象；需观察承接及外围消息落地，后续或有修复。",
+      "sectors": [
+        {
+          "name": "国产算力",
+          "stance": "不明确",
+          "evidence": "作者将国产算力列为观察板块，未明确判断强弱。"
+        },
+        {
+          "name": "红利",
+          "stance": "不明确",
+          "evidence": "作者将红利列为观察板块，未明确判断强弱。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "市场能否出现承接",
+        "本周震荡幅度是否逐步收窄",
+        "外围消息落地后的方向确认"
+      ],
+      "numeric_claims": [
+        "作者称当日量能为19784亿元。",
+        "作者称量能增量139亿元，变化0.71%。"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "2698257c6500b0fb",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为市场成交虽高但仍属存量资金轮动，沪强深弱且无统一主线；成长赛道承压，资金转向低位周期和防御方向。",
+      "sectors": [
+        {
+          "name": "农林牧渔",
+          "stance": "加强",
+          "evidence": "被作者列为日内最强方向，农业龙头打出连板高度，但板块扩散不足。"
+        },
+        {
+          "name": "基础化工",
+          "stance": "活跃",
+          "evidence": "作者称其为资金主动流入前三板块之一，受低位周期防御资金青睐。"
+        },
+        {
+          "name": "有色金属",
+          "stance": "活跃",
+          "evidence": "作者称资金流向低位周期防御方向，有色位列主动流入前三。"
+        },
+        {
+          "name": "油气煤炭",
+          "stance": "活跃",
+          "evidence": "作者将其列入日内相对最强的周期防御方向。"
+        },
+        {
+          "name": "算力硬件",
+          "stance": "退潮",
+          "evidence": "作者认为此前异动属消息刺激和超跌修复脉冲，今日熄火并出现兑现。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "午后异动但启动较晚、缺少连板龙头且内部分化，持续性待次日验证。"
+        },
+        {
+          "name": "TMT",
+          "stance": "退潮",
+          "evidence": "作者称其为资金主动流出方向，高位板块资金持续兑现。"
+        },
+        {
+          "name": "计算机",
+          "stance": "退潮",
+          "evidence": "作者称其位居资金主动流出前三，高位成长赛道承受兑现压力。"
+        },
+        {
+          "name": "消费电子",
+          "stance": "退潮",
+          "evidence": "作者将其列为领跌及资金流出方向，认为高位资金持续离场。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "上证能否放量突破3955及3926支撑表现，成交能否站上2万亿",
+        "医药异动股能否继续高开走强、板块资金能否持续流入",
+        "农业周期龙头连板高度与板块扩散力度，以及算力是否修复"
+      ],
+      "numeric_claims": [
+        "上证指数3940.55点，+0.20%",
+        "深证成指13703.21点，-0.52%",
+        "创业板指3359.72点，-1.15%",
+        "两市合计成交1.96万亿",
+        "作者列出盘前压力3943、中线3940、支撑3926",
+        "作者关注3955能否放量突破",
+        "作者以成交量站上2万亿作为增量资金观察信号",
+        "作者建议医药需有2-3只个股继续高开走强作为持续性验证",
+        "作者提出仓位控制5-6成"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "2901873111e8c976",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为盘面虽热闹但整体一般，题材发酵偏弱且持续性存疑，代糖虽成热点但审美疲劳出现，等待新周期机会。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称科技缺乏美股指引，资金面尴尬。"
+        },
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "亚盛带动敦煌，但作者认为板块发酵仍弱。"
+        },
+        {
+          "name": "商业连锁",
+          "stance": "活跃",
+          "evidence": "百大带动中百，但作者认为板块发酵偏弱。"
+        },
+        {
+          "name": "代糖",
+          "stance": "活跃",
+          "evidence": "作者称代糖引发日内热点，但审美疲劳已来。"
+        },
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者将中京称为PCB方向。"
+        },
+        {
+          "name": "通信",
+          "stance": "活跃",
+          "evidence": "作者称华脉受通信利好而一字涨停。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "传媒出版",
+          "role": "龙头"
+        },
+        {
+          "name": "中国出版",
+          "sector": "传媒出版",
+          "role": "核心"
+        },
+        {
+          "name": "读者传媒",
+          "sector": "传媒出版",
+          "role": "跟随"
+        },
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "百大集团",
+          "sector": "商业连锁",
+          "role": "核心"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "中京电子",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "龙版传媒炸板后能否维持性价比",
+        "农业及商业连锁板块能否继续发酵",
+        "是否出现可开启新周期的新方向"
+      ],
+      "numeric_claims": [
+        "龙版传媒面临七板警戒线",
+        "作者称龙版传媒若两个交易日不跌出性价比则继续观察",
+        "亚盛集团、百大集团、爱仕达被提及为四板"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "2fcaaa764fa6ab87",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为科技硬件与指数震荡共振，农业、化工、医药、消费抱团走强，但午后已有回落抢跑，提示关注修复与跷跷板风险。",
+      "sectors": [
+        {
+          "name": "科技硬件",
+          "stance": "分化",
+          "evidence": "早盘震荡，午后随指数回落后尾盘企稳反弹。"
+        },
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "被作者列为情绪抱团强势方向，午后冲高后回落。"
+        },
+        {
+          "name": "化工",
+          "stance": "活跃",
+          "evidence": "作者称其为抱团方向，并关注次日能否修复。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "午盘回流、午后逆势冲高，临近尾盘回落。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者称消费惯性上涨，午后出现脉冲拉升。"
+        },
+        {
+          "name": "大金融",
+          "stance": "分化",
+          "evidence": "早盘冲高后回落，作者提示关注量能与跷跷板效应。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "化工方向能否修复",
+        "抱团的医药、消费、化工是否冲高回落",
+        "科技硬件及大金融的量能和跷跷板效应"
+      ],
+      "numeric_claims": [
+        "中信出版龙虎榜：作手新一净买入8000万元，开源西安净买入2566万元",
+        "中京电子龙虎榜：紫阳东路净买入16950万元，国新北京分净买入8600万元",
+        "金正大龙虎榜：知春路净买入7700万元，国新北京分净买入4558万元，作手新一净卖出4671万元",
+        "盈新发展龙虎榜：紫阳东路净买入13400万元，北一环净买入13300万元"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "36c4274db9ae21bd",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "混沌",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场多题材并行、抱团加速但高位抛压累积，明日接力资金或分散调整，宜等待分歧释放。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者称板块加速后或盛极，金健米业炸板、万向德农尾盘回落。"
+        },
+        {
+          "name": "大消费",
+          "stance": "活跃",
+          "evidence": "百大集团一字加速、国芳集团走强，但作者预计百大将开板放量。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "分化",
+          "evidence": "龙版传媒放量炸板，作者预计次日进一步分歧，停牌或冲击板块。"
+        },
+        {
+          "name": "机器人",
+          "stance": "分化",
+          "evidence": "作者定性机器人分歧，爱仕达连续两天放量回封。"
+        },
+        {
+          "name": "大科技",
+          "stance": "分化",
+          "evidence": "作者称整体冲高回落，预计先兑现再看修复，受外围市场影响较大。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者认为医药局部修复，澳洋健康拉升晋级2连板。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "百大集团",
+          "sector": "大消费",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "中国出版",
+          "sector": "AI应用",
+          "role": "跟随"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "大消费",
+          "role": "高关注"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "风险"
+        },
+        {
+          "name": "澳洋健康",
+          "sector": "医药",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "高位抱团接力资金是否分散及抛压释放",
+        "农业龙头亚盛集团放量后的分化情况",
+        "龙版传媒停牌对AI应用及高低位个股的负反馈"
+      ],
+      "numeric_claims": [
+        "农业板块整体有18个涨停板",
+        "亚盛集团此前封单6亿元，作者称当日增加一倍",
+        "国芳集团8个交易日涨幅97%",
+        "龙版传媒此前6板，文中称当日放量7连板炸板",
+        "爱仕达4连板且连续2天放量"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "5902e51a544eba84",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "混沌",
+        "高潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为指数仍以震荡为主，微盘及投机情绪活跃；科技反弹未能延续，农业成为最强方向但连续上涨后尾盘已现分歧。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称农业受厄尔尼诺、食品通胀等逻辑发酵而加速，成为日内最强方向。"
+        },
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者认为科技冲高回落、反弹偏脉冲式，暂不具备接力价值。"
+        },
+        {
+          "name": "通信",
+          "stance": "退潮",
+          "evidence": "作者称前一日大涨的通信当天出现分化，剔除6G后光通信仅3只涨停。"
+        },
+        {
+          "name": "传媒",
+          "stance": "分化",
+          "evidence": "作者称传媒受消息刺激但开盘后未加强，暂时看不到持续性。"
+        },
+        {
+          "name": "地产",
+          "stance": "活跃",
+          "evidence": "作者认为地产有局部活跃且近期反复表现，但主要集中在前排载体。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "金正大",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "中国出版",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "读者传媒",
+          "sector": "传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "楚天龙",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "地产",
+          "role": "高关注"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业连续走强后能否通过分歧实现切换，以及是否与哈药周期分离",
+        "科技调整后能否摆脱脉冲式反弹并重新获得主导权",
+        "具备趋势、分歧且有承接的方向是否走出轮动"
+      ],
+      "numeric_claims": [
+        "农业涨停21只，金额136.79亿元",
+        "敦煌种业8天5板",
+        "亚盛集团4板",
+        "金正大2板",
+        "传媒涨停6只",
+        "中国出版3板",
+        "读者传媒2板",
+        "地产涨停6只，均为首板",
+        "剔除6G概念后，光通信涨停3只"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "613173b0cb9178d9",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为高位四板竞争存在不确定性，接力性价比偏低；低位首二虽有布局机会，但尚未看到明确主升与新题材。",
+      "sectors": [
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "作者以龙版此前AI应用仅少量发酵作为参考。"
+        },
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称二板潜在主升偏科技，但对股性和股本存疑。"
+        },
+        {
+          "name": "浙江",
+          "stance": "活跃",
+          "evidence": "作者提及午后药箱浙江积极，并关注地域伴飞指引。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版",
+          "sector": "AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "爱",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "百",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "亚",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "国芳",
+          "sector": "不明确",
+          "role": "不明确"
+        },
+        {
+          "name": "捷荣",
+          "sector": "不明确",
+          "role": "不明确"
+        },
+        {
+          "name": "读者",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "六国",
+          "sector": "不明确",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "四板候选能否与龙版走势明确分离",
+        "爱是否获得题材发酵并走出有效承接",
+        "二板梯队及是否出现新题材"
+      ],
+      "numeric_claims": [
+        "龙版未站稳7板",
+        "4板共有3位选手",
+        "9月3日至4日AI应用发酵约2至3个",
+        "收盘2板共计12只股票",
+        "二板晋级率14.8%",
+        "作者称指引标瑞接近11:00上板"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "62d01264b247e967",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为市场此前情绪回暖并加速，但午后科技跳水、炸板增多，资金转向医药、农业、零售等避险及轮动方向，盘面趋于凌乱。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称农业竞价和早盘最强，敦煌种业等带动多股涨停。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "作者称读者传媒、中国出版等竞价超预期，板块早盘获资金拉升。"
+        },
+        {
+          "name": "通信",
+          "stance": "分化",
+          "evidence": "作者称通信前排强势，但午后持续炸板、跳水，后排承压。"
+        },
+        {
+          "name": "有色金属",
+          "stance": "活跃",
+          "evidence": "作者称北方铜业涨停后，带动铜产业链个股上冲。"
+        },
+        {
+          "name": "化工",
+          "stance": "活跃",
+          "evidence": "作者称集泰股份、赤天化涨停刺激化工线走强。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称午后医药拉升较多，但认为其尾盘走强带有投机属性。"
+        },
+        {
+          "name": "房地产",
+          "stance": "活跃",
+          "evidence": "作者称我爱我家、深物业A等涨停，地产链午间后参与轮动。"
+        },
+        {
+          "name": "机器人",
+          "stance": "分化",
+          "evidence": "作者称爱仕达虽强，但未带动机器人板块小弟发酵。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "中国出版",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "北方铜业",
+          "sector": "有色金属",
+          "role": "核心"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "五洲医疗",
+          "sector": "医药",
+          "role": "风险"
+        },
+        {
+          "name": "中石科技",
+          "sector": "通信",
+          "role": "风险"
+        },
+        {
+          "name": "高争民爆",
+          "sector": "民用爆破",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "通信板块炸板后，前排个股能否保持强势及后排分化情况",
+        "农业、AI应用等早盘强势方向能否延续",
+        "尾盘走强医药股能否出现作者所述的弱转强加速"
+      ],
+      "numeric_claims": [
+        "亚盛集团竞价一字板金额12.16亿元",
+        "三孚股份竞价一字板金额7.20亿元",
+        "红棉股份竞价一字板金额6.46亿元",
+        "中信出版竞价高开12个百分点",
+        "中国出版竞价高开6个百分点",
+        "上午炸板率为十几，午后约升至30%",
+        "作者称近一个月留意177个首板中，145个次日表现不错"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "6f2202aaad3ec379",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧",
+        "发酵"
+      ],
+      "market_summary": "作者认为科技成长分化、资金转向农业化肥、传媒和有色，市场未全面走弱，核心特征是热点快速轮动及持续性待验证。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称农业出现板块联动，成为当日明显强势方向。"
+        },
+        {
+          "name": "化肥",
+          "stance": "加强",
+          "evidence": "作者称化肥、农药等农资方向集体爆发，并视为农业产业链扩散。"
+        },
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者称传媒连续活跃数日，正形成短线辨识度。"
+        },
+        {
+          "name": "有色铜",
+          "stance": "活跃",
+          "evidence": "作者称有色、铜方向表现明显，受到商品逻辑关注。"
+        },
+        {
+          "name": "算力硬件",
+          "stance": "分化",
+          "evidence": "作者称CPO、PCB、液冷等较前日明显分化，承接不如前日。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "泸天化",
+          "sector": "化肥",
+          "role": "跟随"
+        },
+        {
+          "name": "川发龙蟒",
+          "sector": "化肥",
+          "role": "跟随"
+        },
+        {
+          "name": "中国出版",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "中石科技",
+          "sector": "液冷服务器",
+          "role": "风险"
+        },
+        {
+          "name": "精艺股份",
+          "sector": "有色铜",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业化肥能否保持板块联动和强度",
+        "传媒前排承接及内部梯队扩散",
+        "算力硬件能否出现修复承接"
+      ],
+      "numeric_claims": [
+        "前一日创业板指上涨3.41%",
+        "沪指上涨0.20%",
+        "深成指下跌0.52%",
+        "创业板指下跌1.15%",
+        "两市成交额约1.96万亿元",
+        "亚盛集团4连板",
+        "敦煌种业8天5板"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "7a1132161aa51825",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "混沌",
+        "分歧"
+      ],
+      "market_summary": "作者认为成交额未放大至2万亿元以上，市场仍偏震荡轮动，当前保持空仓观察，等待放量后的方向选择。",
+      "sectors": [
+        {
+          "name": "代糖概念",
+          "stance": "活跃",
+          "evidence": "作者列为当日上涨第一板块，涨5.18%。"
+        },
+        {
+          "name": "农化制品",
+          "stance": "活跃",
+          "evidence": "作者称板块涨4.71%，多只个股涨停。"
+        },
+        {
+          "name": "种植业与林业",
+          "stance": "活跃",
+          "evidence": "作者列示板块上涨3.3%，亚盛集团等表现较强。"
+        },
+        {
+          "name": "半导体",
+          "stance": "退潮",
+          "evidence": "作者列为下跌板块，称半导体跌1.2%。"
+        },
+        {
+          "name": "电子化学品",
+          "stance": "退潮",
+          "evidence": "作者称电子化学品跌1.46%，中石科技跌幅较大。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "种植业与林业",
+          "role": "龙头"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "百大集团",
+          "sector": "大消费",
+          "role": "高关注"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "种植业与林业",
+          "role": "跟随"
+        },
+        {
+          "name": "中京电子",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "大盘成交额能否放量并选择方向",
+        "4进5爱仕达的竞价表现",
+        "海欣食品、中京电子、出版传媒等连板竞价表现"
+      ],
+      "numeric_claims": [
+        "上证指数上涨7.85点至3940点",
+        "全市场成交额1.98万亿元，较此前放量139.8亿元",
+        "上涨3417家，下跌2026家",
+        "涨停74家，跌停0家",
+        "主板首板炸板率30.7%，主板二板炸板率42.9%"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "7c0f347950061a42",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "发酵"
+      ],
+      "market_summary": "作者认为市场仍是存量资金轮动，科技处于分歧消化，老妖股和农业补涨维持情绪，但不宜盲目追高。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称算力、光模块、PCB等集体震荡走弱，短期需看修复。"
+        },
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者认为农业赚钱效应扩散至种业、糖、化肥及消费分支。"
+        },
+        {
+          "name": "出版传媒",
+          "stance": "活跃",
+          "evidence": "作者认为龙版传媒停牌后，补涨情绪可能转向中国出版、读者传媒。"
+        },
+        {
+          "name": "老妖股",
+          "stance": "活跃",
+          "evidence": "作者称资金抱团老龙头，但认为其属于存量情绪博弈。"
+        },
+        {
+          "name": "化肥",
+          "stance": "分化",
+          "evidence": "作者称化肥是农业偏弱分支，金牛化工更偏期货套利。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "集泰股份",
+          "sector": "科技",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "万向德农",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "楚天龙",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "中国出版",
+          "sector": "出版传媒",
+          "role": "核心"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "出版传媒",
+          "role": "风险"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "消费",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技方向能否回流修复及集泰股份承接",
+        "农业补涨中敦煌种业、亚盛集团的分歧承接",
+        "读者传媒封单强度对中国出版补涨情绪的指引"
+      ],
+      "numeric_claims": [
+        "两市成交额19782亿元，较前一日增加140亿元",
+        "上证指数收涨0.20%",
+        "集泰股份全天成交11.43亿元",
+        "龙版传媒竞价高开6.25%",
+        "金健米业竞价高开3.99%",
+        "万向德农竞价高开1.99%",
+        "国芳集团收涨7.4%",
+        "金健米业近一个月涨幅约200%",
+        "龙版传媒上涨2.36%即触及异动红线",
+        "国芳集团上涨0.6%即触发异动"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "8b144c592311dfad",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为指数仅弱修复、市场仍属高位箱体内的存量高低切换；农业是事件套利与概念扩散，尚未确认产业主升。",
+      "sectors": [
+        {
+          "name": "农业产业链",
+          "stance": "活跃",
+          "evidence": "作者称涨价驱动种业、制糖、农化、粮油加工链条走通，但未确认主升。"
+        },
+        {
+          "name": "白糖",
+          "stance": "活跃",
+          "evidence": "作者以中粮糖业放量封板作为容量共振的单点信号。"
+        },
+        {
+          "name": "传媒出版",
+          "stance": "活跃",
+          "evidence": "作者将中信出版和中国出版列为出版方向观察端点。"
+        },
+        {
+          "name": "高位科技成长",
+          "stance": "退潮",
+          "evidence": "作者称资金由高位科技腾挪至农业、消费和资源，科技成长开始亏钱。"
+        },
+        {
+          "name": "机器人",
+          "stance": "分化",
+          "evidence": "作者以爱仕达能否守住13.00元作为机器人结构观察条件。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业产业链",
+          "role": "龙头"
+        },
+        {
+          "name": "中粮糖业",
+          "sector": "白糖",
+          "role": "核心"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业产业链",
+          "role": "核心"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业产业链",
+          "role": "高关注"
+        },
+        {
+          "name": "万向德农",
+          "sector": "农业产业链",
+          "role": "高关注"
+        },
+        {
+          "name": "中国出版",
+          "sector": "传媒出版",
+          "role": "核心"
+        },
+        {
+          "name": "神农种业",
+          "sector": "农业产业链",
+          "role": "风险"
+        },
+        {
+          "name": "中石科技",
+          "sector": "科技成长",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "沪市量能能否回到1.05万亿元以上及3967点附近承接",
+        "亚盛集团开板情况与敦煌种业是否断板",
+        "农业首板次日晋级率及中粮糖业竞价强度"
+      ],
+      "numeric_claims": [
+        "上证指数收3940.55点，涨0.20%",
+        "沪市成交额0.92万亿元",
+        "作者设定有效突破条件为收盘站上3967点且沪市量能不低于1.1万亿元",
+        "上证指数近12周区间为3741至4175点",
+        "上证指数较6月23日高点4175点回撤5.6%",
+        "创业板指收3359.72点，较6月25日高点4380.41点回撤23.3%",
+        "涨停75家，跌停1家",
+        "昨日连板指数涨6.62%",
+        "连板股6只，69只首板",
+        "两市成交额1.96万亿元",
+        "中粮糖业市值388亿元",
+        "亚盛集团市值103亿元",
+        "神农种业换手率44.88%",
+        "万向德农换手率32.7%",
+        "中石科技跌15.46%",
+        "科创50跌1.52%",
+        "半导体跌1.30%"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "8bb1686e8eb0e661",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵"
+      ],
+      "market_summary": "作者认为AI算力硬件为主线且领涨，龙版传媒成为唯一空间龙；半导体需警惕冲高兑现。",
+      "sectors": [
+        {
+          "name": "AI算力硬件",
+          "stance": "加强",
+          "evidence": "作者称其为主线，PCB涨7.62%、元件涨6.72%领涨。"
+        },
+        {
+          "name": "出版传媒",
+          "stance": "活跃",
+          "evidence": "作者称其为情绪总龙线，关联重组及AI漫剧。"
+        },
+        {
+          "name": "半导体",
+          "stance": "分化",
+          "evidence": "作者提示涨幅达3%后谨防兑现，关注平低开后的回封。"
+        },
+        {
+          "name": "航海装备",
+          "stance": "不明确",
+          "evidence": "作者称该板块未进入TOP5，船舶仅上涨2.43%。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "出版传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "沪电",
+          "sector": "AI算力硬件",
+          "role": "高关注"
+        },
+        {
+          "name": "源杰",
+          "sector": "AI算力硬件",
+          "role": "高关注"
+        },
+        {
+          "name": "光迅",
+          "sector": "AI算力硬件",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "关注竞价成交额是否较昨日同期缩量，以及是否低于1.95万亿预案阈值",
+        "关注半导体平开或低开后的回封表现",
+        "关注AI算力硬件回踩表现"
+      ],
+      "numeric_claims": [
+        "昨日预判兑现率60%（3项正确、2项错误）",
+        "龙版传媒封住6板",
+        "涨停93家、跌停2家、炸板19家",
+        "封板率83.0%",
+        "船舶上涨2.43%",
+        "PCB上涨7.62%",
+        "元件上涨6.72%",
+        "沪电净买17.43亿",
+        "源杰净买13.17亿",
+        "光迅净买10.97亿"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "91b0aba40784e5fa",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "发酵",
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者认为农业、油气、化工成为结构性进攻方向，算力硬件等退潮；连板高度回落且炸板率高，市场仍需防范分歧。",
+      "sectors": [
+        {
+          "name": "农化制品",
+          "stance": "加强",
+          "evidence": "作者称其涨4.71%居首，为当日最强主线。"
+        },
+        {
+          "name": "农业/种植业",
+          "stance": "分化",
+          "evidence": "亚盛集团4连板、敦煌种业强势，但金健米业等午后炸板。"
+        },
+        {
+          "name": "油气开采及服务",
+          "stance": "活跃",
+          "evidence": "作者称油气股集体上涨，中曼石油涨停。"
+        },
+        {
+          "name": "大消费",
+          "stance": "活跃",
+          "evidence": "作者称百大集团4连板、海欣食品3连板，方向持续活跃。"
+        },
+        {
+          "name": "算力硬件/PCB/CPO",
+          "stance": "退潮",
+          "evidence": "作者称昨日领涨方向集体熄火，核心股未能延续。"
+        },
+        {
+          "name": "半导体/电子化学品/消费电子",
+          "stance": "退潮",
+          "evidence": "作者称相关方向全面下跌，电子化学品和半导体表现低迷。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业/种植业",
+          "role": "龙头"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业/种植业",
+          "role": "核心"
+        },
+        {
+          "name": "百大集团",
+          "sector": "大消费",
+          "role": "龙头"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "龙头"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用/传媒",
+          "role": "风险"
+        },
+        {
+          "name": "中石科技",
+          "sector": "液冷服务器",
+          "role": "风险"
+        },
+        {
+          "name": "中曼石油",
+          "sector": "油气开采及服务",
+          "role": "核心"
+        },
+        {
+          "name": "金正大",
+          "sector": "化肥",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "亚盛集团、百大集团、爱仕达能否晋级5板",
+        "农业板块能否延续及高位股分歧情况",
+        "成交额能否维持1.9万亿元以上、炸板率能否回落"
+      ],
+      "numeric_claims": [
+        "沪指涨0.20%至3940.55点，深成指跌0.52%，创业板指跌1.15%",
+        "全市场成交额19782亿元，较上一交易日放量140亿元",
+        "上涨3417只、下跌2026只，涨跌比约1.69:1",
+        "74股涨停、37股炸板、跌停0家",
+        "连板晋级率46.15%，封板率66%，炸板率34%",
+        "连板高度由6板降至4板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "99455faa535b1e0e",
+      "market_stance": "偏多",
+      "market_phase": [
+        "修复",
+        "发酵"
+      ],
+      "market_summary": "作者认为市场在连续分歧后迎来并延续强修复，农业最强且主线特征增强；指数仍可能处于2浪调整，题材可相对轻指数。",
+      "sectors": [
+        {
+          "name": "农业（粮食、糖、代糖）",
+          "stance": "加强",
+          "evidence": "作者称农业二连强、已进入主升，并为当前最强主线。"
+        },
+        {
+          "name": "AI应用（传媒）",
+          "stance": "活跃",
+          "evidence": "作者认为资金由短剧高低切至传媒，梯队较完整。"
+        },
+        {
+          "name": "大消费",
+          "stance": "分化",
+          "evidence": "作者称消费强度尚可但未加强，处于弱分歧。"
+        },
+        {
+          "name": "科技",
+          "stance": "不明确",
+          "evidence": "作者称科技后续可能加入轮动，需待指数走好。"
+        },
+        {
+          "name": "机器人",
+          "stance": "不明确",
+          "evidence": "作者认为爱仕达能否卡位成功是后两日关键。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业（代糖）",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业（粮食）",
+          "role": "核心"
+        },
+        {
+          "name": "万向德农",
+          "sector": "农业（粮食）",
+          "role": "核心"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业（粮食）",
+          "role": "跟随"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用（传媒）",
+          "role": "龙头"
+        },
+        {
+          "name": "中国出版",
+          "sector": "AI应用（传媒）",
+          "role": "核心"
+        },
+        {
+          "name": "读者传媒",
+          "sector": "AI应用（传媒）",
+          "role": "核心"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "大消费",
+          "role": "龙头"
+        },
+        {
+          "name": "百大集团",
+          "sector": "大消费",
+          "role": "核心"
+        },
+        {
+          "name": "海欣食品",
+          "sector": "大消费",
+          "role": "核心"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "博恩集团",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "中水渔业",
+          "sector": "农业",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业总龙分歧及亚盛集团开板换手后的承接",
+        "龙版传媒断板后的传媒首板及2板高低切",
+        "百大集团、海欣食品的换手和弱转强表现"
+      ],
+      "numeric_claims": [
+        "亚盛集团竞价封单12亿元",
+        "百大集团竞价封单5亿元",
+        "亚盛集团与百大集团均为4板",
+        "敦煌种业、海欣食品、中国出版均为3板",
+        "作者称5板以上接力应谨慎参与"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "9cf63670d4c10bee",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵",
+        "分歧"
+      ],
+      "market_summary": "作者认为科技短期尚未到位、农业最强，农业与消费或延续至本周；连板高度受压，低位后排晋级随机性较大。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称当日农业最强，化工、农药均为其延伸。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者认为消费是农业补涨，且节日前尚未到兑现时点。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称午后医药因农业强势而回流，农药占比较多。"
+        },
+        {
+          "name": "科技",
+          "stance": "不明确",
+          "evidence": "作者认为科技时间未到，预计月中才出现右侧拐点。"
+        },
+        {
+          "name": "机器人",
+          "stance": "退潮",
+          "evidence": "作者认为该板块没有炒作逻辑，爱仕达仅有溢价后掉队预期。"
+        },
+        {
+          "name": "铜",
+          "stance": "活跃",
+          "evidence": "作者称会关注铜方向精艺股份的预期差。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "消费",
+          "role": "核心"
+        },
+        {
+          "name": "万向德农",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "机器人",
+          "role": "风险"
+        },
+        {
+          "name": "精艺股份",
+          "sector": "铜",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业及消费主线的延续强度",
+        "龙版传媒断板后高位情绪与连板高度压制",
+        "万向德农、金健米业及精艺股份的表现"
+      ],
+      "numeric_claims": [
+        "哈药最高涨幅为213",
+        "金健米业涨幅为150多",
+        "作者预估金健米业最好或至180至190",
+        "敦煌种业近一个月累计涨幅57.34%",
+        "敦煌种业近一个月累计换手率394.29%",
+        "本川智能拟投建项目金额分别不超过20亿元和10亿元",
+        "长高电气中标金额合计约2.99亿元",
+        "江波龙首次回购成交总金额4.48亿元"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "a41de732e29cd513",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者认为市场并非系统性杀跌，而是高位AI硬件兑现、资金向低位周期及医药地产轮动，科技短期进入验业绩阶段。",
+      "sectors": [
+        {
+          "name": "AI硬件",
+          "stance": "退潮",
+          "evidence": "作者称AI硬件链集体跳水，短期进入验业绩阶段。"
+        },
+        {
+          "name": "液冷服务器",
+          "stance": "退潮",
+          "evidence": "作者将液冷服务器列为算力硬件领跌方向。"
+        },
+        {
+          "name": "半导体",
+          "stance": "退潮",
+          "evidence": "作者称半导体位居科技资金净流出方向。"
+        },
+        {
+          "name": "PCB",
+          "stance": "退潮",
+          "evidence": "作者称PCB午后随算力硬件集体跳水。"
+        },
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者认为农业承接科技撤出资金，受涨价和政策催化。"
+        },
+        {
+          "name": "石油石化",
+          "stance": "加强",
+          "evidence": "作者称资金流向石油石化，逻辑为供给风险与通胀交易。"
+        },
+        {
+          "name": "医药",
+          "stance": "加强",
+          "evidence": "作者称医药及CRO午后拉升，具备复苏逻辑。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "活跃",
+          "evidence": "作者称低利率环境下高股息煤炭资产受青睐。"
+        },
+        {
+          "name": "房地产",
+          "stance": "加强",
+          "evidence": "作者认为地产受政策边际改善预期驱动。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "中石科技",
+          "sector": "液冷服务器",
+          "role": "风险"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "光模块",
+          "role": "高关注"
+        },
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "奥浦迈",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "华锦股份",
+          "sector": "石油石化",
+          "role": "高关注"
+        },
+        {
+          "name": "香江控股",
+          "sector": "房地产",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "AI硬件能否获得订单和利润等业绩验证",
+        "农业、油气、医药、煤炭及地产的资金承接",
+        "外围扰动、国内政策与市场量能变化"
+      ],
+      "numeric_claims": [
+        "上证指数涨0.20%，收3940.55点",
+        "深证成指跌0.52%，收13703.21点",
+        "创业板指跌1.15%，收3359.72点",
+        "北证50跌0.97%",
+        "沪深京成交额约1.96万亿元，较前日放量约143亿元",
+        "全市场3417只上涨、2026只下跌",
+        "涨停74家、跌停1家",
+        "电子、计算机、电力设备主力净流出分别为82.86亿、60.78亿、26.76亿",
+        "基础化工、有色金属、医药生物主力净流入分别为38.47亿、33.41亿、25.54亿"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "ac46e2680e6ad621",
+      "market_stance": "谨慎",
+      "market_phase": [],
+      "market_summary": "作者认为监管仍严但核心股若因监管分歧或现机会；科技在无量下仅看反弹，进攻机会偏向农业、AI应用及短剧。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "不明确",
+          "evidence": "作者称没有外部市场影响，但在无量情况下只看反弹。"
+        },
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者认为投机进攻机会大概率在农业，并关注低位补涨。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "加强",
+          "evidence": "作者将AI应用列为投机进攻机会方向之一。"
+        },
+        {
+          "name": "短剧",
+          "stance": "活跃",
+          "evidence": "作者将短剧列为投机进攻机会方向之一。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者认为消费存在次级进攻或轮动机会。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "活跃",
+          "evidence": "作者认为贵金属调整后可关注低位或水下机会。"
+        },
+        {
+          "name": "医药",
+          "stance": "不明确",
+          "evidence": "作者称医药弱修复两天，相关低吸仓位将陆续止盈。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "金J",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "亚S",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "龙b",
+          "sector": "AI应用",
+          "role": "高关注"
+        },
+        {
+          "name": "国F",
+          "sector": "消费",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "监管下核心股是否出现分歧及前排表现",
+        "农业低位30CM补涨与金J异动情况",
+        "AI应用龙b是否缩量加速"
+      ],
+      "numeric_claims": [
+        "医药板块弱修复两天",
+        "农业低位关注30CM补涨"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "b34bdfc1b3411582",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数小幅震荡调整、成交量持平，情绪延续后出现分歧；农业、化肥、传媒等活跃，液冷服务器偏弱。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "作者称农业板块反复活跃，亚盛集团4连板、敦煌种业8天5板。"
+        },
+        {
+          "name": "化肥",
+          "stance": "加强",
+          "evidence": "作者称化肥板块异动拉升，多只个股涨停。"
+        },
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者称传媒板块延续强势，中国出版3连板、读者传媒2连板。"
+        },
+        {
+          "name": "油气",
+          "stance": "活跃",
+          "evidence": "作者称油气板块震荡反弹，中曼石油涨停。"
+        },
+        {
+          "name": "CRO",
+          "stance": "活跃",
+          "evidence": "作者称CRO概念午后活跃，奥浦迈20CM涨停。"
+        },
+        {
+          "name": "液冷服务器",
+          "stance": "退潮",
+          "evidence": "作者称液冷服务器概念走势较弱，中石科技等下挫。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "中国出版",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "奥浦迈",
+          "sector": "CRO",
+          "role": "高关注"
+        },
+        {
+          "name": "中石科技",
+          "sector": "液冷服务器",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [],
+      "numeric_claims": [
+        "沪深两市成交额1.96万亿元，较上一交易日放量143亿元",
+        "全市场超3400只个股上涨",
+        "亚盛集团4连板",
+        "敦煌种业8天5板",
+        "中国出版3连板，读者传媒2连板",
+        "奥浦迈20CM涨停",
+        "沪指涨0.2%，深成指跌0.52%，创业板指跌1.15%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "bbb20a08237b5417",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者判断市场处于存量缩量震荡和高低切换阶段，高位农业、消费、商业连锁分化，关注低位有色与医药修复。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者称其连续上涨3日、高位分化，后排风险上升。"
+        },
+        {
+          "name": "消费",
+          "stance": "分化",
+          "evidence": "作者认为连续上涨后预期透支，后排全面分化。"
+        },
+        {
+          "name": "商业连锁",
+          "stance": "分化",
+          "evidence": "作者称其为强主线但进入高位分化阶段。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "退潮",
+          "evidence": "作者称AI应用进入行情末端，高位票已有松动。"
+        },
+        {
+          "name": "算力液冷",
+          "stance": "退潮",
+          "evidence": "作者称算力液冷持续分化，缺乏量能支撑。"
+        },
+        {
+          "name": "机器人",
+          "stance": "退潮",
+          "evidence": "作者称机器人冲高回落、热度快速退潮。"
+        },
+        {
+          "name": "有色",
+          "stance": "加强",
+          "evidence": "作者认为低位有色获资金切换，具备修复预期。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称尾盘资金回流超跌医药，存在修复预期。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "澳洋健康",
+          "sector": "医药",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "澳洋健康竞价强弱及医药能否回流修复",
+        "夜盘铜价走势及有色板块持续性",
+        "农业、消费、商业连锁后排是否补跌"
+      ],
+      "numeric_claims": [
+        "全天成交1.98万亿元，较昨日微放量140亿元",
+        "市场高度来到4板",
+        "农业、消费、商业连锁已连续上涨3个交易日",
+        "作者称农业、商业连锁的5日乖离率偏高"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "bcef00cc7c0e8898",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为指数仍区间震荡，短线情绪修复但内部分歧浮现，高标尾盘回落且资金抢跑，次日需警惕分歧。",
+      "sectors": [
+        {
+          "name": "大农业",
+          "stance": "活跃",
+          "evidence": "作者定位为当前主线，但称二板断层，亚盛集团5板决定后续空间。"
+        },
+        {
+          "name": "大消费",
+          "stance": "分化",
+          "evidence": "梯队完整但高标尾盘跳水，百大集团若断板或带来板块调整。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "作者称板块继续走强，关注中国出版4板及龙版传媒断板反馈。"
+        },
+        {
+          "name": "算力/半导体产业链",
+          "stance": "活跃",
+          "evidence": "5只2板且无3板高度，作者关注谁能率先晋级3板。"
+        },
+        {
+          "name": "磷化工/化肥",
+          "stance": "加强",
+          "evidence": "作者称板块全面爆发，与农业形成联动补涨。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "作者称其为高位退潮后的零星反抽，持续性存疑。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "大农业",
+          "role": "龙头"
+        },
+        {
+          "name": "百大集团",
+          "sector": "大消费",
+          "role": "龙头"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "大消费",
+          "role": "高关注"
+        },
+        {
+          "name": "中国出版",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用",
+          "role": "风险"
+        },
+        {
+          "name": "中京电子",
+          "sector": "算力/半导体产业链",
+          "role": "高关注"
+        },
+        {
+          "name": "金正大",
+          "sector": "磷化工/化肥",
+          "role": "核心"
+        },
+        {
+          "name": "澳洋健康",
+          "sector": "医药",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "亚盛集团、百大集团、爱仕达三只4板的晋级情况",
+        "中国出版4板及AI应用持续性",
+        "龙版传媒断板后高标亏钱效应是否扩散"
+      ],
+      "numeric_claims": [
+        "两市上涨3417家、下跌2026家",
+        "涨停74家，日内跌停0家",
+        "市场总成交额19784亿元，较前一日放量140亿元、增0.71%",
+        "主力净流入-81.99亿元",
+        "昨日涨停表现2.72%",
+        "文中称共58股涨停、连板股16只、封板率81%",
+        "文中称三大指数成交额1.86万亿元",
+        "指数压力位3950，支撑位3915"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ca7c6924d0a87a1e",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者记录指数涨跌不一、市场个股普涨，认为农业、油气和医药较活跃，而电子化学品与半导体偏弱。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者列为主流看点，代糖、草甘膦和玉米等农业相关概念涨幅居前。"
+        },
+        {
+          "name": "油气开采及服务",
+          "stance": "加强",
+          "evidence": "作者称该板块午后涨幅扩大，中曼石油涨停。"
+        },
+        {
+          "name": "医疗服务",
+          "stance": "加强",
+          "evidence": "作者称板块午后大幅上涨，奥浦迈、澳洋健康涨停。"
+        },
+        {
+          "name": "电子化学品",
+          "stance": "退潮",
+          "evidence": "作者称板块表现低迷，中石科技一度跌超17%。"
+        },
+        {
+          "name": "半导体",
+          "stance": "退潮",
+          "evidence": "作者称半导体板块震荡下行。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "红棉股份",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "华脉科技",
+          "sector": "通信",
+          "role": "龙头"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "地产链",
+          "role": "龙头"
+        },
+        {
+          "name": "奥浦迈",
+          "sector": "医疗服务",
+          "role": "高关注"
+        },
+        {
+          "name": "中石科技",
+          "sector": "电子化学品",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "华脉科技及通信方向",
+        "红棉股份、亚盛集团所在农业方向",
+        "我爱我家所在地产链方向"
+      ],
+      "numeric_claims": [
+        "上证指数涨0.2%，深证成指跌0.52%，创业板指跌1.15%",
+        "北证50跌0.97%，科创50跌1.52%",
+        "全市场成交额19782亿元，较上日放量140亿元",
+        "全市场超3400只个股上涨",
+        "代糖概念涨5.18%，草甘膦涨4.94%，玉米涨4.42%",
+        "盈利1%-3%的股票1610只，占34.95%",
+        "盈利3%-5%的股票434只，占9.42%",
+        "盈利5%及以上股票261只，占5.67%",
+        "涨停破板率33.64%，昨日涨停今表现2.82%，昨日连板今表现6.62%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "cd9aa3c4255ec3fa",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为市场震荡分化但接力热情较高，农业行情强化；其提示农业多轮演绎后次日分化或加剧。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称农业、粮食种植持续火热，行情进一步强化。"
+        },
+        {
+          "name": "化肥",
+          "stance": "活跃",
+          "evidence": "农业走强带动化肥细分上行，多股涨停。"
+        },
+        {
+          "name": "油气",
+          "stance": "活跃",
+          "evidence": "作者称油气产业链震荡拉升。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "活跃",
+          "evidence": "作者称煤炭股持续走高。"
+        },
+        {
+          "name": "创新药",
+          "stance": "活跃",
+          "evidence": "作者称创新药、CRO午后震荡反弹。"
+        },
+        {
+          "name": "影视传媒",
+          "stance": "活跃",
+          "evidence": "作者称影视传媒概念延续强势。"
+        },
+        {
+          "name": "大消费",
+          "stance": "活跃",
+          "evidence": "作者称零售、食品饮料等大消费持续活跃。"
+        },
+        {
+          "name": "有色",
+          "stance": "活跃",
+          "evidence": "作者称有色板块持续走高，金属铜领涨。"
+        },
+        {
+          "name": "半导体芯片",
+          "stance": "退潮",
+          "evidence": "作者称半导体芯片产业链持续下挫。"
+        },
+        {
+          "name": "液冷服务器",
+          "stance": "退潮",
+          "evidence": "作者称液冷服务器概念走势较弱。"
+        },
+        {
+          "name": "消费电子",
+          "stance": "退潮",
+          "evidence": "作者称消费电子板块走弱。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "影视传媒",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业板块内部是否加剧分化",
+        "农业产业链化肥分支的延续性"
+      ],
+      "numeric_claims": [
+        "沪指涨0.2%",
+        "深成指跌0.52%",
+        "创业板指跌1.15%",
+        "成交额1.96万亿，较上个交易日放量143亿",
+        "3257只上涨，1859只下跌",
+        "73只涨停，18只连板，37只封板未遂",
+        "封板率66%",
+        "三连板及以上个股6只",
+        "上一交易日13只连板，连板晋级率46.15%",
+        "金健米业近18个交易日累计涨幅超140%",
+        "亚盛集团4连板",
+        "敦煌种业8天5板",
+        "金正大6天3板"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "d26ab524636764b0",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "修复"
+      ],
+      "market_summary": "作者认为市场仍是拉扯震荡，退潮迹象未明显，但科技修复后再度消化、资金与板块分歧，需控制操作节奏。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称科技情绪昨日略修复，今日又进入消化阶段，效应依旧分化。"
+        },
+        {
+          "name": "光通信",
+          "stance": "活跃",
+          "evidence": "作者认为光通信板块安全垫较充足，后续或受光博会带动。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "烽火通信",
+          "sector": "光通信",
+          "role": "高关注"
+        },
+        {
+          "name": "工业富联",
+          "sector": "科技",
+          "role": "高关注"
+        },
+        {
+          "name": "麦格米特",
+          "sector": "科技",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技板块资金及情绪能否企稳",
+        "整体量能是否支持企稳",
+        "麦格米特127-132区间表现"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "de1c78abec588c83",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为科技反弹首日即分歧，尚未确认趋势反转；金融、资源未形成替代主线，后续需观察科创50与CPO核心共振。",
+      "sectors": [
+        {
+          "name": "CPO/光通信",
+          "stance": "分化",
+          "evidence": "作者称容量未崩但由进攻转验收，三只核心股均冲高回落。"
+        },
+        {
+          "name": "PCB",
+          "stance": "退潮",
+          "evidence": "作者认为生益科技未维持强势，材料端未接过领涨权。"
+        },
+        {
+          "name": "存储",
+          "stance": "分化",
+          "evidence": "作者称仅有个股强度，尚不足以证明板块成为独立主线。"
+        },
+        {
+          "name": "液冷与AIDC",
+          "stance": "退潮",
+          "evidence": "作者称该方向未形成替代主线，需按订单与交付单独判断。"
+        },
+        {
+          "name": "金融",
+          "stance": "不明确",
+          "evidence": "作者认为金融未在科技分歧时提供明显风险偏好支撑。"
+        },
+        {
+          "name": "资源",
+          "stance": "分化",
+          "evidence": "作者称资源内部差异较大，未形成统一接力。"
+        },
+        {
+          "name": "代糖概念",
+          "stance": "加强",
+          "evidence": "作者描述板块高开高走、全天强势，多股涨停。"
+        },
+        {
+          "name": "医疗服务",
+          "stance": "活跃",
+          "evidence": "作者称午后大幅上涨，奥浦迈、澳洋健康涨停。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "中际旭创",
+          "sector": "CPO/光通信",
+          "role": "核心"
+        },
+        {
+          "name": "新易盛",
+          "sector": "CPO/光通信",
+          "role": "核心"
+        },
+        {
+          "name": "天孚通信",
+          "sector": "CPO/光通信",
+          "role": "核心"
+        },
+        {
+          "name": "生益科技",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "德明利",
+          "sector": "存储",
+          "role": "高关注"
+        },
+        {
+          "name": "中石科技",
+          "sector": "电子化学品",
+          "role": "风险"
+        },
+        {
+          "name": "中粮科技",
+          "sector": "代糖概念",
+          "role": "跟随"
+        },
+        {
+          "name": "澳洋健康",
+          "sector": "医疗服务",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "中际旭创、新易盛、天孚通信能否至少两只放量转强",
+        "科创50能否收复1603并向1633运行，或跌破1577",
+        "PCB、存储等能否形成容量股同步共振"
+      ],
+      "numeric_claims": [
+        "上证指数3940.55点，涨0.20%",
+        "深证成指13703.21点，跌0.52%",
+        "创业板指3359.72点，跌1.15%",
+        "科创50报1591.00点，跌1.52%",
+        "成交额19782亿元，较前日增加139亿元",
+        "上涨3417家、涨停74家；下跌2026家、跌停0家",
+        "中际旭创成交约262亿元",
+        "科创50关注区间1577—1603—1633"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "efdb8403d2d5224b",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧",
+        "退潮",
+        "发酵"
+      ],
+      "market_summary": "作者认为市场并非系统性杀跌，而是高位AI硬件兑现、资金向农业油气医药煤炭地产等低位方向轮动的结构性换仓。",
+      "sectors": [
+        {
+          "name": "AI硬件链",
+          "stance": "退潮",
+          "evidence": "作者称算力硬件预期阶段性打满，进入验业绩与获利兑现期。"
+        },
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者认为厄尔尼诺和种业政策催化使农业承接科技流出资金。"
+        },
+        {
+          "name": "石油石化",
+          "stance": "加强",
+          "evidence": "作者称原油供给风险与通胀交易推动资源品共振。"
+        },
+        {
+          "name": "医药/CRO",
+          "stance": "活跃",
+          "evidence": "作者称机构预期医药进入复苏周期，CXO及科研服务景气。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "活跃",
+          "evidence": "作者认为低利率环境下高股息资产受青睐。"
+        },
+        {
+          "name": "房地产",
+          "stance": "活跃",
+          "evidence": "作者认为地产受政策边际改善预期驱动。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "苏垦农发",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "中石科技",
+          "sector": "AI硬件链",
+          "role": "风险"
+        },
+        {
+          "name": "爱克股份",
+          "sector": "AI硬件链",
+          "role": "风险"
+        },
+        {
+          "name": "飞荣达",
+          "sector": "AI硬件链",
+          "role": "风险"
+        },
+        {
+          "name": "华锦股份",
+          "sector": "石油石化",
+          "role": "跟随"
+        },
+        {
+          "name": "和顺石油",
+          "sector": "石油石化",
+          "role": "跟随"
+        },
+        {
+          "name": "中曼石油",
+          "sector": "石油石化",
+          "role": "跟随"
+        },
+        {
+          "name": "奥浦迈",
+          "sector": "医药/CRO",
+          "role": "核心"
+        },
+        {
+          "name": "香江控股",
+          "sector": "房地产",
+          "role": "跟随"
+        },
+        {
+          "name": "深物业A",
+          "sector": "房地产",
+          "role": "跟随"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "房地产",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "AI硬件订单和中报、三季报的业绩验证",
+        "农业、油气、医药等低位轮动方向的资金持续性",
+        "成交量变化及科技与周期之间的资金切换"
+      ],
+      "numeric_claims": [
+        "上证指数涨0.20%，收3940.55点",
+        "深证成指跌0.52%，收13703.21点",
+        "创业板指跌1.15%，收3359.72点",
+        "全市场成交额约1.96万亿元，较前日增加约143亿元",
+        "全市场3417只上涨、2026只下跌，74家涨停、1家跌停",
+        "电子、计算机、电力设备主力净流出分别为82.86亿、60.78亿、26.76亿",
+        "基础化工、有色金属、医药生物主力净流入分别为38.47亿、33.41亿、25.54亿"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "fd815cc751fedf3b",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "发酵"
+      ],
+      "market_summary": "作者认为市场处于高低切轮动和高位分歧阶段，广度尚在但连板高度压缩；预计次日继续分化，宜关注前排及龙版传媒断板反馈。",
+      "sectors": [
+        {
+          "name": "农业/糖/农化",
+          "stance": "加强",
+          "evidence": "作者称其为当日“绝对主线T0”，亚盛集团4板、敦煌种业3板带动糖肥首板潮。"
+        },
+        {
+          "name": "出版/AI应用",
+          "stance": "分化",
+          "evidence": "中国出版3板等低位连板活跃，但作者认为龙版传媒冲7板炸板，需防高位负反馈。"
+        },
+        {
+          "name": "算力/电子/PCB/光通信",
+          "stance": "分化",
+          "evidence": "作者称中际旭创、兴森科技等偏强，但电子和计算机资金净流出、CPO午后跳水。"
+        },
+        {
+          "name": "资源/能源",
+          "stance": "活跃",
+          "evidence": "作者认为石油、有色受商品及事件驱动走强，但定位为高低切轮动方向。"
+        },
+        {
+          "name": "零售/消费",
+          "stance": "活跃",
+          "evidence": "百大集团4板、中百集团2板，作者将其定位为切换日辅助方向。"
+        },
+        {
+          "name": "医药/CRO",
+          "stance": "活跃",
+          "evidence": "作者提及奥浦迈20cm及澳洋科技连板，认为CRO若次日晋级可升温。"
+        },
+        {
+          "name": "液冷",
+          "stance": "退潮",
+          "evidence": "作者认为集泰股份偏独立，板块整体偏弱，需等待中石科技、金富科技止跌。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "亚盛集团",
+          "sector": "农业/种植业",
+          "role": "龙头"
+        },
+        {
+          "name": "敦煌种业",
+          "sector": "农业/种植业",
+          "role": "核心"
+        },
+        {
+          "name": "中国出版",
+          "sector": "出版/AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "出版/AI应用",
+          "role": "风险"
+        },
+        {
+          "name": "百大集团",
+          "sector": "零售/消费",
+          "role": "核心"
+        },
+        {
+          "name": "爱仕达",
+          "sector": "小家电/机器人",
+          "role": "核心"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "算力/光通信",
+          "role": "核心"
+        },
+        {
+          "name": "兴森科技",
+          "sector": "电子/PCB",
+          "role": "核心"
+        },
+        {
+          "name": "中石科技",
+          "sector": "液冷",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "龙版传媒断板后的开盘及收盘反馈",
+        "亚盛集团、百大集团、爱仕达等4板股的晋级和换手情况",
+        "沪指3950附近、创业板3400附近及两市成交量能变化"
+      ],
+      "numeric_claims": [
+        "沪指收3940.55点，上涨0.20%",
+        "深成指收13703.21点，下跌0.52%",
+        "创业板指收3359.72点，下跌1.15%",
+        "科创50约下跌1.52%",
+        "沪深两市成交19604亿元，较前日放量144亿元",
+        "全市场3417只上涨、2026只下跌、106只平盘",
+        "涨停74只，跌停0只",
+        "封板率66%，连板晋级率46.15%",
+        "亚盛集团、百大集团、爱仕达均为4连板",
+        "中国出版、敦煌种业、海欣食品均为3连板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ffb147f8214d7b7a",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为地缘风险压制整体风险偏好，但AI算力硬件受产业利好支撑而强于大盘；存储内部及中概股表现分化。",
+      "sectors": [
+        {
+          "name": "半导体",
+          "stance": "加强",
+          "evidence": "作者称半导体产业链为亮点，AI硬件主线只是高低切换。"
+        },
+        {
+          "name": "存储芯片",
+          "stance": "分化",
+          "evidence": "原厂与模组环节分化加剧，部分海外标的涨跌不一。"
+        },
+        {
+          "name": "光通信",
+          "stance": "加强",
+          "evidence": "作者称AI数据中心光互联景气延续，映射A股修复预期。"
+        },
+        {
+          "name": "创新药",
+          "stance": "退潮",
+          "evidence": "作者提到诺华、安进大跌，大药企集体重挫。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "美国通胀数据对美联储政策路径的影响",
+        "AI算力硬件产业利好持续性",
+        "地缘风险及国际油价变化"
+      ],
+      "numeric_claims": [
+        "英特尔上涨9.05%",
+        "AMD上涨5.90%",
+        "阿斯麦上涨2.91%",
+        "费城半导体指数上涨1.30%",
+        "希捷上涨6.49%",
+        "SK海力士上涨4.83%",
+        "美光下跌1.61%",
+        "闪迪下跌0.12%",
+        "Lumentum上涨11.04%",
+        "康宁上涨7.56%",
+        "Coherent上涨7.10%",
+        "诺华下跌13.93%",
+        "安进下跌10.08%",
+        "英特尔消费级CPU拟涨价10%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    }
+  ]
+}

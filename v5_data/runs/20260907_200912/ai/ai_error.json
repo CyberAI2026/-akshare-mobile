@@ -1,0 +1,11 @@
+{
+  "status": "ai_failed",
+  "engine": "V5.3-auditable-market-sector-layer",
+  "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
+  "time_cn": "2026-09-07T20:48:40.652359+08:00",
+  "error_type": "JSONDecodeError",
+  "error": "Expecting ',' delimiter: line 1 column 19093 (char 19092)",
+  "generated_trade_date": "2026-09-07",
+  "source_candidate_count": 34,
+  "rule": "AI失败时不生成观察池，也不保留旧观察池。"
+}
