@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "initialized",
+  "stage": "screen25_complete",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-10T19:34:57.439120+08:00",
@@ -32,5 +32,14 @@
   "cache_deep_ready_count": 351,
   "cache_current_count": 565,
   "cache_fallback_count": 87,
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 197,
+  "qa25": {
+    "命中或增量": 594,
+    "总数": 652,
+    "成功": 594
+  },
+  "cache25_refresh_requested": 29,
+  "cache25_current_ranked": 594,
+  "cache25_stale_deferred": 58
 }

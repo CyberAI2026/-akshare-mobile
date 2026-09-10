@@ -1,0 +1,17 @@
+{
+  "done": 29,
+  "total": 29,
+  "code": "920128",
+  "updated_cn": "2026-09-10T19:38:45.168144+08:00",
+  "last": {
+    "股票代码": "920128",
+    "股票名称": "胜业电气",
+    "状态": "成功",
+    "交易日数": 25,
+    "前复权源": "eastmoney",
+    "未复权源": "eastmoney",
+    "缓存模式": "deep-backfill",
+    "未复权匹配日": 25,
+    "错误": "sina/qfq/1:KeyError:'date' | sina/qfq/2:KeyError:'date'"
+  }
+}
