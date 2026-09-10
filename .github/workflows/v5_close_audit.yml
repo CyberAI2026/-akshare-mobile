@@ -40,6 +40,19 @@ jobs:
         run: python v5_cli.py close_audit
       - name: Backfill recommendation close anchors
         run: python research/recommendation_feedback.py update --no-notify
+      - name: Persist recommendation close anchors
+        shell: bash
+        run: |
+          git config user.name "V5 Close Audit Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add --all -- v5_data/feedback
+          if git diff --cached --quiet; then
+            echo "No recommendation close-anchor changes to commit"
+          else
+            git commit -m "Backfill recommendation close anchors $(date +%F-%H%M)"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
       - if: always()
         uses: actions/upload-artifact@v4
         with:
