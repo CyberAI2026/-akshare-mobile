@@ -52,23 +52,23 @@ class AfterCloseStageTests(unittest.TestCase):
         self.assertEqual(sum(len(part) for part in parts), len(frame))
         self.assertLessEqual(max(len(part) for part in parts), 51)
 
-    def test_25d_refresh_prioritizes_today_and_avoids_refreshing_entire_master(self):
+    def test_25d_refresh_attempts_every_stale_active_symbol(self):
         active = pd.DataFrame({
             "股票代码": ["000001", "000002", "000003", "000004", "000005"],
             "股票名称": ["A", "B", "C", "D", "E"],
         })
         daily = pd.DataFrame({"股票代码": ["000002", "000003"]})
         manifest = pd.DataFrame([
-            {"股票代码": "000001", "缓存行数": 25, "日期已最新": True, "最后交易日": "2026-09-07"},
-            {"股票代码": "000002", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-04"},
-            {"股票代码": "000003", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-03"},
-            {"股票代码": "000004", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-02"},
-            {"股票代码": "000005", "缓存行数": 25, "日期已最新": True, "最后交易日": "2026-09-07"},
+            {"股票代码": "000001", "缓存行数": 26, "日期已最新": True, "最后交易日": "2026-09-07"},
+            {"股票代码": "000002", "缓存行数": 26, "日期已最新": False, "最后交易日": "2026-09-04"},
+            {"股票代码": "000003", "缓存行数": 26, "日期已最新": False, "最后交易日": "2026-09-03"},
+            {"股票代码": "000004", "缓存行数": 26, "日期已最新": False, "最后交易日": "2026-09-02"},
+            {"股票代码": "000005", "缓存行数": 26, "日期已最新": True, "最后交易日": "2026-09-07"},
         ])
         planned = stages._plan_25d_cache_refresh(active, daily, manifest, minimum_ready=3)
-        self.assertEqual(set(planned["股票代码"]), {"000002", "000003"})
+        self.assertEqual(set(planned["股票代码"]), {"000002", "000003", "000004"})
 
-    def test_25d_refresh_adds_recent_old_names_only_when_capacity_needs_them(self):
+    def test_25d_refresh_requires_prior_close_for_all_25_sessions(self):
         active = pd.DataFrame({
             "股票代码": ["000001", "000002", "000003", "000004"],
             "股票名称": ["A", "B", "C", "D"],
@@ -76,14 +76,14 @@ class AfterCloseStageTests(unittest.TestCase):
         daily = pd.DataFrame({"股票代码": ["000002"]})
         manifest = pd.DataFrame([
             {"股票代码": "000001", "缓存行数": 25, "日期已最新": True, "最后交易日": "2026-09-07"},
-            {"股票代码": "000002", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-01"},
-            {"股票代码": "000003", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-04"},
-            {"股票代码": "000004", "缓存行数": 25, "日期已最新": False, "最后交易日": "2026-09-02"},
+            {"股票代码": "000002", "缓存行数": 26, "日期已最新": True, "最后交易日": "2026-09-07"},
+            {"股票代码": "000003", "缓存行数": 26, "日期已最新": False, "最后交易日": "2026-09-04"},
+            {"股票代码": "000004", "缓存行数": 26, "日期已最新": True, "最后交易日": "2026-09-07"},
         ])
         planned = stages._plan_25d_cache_refresh(active, daily, manifest, minimum_ready=3)
-        self.assertEqual(set(planned["股票代码"]), {"000002", "000003"})
+        self.assertEqual(set(planned["股票代码"]), {"000001", "000003"})
 
-    def test_25d_capacity_failure_persists_partial_refresh_before_raising(self):
+    def test_25d_partial_current_coverage_has_no_minimum_count_gate(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             base = root / "run"
@@ -95,12 +95,12 @@ class AfterCloseStageTests(unittest.TestCase):
                 "股票名称": ["甲", "乙", "丙"],
             })
             active.to_csv(base / "stages" / "active_input.csv", index=False)
-            active.assign(缓存行数=25, 日期已最新=False).to_csv(
+            active.assign(缓存行数=26, 日期已最新=False).to_csv(
                 base / "history_cache_manifest.csv", index=False
             )
             active.iloc[:0].to_csv(base / "每日提交变动.csv", index=False)
             final_manifest = active.assign(
-                缓存行数=[25, 25, 24], 日期已最新=[True, True, False]
+                缓存行数=[26, 26, 25], 日期已最新=[True, True, False]
             )
             state = {
                 "stage": "initialized", "status": "running", "folder": str(base),
@@ -114,10 +114,10 @@ class AfterCloseStageTests(unittest.TestCase):
                  patch.object(stages.cli, "LATEST", latest), \
                  patch.object(stages.cli, "CACHE", root / "cache"), \
                  patch.object(stages.cli, "git_commit") as git_commit:
-                with self.assertRaisesRegex(RuntimeError, "当日有效缓存仅2只"):
-                    stages.run_25d()
-            self.assertEqual(state["stage"], "initialized")
-            self.assertEqual(state["cache25_refresh_shortfall"], 1)
+                stages.run_25d()
+            self.assertEqual(state["stage"], "screen25_complete")
+            self.assertEqual(state["cache25_current_ranked"], 2)
+            self.assertNotIn("cache25_refresh_shortfall", state)
             save_state.assert_called_once_with(state)
             git_commit.assert_called_once()
 
@@ -197,6 +197,44 @@ class AfterCloseStageTests(unittest.TestCase):
                     stages.run_ai()
             saved = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertEqual(saved["stage"], "ai_failed")
+
+    def test_strategy_replay_can_complete_without_pushplus(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            run = root / "run"
+            latest = root / "latest"
+            (run / "250d").mkdir(parents=True)
+            latest.mkdir()
+            state_path = root / "state.json"
+            state_path.write_text(json.dumps({
+                "stage": "market_context_complete", "status": "running",
+                "folder": str(run), "generated_trade_date": "2026-09-10",
+                "engine": "test", "strategy": "test", "stamp": "test",
+                "started_cn": "2026-09-10T19:00:00+08:00",
+            }), encoding="utf-8")
+            candidate = pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股份"}])
+            candidate.to_csv(run / "250d" / "research_pack_30_40.csv", index=False)
+            with pd.ExcelWriter(run / "market_review.xlsx") as writer:
+                for name in ["五大指数180日", "市场宽度当日", "市场宽度历史180", "市场滚动上下文"]:
+                    pd.DataFrame().to_excel(writer, sheet_name=name, index=False)
+            with pd.ExcelWriter(run / "sector_fund_flow.xlsx") as writer:
+                pd.DataFrame().to_excel(writer, sheet_name="板块质量校验", index=False)
+            meta = {"target_trade_date": "2026-09-11", "model": "test", "market_assessment": {}, "opinion_context": {}}
+            notifier = MagicMock(return_value=True)
+            with patch.dict("os.environ", {"AFTER_CLOSE_NOTIFY": "false"}), \
+                 patch.object(stages, "STATE", state_path), \
+                 patch.object(stages.cli, "LATEST", latest), \
+                 patch.object(stages.cli, "run_openai_after_close", return_value=(candidate, meta, {})), \
+                 patch.object(stages.cli, "_sector_readiness", return_value=({}, {"status": "test"})), \
+                 patch.object(stages.cli, "_attention_sector_market_groups", return_value={}), \
+                 patch.object(stages.cli, "notify_after_close_success", notifier), \
+                 patch.object(stages.cli, "git_commit"):
+                stages.run_ai()
+            saved = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["status"], "completed")
+            self.assertEqual(saved["pushplus_delivery_status"], "suppressed_strategy_replay")
+            self.assertIsNone(saved["pushplus_delivery_ok"])
+            notifier.assert_not_called()
 
 
 if __name__ == "__main__":
