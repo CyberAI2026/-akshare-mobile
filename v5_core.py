@@ -470,8 +470,8 @@ def _recent_limit_up_evidence(g: pd.DataFrame, sessions: int = 25) -> dict:
     manufacture a false limit-up. One extra prior close is used to evaluate all
     25 requested sessions, including the generated trade date.
     """
-    code = _norm_code(g.get("股票代码", pd.Series(dtype=str)).iloc[-1]) if not g.empty else ""
-    name = str(g.get("股票名称", pd.Series(dtype=str)).iloc[-1]) if not g.empty else ""
+    code = _norm_code(g["股票代码"].iloc[-1]) if not g.empty and "股票代码" in g else ""
+    name = str(g["股票名称"].iloc[-1]) if not g.empty and "股票名称" in g else ""
     limit_pct, board = _price_limit_rule(code, name)
     empty = {
         "最近25日曾涨停": False,
@@ -611,11 +611,13 @@ def build_metrics(data: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _rank_and_audit(x: pd.DataFrame, score_col: str, min_n: int, max_n: int, eligible_col: str | None = None, stage: str = "") -> tuple[pd.DataFrame, pd.DataFrame]:
-    """软容量筛选：不是死卡一个数字。
+def _rank_and_audit(x: pd.DataFrame, score_col: str, min_n: int | None = None,
+                    max_n: int | None = None, eligible_col: str | None = None,
+                    stage: str = "") -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Eligibility-first screening with optional legacy soft capacity.
 
-    先保证最低研究容量 min_n；如果 min_n 边界出现同分，则把同分组一起纳入，
-    但最多到 max_n。若合格样本本来少于 min_n，则不为凑数降低资格线。
+    With no capacity arguments, every eligible symbol advances. Explicit min/max
+    remain supported only for historical callers and deterministic compatibility.
     """
     z = x.copy()
     if z.empty:
@@ -626,34 +628,44 @@ def _rank_and_audit(x: pd.DataFrame, score_col: str, min_n: int, max_n: int, eli
         eligible = pd.Series(True, index=z.index)
     # 主排序只使用既有研究分；代码只用于完全同分时保证结果可复现，不代表策略证据。
     eligible_sorted = z[eligible].sort_values([score_col, "股票代码"], ascending=[False, True]).copy()
+    unlimited = min_n is None and max_n is None
     if eligible_sorted.empty:
         selected_codes=set(); cutoff=np.nan; selected_n=0
-    elif len(eligible_sorted) <= min_n:
+    elif unlimited:
+        selected_n=len(eligible_sorted); cutoff=eligible_sorted[score_col].min()
+        selected_codes=set(eligible_sorted["股票代码"].astype(str))
+    elif len(eligible_sorted) <= int(min_n or 0):
         selected_n=len(eligible_sorted); cutoff=eligible_sorted[score_col].min()
         selected_codes=set(eligible_sorted["股票代码"].astype(str))
     else:
-        cutoff=eligible_sorted.iloc[min_n-1][score_col]
+        effective_min=max(1,int(min_n or max_n or len(eligible_sorted)))
+        effective_max=max(effective_min,int(max_n or len(eligible_sorted)))
+        cutoff=eligible_sorted.iloc[effective_min-1][score_col]
         natural_n=int((eligible_sorted[score_col] >= cutoff).sum())
-        selected_n=min(max_n, max(min_n, natural_n))
+        selected_n=min(effective_max, max(effective_min, natural_n))
         selected_codes=set(eligible_sorted.head(selected_n)["股票代码"].astype(str))
     z["阶段排名"] = z[score_col].rank(method="min", ascending=False).astype("Int64")
     z["本阶段入选"] = z["股票代码"].astype(str).isin(selected_codes)
-    z["阶段软容量下限"] = min_n
-    z["阶段软容量上限"] = max_n
+    z["阶段软容量下限"] = pd.NA if unlimited else min_n
+    z["阶段软容量上限"] = pd.NA if unlimited else max_n
     z["实际入选数"] = selected_n
     z["边界分数"] = cutoff
     def reason(r):
         if eligible_col and not bool(r.get(eligible_col, False)):
             return f"未入选：未满足{stage}最低资格条件"
         if bool(r["本阶段入选"]):
+            if unlimited:
+                return f"入选：满足{stage}资格条件；本阶段不设置数量下限或上限"
             return f"入选：{score_col}={r.get(score_col)}；软容量{min_n}-{max_n}只，本次实际{selected_n}只"
+        if unlimited:
+            return f"未入选：未满足{stage}资格条件"
         return f"未入选：满足基础条件，但位于本次软容量边界之外（{min_n}-{max_n}只）"
     z["决策说明"] = z.apply(reason, axis=1)
     selected = z[z["本阶段入选"]].sort_values([score_col, "股票代码"], ascending=[False, True]).reset_index(drop=True)
     audit = z.sort_values(["本阶段入选", score_col, "股票代码"], ascending=[False, False, True]).reset_index(drop=True)
     return selected, audit
 
-def stage1_rank(metrics: pd.DataFrame, min_n: int = 150, max_n: int = 200, return_audit: bool = False):
+def stage1_rank(metrics: pd.DataFrame, min_n: int | None = None, max_n: int | None = None, return_audit: bool = False):
     """25日一级：先要求最近25个交易日至少出现一次实际涨停。
 
     研究约束：
@@ -692,7 +704,7 @@ def stage1_rank(metrics: pd.DataFrame, min_n: int = 150, max_n: int = 200, retur
     return (selected, audit) if return_audit else selected
 
 
-def stage2_rank(metrics: pd.DataFrame, min_n: int = 30, max_n: int = 40, return_audit: bool = False):
+def stage2_rank(metrics: pd.DataFrame, min_n: int | None = None, max_n: int | None = None, return_audit: bool = False):
     """120日二级：核心研究层——整理成熟 + 中期趋势仍活 + 接近稳健5日上沿。
 
     强证据用于资格/主排序；信号日2%-6%重新加速仅作中等证据加分，绝不作为稳定胜率承诺。
@@ -751,7 +763,7 @@ def stage2_rank(metrics: pd.DataFrame, min_n: int = 30, max_n: int = 40, return_
     return (selected, audit) if return_audit else selected
 
 
-def stage3_rank(metrics: pd.DataFrame, max_n: int = 10, return_audit: bool = False):
+def stage3_rank(metrics: pd.DataFrame, max_n: int | None = None, return_audit: bool = False):
     """250日三级：生命周期否决/修正层，而不是“越靠250日最高点越好”。
 
     主要任务：识别长期下降趋势修复，避免把修复反弹误判成右上角二次启动；
@@ -793,7 +805,11 @@ def stage3_rank(metrics: pd.DataFrame, max_n: int = 10, return_audit: bool = Fal
         [clear_down_rebound, x["ret40"] > 0.50, x["ret120"] < 0],
         ["长期下降趋势中的修复/反弹，降级", "40日加速较大：仅作趋势成熟风险提示，不单独判尾端", "120日趋势偏弱"], default="")
     x["阶段3规则说明"] = "生命周期否决/修正：重点排除长期下降修复；不把接近250日高点或累计涨幅本身当成越高越好"
-    selected, audit = _rank_and_audit(x, "阶段3分", max_n, max_n, "阶段3通过", "三级生命周期筛选")
+    selected, audit = _rank_and_audit(
+        x, "阶段3分", max_n, max_n, "阶段3通过", "三级生命周期筛选"
+    ) if max_n is not None else _rank_and_audit(
+        x, "阶段3分", None, None, "阶段3通过", "三级生命周期筛选"
+    )
     return (selected, audit) if return_audit else selected
 
 
@@ -1070,7 +1086,7 @@ def openai_analyze(
     )
     if "盘后" in kind or "观察池" in kind:
         task=(
-            "当前任务是盘后30只研究池筛选到次日0-10只观察池，不是最终买入推荐。"
+            "当前任务是从盘后三级研究池筛选次日0-10只观察池，不是最终买入推荐。"
             "必须优先排除明显长期下降趋势修复、趋势尾端/近期加速极端、结构尚未成熟者；"
             "同时允许仍需次日14:40-14:45验证的候选进入观察池。"
         )
