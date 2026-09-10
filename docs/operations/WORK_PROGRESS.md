@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-10 19:58 Asia/Shanghai
+Updated: 2026-09-10 20:14 Asia/Shanghai
 
 ## Overall goal
 
@@ -80,6 +80,14 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   dependencies. A non-interactive GitHub Actions deployment path is being added so
   credentials can stay in repository Secrets rather than chat or a temporary Work
   environment. No deployment has been triggered.
+- `LOCK-20260910-limitup-25d-strategy-replay`: user-authorized strategy revision.
+  Require at least one actual board-specific limit-up in the latest 25 completed
+  trading sessions including the generated trade date; remove fixed minimum/target
+  counts from the 25-day, 120-day, and 250-day filters; replace the programmatic
+  after-close observation-pool cap of 3 with a hard maximum of 10. The current
+  652-symbol active pool will be recomputed once after deterministic validation.
+  Replay may use at most one OpenAI call and defaults to no PushPlus delivery so the
+  already accepted 2026-09-10 formal message is not duplicated.
 - `LOCK-20260910-after-close-25d-recovery` is closed. The repaired recovery run
   `34471878484` completed successfully through feedback refresh. No manual rerun is
   pending and the failure-alert job for the successful run was skipped.
