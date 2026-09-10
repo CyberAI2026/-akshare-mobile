@@ -88,6 +88,12 @@ Task-specific detail: `docs/operations/OPINION_TASK_CHECKPOINT.md`.
   652-symbol active pool will be recomputed once after deterministic validation.
   Replay may use at most one OpenAI call and defaults to no PushPlus delivery so the
   already accepted 2026-09-10 formal message is not duplicated.
+  Unit 1 is durable: board-specific rounded limit prices and raw-close evidence were
+  committed in `3d0b92f0f572ce35f78e730d205534877eb75eb0`; deterministic coverage for
+  main-board 10%, ChiNext/STAR 20%, BSE 30%, and low-price rounding was committed in
+  `ebc3a7d7ebd970371a33607c9c84f2bb86fa4224`. Ten targeted tests passed with no
+  external OpenAI or PushPlus call. Next unit: remove stage count forcing and change
+  the post-model observation cap from 3 to 10.
 - `LOCK-20260910-after-close-25d-recovery` is closed. The repaired recovery run
   `34471878484` completed successfully through feedback refresh. No manual rerun is
   pending and the failure-alert job for the successful run was skipped.
