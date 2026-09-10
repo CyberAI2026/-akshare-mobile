@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/v5_close_audit.yml'
+      - 'v5_data/control/close_audit_fallback_trigger.json'
 
 permissions:
   contents: write
@@ -19,7 +20,8 @@ concurrency:
 
 jobs:
   close-audit:
-    if: github.event_name != 'push'
+    # Ordinary pushes remain validation-only; an explicit recovery marker may run the idempotent audit.
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[close-audit]')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
