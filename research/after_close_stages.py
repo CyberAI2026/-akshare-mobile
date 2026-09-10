@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -91,14 +92,13 @@ def _plan_25d_cache_refresh(
     active_input: pd.DataFrame,
     daily_changes: pd.DataFrame,
     manifest: pd.DataFrame,
-    minimum_ready: int = 150,
+    minimum_ready: int | None = None,
 ) -> pd.DataFrame:
-    """Choose a bounded set of stale caches to refresh before the broad screen.
+    """Refresh every stale active-pool cache before the 25-session screen.
 
-    Today's submitted names always have priority. Older master-pool names are
-    refreshed only when the already-current universe would otherwise be too
-    small for the 150-200 stock first stage. This keeps the stage bounded while
-    ensuring stale rows never compete with current rows in the ranking.
+    ``daily_changes`` and ``minimum_ready`` remain accepted for checkpoint/backward
+    compatibility, but no longer restrict coverage. Every active symbol is attempted;
+    symbols still stale after bounded retries are explicitly deferred in QA.
     """
     if active_input.empty:
         return active_input.copy()
@@ -108,20 +108,8 @@ def _plan_25d_cache_refresh(
     info["股票代码"] = info["股票代码"].astype(str).str.zfill(6)
     info["缓存行数"] = pd.to_numeric(info.get("缓存行数"), errors="coerce").fillna(0)
     info["日期已最新"] = info.get("日期已最新", False).fillna(False).astype(bool)
-    ready = info["日期已最新"] & (info["缓存行数"] >= 25)
-    daily_codes = set(
-        daily_changes.get("股票代码", pd.Series(dtype=str)).astype(str).str.zfill(6)
-    )
-    refresh_codes = set(info.loc[~ready & info["股票代码"].isin(daily_codes), "股票代码"])
-
-    projected_ready = int(ready.sum()) + len(refresh_codes)
-    target_ready = min(int(minimum_ready), len(active_input))
-    if projected_ready < target_ready:
-        extra_needed = target_ready - projected_ready
-        old_stale = info.loc[~ready & ~info["股票代码"].isin(refresh_codes)].copy()
-        old_stale["_latest"] = pd.to_datetime(old_stale.get("最后交易日"), errors="coerce")
-        old_stale = old_stale.sort_values(["_latest", "缓存行数"], ascending=[False, False])
-        refresh_codes.update(old_stale.head(extra_needed)["股票代码"].astype(str))
+    ready = info["日期已最新"] & (info["缓存行数"] >= 26)
+    refresh_codes = set(info.loc[~ready, "股票代码"].astype(str))
 
     codes = active_input["股票代码"].astype(str).str.zfill(6)
     return active_input.loc[codes.isin(refresh_codes)].reset_index(drop=True)
@@ -193,7 +181,7 @@ def run_25d() -> None:
     refresh_pool = _plan_25d_cache_refresh(active_input, daily_changes, initial_manifest)
     if not refresh_pool.empty:
         _, refresh_qa = fetch_pool_history_incremental(
-            refresh_pool, 25, cli.CACHE, cli.checkpoint_factory(base / "25d" / "refresh")
+            refresh_pool, 26, cli.CACHE, cli.checkpoint_factory(base / "25d" / "refresh")
         )
     else:
         refresh_qa = pd.DataFrame()
@@ -205,22 +193,19 @@ def run_25d() -> None:
     cli.save_df(cli.LATEST / "history_cache_manifest.csv", final_manifest)
     current_mask = (
         final_manifest["日期已最新"].fillna(False).astype(bool)
-        & (pd.to_numeric(final_manifest["缓存行数"], errors="coerce").fillna(0) >= 25)
+        & (pd.to_numeric(final_manifest["缓存行数"], errors="coerce").fillna(0) >= 26)
     )
     ready_codes = set(final_manifest.loc[current_mask, "股票代码"].astype(str).str.zfill(6))
     code_series = active_input["股票代码"].astype(str).str.zfill(6)
     ready_pool = active_input.loc[code_series.isin(ready_codes)].reset_index(drop=True)
-    minimum_ready = min(150, len(active_input))
-    if len(ready_pool) < minimum_ready:
-        # Preserve every successful download and its QA before failing the capacity
-        # gate. A later failed-job rerun then fetches only the remaining stale names
-        # instead of discarding the completed part of this stage with the runner.
+    if ready_pool.empty:
+        # Preserve every attempted download and its QA. A later failed-job rerun
+        # then fetches only the remaining stale names instead of discarding work.
         state.update({
             "status": "running",
             "stage": "initialized",
             "cache25_refresh_requested": len(refresh_pool),
             "cache25_refresh_ready": len(ready_pool),
-            "cache25_refresh_shortfall": minimum_ready - len(ready_pool),
             "cache25_refresh_last_attempt_cn": cli.now_cn().isoformat(),
             "qa25_refresh": _qa_cache_summary(refresh_qa),
         })
@@ -228,12 +213,11 @@ def run_25d() -> None:
         cli.save_json(base / "meta.json", state)
         cli.git_commit(f"V5 after-close 25d refresh partial {state.get('stamp', '')}".strip())
         raise RuntimeError(
-            f"25日当日有效缓存仅{len(ready_pool)}只，低于最低研究容量{minimum_ready}只；"
-            "已禁止用过期行情补足排名"
+            "25日筛选没有任何具备当日行情且至少26行历史的股票；已保存抓取断点"
         )
 
     d25, ready_qa = fetch_pool_history_incremental(
-        ready_pool, 25, cli.CACHE, cli.checkpoint_factory(base / "25d" / "screen")
+        ready_pool, 26, cli.CACHE, cli.checkpoint_factory(base / "25d" / "screen")
     )
     deferred = final_manifest.loc[~current_mask].copy()
     deferred_qa = pd.DataFrame({
@@ -248,8 +232,9 @@ def run_25d() -> None:
     })
     q25 = pd.concat([ready_qa, deferred_qa], ignore_index=True, sort=False)
     m25 = build_metrics(d25)
-    s1, a1 = stage1_rank(m25, 150, 200, return_audit=True)
-    p1 = s1[["股票代码", "股票名称"]].copy()
+    s1, a1 = stage1_rank(m25, return_audit=True)
+    p1 = s1.reindex(columns=["股票代码", "股票名称"]).copy()
+    cli.save_df(base / "25d" / "pool_stage1.csv", p1)
     cli.save_df(base / "25d" / "pool_150_200.csv", p1)
     cli.save_df(base / "25d" / "pool_150.csv", p1)
     cli.save_df(base / "25d" / "stage_audit.csv", a1)
@@ -271,13 +256,14 @@ def run_120d() -> None:
     p1 = _read_csv(base / "25d" / "pool_150_200.csv")
     d120, q120 = fetch_pool_history_incremental(p1, 120, cli.CACHE, cli.checkpoint_factory(base / "120d"))
     m120 = build_metrics(d120)
-    s2, a2 = stage2_rank(m120, 30, 50, return_audit=True)
-    p2 = s2[["股票代码", "股票名称"]].copy()
+    s2, a2 = stage2_rank(m120, return_audit=True)
+    p2 = s2.reindex(columns=["股票代码", "股票名称"]).copy()
+    cli.save_df(base / "120d" / "research_pool_stage2.csv", p2)
     cli.save_df(base / "120d" / "research_pool_30_50.csv", p2)
     cli.save_df(base / "120d" / "research_pool_30.csv", p2)
     cli.save_df(base / "120d" / "stage_audit.csv", a2)
     cli.save_df(base / "stages" / "q120.csv", q120)
-    cli.save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级30-50只": s2}))
+    cli.save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级合格池": s2}))
     state.update({"stage": "screen120_complete", "stage2_research_pool": len(p2), "qa120": _qa_cache_summary(q120)})
     _save_state(state)
     cli.git_commit(f"V5 after-close 120d {state['stamp']}")
@@ -328,15 +314,16 @@ def run_120d_aggregate(shard_count: int = 4) -> None:
     d120 = pd.concat(d_parts, ignore_index=True) if d_parts else pd.DataFrame()
     q120 = pd.concat(q_parts, ignore_index=True) if q_parts else pd.DataFrame()
     m120 = build_metrics(d120)
-    s2, a2 = stage2_rank(m120, 30, 50, return_audit=True)
-    p2 = s2[["股票代码", "股票名称"]].copy()
+    s2, a2 = stage2_rank(m120, return_audit=True)
+    p2 = s2.reindex(columns=["股票代码", "股票名称"]).copy()
+    cli.save_df(base / "120d" / "research_pool_stage2.csv", p2)
     cli.save_df(base / "120d" / "research_pool_30_50.csv", p2)
     cli.save_df(base / "120d" / "research_pool_30.csv", p2)
     cli.save_df(base / "120d" / "stage_audit.csv", a2)
     cli.save_df(base / "stages" / "q120.csv", q120)
     cli.save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({
         "120日日线": d120, "质量校验": q120, "结构指标": m120,
-        "筛选审计": a2, "二级30-50只": s2,
+        "筛选审计": a2, "二级合格池": s2,
     }))
     state.update({"stage": "screen120_complete", "stage2_research_pool": len(p2), "qa120": _qa_cache_summary(q120)})
     _save_state(state)
@@ -348,19 +335,27 @@ def run_250d() -> None:
     state, base = _load_state("screen120_complete")
     p2 = _read_csv(base / "120d" / "research_pool_30_50.csv")
     d250, q250 = fetch_pool_history_incremental(p2, 250, cli.CACHE, cli.checkpoint_factory(base / "250d"))
-    if d250.empty or "日期" not in d250.columns:
-        raise RuntimeError("250日数据缺少日期，无法确定观察池生成交易日")
-    m250 = build_metrics(d250)
+    if d250.empty:
+        m250 = pd.DataFrame(columns=["股票代码", "股票名称"])
+        generated_trade_date = str(
+            pd.Timestamp(state.get("cache_asof_trade_date") or state["started_cn"]).date()
+        )
+    else:
+        if "日期" not in d250.columns:
+            raise RuntimeError("250日数据缺少日期，无法确定观察池生成交易日")
+        m250 = build_metrics(d250)
+        generated_trade_date = str(pd.to_datetime(d250["日期"], errors="coerce").max().date())
     stage2_audit = _read_csv(base / "120d" / "stage_audit.csv")
     if not stage2_audit.empty and "阶段2分" in stage2_audit.columns:
         m250 = m250.merge(stage2_audit[["股票代码", "阶段2分"]], on="股票代码", how="left")
-    _, lifecycle_audit = stage3_rank(m250, max(1, len(m250)), return_audit=True)
-    research_pack = p2.merge(lifecycle_audit, on=["股票代码", "股票名称"], how="left")
+    lifecycle_selected, lifecycle_audit = stage3_rank(m250, return_audit=True)
+    research_pack = lifecycle_selected.copy()
     research_pack = _attach_stage2_evidence(research_pack, stage2_audit)
+    cli.save_df(base / "250d" / "research_pack_stage3.csv", research_pack)
     cli.save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
     cli.save_df(base / "250d" / "lifecycle_audit.csv", lifecycle_audit)
     cli.save_df(base / "stages" / "q250.csv", q250)
-    cli.save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI研究输入30-50只": research_pack}))
+    cli.save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI三级合格输入": research_pack}))
 
     registry = _read_csv(base / "stages" / "registry_merged.csv")
     cache_metrics = cli._cache_metrics_for_master(registry)
@@ -375,13 +370,14 @@ def run_250d() -> None:
     cli.save_df(base / "master_maintenance_audit.csv", maintenance_audit)
     cli.save_df(cli.LATEST / "research_pool_30_50.csv", research_pack)
     cli.save_df(cli.LATEST / "research_pool_30.csv", research_pack)
+    cli.save_df(cli.LATEST / "research_pool_stage3.csv", research_pack)
     cli.save_df(cli.LATEST / "current_master_pool.csv", current)
 
     changes = _read_csv(base / "每日提交变动.csv")
     change_kind = changes.get("变动", pd.Series(dtype=str)).astype(str) if not changes.empty else pd.Series(dtype=str)
     state.update({
         "stage": "lifecycle250_complete",
-        "generated_trade_date": str(pd.to_datetime(d250["日期"], errors="coerce").max().date()),
+        "generated_trade_date": generated_trade_date,
         "master_count": len(current),
         "eliminated_count": len(eliminated),
         "daily_new_count": int((change_kind == "新增").sum()),
@@ -389,6 +385,7 @@ def run_250d() -> None:
         "daily_eliminated_count": int((maintenance_audit.get("淘汰日期", pd.Series(dtype=str)).astype(str) == str(pd.Timestamp(state["started_cn"]).date())).sum()) if not maintenance_audit.empty else 0,
         "cooling_count": int((registry["当前状态"].astype(str) == "冷却观察").sum()) if not registry.empty else 0,
         "qa250": _qa_cache_summary(q250),
+        "stage3_research_pool": len(research_pack),
     })
     _save_state(state)
     cli.git_commit(f"V5 after-close 250d {state['stamp']}")
@@ -416,7 +413,12 @@ def run_market() -> None:
 
 def run_ai() -> None:
     state, base = _load_state()
+    notify_enabled = str(os.getenv("AFTER_CLOSE_NOTIFY", "true")).strip().lower() not in {
+        "0", "false", "no", "off"
+    }
     if state.get("stage") == "completed" and state.get("status") == "completed_push_failed":
+        if not notify_enabled:
+            raise RuntimeError("盘后送达重试要求 AFTER_CLOSE_NOTIFY=true")
         obs = _read_csv(cli.LATEST / "observation_pool.csv")
         meta_path = cli.LATEST / "observation_pool_meta.json"
         if not meta_path.exists():
@@ -450,10 +452,39 @@ def run_ai() -> None:
     sector_tables_for_ai, sector_validation = cli._sector_readiness(sector_sheets, sector_qa)
     generated_trade_date = pd.Timestamp(state["generated_trade_date"]).date()
     try:
-        obs, obs_meta, _ = cli.run_openai_after_close(
-            research_pack, idx, breadth, market_history, market_context, base,
-            generated_trade_date, {"folder": str(base)}, sector_tables_for_ai,
-        )
+        if research_pack.empty:
+            obs = research_pack.reindex(columns=["股票代码", "股票名称"]).copy()
+            obs_meta = {
+                "status": "valid_empty",
+                "generated_trade_date": str(generated_trade_date),
+                "target_trade_date": str(cli.next_trade_day(generated_trade_date)),
+                "generated_at_cn": cli.now_cn().isoformat(),
+                "source_candidate_count": 0,
+                "ai_candidate_count_after_active_trade_exclusion": 0,
+                "excluded_active_trade_count": 0,
+                "observation_count": 0,
+                "model": "not_called_no_stage3_candidates",
+                "strategy": STRATEGY_VERSION,
+                "source_run": str(base),
+                "market_assessment": {},
+                "sector_assessment": {"status": "not_applicable", "summary": "三级筛选无合格候选"},
+                "opinion_assessment": {"status": "not_applicable", "summary": "三级筛选无合格候选"},
+                "opinion_context": {},
+                "portfolio_note": "三级资格筛选无合格股票，次日观察池为0只；未调用OpenAI。",
+                "pool_cap_trimmed_codes": [],
+                "rule": "各阶段不设数量下限；0只为合法结果",
+            }
+            cli.save_df(base / "ai" / "observation_pool.csv", obs)
+            cli.save_json(base / "ai" / "observation_pool_meta.json", obs_meta)
+            cli.save_json(base / "ai" / "observation_pool_analysis.json", {"selected_codes": [], "decisions": []})
+            cli.save_df(cli.LATEST / "observation_pool.csv", obs)
+            cli.save_json(cli.LATEST / "observation_pool_meta.json", obs_meta)
+            cli.save_json(cli.LATEST / "observation_pool_analysis.json", {"selected_codes": [], "decisions": []})
+        else:
+            obs, obs_meta, _ = cli.run_openai_after_close(
+                research_pack, idx, breadth, market_history, market_context, base,
+                generated_trade_date, {"folder": str(base)}, sector_tables_for_ai,
+            )
     except Exception as exc:
         err = {
             "status": "ai_failed", "engine": state["engine"], "strategy": STRATEGY_VERSION,
@@ -468,7 +499,8 @@ def run_ai() -> None:
         cli.save_json(base / "summary.json", state)
         cli.save_json(cli.LATEST / "latest_after_close.json", state)
         cli.git_commit(f"V5.3 AI failed {state['stamp']}")
-        cli.notify_failure("盘后OpenAI研究", exc)
+        if notify_enabled:
+            cli.notify_failure("盘后OpenAI研究", exc)
         raise
 
     completed = cli.now_cn()
@@ -479,7 +511,7 @@ def run_ai() -> None:
         "status": "completed", "stage": "completed", "completed_cn": completed.isoformat(),
         "elapsed_minutes": round((completed - started).total_seconds() / 60, 2),
         "cache_summary": {"25日": state.get("qa25", {}), "120日": state.get("qa120", {}), "250日": state.get("qa250", {})},
-        "python_final": "30-50只软容量研究包（不机械生成前10）",
+        "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment", {}),
         "sector_validation": sector_validation,
@@ -489,15 +521,18 @@ def run_ai() -> None:
         "stock_qa_250_success": state.get("qa250", {}).get("成功", 0),
         "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
     }
-    push_ok = bool(cli.notify_after_close_success(summary, obs, obs_meta))
+    push_ok = bool(cli.notify_after_close_success(summary, obs, obs_meta)) if notify_enabled else None
     summary["pushplus_delivery_ok"] = push_ok
-    summary["status"] = "completed" if push_ok else "completed_push_failed"
+    summary["pushplus_delivery_status"] = (
+        "request_accepted" if push_ok else "failed" if notify_enabled else "suppressed_strategy_replay"
+    )
+    summary["status"] = "completed" if (push_ok or not notify_enabled) else "completed_push_failed"
     cli.save_json(base / "summary.json", summary)
     cli.save_json(cli.LATEST / "latest_after_close.json", summary)
     cli.save_json(base / "meta.json", summary)
     _save_state(summary)
     cli.git_commit(f"V5.3 after-close + AI completed {state['stamp']}")
-    if not push_ok:
+    if notify_enabled and not push_ok:
         cli.notify_failure("盘后微信推送", "PushPlus delivery exhausted retries")
         raise RuntimeError("盘后结果已保存，但PushPlus送达未确认")
     print(f"AFTER_CLOSE_STAGE_OK stage=ai observation_pool={len(obs)}")

@@ -540,7 +540,7 @@ def _mark_master_stage(registry: pd.DataFrame, p1: pd.DataFrame, p2: pd.DataFram
     p1c = set(p1["股票代码"].astype(str)) if not p1.empty else set()
     p2c = set(p2["股票代码"].astype(str)) if not p2.empty else set()
     x.loc[active & x["股票代码"].astype(str).isin(p1c), "当前状态"] = "一级活跃"
-    x.loc[active & x["股票代码"].astype(str).isin(p2c), "当前状态"] = "进入30-50只研究池"
+    x.loc[active & x["股票代码"].astype(str).isin(p2c), "当前状态"] = "进入120日结构研究池"
     return x
 
 
@@ -930,7 +930,7 @@ def _apply_sector_evidence_gate(
 
 
 def _cap_observation_pool(selected: list[str], decision_by_code: dict[str, dict],
-                          stock_sector_context: dict, cap: int = 3) -> tuple[list[str], list[str], dict[str, float]]:
+                          stock_sector_context: dict, cap: int = 10) -> tuple[list[str], list[str], dict[str, float]]:
     """Cap with auditable 70% model priority and 30% objective sector evidence."""
     if len(selected) <= cap:
         return list(selected), [], {code: 1.0 for code in selected}
@@ -954,7 +954,7 @@ def _cap_observation_pool(selected: list[str], decision_by_code: dict[str, dict]
 
 
 def _post_gate_portfolio_note(selected: list[str], retreat: list[str], conditional: list[str],
-                              trimmed: list[str] | None = None) -> str:
+                              trimmed: list[str] | None = None, cap: int = 10) -> str:
     """Build the authoritative note from the post-gate pool, not the model's pre-gate count."""
     selected_text="、".join(selected) if selected else "无"
     note=(
@@ -967,14 +967,14 @@ def _post_gate_portfolio_note(selected: list[str], retreat: list[str], condition
     if conditional:
         gate_notes.append(f"同期板块证据未核验、保留为条件观察：{'、'.join(conditional)}")
     if trimmed:
-        gate_notes.append(f"超过3只后按结构70%和板块30%排序未入围：{'、'.join(trimmed)}")
+        gate_notes.append(f"超过{cap}只后按结构70%和板块30%排序未入围：{'、'.join(trimmed)}")
     if gate_notes:
         note += " " + "；".join(gate_notes) + "。"
     return note
 
 
 def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict, sector_tables: dict[str,pd.DataFrame] | None = None) -> tuple[pd.DataFrame, dict, dict]:
-    """30 -> 0~10。严格验证代码集合、数量和日期，失败时绝不留下旧观察池冒充新结果。"""
+    """动态三级研究池 -> 0~10。严格验证代码集合、数量和日期。"""
     LATEST.mkdir(parents=True, exist_ok=True)
     for stale in [LATEST/"observation_pool.csv", LATEST/"observation_pool_meta.json", LATEST/"observation_pool_analysis.json"]:
         try:
@@ -982,7 +982,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         except Exception:
             pass
     if research_pack is None or research_pack.empty:
-        raise RuntimeError("30只研究包为空，不能调用OpenAI。")
+        raise RuntimeError("三级研究包为空，不能调用OpenAI。")
     research_pack = refresh_stock_names(research_pack)
     source_candidate_count = len(research_pack)
     research_pack, excluded_active_trade_codes = exclude_active_trades(research_pack)
@@ -994,7 +994,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market_assessment": {"risk_level":"低/中/高", "summary":"基于输入市场数据的简洁判断", "next_day_aggressiveness":"偏防守/中性/偏积极"},
         "sector_assessment": {"status":"正式可用/实验性未启用", "summary":"板块环境判断；无正式数据时明确写未启用"},
         "opinion_assessment": {"status":"可用/未启用", "summary":"公开复盘正文挖掘形成的市场与板块观点共识；明确其不是行情事实"},
-        "selected_codes":["最多10个、必须来自输入30只的6位股票代码"],
+        "selected_codes":["最多10个、必须来自输入候选的6位股票代码"],
         "decisions":[{
             "股票代码":"6位代码","股票名称":"输入名称","decision":"SELECT/WAIT/REJECT",
             "priority":1,"confidence_level":"低/中/高","evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么",
@@ -1039,7 +1039,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "required_output_schema":schema,
     }
     raw=openai_analyze(
-        "盘后30→0~10次日观察池", payload,
+        "盘后三级研究池→0~10次日观察池", payload,
         output_schema=_after_close_response_schema(),
         schema_name="after_close_observation_pool",
         max_output_tokens=20000,
@@ -1054,7 +1054,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         raise ValueError(f"OpenAI选择了{len(selected)}只，超过10只上限")
     bad=[x for x in selected if x not in allowed]
     if bad:
-        raise ValueError(f"OpenAI选择了输入30只之外的代码: {bad}")
+        raise ValueError(f"OpenAI选择了输入候选之外的代码: {bad}")
     decisions=result.get("decisions",[])
     if not isinstance(decisions,list):
         raise ValueError("OpenAI decisions不是数组")
@@ -1065,7 +1065,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         if code in allowed: decision_by_code[code]=d
     missing=sorted(allowed-set(decision_by_code))
     if missing:
-        raise ValueError(f"OpenAI decisions未覆盖全部30只，缺少{len(missing)}只: {missing[:8]}")
+        raise ValueError(f"OpenAI decisions未覆盖全部输入候选，缺少{len(missing)}只: {missing[:8]}")
     required_dimensions=["confidence_level","structure_assessment","volume_assessment","amplitude_assessment","turnover_assessment","sector_resonance"]
     for code in list(selected):
         decision=decision_by_code[code]
@@ -1079,14 +1079,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         selected,decision_by_code,stock_sector_context
     )
     selected,pool_cap_trimmed,pool_ranking_scores=_cap_observation_pool(
-        selected,decision_by_code,stock_sector_context,cap=3
+        selected,decision_by_code,stock_sector_context,cap=10
     )
     sector_state_by_code={str(item.get("股票代码","")).zfill(6):str(item.get("板块共振状态","") or "板块未核验")
                           for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
     sector_divergence_conditional=[code for code in selected if sector_state_by_code.get(code)=="同期概念分化"]
     result["model_portfolio_note_before_sector_gate"]=str(result.get("portfolio_note","") or "").strip()
     result["portfolio_note"]=_post_gate_portfolio_note(
-        selected,downgraded,sector_unverified_downgraded,pool_cap_trimmed
+        selected,downgraded,sector_unverified_downgraded,pool_cap_trimmed,cap=10
     )
     result["selected_codes"]=selected
     result["sector_retreat_downgraded_codes"]=downgraded
@@ -1180,38 +1180,40 @@ def run_after_close(batch_path: str | None):
     save_df(base / "每日提交变动.csv", changes)
 
     # 一级：全当前主池，25日宽筛。
-    d25, q25 = fetch_pool_history_incremental(active_input, 25, CACHE, checkpoint_factory(base / "25d"))
+    d25, q25 = fetch_pool_history_incremental(active_input, 26, CACHE, checkpoint_factory(base / "25d"))
     m25 = build_metrics(d25)
-    s1, a1 = stage1_rank(m25, 150, 200, return_audit=True)
-    p1 = s1[["股票代码", "股票名称"]].copy()
+    s1, a1 = stage1_rank(m25, return_audit=True)
+    p1 = s1.reindex(columns=["股票代码", "股票名称"]).copy()
+    save_df(base / "25d" / "pool_stage1.csv", p1)
     save_df(base / "25d" / "pool_150_200.csv", p1)
     save_df(base / "25d" / "pool_150.csv", p1)  # 兼容旧前端/历史工具
     save_df(base / "25d" / "stage_audit.csv", a1)
     save_bytes(base / "25d" / "result.xlsx", to_excel_bytes({"25日日线": d25, "质量校验": q25, "粗筛指标": m25, "筛选审计": a1, "一级结果": s1}))
     git_commit(f"V5 after-close 25d {stamp}")
 
-    # 二级：150 -> 30。
+    # 二级：对全部一级合格股票做120日结构筛选，不设置数量目标。
     d120, q120 = fetch_pool_history_incremental(p1, 120, CACHE, checkpoint_factory(base / "120d"))
     m120 = build_metrics(d120)
-    s2, a2 = stage2_rank(m120, 30, 50, return_audit=True)
-    p2 = s2[["股票代码", "股票名称"]].copy()
+    s2, a2 = stage2_rank(m120, return_audit=True)
+    p2 = s2.reindex(columns=["股票代码", "股票名称"]).copy()
+    save_df(base / "120d" / "research_pool_stage2.csv", p2)
     save_df(base / "120d" / "research_pool_30_50.csv", p2)
     save_df(base / "120d" / "research_pool_30.csv", p2)  # 兼容旧前端/历史工具
     save_df(base / "120d" / "stage_audit.csv", a2)
-    save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级30-50只": s2}))
+    save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级合格池": s2}))
     git_commit(f"V5 after-close 120d {stamp}")
 
-    # 三级：只给这30-50只补250日生命周期档案；不再由Python截前10。
+    # 三级：对全部二级合格股票做250日生命周期筛选，不设置数量目标。
     d250, q250 = fetch_pool_history_incremental(p2, 250, CACHE, checkpoint_factory(base / "250d"))
     m250 = build_metrics(d250)
     if not s2.empty and "阶段2分" in s2.columns:
         m250 = m250.merge(s2[["股票代码", "阶段2分"]], on="股票代码", how="left")
-    _, lifecycle_audit = stage3_rank(m250, max(1, len(m250)), return_audit=True)
-    # research_pack保留全部30只，即便生命周期层认为某只应降级，也作为AI后续的排除证据，而不是Python提前丢掉。
-    research_pack = p2.merge(lifecycle_audit, on=["股票代码", "股票名称"], how="left")
+    lifecycle_selected, lifecycle_audit = stage3_rank(m250, return_audit=True)
+    research_pack = lifecycle_selected.copy()
+    save_df(base / "250d" / "research_pack_stage3.csv", research_pack)
     save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
     save_df(base / "250d" / "lifecycle_audit.csv", lifecycle_audit)
-    save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI研究输入30-50只": research_pack}))
+    save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI三级合格输入": research_pack}))
 
     # 主池维护：仅自动淘汰“较久未再次提交 + 趋势同步转弱”；淘汰可被以后再次提交重新激活。
     cache_metrics = _cache_metrics_for_master(registry)
@@ -1296,7 +1298,8 @@ def run_after_close(batch_path: str | None):
         "master_pool_capacity_note": "动态证据池；不按固定500只硬砍，按长期未提交且趋势同步转弱可逆淘汰",
         "cache_summary": cache_summary,
         "stage1": len(p1), "stage2_research_pool": len(p2),
-        "python_final": "30-50只软容量研究包（不机械生成前10）",
+        "stage3_research_pool": len(research_pack),
+        "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment",{}),
         "sector_validation": sector_validation,

@@ -48,20 +48,15 @@ class AfterCloseAIContractTests(unittest.TestCase):
         self.assertEqual(decisions["000003"]["decision"], "SELECT")
         self.assertEqual(decisions["000003"]["confidence_level"], "低")
 
-    def test_pool_over_three_uses_70_30_ranking(self):
-        selected=["000001","000002","000003","000004"]
+    def test_pool_over_ten_uses_70_30_ranking(self):
+        selected=[f"{i:06d}" for i in range(1,12)]
         decisions={code:{"decision":"SELECT","priority":i+1,"risk":""} for i,code in enumerate(selected)}
-        context={"stocks":[
-            {"股票代码":"000001","板块共振状态":"板块未核验"},
-            {"股票代码":"000002","板块共振状态":"同期概念共振"},
-            {"股票代码":"000003","板块共振状态":"同期概念分化"},
-            {"股票代码":"000004","板块共振状态":"同期概念共振"},
-        ]}
-        kept,trimmed,scores=_cap_observation_pool(selected,decisions,context,cap=3)
-        self.assertEqual(len(kept),3)
-        self.assertEqual(trimmed,["000004"])
-        self.assertGreater(scores["000002"],scores["000003"])
-        self.assertEqual(decisions["000004"]["decision"],"WAIT")
+        context={"stocks":[]}
+        kept,trimmed,scores=_cap_observation_pool(selected,decisions,context)
+        self.assertEqual(len(kept),10)
+        self.assertEqual(trimmed,["000011"])
+        self.assertEqual(decisions["000011"]["decision"],"WAIT")
+        self.assertIn("超过10只",decisions["000011"]["risk"])
 
     def test_sector_divergence_cannot_remain_high_confidence(self):
         decisions = {"000001": {"decision": "SELECT", "confidence_level": "高", "risk": ""}}
