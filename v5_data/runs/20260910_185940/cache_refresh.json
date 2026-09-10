@@ -1,0 +1,14 @@
+{
+  "asof_trade_date": "2026-09-10",
+  "source": "",
+  "pool_count": 652,
+  "already_current": 0,
+  "bulk_appended": 0,
+  "needs_history_fallback": 0,
+  "missing_cache": 0,
+  "corporate_action_guard": 0,
+  "errors": [
+    "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+    "sina-spot:JSONDecodeError:Can not decode value starting with character '<'"
+  ]
+}
