@@ -44,7 +44,8 @@
   "cache25_stale_deferred": 58,
   "completed_120d_shards": [
     0,
-    1
+    1,
+    2
   ],
   "shard_count_120d": 4
 }
