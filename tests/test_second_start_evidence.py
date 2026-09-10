@@ -15,7 +15,7 @@ import pandas as pd
 
 sys.modules.setdefault("akshare", MagicMock())
 sys.modules.setdefault("requests", MagicMock())
-from v5_core import build_metrics, fetch_pool_history_incremental, openai_analyze, stage2_rank
+from v5_core import build_metrics, fetch_pool_history_incremental, openai_analyze, stage1_rank, stage2_rank
 
 
 def sample_history(contracting: bool = True, with_turnover: bool = True) -> pd.DataFrame:
@@ -42,6 +42,54 @@ def sample_history(contracting: bool = True, with_turnover: bool = True) -> pd.D
 
 
 class SecondStartEvidenceTests(unittest.TestCase):
+    @staticmethod
+    def limit_history(code: str, before: float, limit_close: float) -> pd.DataFrame:
+        n = 26
+        close = np.full(n, before, dtype=float)
+        close[-1] = limit_close
+        return pd.DataFrame({
+            "股票代码": [code] * n,
+            "股票名称": ["测试股份"] * n,
+            "日期": pd.date_range("2026-08-06", periods=n, freq="B"),
+            "收盘价": close,
+            "未复权收盘价": close,
+            "最高价": close,
+            "最低价": close,
+            "成交量": np.full(n, 1000.0),
+            "换手率": np.full(n, 2.0),
+        })
+
+    def test_latest_25_sessions_detect_board_specific_limit_up_prices(self):
+        histories = pd.concat([
+            self.limit_history("600001", 10.0, 11.0),
+            self.limit_history("300001", 10.0, 12.0),
+            self.limit_history("688001", 10.0, 12.0),
+            self.limit_history("920001", 10.0, 13.0),
+        ], ignore_index=True)
+        metrics = build_metrics(histories).set_index("股票代码")
+        self.assertTrue(metrics["最近25日曾涨停"].all())
+        self.assertEqual(set(metrics["25日内涨停次数"]), {1})
+        self.assertEqual(metrics.loc["600001", "涨停板规则"], "沪深主板10%")
+        self.assertEqual(metrics.loc["300001", "涨停板规则"], "创业板20%")
+        self.assertEqual(metrics.loc["688001", "涨停板规则"], "科创板20%")
+        self.assertEqual(metrics.loc["920001", "涨停板规则"], "北交所30%")
+
+    def test_limit_up_uses_rounded_raw_close_not_fixed_percentage(self):
+        rounded_limit = self.limit_history("600001", 3.33, 3.66)
+        adjusted_only = self.limit_history("300001", 10.0, 11.0)
+        metrics = build_metrics(pd.concat([rounded_limit, adjusted_only], ignore_index=True)).set_index("股票代码")
+        self.assertTrue(bool(metrics.loc["600001", "最近25日曾涨停"]))
+        self.assertFalse(bool(metrics.loc["300001", "最近25日曾涨停"]))
+
+    def test_stage1_requires_verified_limit_up_evidence(self):
+        yes = build_metrics(self.limit_history("600001", 10.0, 11.0))
+        no = build_metrics(self.limit_history("600002", 10.0, 10.99))
+        metrics = pd.concat([yes, no], ignore_index=True)
+        selected, audit = stage1_rank(metrics, min_n=10, max_n=20, return_audit=True)
+        self.assertEqual(selected["股票代码"].tolist(), ["600001"])
+        rejected = audit.set_index("股票代码").loc["600002"]
+        self.assertFalse(bool(rejected["阶段1通过"]))
+
     def test_metrics_expose_volume_turnover_and_consolidation(self):
         metrics = build_metrics(sample_history()).iloc[0]
         self.assertLess(metrics["成交量收敛比"], 1.0)
