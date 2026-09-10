@@ -1,6 +1,5 @@
 {
-  "beijing_time": "2026-09-09T22:02:00+08:00",
-  "source_date": "2026-09-09",
-  "watchdog_stage": "deadline_final_2202",
-  "main_sha": "fb67bb82afcd18d37c945683f18c64d9e8f28737"
+  "beijing_time": "2026-09-11T01:07:34+08:00",
+  "source_date": "2026-09-11",
+  "watchdog_stage": "retry_2130_fallback"
 }
