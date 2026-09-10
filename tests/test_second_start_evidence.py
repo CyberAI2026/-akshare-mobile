@@ -73,6 +73,10 @@ class SecondStartEvidenceTests(unittest.TestCase):
         self.assertEqual(metrics.loc["300001", "涨停板规则"], "创业板20%")
         self.assertEqual(metrics.loc["688001", "涨停板规则"], "科创板20%")
         self.assertEqual(metrics.loc["920001", "涨停板规则"], "北交所30%")
+        selected = stage1_rank(metrics.reset_index())
+        self.assertEqual(len(selected), 4)
+        self.assertTrue(selected["阶段软容量下限"].isna().all())
+        self.assertTrue(selected["阶段软容量上限"].isna().all())
 
     def test_limit_up_uses_rounded_raw_close_not_fixed_percentage(self):
         rounded_limit = self.limit_history("600001", 3.33, 3.66)
