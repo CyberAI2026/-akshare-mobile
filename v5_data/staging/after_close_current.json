@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.6-second-start-evidence+pool-v0.3+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-10T19:34:57.439120+08:00",
@@ -76,5 +76,48 @@
     "concept_table_count": 1,
     "industry_table_count": 1,
     "scope_note": ""
-  }
+  },
+  "completed_cn": "2026-09-10T19:53:54.310526+08:00",
+  "elapsed_minutes": 18.95,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 594,
+      "总数": 652,
+      "成功": 594
+    },
+    "120日": {
+      "命中或增量": 172,
+      "总数": 197,
+      "成功": 197
+    },
+    "250日": {
+      "命中或增量": 39,
+      "总数": 39,
+      "成功": 39
+    }
+  },
+  "python_final": "30-50只软容量研究包（不机械生成前10）",
+  "observation_pool_count": 2,
+  "target_trade_date": "2026-09-11",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月10日上涨931家、下跌4192家，净上涨-3261，较前日继续恶化；深证、创业板及科创50的20日表现偏弱。研究判断：市场风险偏好显著收缩，次日个股二次启动需接受盘中承接验证。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 594,
+  "stock_qa_120_success": 197,
+  "stock_qa_250_success": 39,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true
 }
