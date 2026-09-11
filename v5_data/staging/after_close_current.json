@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-11T15:36:30.854126+08:00",
@@ -77,5 +77,49 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "completed_cn": "2026-09-11T15:57:59.752246+08:00",
+  "elapsed_minutes": 21.48,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 594,
+      "总数": 667,
+      "成功": 594
+    },
+    "120日": {
+      "命中或增量": 252,
+      "总数": 357,
+      "成功": 357
+    },
+    "250日": {
+      "命中或增量": 126,
+      "总数": 132,
+      "成功": 132
+    }
+  },
+  "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
+  "observation_pool_count": 3,
+  "target_trade_date": "2026-09-14",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月11日上涨604家、下跌4567家、净上涨-3963，跌停21家且较前日增加；宽度处于样本低位。研究判断：风险偏好显著收缩，个股观察须以盘中承接确认优先。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 594,
+  "stock_qa_120_success": 357,
+  "stock_qa_250_success": 132,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
