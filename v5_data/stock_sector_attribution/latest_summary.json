@@ -1,9 +1,9 @@
 {
   "status": "completed",
   "snapshot_date": "2026-09-05",
-  "rows": 1798,
-  "stocks": 620,
-  "multi_concept_stocks": 249,
+  "rows": 1826,
+  "stocks": 660,
+  "multi_concept_stocks": 254,
   "fact_board_count": 477,
   "version": "stock-sector-attribution-v0.1.0",
   "causality_warning": "主导板块是可审计关联归因，不是已证明的因果关系；历史回看仅使用当日保存的成分快照。"
