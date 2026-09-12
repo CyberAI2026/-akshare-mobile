@@ -20,6 +20,50 @@ import v5_cli as cli
 from research import market_opinion_mining as opinion
 
 
+class MasterPoolHardRuleTests(unittest.TestCase):
+    COLUMNS = [
+        "股票代码", "股票名称", "首次进入日期", "最近提交日期", "提交次数",
+        "当前状态", "淘汰日期", "淘汰原因",
+    ]
+
+    def test_new_st_stock_is_rejected_before_entering_registry(self):
+        master = pd.DataFrame(columns=self.COLUMNS)
+        daily = pd.DataFrame([
+            {"股票代码": "000001", "股票名称": "平安银行"},
+            {"股票代码": "002743", "股票名称": "ST富煌"},
+            {"股票代码": "600001", "股票名称": " *st 测试"},
+        ])
+        merged, changes = core.merge_master_pool(master, daily, asof="2026-09-12")
+        self.assertEqual(merged["股票代码"].tolist(), ["000001"])
+        self.assertEqual((changes["变动"] == "ST股票硬排除").sum(), 2)
+
+    def test_existing_st_stock_is_archived_and_cannot_reactivate(self):
+        master = pd.DataFrame([{
+            "股票代码": "002743", "股票名称": "ST富煌", "首次进入日期": "2026-09-02",
+            "最近提交日期": "2026-09-02", "提交次数": 1, "当前状态": "活跃",
+            "淘汰日期": "", "淘汰原因": "",
+        }], columns=self.COLUMNS)
+        daily = pd.DataFrame([{"股票代码": "002743", "股票名称": "ST富煌"}])
+        merged, _ = core.merge_master_pool(master, daily, asof="2026-09-12")
+        row = merged.iloc[0]
+        self.assertEqual(row["当前状态"], "已淘汰")
+        self.assertEqual(row["淘汰日期"], "2026-09-12")
+        self.assertEqual(row["淘汰原因"], core.ST_ELIMINATION_REASON)
+        self.assertTrue(merged[merged["当前状态"] != "已淘汰"].empty)
+
+    def test_maintenance_hard_excludes_all_supported_st_prefixes(self):
+        master = pd.DataFrame([
+            {"股票代码": f"00000{i}", "股票名称": name, "首次进入日期": "2026-09-01",
+             "最近提交日期": "2026-09-12", "提交次数": 1, "当前状态": "活跃",
+             "淘汰日期": "", "淘汰原因": ""}
+            for i, name in enumerate(["ST甲", "*ST乙", "SST丙", "S*ST丁", "正常股份"], start=1)
+        ], columns=self.COLUMNS)
+        maintained, _ = core.maintain_master_pool(master, None, asof="2026-09-12")
+        active = maintained[maintained["当前状态"] != "已淘汰"]
+        self.assertEqual(active["股票名称"].tolist(), ["正常股份"])
+        self.assertEqual((maintained["淘汰原因"] == core.ST_ELIMINATION_REASON).sum(), 4)
+
+
 class UnifiedHistoryCacheTests(unittest.TestCase):
     def test_bulk_spot_appends_one_closed_day_without_per_stock_history_call(self):
         with tempfile.TemporaryDirectory() as td:

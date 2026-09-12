@@ -35,6 +35,21 @@ class WorkflowReliabilityTests(unittest.TestCase):
         env = workflow["jobs"]["aggregate"]["env"]
         self.assertEqual(str(env["OPINION_PUSH_AFTER_AGGREGATE"]), "1")
 
+    def test_opinion_external_schedule_is_not_treated_as_manual_force(self):
+        workflow = load_workflow("v5_market_opinion.yml")
+        triggers = workflow.get("on", workflow.get(True, {}))
+        inputs = triggers["workflow_dispatch"]["inputs"]
+        self.assertIn("scheduler_mode", inputs)
+        self.assertIn("source_date", inputs)
+        text = (ROOT / ".github" / "workflows" / "v5_market_opinion.yml").read_text(encoding="utf-8")
+        self.assertIn('scheduler_mode=="external_schedule"', text)
+        self.assertIn("source_date输入超出安全窗口", text)
+
+    def test_delayed_opinion_fallback_keeps_previous_business_date_before_six(self):
+        text = (ROOT / ".github" / "workflows" / "v5_market_opinion_2130_fallback.yml").read_text(encoding="utf-8")
+        self.assertGreaterEqual(text.count("now_cn.hour<6") + text.count("now.hour<6"), 2)
+        self.assertIn('"source_date": business_day.isoformat()', text)
+
     def test_after_close_has_failure_alert(self):
         workflow = load_workflow("v5_after_close.yml")
         alert = workflow["jobs"]["failure-alert"]

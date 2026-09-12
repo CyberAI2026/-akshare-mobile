@@ -506,7 +506,13 @@ def discover_articles() -> list[dict]:
 def title_review_date_matches(title: str, target) -> bool:
     """标题明确标注旧复盘日期时拒绝；“明日策略9.4”不当作文章复盘日期。"""
     dates = []
-    for match in re.finditer(r"(?:\d{4}年)?(\d{1,2})[月./-](\d{1,2})日?.{0,8}复盘", title):
+    # 同时接受 2026年9月11日、2026.9.11、2026-9-11、9.11、9月11日。
+    # 年份部分必须整体识别，否则旧表达式可能从“2026.9.11”中间截出
+    # “26.9复盘”，把同日文章错误判成 26 月 9 日。
+    for match in re.finditer(
+        r"(?<!\d)(?:(?:20\d{2})[年./-])?(\d{1,2})[月./-](\d{1,2})日?.{0,8}复盘",
+        title,
+    ):
         dates.append((int(match.group(1)), int(match.group(2))))
     for match in re.finditer(r"(?<!\d)(\d{2})(\d{2})复盘", title):
         dates.append((int(match.group(1)), int(match.group(2))))

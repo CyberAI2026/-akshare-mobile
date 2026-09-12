@@ -1713,6 +1713,15 @@ def load_master_pool(path: str | Path) -> pd.DataFrame:
     return x
 
 
+ST_ELIMINATION_REASON = "硬规则：ST/*ST/SST/S*ST股票不得进入或保留在当前观察池"
+
+
+def is_st_stock_name(name: object) -> bool:
+    """识别A股风险警示简称；空格和大小写不影响判断。"""
+    normalized = re.sub(r"\s+", "", str(name or "")).upper()
+    return bool(re.match(r"^(?:S\*?ST|\*?ST)", normalized))
+
+
 def merge_master_pool(master: pd.DataFrame, daily: pd.DataFrame, asof=None) -> tuple[pd.DataFrame, pd.DataFrame]:
     """把每日30~40只提交与云端主池合并。用户无需判断是否重复。
 
@@ -1732,8 +1741,22 @@ def merge_master_pool(master: pd.DataFrame, daily: pd.DataFrame, asof=None) -> t
     m["股票代码"] = m["股票代码"].map(_norm_code)
     m = m.drop_duplicates("股票代码", keep="last").set_index("股票代码", drop=False)
     changes=[]
+    # 风险警示股票是观察池入口硬排除项。注册表保留历史审计记录，但立即失活；
+    # 当前观察池导出只包含非“已淘汰”记录，因此不会继续抓取或进入任何筛选阶段。
+    existing_st = m["股票名称"].map(is_st_stock_name)
+    m.loc[existing_st, "当前状态"] = "已淘汰"
+    m.loc[existing_st, "淘汰日期"] = asof
+    m.loc[existing_st, "淘汰原因"] = ST_ELIMINATION_REASON
     for _, r in stocks.iterrows():
         code, name = r["股票代码"], str(r.get("股票名称", "") or "")
+        if is_st_stock_name(name):
+            if code in m.index:
+                m.at[code, "股票名称"] = name or m.at[code, "股票名称"]
+                m.at[code, "当前状态"] = "已淘汰"
+                m.at[code, "淘汰日期"] = asof
+                m.at[code, "淘汰原因"] = ST_ELIMINATION_REASON
+            changes.append({"股票代码":code,"股票名称":name,"变动":"ST股票硬排除"})
+            continue
         if code in m.index:
             old_status = str(m.at[code, "当前状态"] or "")
             m.at[code, "股票名称"] = name or m.at[code, "股票名称"]
@@ -1792,6 +1815,11 @@ def maintain_master_pool(master: pd.DataFrame, metrics120: pd.DataFrame | None, 
     x.loc[auto_drop,"当前状态"]="已淘汰"
     x.loc[auto_drop,"淘汰日期"]=asof_ts.strftime("%Y-%m-%d")
     x.loc[auto_drop,"淘汰原因"]="维护v0.1：较久未再次提交，且120日/40日趋势证据同步转弱；若后续重新强势并再次提交可自动恢复"
+    # ST 排除优先级高于普通维护状态，且不可因再次提交而重新激活。
+    st_mask = x["股票名称"].map(is_st_stock_name)
+    x.loc[st_mask, "当前状态"] = "已淘汰"
+    x.loc[st_mask, "淘汰日期"] = asof_ts.strftime("%Y-%m-%d")
+    x.loc[st_mask, "淘汰原因"] = ST_ELIMINATION_REASON
     audit_cols=["股票代码","股票名称","当前状态","最近提交日期","ret20","ret40","ret120","MA20距离","MA30_5日斜率","淘汰日期","淘汰原因"]
     audit=x[audit_cols].copy()
     base_cols=["股票代码","股票名称","首次进入日期","最近提交日期","提交次数","当前状态","淘汰日期","淘汰原因"]

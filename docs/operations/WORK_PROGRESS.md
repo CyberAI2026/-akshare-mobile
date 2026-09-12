@@ -1,6 +1,74 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-10 20:14 Asia/Shanghai
+Updated: 2026-09-12 17:14 Asia/Shanghai
+
+## 2026-09-12 takeover and reliability correction checkpoint
+
+- Read-only takeover baseline: production `main`
+  `13b87496ec89b12007762e708b1084ec981e0675`; assets `main`
+  `3ede4b8deb9c8e77bd3add81a379e629fe1254f7`; no queued or in-progress Actions
+  were present at the baseline check. Recheck immediately before any remote merge,
+  deployment, or manual recovery.
+- Sole executor: current maintenance account/current window. Active locks:
+  `LOCK-20260910-limitup-25d-strategy-replay` (ST hard-rule closure only),
+  `LOCK-20260909-cloudflare-ci-deploy`, and
+  `LOCK-20260912-opinion-discovery-reliability`. No historical tail/opinion replay
+  or duplicate external delivery is authorized.
+- Latest natural after-close run `34683308527` completed from folder
+  `v5_data/runs/20260912_162833`: uploaded active pool 672, 669 symbols with current
+  25-session evidence, 3 stale/deferred, stage1 402, stage2 161, stage3 93, and one
+  final OpenAI observation. The 25-session hard gate is already in production:
+  402/669 had at least one board-specific actual limit-up and all 402 passed stage1;
+  zero selected symbols lacked that evidence. Main board uses 10%, ChiNext/STAR 20%,
+  and BSE 30%, with regulatory price rounding.
+- ST hard-exclusion unit is saved locally in commit
+  `8abdea55aa24d38b946962a8146c60834a6d7315`. New or existing names beginning with
+  `ST`, `*ST`, `SST`, or `S*ST` cannot enter, remain in, or be reactivated into the
+  current observation pool. `002743 ST富煌` was removed from both current-pool
+  exports; the active count is now 671. The registry retains its single historical
+  record as `已淘汰`, and `eliminated_archive.csv` records the reason and date rather
+  than silently erasing history. Compilation, diff validation, and 46 deterministic
+  tests passed; external calls in tests were mocked.
+- Opinion discovery policy/parser unit is saved locally in commit
+  `3de064437de4e192e7138d9091831062fc7d7209`. The project skill
+  `.codex/skills/strong-stock-opinion-discovery/` now fixes the two tag IDs, bounded
+  collection times, 22:00/15-article gate, same-source-set idempotency, article-page
+  date/content validation, objective THS separation, and late-run business-date
+  safety. The title parser now accepts full-year dotted/dashed/slashed dates such as
+  `2026.9.11操作复盘` without misreading `26.9` as month/day. Twenty-five opinion and
+  workflow reliability tests plus skill validation passed. No live discovery,
+  OpenAI, or PushPlus action occurred.
+- Independent scheduler expansion is saved locally in commit
+  `0976d50122612241e5fee1e0ed9e876d82af93d0`. One Cloudflare Worker now routes
+  tail dispatch at 14:26/14:31/14:35 on trading weekdays, opinion collection at
+  20:30, every ten minutes from 21:00 through 21:50, final aggregation at 22:00,
+  and a delivery fallback at 22:12 (all Asia/Shanghai). It checks active/recent
+  Actions before dispatch; external opinion dispatches carry an explicit source
+  date and do not acquire manual-force semantics. The 21:30 GitHub fallback also
+  retains the previous business date when a delayed run starts before 06:00.
+  Ten Worker tests, 27 opinion/workflow tests, YAML parsing, compilation, and diff
+  validation passed. Deployment is still blocked until the three existing GitHub
+  Actions secrets are configured and one `DEPLOY` run is explicitly performed.
+- 2026-09-11 tail diagnosis: scheduled runs `34595324289`, `34595459197`, and
+  `34595713585` did trigger, but GitHub did not start their prechecks until
+  19:43/19:45/19:48 Asia/Shanghai. The safe-time gate correctly refused to fabricate
+  a post-close recommendation. The independent Cloudflare dispatcher exists but is
+  not deployed; this remains the direct reliability blocker.
+- 2026-09-11 opinion diagnosis: run `34623365526` started around 00:40 on 2026-09-12,
+  about 2h40 after the 22:00 target. Tag discovery found 55 candidates, deterministic
+  article/date checks retained 21, and model quality validation retained 17. The
+  PushPlus API accepted the request at 00:46 with short receipt
+  `3e5ddb03704e417b9c95cafa2211a79b`; terminal WeChat receipt is unverified. The
+  correct `#复盘`/`#每日复盘` topic endpoints were used; the late delivery is a
+  scheduler failure, while a separate date-parser defect may reject titles written
+  as `YYYY.M.D复盘` and still requires a tested correction.
+- Current reliable checkpoint: ST hard-rule/current-pool cleanup is closed at local
+  commit `8abdea55...`; opinion parser and reusable project skill are closed at
+  `3de06443...`; scheduler expansion and rollover repair are closed at
+  `0976d501...`. No production push, live article fetch, OpenAI request, PushPlus
+  request, or Cloudflare deployment has occurred in this correction. Next unit is
+  remote PR/merge with validation-only Actions, followed by credential-gated
+  Cloudflare deployment and natural-cycle acceptance.
 
 ## Overall goal
 

@@ -2,6 +2,15 @@ name: V5 Market Opinion Mining
 
 on:
   workflow_dispatch:
+    inputs:
+      scheduler_mode:
+        description: "Leave blank for manual recovery; external scheduler uses external_schedule"
+        required: false
+        type: string
+      source_date:
+        description: "Optional bounded source date for the external scheduler/manual recovery"
+        required: false
+        type: string
   schedule:
     # Beijing 20:30 starts collection. Re-evaluate every 10 minutes from
     # 21:00 through 21:50; 22:00 releases all quality articles only if at least 15 exist.
@@ -44,12 +53,20 @@ jobs:
           from zoneinfo import ZoneInfo
           event=os.environ.get("GITHUB_EVENT_NAME","")
           message=os.environ.get("HEAD_MESSAGE","")
-          force=event=="workflow_dispatch" or (
+          scheduler_mode=os.environ.get("SCHEDULER_MODE","").strip()
+          external_schedule=event=="workflow_dispatch" and scheduler_mode=="external_schedule"
+          force=(event=="workflow_dispatch" and not external_schedule) or (
               event=="push" and ("[run-opinion]" in message or "[refresh-opinion-concepts]" in message)
           )
           current=datetime.now(ZoneInfo("Asia/Shanghai"))
           default_day=current.date()-timedelta(days=1) if current.hour<6 else current.date()
           source_day=default_day.isoformat()
+          requested_input=os.environ.get("REQUESTED_SOURCE_DATE","").strip()
+          if requested_input:
+              parsed=datetime.strptime(requested_input,"%Y-%m-%d").date()
+              if parsed>current.date() or (current.date()-parsed).days>3:
+                  raise RuntimeError(f"source_date输入超出安全窗口: {requested_input}")
+              source_day=requested_input
           if force:
               trigger=Path("v5_data/control/opinion_fallback_trigger.json")
               if trigger.exists():
@@ -78,10 +95,12 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as handle:
               handle.write(f"should_run={'true' if should_run else 'false'}\n")
               handle.write(f"source_date={source_day}\n")
-          print(f"OPINION_PREFLIGHT source_date={source_day} complete={complete} force={force} should_run={should_run}")
+          print(f"OPINION_PREFLIGHT source_date={source_day} complete={complete} force={force} external_schedule={external_schedule} should_run={should_run}")
           PY
         env:
           HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+          SCHEDULER_MODE: ${{ inputs.scheduler_mode }}
+          REQUESTED_SOURCE_DATE: ${{ inputs.source_date }}
 
   validate:
     needs: preflight

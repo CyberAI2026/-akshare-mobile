@@ -41,7 +41,9 @@ jobs:
           from zoneinfo import ZoneInfo
 
           now_utc = datetime.now(timezone.utc)
-          today = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
+          now_cn = datetime.now(ZoneInfo("Asia/Shanghai"))
+          business_day = now_cn.date()-timedelta(days=1) if now_cn.hour<6 else now_cn.date()
+          today = business_day.isoformat()
           latest = Path("v5_data/opinion/latest.json")
           complete = False
           article_count = 0
@@ -96,16 +98,17 @@ jobs:
         run: |
           python - <<'PY'
           import json
-          from datetime import datetime
+          from datetime import datetime, timedelta
           from pathlib import Path
           from zoneinfo import ZoneInfo
 
           now = datetime.now(ZoneInfo("Asia/Shanghai"))
+          business_day = now.date()-timedelta(days=1) if now.hour<6 else now.date()
           path = Path("v5_data/control/opinion_fallback_trigger.json")
           path.parent.mkdir(parents=True, exist_ok=True)
           payload = {
               "beijing_time": now.isoformat(timespec="seconds"),
-              "source_date": now.date().isoformat(),
+              "source_date": business_day.isoformat(),
               "watchdog_stage": "retry_2130_fallback",
           }
           path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
