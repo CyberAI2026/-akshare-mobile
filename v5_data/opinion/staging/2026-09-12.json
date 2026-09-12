@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-12",
   "trade_date": "2026-09-14",
-  "updated_at_cn": "2026-09-12T20:33:43.208601+08:00",
+  "updated_at_cn": "2026-09-12T21:04:20.241588+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -27,6 +27,21 @@
       "body_chars": 2102,
       "body_sha256": "15c081b3e21aaa554a61d60545a5caf09cbea6d85425ddee1bd85771677aa002",
       "published_at_cn": "2026-09-12T20:19:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "4001f13bdc6dde83",
+      "title": "Lazybread—20260911（高位修复失败低位看重来）_lazybread_淘股吧",
+      "url": "https://www.tgb.cn/a/2v25sHWz9pP",
+      "read_count": 212,
+      "body_chars": 2866,
+      "body_sha256": "4001f13bdc6dde83255c01a8e755bf2b631aa4a1f39cc288669d2c1d9f33b5c9",
+      "published_at_cn": "2026-09-12T17:24:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -244,6 +259,106 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "4001f13bdc6dde83",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "修复"
+      ],
+      "market_summary": "作者认为高位修复失败，做空龙未止跌前应回避中高位弱转强；午后指数回暖，低位科技及区域题材出现重来迹象。",
+      "sectors": [
+        {
+          "name": "电力",
+          "stance": "活跃",
+          "evidence": "闽东电力3板，杭州热电、江苏新能等跟随，但作者称仍仅首板气氛组。"
+        },
+        {
+          "name": "电网",
+          "stance": "活跃",
+          "evidence": "鼎信通讯3板，通达股份被视为电网方向跟随。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "分化",
+          "evidence": "中新赛克2板，正和生态、风语筑等跟随，作者称发酵一般。"
+        },
+        {
+          "name": "PCB",
+          "stance": "加强",
+          "evidence": "超声电子午后2板与指数回暖共振，九鼎新材及多只PCB股被列为跟随。"
+        },
+        {
+          "name": "CPO",
+          "stance": "活跃",
+          "evidence": "作者称远望谷大单指引CPO及广东高低切，列举铭普光磁、光电股份等响应。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "红棉新赛开盘后向跌停砸，作者提示规避农业弱转强。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "捷荣技术",
+          "sector": "高位连板",
+          "role": "风险"
+        },
+        {
+          "name": "闽东电力",
+          "sector": "电力",
+          "role": "龙头"
+        },
+        {
+          "name": "鼎信通讯",
+          "sector": "电网",
+          "role": "龙头"
+        },
+        {
+          "name": "中新赛克",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "远望谷",
+          "sector": "CPO/AI智能体",
+          "role": "核心"
+        },
+        {
+          "name": "凯盛新能",
+          "sector": "光伏玻璃基板",
+          "role": "核心"
+        },
+        {
+          "name": "瑞尔特",
+          "sector": "家居",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "做空龙捷荣技术是否止跌，以及高位接力风险是否缓解",
+        "远望谷对CPO及广东高低切的指引持续性",
+        "超声电子带动的PCB科技方向能否延续"
+      ],
+      "numeric_claims": [
+        "捷荣技术低开后仍跌停，文中称为连续3个跌停",
+        "闽东电力为3板",
+        "鼎信通讯为3板",
+        "中新赛克为2板",
+        "超声电子为2板",
+        "瑞尔特为4板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
       ]
     }
   ]
