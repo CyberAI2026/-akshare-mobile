@@ -7,10 +7,13 @@ enabled = true
 
 [triggers]
 # Cloudflare cron uses UTC. Asia/Shanghai is UTC+8 and has no DST.
-# These checks run at 14:26, 14:31, and 14:35 on weekdays.
-crons = ["26 6 * * 1-5", "31 6 * * 1-5", "35 6 * * 1-5"]
+# Tail: 14:26/14:31/14:35 weekdays. Opinion mining: 20:30, every ten minutes
+# 21:00-21:50, and 22:00 daily. Opinion delivery fallback: 22:12 daily.
+crons = ["26,31,35 6 * * 1-5", "30 12 * * *", "0,10,20,30,40,50 13 * * *", "0 14 * * *", "12 14 * * *"]
 
 [vars]
 GITHUB_REPOSITORY = "CyberAI2026/-akshare-mobile"
 GITHUB_REF = "main"
 TAIL_WORKFLOW_FILE = "v5_tail_confirmation.yml"
+OPINION_WORKFLOW_FILE = "v5_market_opinion.yml"
+OPINION_DELIVERY_WORKFLOW_FILE = "v5_market_opinion_delivery.yml"
