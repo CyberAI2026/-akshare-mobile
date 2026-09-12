@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "initialized",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-12T16:28:33.466591+08:00",
@@ -32,5 +32,147 @@
   "cache_deep_ready_count": 526,
   "cache_current_count": 664,
   "cache_fallback_count": 8,
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 402,
+  "qa25": {
+    "命中或增量": 669,
+    "总数": 672,
+    "成功": 669
+  },
+  "cache25_refresh_requested": 8,
+  "cache25_current_ranked": 669,
+  "cache25_stale_deferred": 3,
+  "completed_120d_shards": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "shard_count_120d": 4,
+  "stage2_research_pool": 161,
+  "qa120": {
+    "命中或增量": 401,
+    "总数": 402,
+    "成功": 402
+  },
+  "generated_trade_date": "2026-09-11",
+  "master_count": 672,
+  "eliminated_count": 0,
+  "daily_new_count": 5,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 0,
+  "cooling_count": 0,
+  "qa250": {
+    "命中或增量": 161,
+    "总数": 161,
+    "成功": 161
+  },
+  "stage3_research_pool": 93,
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "completed_cn": "2026-09-12T16:41:52.205726+08:00",
+  "elapsed_minutes": 13.31,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 669,
+      "总数": 672,
+      "成功": 669
+    },
+    "120日": {
+      "命中或增量": 401,
+      "总数": 402,
+      "成功": 402
+    },
+    "250日": {
+      "命中或增量": 161,
+      "总数": 161,
+      "成功": 161
+    }
+  },
+  "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
+  "observation_pool_count": 1,
+  "target_trade_date": "2026-09-14",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月11日上涨604家、下跌4567家，净上涨-3963，跌停21家；主要指数20日、60日收益多数为负。研究判断：弱市退潮与风险偏好收缩未见明确扭转，次日观察应严控追涨。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [
+        {
+          "板块": "军工",
+          "文章提及数": 4,
+          "观点状态": "活跃",
+          "板块类型": "概念",
+          "当日涨跌幅%": -1.02,
+          "当日涨幅排名": 37,
+          "同类板块数": 387,
+          "净额亿元": -61.76
+        }
+      ],
+      "高关注且观点退潮": [
+        {
+          "板块": "农业",
+          "文章提及数": 9,
+          "观点状态": "退潮"
+        },
+        {
+          "板块": "消费/零售/旅游",
+          "文章提及数": 9,
+          "观点状态": "退潮"
+        },
+        {
+          "板块": "有色金属/贵金属/资源",
+          "文章提及数": 7,
+          "观点状态": "退潮"
+        },
+        {
+          "板块": "大金融",
+          "文章提及数": 5,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "AI硬件（PCB、MLCC、元件、铜缆、光通信）",
+          "文章提及数": 13,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "PCB",
+          "文章提及数": 11,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "MLCC/被动元件",
+          "文章提及数": 10,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "电力/电网",
+          "文章提及数": 10,
+          "观点状态": "活跃"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 669,
+  "stock_qa_120_success": 402,
+  "stock_qa_250_success": 161,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
