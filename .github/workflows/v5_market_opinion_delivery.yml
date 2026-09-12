@@ -36,7 +36,47 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Deliver latest same-day summary once
-        run: python research/market_opinion_mining.py --stage push
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          today = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
+          latest_path = Path("v5_data/opinion/latest.json")
+          staging_path = Path("v5_data/opinion/staging") / f"{today}.json"
+
+          latest = {}
+          if latest_path.exists():
+              latest = json.loads(latest_path.read_text(encoding="utf-8"))
+          latest_count = len(latest.get("sources", []) or [])
+          same_day_ready = str(latest.get("source_date") or "") == today and latest_count >= 15
+          if same_day_ready:
+              subprocess.run(
+                  ["python", "research/market_opinion_mining.py", "--stage", "push"],
+                  check=True,
+              )
+              raise SystemExit(0)
+
+          if staging_path.exists():
+              staging = json.loads(staging_path.read_text(encoding="utf-8"))
+              staging_count = len(staging.get("sources", []) or [])
+              if str(staging.get("source_date") or "") == today and staging_count < 15:
+                  print(
+                      f"OPINION_DELIVERY_SKIPPED source_date={today} "
+                      f"quality_articles={staging_count} minimum=15 reason=minimum_not_met"
+                  )
+                  raise SystemExit(0)
+
+          raise RuntimeError(
+              f"当天正式观点报告缺失且没有可核验的低样本staging: "
+              f"source_date={today} latest_source={latest.get('source_date')} "
+              f"latest_articles={latest_count}"
+          )
+          PY
 
   failure-alert:
     needs: deliver
