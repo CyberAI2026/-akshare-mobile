@@ -1,0 +1,7 @@
+interface:
+  display_name: "Strong Stock Opinion Discovery"
+  short_description: "淘股吧复盘发现、22点汇总与幂等推送规则"
+  default_prompt: "Use $strong-stock-opinion-discovery to inspect or operate the saved market-opinion workflow without duplicating article fetches, OpenAI calls, or PushPlus delivery."
+
+policy:
+  allow_implicit_invocation: true
