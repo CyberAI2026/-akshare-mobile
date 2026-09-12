@@ -1,6 +1,6 @@
 # V5 Market Opinion Mining — Task Checkpoint
 
-Updated: 2026-09-09 11:52 Asia/Shanghai
+Updated: 2026-09-12 17:34 Asia/Shanghai
 
 ## Goal
 
@@ -205,3 +205,53 @@ Verification and side effects:
 - Operation lock `LOCK-20260909-1238-opinion-tail-reliability`: closed after this checkpoint.
 
 Latest reliable checkpoint: the missed 2026-09-09 tail incident is recorded without fabrication, and both future watchdog prompts are hardened. The next natural production verification is the 2026-09-09 20:30–22:15 opinion cycle; the next tail-trigger verification is the following A-share trading day at 14:29–14:45.
+
+## 2026-09-11 Opinion Delay Diagnosis and Repair
+
+Incident evidence:
+
+- Primary mining run `34623365526` did not start until about 00:40 Asia/Shanghai on
+  2026-09-12, roughly 2 hours 40 minutes after the 22:00 target. The lateness was a
+  GitHub schedule delay, not a missing tag route.
+- The dedicated `#复盘` (`talkSeq=143895`) and `#每日复盘` (`talkSeq=21325`) feeds
+  found 55 candidates. Article-page publication/content validation retained 21;
+  model quality validation rejected another 4, leaving 17 formal-quality articles.
+  Seventeen was the actual qualified set, not a configured maximum.
+- Aggregation completed and PushPlus accepted one request at 00:46 Asia/Shanghai,
+  short receipt `3e5ddb03704e417b9c95cafa2211a79b`. WeChat terminal receipt remains
+  unverified. Delivery run `34624811452` later found delivery already complete.
+- Delayed fallback run `34625931241` used 2026-09-12 instead of the intended
+  2026-09-11 source date. This rollover defect could create a false new-day trigger.
+
+Completed repair at production commit
+`6dfe80b33c636e0c6f533addfa515b631b85035b`:
+
+- Full-year review-title forms such as `2026.9.11操作复盘`, `2026-9-11`, and
+  `2026/9/11` are now parsed as month 9/day 11 instead of being misread from the
+  middle of the year.
+- The delayed 21:30 fallback retains the previous business date when it starts
+  before 06:00 Asia/Shanghai.
+- Project skill `.codex/skills/strong-stock-opinion-discovery/` now persists the
+  tag IDs, article-page date/content gates, 20:30/21:00-21:50/22:00 schedule,
+  minimum-15-at-22:00 release rule, full qualified-set aggregation, source-set
+  idempotency, and separation of subjective articles from objective THS data.
+- The independent Cloudflare Worker code now covers opinion collection at 20:30,
+  every ten minutes from 21:00 through 21:50, final aggregation at 22:00, and
+  delivery fallback at 22:12. It is committed but not deployed.
+
+Acceptance:
+
+- Opinion validation run `34685913114` succeeded; preflight/validate ran, while
+  discovery, article batches, aggregate, concept-refresh, failure-alert, OpenAI, and
+  PushPlus were skipped.
+- Twenty-seven opinion/workflow tests, ten Worker tests, skill validation, YAML
+  parsing, compilation, and diff checks passed locally.
+- No 2026-09-11 replay is authorized. The existing 17-article summary and accepted
+  delivery receipt must not be duplicated.
+
+Latest reliable checkpoint: opinion code, reusable policy skill, rollover repair,
+and external-dispatch support are live at `6dfe80b33...`; no Actions are queued or
+in progress. The next incomplete action is credential-gated Cloudflare deployment,
+then acceptance of the next natural opinion cycle. Required repository secret names
+are `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and
+`TAIL_DISPATCH_GITHUB_TOKEN`; secret values must never be written to chat or Git.
