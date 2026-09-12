@@ -1,0 +1,9 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+002242,九阳股份,成功,26,sina,sina,deep-backfill,26,
+002870,香山股份,成功,26,global-cache+sina,global-cache,per-stock-incremental,19,
+600184,光电股份,成功,26,sina,sina,deep-backfill,26,
+600207,安彩高科,成功,26,sina,sina,deep-backfill,26,
+605011,杭州热电,成功,26,sina,sina,deep-backfill,26,
+605258,协和电子,成功,26,sina,sina,deep-backfill,26,
+605577,龙版传媒,成功,26,global-cache+sina,global-cache,per-stock-incremental,17,
+688432,有研硅,成功,26,global-cache+sina,global-cache,per-stock-incremental,18,
