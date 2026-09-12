@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-12 17:14 Asia/Shanghai
+Updated: 2026-09-12 17:32 Asia/Shanghai
 
 ## 2026-09-12 takeover and reliability correction checkpoint
 
@@ -49,6 +49,17 @@ Updated: 2026-09-12 17:14 Asia/Shanghai
   Ten Worker tests, 27 opinion/workflow tests, YAML parsing, compilation, and diff
   validation passed. Deployment is still blocked until the three existing GitHub
   Actions secrets are configured and one `DEPLOY` run is explicitly performed.
+- PR `#6` was squash-merged into production as
+  `6dfe80b33c636e0c6f533addfa515b631b85035b`. Opinion validation run
+  `34685913114` succeeded with only preflight/validate; discovery, article batches,
+  aggregation, concept refresh, failure alert, OpenAI, and PushPlus were all skipped.
+  THS public-sector checks `34685876806` and `34685913120` succeeded. Official
+  market-count checks `34685876803` and `34685913122` failed without retry because
+  both full-market snapshot candidates were unavailable: Eastmoney closed both
+  connections and Sina timed out twice. Their saved artifacts show index histories,
+  Legulegu cross-check, and Eastmoney limit/failed-limit pools succeeded; this is a
+  non-blocking upstream snapshot acceptance issue, not evidence of a regression in
+  the ST, opinion, or scheduler changes. No Actions remain queued or in progress.
 - 2026-09-11 tail diagnosis: scheduled runs `34595324289`, `34595459197`, and
   `34595713585` did trigger, but GitHub did not start their prechecks until
   19:43/19:45/19:48 Asia/Shanghai. The safe-time gate correctly refused to fabricate
@@ -65,10 +76,10 @@ Updated: 2026-09-12 17:14 Asia/Shanghai
 - Current reliable checkpoint: ST hard-rule/current-pool cleanup is closed at local
   commit `8abdea55...`; opinion parser and reusable project skill are closed at
   `3de06443...`; scheduler expansion and rollover repair are closed at
-  `0976d501...`. No production push, live article fetch, OpenAI request, PushPlus
-  request, or Cloudflare deployment has occurred in this correction. Next unit is
-  remote PR/merge with validation-only Actions, followed by credential-gated
-  Cloudflare deployment and natural-cycle acceptance.
+  `0976d501...`, and all three units are live at production commit `6dfe80b33...`.
+  No live article fetch, OpenAI request, PushPlus request, historical replay, or
+  Cloudflare deployment occurred in this correction. Next unit is credential-gated
+  Cloudflare deployment, health/cron verification, and natural-cycle acceptance.
 
 ## Overall goal
 
