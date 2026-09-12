@@ -366,3 +366,32 @@ run and natural-cycle acceptance.
   model evidence, API receipt, feedback refresh, and artifact are all durable at
   `42f887f2b4a99b586ea6b0d3ee4670590bf8ed9f`. No after-close recovery write lock or
   rerun remains active.
+
+
+## Cloudflare Scheduler Deployment — 2026-09-12
+
+- Operation lock `LOCK-20260909-cloudflare-ci-deploy` was resumed by the authorized
+  current maintenance account after verifying production main
+  `4e4a62c6a54b66faeae350d699c53e360f0031f7`, assets main
+  `3ede4b8deb9c8e77bd3add81a379e629fe1254f7`, and zero queued/in-progress Actions.
+- The user confirmed the three required repository Actions secrets were configured.
+  Secret values were never read, displayed, written to chat, or committed.
+- Exactly one deployment was dispatched: workflow run `34687460024`, job
+  `103536842683`, event `workflow_dispatch`, conclusion `success`.
+- The required-secret check succeeded, all 10 scheduler tests passed, and Cloudflare
+  created and deployed Worker `strong-stock-tail-dispatcher`.
+- Worker version: `3d3a16b4-26cf-49fc-ab4d-3888c7d457bf`.
+- Health endpoint returned
+  `{"status":"ok","timezone":"Asia/Shanghai","workflows":["tail","opinion","opinion-delivery"]}`.
+- Active UTC cron triggers: `26,31,35 6 * * 1-5` (14:26/14:31/14:35 Shanghai
+  weekday tail dispatch); `30 12 * * *` (20:30 opinion); `0,10,20,30,40,50 13 * * *`
+  (21:00-21:50 opinion accumulation); `0 14 * * *` (22:00 opinion finalization);
+  `12 14 * * *` (22:12 delivery fallback).
+- No OpenAI or PushPlus call occurred during deployment. No stock-selection,
+  observation-pool, position, capital, stop-loss, or take-profit rule changed.
+- Idempotency checkpoint: do not repeat deployment run `34687460024`. The next
+  acceptance units are the next natural opinion cycle and the next A-share trading
+  day's natural tail cycle. API request acceptance remains distinct from terminal
+  WeChat receipt.
+- Lock status: `LOCK-20260909-cloudflare-ci-deploy` closed after successful
+  deployment and health verification.
