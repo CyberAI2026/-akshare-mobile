@@ -1,0 +1,4 @@
+source_date=2026-09-12
+purpose=verify_below_15_delivery_skip
+expected_action=no_pushplus
+fix_commit=fb8d696e9c7d0b68953c34c03932a3e20add8cb4
