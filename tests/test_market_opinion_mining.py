@@ -124,6 +124,13 @@ class OpinionSectorGroupingTests(unittest.TestCase):
         self.assertTrue(title_review_date_matches("9月3日主题复盘", target))
         self.assertTrue(title_review_date_matches("退潮期空仓！附9.4明日市场核心策略", target))
 
+    def test_full_year_separator_review_titles_use_month_and_day(self):
+        target = date(2026, 9, 11)
+        self.assertTrue(title_review_date_matches("2026.9.11操作复盘", target))
+        self.assertTrue(title_review_date_matches("2026-9-11 市场复盘", target))
+        self.assertTrue(title_review_date_matches("2026/9/11情绪复盘", target))
+        self.assertFalse(title_review_date_matches("2026.9.10操作复盘", target))
+
     def test_source_date_override_is_bounded_for_recovery(self):
         cn=ZoneInfo("Asia/Shanghai")
         with patch.dict(opinion.os.environ,{"OPINION_SOURCE_DATE_OVERRIDE":"2026-09-08"},clear=False):
