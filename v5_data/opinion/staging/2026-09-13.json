@@ -1,9 +1,24 @@
 {
   "source_date": "2026-09-13",
   "trade_date": "2026-09-14",
-  "updated_at_cn": "2026-09-13T21:09:10.004704+08:00",
+  "updated_at_cn": "2026-09-13T22:08:16.082228+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
+    {
+      "article_id": "0b1ec8b4a91a1194",
+      "title": "注意指数二次探底！_98DoReMi_淘股吧",
+      "url": "https://www.tgb.cn/a/2v3NL41Mo6N",
+      "read_count": 135,
+      "body_chars": 1844,
+      "body_sha256": "0b1ec8b4a91a11946213a3a0def233f2c9a2a3a74ff2d40e9a15df9b23717ee1",
+      "published_at_cn": "2026-09-13T18:12:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
     {
       "article_id": "0c20e1dc907333b2",
       "title": "9月13日周复盘｜下周展望:变盘加速向下的意图，难道真去3650点?_情绪流猛男_淘股吧",
@@ -141,6 +156,106 @@
     }
   ],
   "article_mining": [
+    {
+      "article_id": "0b1ec8b4a91a1194",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数仍有回调及二次探底需求，周五午后拉升透支修复预期；农业退潮，科技细分相对走强但中间位置博弈价值低。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业是弱修复，已看退潮，操作难度很大。"
+        },
+        {
+          "name": "科技",
+          "stance": "活跃",
+          "evidence": "作者称盘中细分科技走强，并计划平铺科技强分支。"
+        },
+        {
+          "name": "PCB",
+          "stance": "分化",
+          "evidence": "作者认为超声电子需加速表态，协和电子或高斯贝尔需有一只顶一字。"
+        },
+        {
+          "name": "光模块",
+          "stance": "分化",
+          "evidence": "作者称铭普光磁周一预期弱于PCB，预期冲高离场。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "中粮科技",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "华工科技",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "剑桥科技",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "光电股份",
+          "sector": "光纤",
+          "role": "高关注"
+        },
+        {
+          "name": "华脉科技",
+          "sector": "科技",
+          "role": "高关注"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "协和电子",
+          "sector": "PCB",
+          "role": "龙头"
+        },
+        {
+          "name": "高斯贝尔",
+          "sector": "PCB",
+          "role": "高关注"
+        },
+        {
+          "name": "集泰股份",
+          "sector": "科技",
+          "role": "核心"
+        },
+        {
+          "name": "铭普光磁",
+          "sector": "光模块",
+          "role": "龙头"
+        },
+        {
+          "name": "风华高科",
+          "sector": "MLCC",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数是否二次探底至3850附近，或直接突破3996",
+        "PCB方向超声电子能否加速表态，协和电子或高斯贝尔能否走强",
+        "农业退潮及科技细分修复持续性"
+      ],
+      "numeric_claims": [
+        "作者提及指数等待3850附近位置",
+        "作者提及3996为右侧买点",
+        "作者提及盘中指数快速下杀至3870-3850附近"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
     {
       "article_id": "0c20e1dc907333b2",
       "market_stance": "偏空",
