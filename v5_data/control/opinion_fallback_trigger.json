@@ -1,5 +1,5 @@
 {
-  "beijing_time": "2026-09-13T21:04:12+08:00",
+  "beijing_time": "2026-09-13T22:04:00+08:00",
   "source_date": "2026-09-13",
-  "watchdog_stage": "retry_2102_fallback"
+  "watchdog_stage": "deadline_final_fallback"
 }
