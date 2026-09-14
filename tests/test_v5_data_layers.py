@@ -3,6 +3,7 @@ import sys
 import os
 import tempfile
 import base64
+import io
 from pathlib import Path
 from unittest.mock import MagicMock
 from datetime import date, datetime
@@ -18,6 +19,33 @@ sys.modules.setdefault("openai",MagicMock())
 import v5_core as core
 import v5_cli as cli
 from research import market_opinion_mining as opinion
+
+
+class StockPoolUploadTests(unittest.TestCase):
+    def test_name_only_xlsx_resolves_registered_old_name_without_network(self):
+        source = pd.DataFrame({"    名称": ["贵州三力", "剑桥科技"]})
+        buf = io.BytesIO()
+        source.to_excel(buf, index=False, engine="openpyxl")
+        with patch.object(core.ak, "stock_info_a_code_name", side_effect=AssertionError("must stay local")), \
+             patch.object(core.ak, "stock_zh_a_spot_em", side_effect=AssertionError("must stay local")):
+            result = core.pool_from_upload("Table.xlsx", buf.getvalue())
+        self.assertEqual(result["股票代码"].tolist(), ["603439", "603083"])
+        self.assertEqual(result["股票名称"].tolist(), ["三力制药", "剑桥科技"])
+
+    def test_name_normalization_handles_fullwidth_ascii_and_internal_spaces(self):
+        source = pd.DataFrame({"名称": ["万科A"]})
+        with patch.object(core.ak, "stock_info_a_code_name", side_effect=AssertionError("must stay local")), \
+             patch.object(core.ak, "stock_zh_a_spot_em", side_effect=AssertionError("must stay local")):
+            result = core.pool_from_dataframe(source)
+        self.assertEqual(result.iloc[0]["股票代码"], "000002")
+        self.assertEqual(result.iloc[0]["股票名称"], "万 科Ａ")
+
+    def test_unregistered_name_is_rejected_instead_of_guessed(self):
+        source = pd.DataFrame({"名称": ["不存在的近似股票名"]})
+        with patch.object(core.ak, "stock_info_a_code_name", side_effect=RuntimeError("offline")), \
+             patch.object(core.ak, "stock_zh_a_spot_em", side_effect=RuntimeError("offline")):
+            with self.assertRaisesRegex(ValueError, "无法唯一匹配代码"):
+                core.pool_from_dataframe(source)
 
 
 class MasterPoolHardRuleTests(unittest.TestCase):
