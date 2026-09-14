@@ -2,6 +2,38 @@
 
 Updated: 2026-09-12 17:32 Asia/Shanghai
 
+## 2026-09-14 upload recovery checkpoint
+
+- Active operation lock: `LOCK-20260914-upload-name-resolution-recovery`.
+- Baseline production main: `d4d563ec07bf1a29ae60e67b43895ffa6c2ab9fe`;
+  assets main: `3ede4b8deb9c8e77bd3add81a379e629fe1254f7`; zero queued or
+  in-progress Actions at acquisition.
+- User workbook `Table.xlsx` is a valid OOXML workbook with one 73-row sheet
+  (one header plus 72 stocks) and 60 columns. It contains stock names but no stock
+  code column; the previous rejection is therefore a name-resolution failure, not
+  a corrupt-file failure.
+- The current code-name master resolves 71 names uniquely. The remaining input
+  `贵州三力` is the former name of code `603439`, whose registered current short
+  name is `三力制药`; the code remained unchanged. No input row is an ST stock and
+  no duplicate name was found.
+- Current unit: add deterministic Unicode/whitespace name normalization, a reviewed
+  historical-short-name registry, and offline upload regression tests. This is an
+  engineering reliability change only; screening and trading rules are unchanged.
+- No OpenAI or PushPlus call has occurred in this operation. No 2026-09-14 daily
+  batch has been committed or dispatched yet.
+- Reliable resume point: workbook structure and 71 current-name mappings are
+  verified; resume with local tests, then generate the 72-row canonical CSV.
+- Extraction unit completed locally: the repaired offline parser produced 72
+  unique A-share codes, zero indices, zero duplicates, and zero ST rows. The only
+  historical-name conversion is `贵州三力 -> 603439 三力制药`.
+- Source workbook SHA-256:
+  `5626f2ee5289233282d5123a4eca3d1df394dc7d0d8e31db53994ede0f4253be`.
+  Canonical CSV SHA-256:
+  `a9fda869cd2c44ce8114de3973146c0804d4c3817165f258de02d3790b1a61d7`.
+- Three focused upload tests and Python compilation passed. Next resume point:
+  run the complete data-layer test module, commit the engineering-only patch, and
+  verify it before any daily-batch production commit.
+
 ## 2026-09-12 takeover and reliability correction checkpoint
 
 - Read-only takeover baseline: production `main`

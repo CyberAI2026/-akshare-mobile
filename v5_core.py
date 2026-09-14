@@ -8,6 +8,7 @@ import random
 import re
 import signal
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -114,10 +115,39 @@ def _find_col(columns: Iterable[str], aliases: list[str]) -> str | None:
     return None
 
 
+def _norm_stock_name(value: object) -> str:
+    """生成仅用于确定性匹配的简称键；不做同音、包含或编辑距离猜测。"""
+    if value is None or (isinstance(value, float) and np.isnan(value)):
+        return ""
+    text = unicodedata.normalize("NFKC", str(value))
+    return re.sub(r"\s+", "", text).upper()
+
+
+def _name_lookup(tables: list[pd.DataFrame]) -> tuple[dict[str, str], dict[str, str]]:
+    """只保留名称键到代码唯一的记录，并返回代码对应的优先正式简称。"""
+    if not tables:
+        return {}, {}
+    master = pd.concat(tables, ignore_index=True)
+    master["股票代码"] = master["股票代码"].map(_norm_code)
+    master["股票名称"] = master["股票名称"].astype(str).str.strip()
+    master["名称键"] = master["股票名称"].map(_norm_stock_name)
+    master = master[
+        master["股票代码"].str.fullmatch(r"\d{6}", na=False)
+        & master["名称键"].ne("")
+    ].drop_duplicates(["名称键", "股票代码"])
+    codes_by_name = master.groupby("名称键", sort=False)["股票代码"].agg(
+        lambda values: list(dict.fromkeys(values))
+    )
+    code_map = {name: codes[0] for name, codes in codes_by_name.items() if len(codes) == 1}
+    canonical = master.drop_duplicates("股票代码", keep="first").set_index("股票代码")["股票名称"].to_dict()
+    return code_map, canonical
+
+
 def _resolve_codes_by_name(names: pd.Series) -> pd.DataFrame:
     """为只有股票名称的行情软件导出表补全A股代码；歧义或缺失时拒绝静默猜测。"""
     requested = names.astype(str).str.strip()
     requested = requested[requested.ne("") & requested.ne("nan")].drop_duplicates()
+    requested_keys = requested.map(_norm_stock_name)
     sources = [
         ("stock_info_a_code_name", lambda: ak.stock_info_a_code_name()),
         ("stock_zh_a_spot_em", lambda: ak.stock_zh_a_spot_em()),
@@ -150,7 +180,47 @@ def _resolve_codes_by_name(names: pd.Series) -> pd.DataFrame:
                 break
         except Exception as e:
             errors.append(f"local_code_name:{type(e).__name__}:{e}")
+
+    # 历史简称必须显式登记代码和当前简称，禁止用模糊相似度猜测。这样既能兼容
+    # 行情软件未更新的简称，也不会把同名或近似名称静默映射到错误证券。
+    alias_candidates = [
+        Path("v5_data/reference/a_share_name_aliases.csv"),
+        Path(__file__).resolve().parent / "v5_data/reference/a_share_name_aliases.csv",
+    ]
+    for alias_path in alias_candidates:
+        if not alias_path.exists():
+            continue
+        try:
+            raw = pd.read_csv(alias_path, dtype=str, encoding="utf-8-sig")
+            alias_col = _find_col(raw.columns, ["历史名称", "曾用名", "旧名称", "alias"])
+            code_col = _find_col(raw.columns, ["股票代码", "证券代码", "代码", "code", "symbol"])
+            current_col = _find_col(raw.columns, ["当前名称", "股票名称", "证券简称", "名称", "name"])
+            if alias_col is None or code_col is None or current_col is None:
+                raise RuntimeError(f"历史简称表字段异常: {list(raw.columns)}")
+            aliases = pd.DataFrame({
+                "股票代码": raw[code_col].map(_norm_code),
+                "股票名称": raw[alias_col].astype(str).str.strip(),
+            })
+            current_names = pd.DataFrame({
+                "股票代码": raw[code_col].map(_norm_code),
+                "股票名称": raw[current_col].astype(str).str.strip(),
+            })
+            aliases = pd.concat([current_names, aliases], ignore_index=True)
+            aliases = aliases[
+                aliases["股票代码"].str.fullmatch(r"\d{6}", na=False)
+                & aliases["股票名称"].map(_norm_stock_name).ne("")
+            ]
+            if not aliases.empty:
+                tables.append(aliases)
+                break
+        except Exception as e:
+            errors.append(f"local_name_alias:{type(e).__name__}:{e}")
+
+    code_map, canonical_by_code = _name_lookup(tables)
+    unresolved_keys = {key for key in requested_keys if key not in code_map}
     for source, fetcher in sources:
+        if not unresolved_keys:
+            break
         try:
             raw = fetcher()
             if raw is None or raw.empty:
@@ -165,23 +235,22 @@ def _resolve_codes_by_name(names: pd.Series) -> pd.DataFrame:
             })
             x = x[x["股票代码"].str.fullmatch(r"\d{6}", na=False) & x["股票名称"].ne("")]
             tables.append(x)
+            code_map, canonical_by_code = _name_lookup(tables)
+            unresolved_keys = {key for key in requested_keys if key not in code_map}
         except Exception as e:
             errors.append(f"{source}:{type(e).__name__}:{e}")
     if not tables:
         raise ValueError("文件只有股票名称，但在线代码—名称表获取失败：" + " | ".join(errors))
 
-    master = pd.concat(tables, ignore_index=True).drop_duplicates()
-    ambiguous = set(master.loc[master["股票名称"].duplicated(keep=False), "股票名称"])
-    master = master[~master["股票名称"].isin(ambiguous)].drop_duplicates("股票名称")
-    code_map = master.set_index("股票名称")["股票代码"]
-    missing = [name for name in requested if name not in code_map.index]
+    code_map, canonical_by_code = _name_lookup(tables)
+    missing = [name for name, key in zip(requested, requested_keys) if key not in code_map]
     if missing:
         shown = "、".join(missing[:12])
         more = f"等共{len(missing)}只" if len(missing) > 12 else ""
         raise ValueError(f"仅有名称的文件中有股票无法唯一匹配代码：{shown}{more}。请补充代码后重试。")
     return pd.DataFrame({
-        "股票代码": [code_map[name] for name in requested],
-        "股票名称": list(requested),
+        "股票代码": [code_map[key] for key in requested_keys],
+        "股票名称": [canonical_by_code.get(code_map[key], name) for name, key in zip(requested, requested_keys)],
     }).reset_index(drop=True)
 
 
