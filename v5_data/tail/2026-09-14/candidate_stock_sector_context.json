@@ -1,0 +1,38 @@
+{
+  "status": "available",
+  "stocks": [
+    {
+      "股票代码": "603261",
+      "股票名称": "立航科技",
+      "主导板块候选": "大飞机",
+      "全部概念": [
+        "大飞机"
+      ],
+      "归因得分": 58.8894,
+      "归因证据": "concept_now第138/387（净额=-9.8）；concept_3d第66/387（净额=6.07）；concept_5d第229/387（净额=-18.59）；concept_10d第250/387（净额=-27.32）",
+      "快照日期": "2026-09-05",
+      "强势观察日期": "2026-09-02",
+      "时点一致": false,
+      "时点限制": "现有成分快照与强势观察日不同，不得倒推为历史确定归因",
+      "同花顺概念指数客观行情": [],
+      "板块共振状态": "概念已映射但同期行情未核验",
+      "同期概念行情数": 0,
+      "板块证据说明": "板块行情只作交叉验证；无同期客观行情时不得写成板块共振"
+    }
+  ],
+  "concept_index_summary": {
+    "status": "unavailable",
+    "asof_date": "2026-09-11",
+    "items": [],
+    "note": "客观指数数据与文章观点分开记录。",
+    "matched_concepts": 1,
+    "failed_concepts": 1,
+    "errors": [
+      "大飞机:TypeError:'NoneType' object is not subscriptable"
+    ],
+    "candidate_stock_count": 1,
+    "covered_stock_count": 0,
+    "stock_coverage_pct": 0.0
+  },
+  "method": "股票代码→行业/多概念映射→同花顺概念指数1日/5日客观行情；板块归因是可审计关联，不声称确定因果"
+}
