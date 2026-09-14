@@ -1192,7 +1192,8 @@ def openai_analyze(
     errors = []
     completed_ok = False
     attempts_used = 0
-    # 结构化输出保证契约；保留一次重试处理传输中断或达到输出上限。
+    # 结构化输出保证契约；只对可能瞬时恢复的错误重试一次。达到输出上限是
+    # 确定性的契约/体积错误，重复同一请求只会重复计费，必须交给上层缩小输出。
     for attempt in range(1, 3):
         attempts_used = attempt
         try:
@@ -1209,6 +1210,12 @@ def openai_analyze(
             break
         except Exception as exc:
             errors.append(f"attempt={attempt}:{type(exc).__name__}:{exc}")
+            details = getattr(resp, "incomplete_details", None) if resp is not None else None
+            if (
+                str(getattr(resp, "status", "") or "") == "incomplete"
+                and str(getattr(details, "reason", "") or "") == "max_output_tokens"
+            ):
+                break
     usage = getattr(resp, "usage", None)
     input_tokens = getattr(usage, "input_tokens", None) if usage else None
     output_tokens = getattr(usage, "output_tokens", None) if usage else None
@@ -1252,7 +1259,7 @@ def openai_analyze(
         )
     if not completed_ok:
         raise RuntimeError(
-            "OpenAI连续两次未返回完整合法JSON；" + " | ".join(errors)
+            "OpenAI未返回完整合法JSON；" + " | ".join(errors)
         )
     return text
 

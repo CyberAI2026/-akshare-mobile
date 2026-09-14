@@ -649,7 +649,7 @@ def _parse_json_object(text: str) -> dict:
 
 
 def _after_close_response_schema() -> dict:
-    """盘后研究的严格输出契约；所有逐股证据必须显式返回。"""
+    """盘后研究的严格输出契约；详细证据只随最多10只SELECT线性增长。"""
     text_field = {"type": "string"}
     return {
         "type": "object",
@@ -684,7 +684,7 @@ def _after_close_response_schema() -> dict:
                     "properties": {
                         "股票代码": text_field,
                         "股票名称": text_field,
-                        "decision": {"type": "string", "enum": ["SELECT", "WAIT", "REJECT"]},
+                        "decision": {"type": "string", "enum": ["SELECT"]},
                         "priority": {"type": "integer"},
                         "confidence_level": {"type": "string", "enum": ["低", "中", "高"]},
                         "evidence": text_field,
@@ -704,15 +704,85 @@ def _after_close_response_schema() -> dict:
                     ],
                     "additionalProperties": False,
                 },
+                "maxItems": 10,
+            },
+            "nonselected": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "股票代码": text_field,
+                        "decision": {"type": "string", "enum": ["WAIT", "REJECT"]},
+                        "reason_code": {
+                            "type": "string",
+                            "enum": [
+                                "STRUCTURE_NOT_MATURE", "MID_TERM_TREND_WEAK",
+                                "OVERHEATED", "SECTOR_WEAK_OR_UNVERIFIED",
+                                "EVIDENCE_INSUFFICIENT", "LOWER_PRIORITY",
+                            ],
+                        },
+                    },
+                    "required": ["股票代码", "decision", "reason_code"],
+                    "additionalProperties": False,
+                },
             },
             "portfolio_note": text_field,
         },
         "required": [
             "market_assessment", "sector_assessment", "opinion_assessment",
-            "selected_codes", "decisions", "portfolio_note",
+            "selected_codes", "decisions", "nonselected", "portfolio_note",
         ],
         "additionalProperties": False,
     }
+
+
+def _validate_after_close_result(result: dict, allowed: set[str]) -> tuple[list[str], dict[str, dict]]:
+    """验证紧凑模型输出完整覆盖输入，同时仅让SELECT携带详细长文本。"""
+    selected = [str(x).zfill(6) for x in result.get("selected_codes", []) if str(x).strip()]
+    if len(selected) != len(set(selected)):
+        raise ValueError("OpenAI selected_codes存在重复代码")
+    if len(selected) > 10:
+        raise ValueError(f"OpenAI选择了{len(selected)}只，超过10只上限")
+    bad = [code for code in selected if code not in allowed]
+    if bad:
+        raise ValueError(f"OpenAI选择了输入候选之外的代码: {bad}")
+
+    decisions = result.get("decisions", [])
+    if not isinstance(decisions, list):
+        raise ValueError("OpenAI decisions不是数组")
+    decision_by_code: dict[str, dict] = {}
+    for decision in decisions:
+        if not isinstance(decision, dict):
+            continue
+        code = str(decision.get("股票代码", "")).zfill(6)
+        if code in decision_by_code:
+            raise ValueError(f"OpenAI decisions存在重复代码: {code}")
+        if code in allowed:
+            decision_by_code[code] = decision
+    if set(decision_by_code) != set(selected):
+        raise ValueError("OpenAI decisions必须且只能详细覆盖selected_codes")
+
+    nonselected = result.get("nonselected", [])
+    if not isinstance(nonselected, list):
+        raise ValueError("OpenAI nonselected不是数组")
+    nonselected_codes: list[str] = []
+    for outcome in nonselected:
+        if not isinstance(outcome, dict):
+            continue
+        code = str(outcome.get("股票代码", "")).zfill(6)
+        if code in nonselected_codes:
+            raise ValueError(f"OpenAI nonselected存在重复代码: {code}")
+        nonselected_codes.append(code)
+    bad_nonselected = sorted(set(nonselected_codes) - allowed)
+    if bad_nonselected:
+        raise ValueError(f"OpenAI nonselected包含输入候选之外的代码: {bad_nonselected[:8]}")
+    overlap = sorted(set(nonselected_codes) & set(selected))
+    if overlap:
+        raise ValueError(f"OpenAI selected与nonselected重复: {overlap[:8]}")
+    missing = sorted(allowed - set(selected) - set(nonselected_codes))
+    if missing:
+        raise ValueError(f"OpenAI紧凑结果未覆盖全部输入候选，缺少{len(missing)}只: {missing[:8]}")
+    return selected, decision_by_code
 
 
 def next_trade_day(d):
@@ -1004,6 +1074,10 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             "turnover_assessment":"近5日换手及相对前10日是收敛/稳定/扩张/未核验",
             "sector_resonance":"同期共振/分化/退潮/独立个股/未核验，并列明行业或概念"
         }],
+        "nonselected":[{
+            "股票代码":"6位代码","decision":"WAIT/REJECT",
+            "reason_code":"STRUCTURE_NOT_MATURE/MID_TERM_TREND_WEAK/OVERHEATED/SECTOR_WEAK_OR_UNVERIFIED/EVIDENCE_INSUFFICIENT/LOWER_PRIORITY"
+        }],
         "portfolio_note":"只描述观察池层面的风险偏好，不给最终买入仓位"
     }
     opinion_context = load_market_opinion_context(generated_trade_date)
@@ -1022,7 +1096,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
             "selected_codes只能来自candidates，最多10只，可以0只；实际持仓已经在进入模型前排除，严禁从输入外补入",
-            "decisions应覆盖全部输入候选；SELECT必须与selected_codes一致",
+            "decisions只详细覆盖selected_codes且最多10条；nonselected用代码、WAIT/REJECT和固定reason_code紧凑覆盖其余全部候选，不得遗漏或重复",
             "逐股文字保持简洁，每个判断字段只写一项结论和对应数值/板块名，避免重复叙述导致输出截断",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
@@ -1047,25 +1121,8 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
     (base/"ai"/"openai_raw.txt").parent.mkdir(parents=True,exist_ok=True)
     (base/"ai"/"openai_raw.txt").write_text(raw,encoding="utf-8")
     result=_parse_json_object(raw)
-    selected=[str(x).zfill(6) for x in result.get("selected_codes",[]) if str(x).strip()]
-    if len(selected)!=len(set(selected)):
-        raise ValueError("OpenAI selected_codes存在重复代码")
-    if len(selected)>10:
-        raise ValueError(f"OpenAI选择了{len(selected)}只，超过10只上限")
-    bad=[x for x in selected if x not in allowed]
-    if bad:
-        raise ValueError(f"OpenAI选择了输入候选之外的代码: {bad}")
+    selected,decision_by_code=_validate_after_close_result(result,allowed)
     decisions=result.get("decisions",[])
-    if not isinstance(decisions,list):
-        raise ValueError("OpenAI decisions不是数组")
-    decision_by_code={}
-    for d in decisions:
-        if not isinstance(d,dict): continue
-        code=str(d.get("股票代码","")).zfill(6)
-        if code in allowed: decision_by_code[code]=d
-    missing=sorted(allowed-set(decision_by_code))
-    if missing:
-        raise ValueError(f"OpenAI decisions未覆盖全部输入候选，缺少{len(missing)}只: {missing[:8]}")
     required_dimensions=["confidence_level","structure_assessment","volume_assessment","amplitude_assessment","turnover_assessment","sector_resonance"]
     for code in list(selected):
         decision=decision_by_code[code]
