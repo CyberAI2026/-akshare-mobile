@@ -1,6 +1,6 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-12 17:32 Asia/Shanghai
+Updated: 2026-09-14 21:00 Asia/Shanghai
 
 ## 2026-09-14 upload recovery checkpoint
 
@@ -80,6 +80,52 @@ Updated: 2026-09-12 17:32 Asia/Shanghai
   after-close-stage, and data-layer tests passed; all external calls in tests were
   mocked. Next resume point: commit this engineering-only unit, verify PR checks,
   merge, then recheck main/Actions/delivery state before one failed-job rerun.
+
+## 2026-09-14 upload and after-close recovery completion
+
+- Upload resolver fix merged in PR `#9` as
+  `c41d7bbd51129764e2d5559f185414478b2e5ae0`. Name-only XLSX/XLS/CSV
+  uploads now use deterministic Unicode/whitespace normalization plus an audited
+  former-name registry. The supplied 72-row workbook is fully resolved; former name
+  `贵州三力` maps to unchanged code `603439` and current name `三力制药`.
+- Atomic daily batch commit:
+  `7f0c1beca1a8085965d44c4348146e9164731a33`. It produced exactly one
+  after-close run, `34843004136`, with saved folder `20260914_202417`.
+  Active pool 681; current 25-session evidence 680; stale/deferred 1; stage1 408;
+  stage2 172; stage3 114.
+- Initial AI attempt failed because the old schema required long-form detail for all
+  114 candidates. Two identical calls reached 20,000 output tokens; no valid JSON,
+  observation pool, or formal recommendation delivery was created. The last
+  incomplete response ID is
+  `resp_05559ecc2fbda243006aa7ead3b21887d29020aac99c0694d3`.
+- Failure notifications: the AI job persisted PushPlus receipt
+  `19770984aa494676bc4acbc5b5be3cf4`; the workflow-level alert also succeeded
+  without a persisted receipt and may have produced a second alert. These alerts
+  must not be replayed. This known duplicate-failure-alert path remains a separate
+  engineering follow-up.
+- Compact-output recovery merged in PR `#10` as
+  `b017a914625cf435b37f9a057b0ff50675abf85a`. It keeps all candidates and
+  the 0-10 observation cap, retains full evidence for SELECT rows, compactly audits
+  every non-selected code, and prevents a deterministic max-output response from
+  being retried unchanged. Forty-eight local tests passed; GitHub deterministic
+  checks passed. No screening or trading rule changed.
+- Only failed AI job `103976139300` was rerun. Workflow attempt 2 completed
+  successfully; every pre-AI stage reused its saved success state. OpenAI made one
+  successful call: response
+  `resp_0c77cd657702875d006aa7eea8b9e887d18b69f19c7f99401c`,
+  171,555 input tokens, 3,769 output tokens, 175,324 total.
+- Final observation pool for target trade date 2026-09-15 contains one conditional
+  watch: `603980 吉华集团`. It remains a 14:40-14:45 confirmation candidate,
+  not a direct buy instruction. Formal PushPlus request was accepted once with
+  receipt `aaef2c82591143b490fbe1a2816e5b32`; terminal WeChat delivery is
+  unverified.
+- Completion main before this checkpoint commit:
+  `9880a5bd6b27abf5a89616b47d95891757e76102`. Run `34843004136`
+  conclusion is success, feedback refresh succeeded with no delivery, failure alert
+  skipped on attempt 2, and zero Actions are queued or in progress.
+- Operation lock `LOCK-20260914-upload-name-resolution-recovery`: closed by this
+  checkpoint. Do not rerun the batch, AI job, or PushPlus delivery. The next natural
+  production acceptance is the 2026-09-15 14:40-14:45 tail cycle.
 
 ## 2026-09-12 takeover and reliability correction checkpoint
 
