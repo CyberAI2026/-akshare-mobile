@@ -1,0 +1,609 @@
+{
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月14日全市场上涨3125家、涨停55家，较此前极弱宽度明显修复；但上证、深成指、创业板指及科创50的5日、20日、60日收益均为负，且当日成交额较前一记录下降12.3%。研究判断：修复日下的中期指数压力仍在，强势股次日延续需严格验证。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "元件、医疗服务、化学制药等当日走强，PCB、MLCC及元件存在多周期资金与涨幅支持；但候选的个股板块归因多数无同期概念指数行情核验，不能据此确认个股板块共振。"
+  },
+  "opinion_assessment": {
+    "status": "未启用",
+    "summary": "公开复盘正文挖掘数据状态为stale，来源日期为9月11日，与当前行情日期不一致；不作为本次筛选依据。"
+  },
+  "selected_codes": [
+    "603980"
+  ],
+  "decisions": [
+    {
+      "股票代码": "603980",
+      "股票名称": "吉华集团",
+      "decision": "SELECT",
+      "priority": 1,
+      "confidence_level": "低",
+      "evidence": "计算事实：振幅收敛比0.387、成交量收敛比0.997、换手率收敛比0.912，三类整理证据齐备；MA5、MA10三日斜率分别为2.45%、4.14%，短期下行停止；ret10为13.33%，中期趋势仍活；距稳健5日上沿-0.37%，处于核心区。",
+      "risk": "市场中期指数仍弱；基础化工仅行业映射，个股同期板块共振未核验；MA20距离11.35%，若再快速拉升则转为追高风险。；缺少同期板块客观行情，保留为条件观察，待14:40-14:45核验",
+      "next_day_watch": "14:40-14:45确认价格能否维持稳健5日上沿附近或有效突破，且成交量、换手不出现无承接的异常扩张；若跌回整理区内部则不跟踪启动。",
+      "structure_assessment": "前期25日内1次涨停；整理收敛较充分，MA5/MA10下行已停止，距稳健5日上沿-0.37%。",
+      "volume_assessment": "近5日均量6365万，较前10日6386万基本稳定，收敛比0.997。",
+      "amplitude_assessment": "近5日振幅12.16%，相对前10日区间振幅31.41%收敛，收敛比0.387。",
+      "turnover_assessment": "近5日平均换手8.60%，较前10日9.43%收敛，收敛比0.912。",
+      "sector_resonance": "未核验：基础化工仅行业映射，缺少该股同期概念指数行情。"
+    }
+  ],
+  "nonselected": [
+    {
+      "股票代码": "002141",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "600228",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "603221",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "301282",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "600186",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "600330",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "603261",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "603880",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "688209",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002774",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002916",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "301529",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "603228",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603679",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300929",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603150",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "688485",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002536",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "003018",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "301151",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600857",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603082",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "603083",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603110",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603269",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "603989",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000962",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002436",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300142",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300679",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "301060",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603236",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603938",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "688378",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "688662",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002687",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "301419",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "600353",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600641",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600105",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600367",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600488",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "601208",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002107",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "002421",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002645",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002859",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600487",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "001268",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002589",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002907",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002975",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000526",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000831",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "001258",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002281",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002354",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002491",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002638",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002947",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002951",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002963",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300333",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300570",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "301127",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "301630",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600110",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600378",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600379",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600508",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600667",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "601700",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603629",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603637",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000859",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "688152",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "000720",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "600654",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603400",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002015",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002918",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "300363",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600165",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "603011",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "000070",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600198",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603297",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603358",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000628",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "002445",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002724",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "605288",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000059",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "000716",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "002212",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002265",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002811",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300345",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "300922",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "600397",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600698",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600969",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603188",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603668",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002124",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002329",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002721",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002742",
+      "decision": "REJECT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "300839",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600551",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "600683",
+      "decision": "REJECT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "600829",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    }
+  ],
+  "portfolio_note": "程序板块证据门禁后，正式观察池共1只（603980）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：603980。",
+  "model_portfolio_note_before_sector_gate": "观察池仅保留1只整理证据完整、短期止跌且接近稳健上沿的候选。次日以14:40-14:45的价格承接、量能和换手验证为前提；在指数中期压力未改善前，保持偏防守的观察密度，不将观察池等同于买入清单。",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "603980"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "603980": 1.0
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "initialized",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-14T20:24:17.397578+08:00",
@@ -32,5 +32,94 @@
   "cache_deep_ready_count": 530,
   "cache_current_count": 668,
   "cache_fallback_count": 13,
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 408,
+  "qa25": {
+    "命中或增量": 680,
+    "总数": 681,
+    "成功": 680
+  },
+  "cache25_refresh_requested": 13,
+  "cache25_current_ranked": 680,
+  "cache25_stale_deferred": 1,
+  "completed_120d_shards": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "shard_count_120d": 4,
+  "stage2_research_pool": 172,
+  "qa120": {
+    "命中或增量": 405,
+    "总数": 408,
+    "成功": 408
+  },
+  "generated_trade_date": "2026-09-14",
+  "master_count": 681,
+  "eliminated_count": 1,
+  "daily_new_count": 10,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 1,
+  "cooling_count": 0,
+  "qa250": {
+    "命中或增量": 171,
+    "总数": 172,
+    "成功": 172
+  },
+  "stage3_research_pool": 114,
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "completed_cn": "2026-09-14T20:55:36.446073+08:00",
+  "elapsed_minutes": 31.32,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 680,
+      "总数": 681,
+      "成功": 680
+    },
+    "120日": {
+      "命中或增量": 405,
+      "总数": 408,
+      "成功": 408
+    },
+    "250日": {
+      "命中或增量": 171,
+      "总数": 172,
+      "成功": 172
+    }
+  },
+  "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
+  "observation_pool_count": 1,
+  "target_trade_date": "2026-09-15",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月14日全市场上涨3125家、涨停55家，较此前极弱宽度明显修复；但上证、深成指、创业板指及科创50的5日、20日、60日收益均为负，且当日成交额较前一记录下降12.3%。研究判断：修复日下的中期指数压力仍在，强势股次日延续需严格验证。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 680,
+  "stock_qa_120_success": 408,
+  "stock_qa_250_success": 172,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }

@@ -1,0 +1,44 @@
+{
+  "status": "valid",
+  "generated_trade_date": "2026-09-14",
+  "target_trade_date": "2026-09-15",
+  "generated_at_cn": "2026-09-14T20:55:36.428194+08:00",
+  "source_candidate_count": 114,
+  "ai_candidate_count_after_active_trade_exclusion": 113,
+  "excluded_active_trade_count": 1,
+  "observation_count": 1,
+  "model": "gpt-5.6-terra",
+  "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
+  "source_run": "v5_data/runs/20260914_202417",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月14日全市场上涨3125家、涨停55家，较此前极弱宽度明显修复；但上证、深成指、创业板指及科创50的5日、20日、60日收益均为负，且当日成交额较前一记录下降12.3%。研究判断：修复日下的中期指数压力仍在，强势股次日延续需严格验证。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "元件、医疗服务、化学制药等当日走强，PCB、MLCC及元件存在多周期资金与涨幅支持；但候选的个股板块归因多数无同期概念指数行情核验，不能据此确认个股板块共振。"
+  },
+  "opinion_assessment": {
+    "status": "未启用",
+    "summary": "公开复盘正文挖掘数据状态为stale，来源日期为9月11日，与当前行情日期不一致；不作为本次筛选依据。"
+  },
+  "opinion_context": {
+    "status": "stale",
+    "source_trade_date": "2026-09-11",
+    "reason": "观点日期与行情日期不一致"
+  },
+  "portfolio_note": "程序板块证据门禁后，正式观察池共1只（603980）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：603980。",
+  "second_start_evidence_version": "v0.6",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "603980"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "603980": 1.0
+  },
+  "rule": "仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单"
+}
