@@ -47,6 +47,39 @@ Updated: 2026-09-12 17:32 Asia/Shanghai
   identical `latest_daily_batch.csv`. Both contain the verified 72-row canonical
   list. The atomic batch commit is intentionally deferred until all engineering
   push checks finish and queued/in-progress Actions are rechecked as zero.
+- Batch commit `7f0c1beca1a8085965d44c4348146e9164731a33` triggered exactly one
+  after-close run, `34843004136`. Saved run folder `20260914_202417` contains an
+  initialized 681-stock active pool; 25-day selected 408, 120-day selected 172,
+  and 250-day retained 114. All deterministic/data/market stages completed.
+- AI finalization failed after two calls with the same prompt because both responses
+  reached the 20,000-token output ceiling. The durable audit records the second
+  response as `resp_05559ecc2fbda243006aa7ead3b21887d29020aac99c0694d3`,
+  171,369 input and 20,000 output tokens; the first response ID was not persisted.
+  Neither partial response is valid JSON, so it cannot safely become an observation
+  pool. No formal recommendation delivery occurred.
+- The AI job sent one failure notification accepted by PushPlus with receipt
+  `19770984aa494676bc4acbc5b5be3cf4`; the workflow-level failure-alert job also
+  completed successfully and may represent a second accepted failure alert because
+  that inline path does not persist its receipt. Neither alert may be repeated.
+- Recovery unit: keep all 114 candidates and the maximum-10 observation rule, but
+  make the structured output proportional to the selected pool: detailed evidence
+  for at most 10 SELECT rows and compact code/reason outcomes for all other rows.
+  A max-output incomplete response becomes non-retryable because the identical
+  request cannot cure a deterministic size overflow. This is engineering
+  reliability only; candidate eligibility and ranking rules do not change.
+- Reliable resume point: all pre-AI artifacts are durable on main
+  `3c8a43d3398ba233224708064495b61bd68ac373`; no Actions are queued or running.
+  Validate and merge the compact-output contract without triggering a new full
+  pipeline, then rerun only failed AI job `103976139300` and its downstream job.
+- Compact-output implementation is locally complete: selected detail remains fully
+  dimensioned for at most 10 stocks; every other candidate must appear exactly once
+  as a compact WAIT/REJECT plus enumerated reason. Coverage, duplicate, overlap,
+  outside-pool, and maximum-10 checks remain hard validation failures.
+- Max-output incomplete responses now stop after one API attempt instead of issuing
+  the same deterministic request twice. Compilation plus 48 AI-contract,
+  after-close-stage, and data-layer tests passed; all external calls in tests were
+  mocked. Next resume point: commit this engineering-only unit, verify PR checks,
+  merge, then recheck main/Actions/delivery state before one failed-job rerun.
 
 ## 2026-09-12 takeover and reliability correction checkpoint
 

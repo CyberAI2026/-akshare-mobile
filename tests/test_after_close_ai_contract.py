@@ -14,7 +14,8 @@ sys.modules.setdefault("akshare", MagicMock())
 sys.modules.setdefault("requests", MagicMock())
 
 from v5_cli import (_after_close_response_schema, _apply_sector_evidence_gate,
-                    _cap_observation_pool, _post_gate_portfolio_note)
+                    _cap_observation_pool, _post_gate_portfolio_note,
+                    _validate_after_close_result)
 from v5_core import openai_analyze
 
 
@@ -28,6 +29,31 @@ class AfterCloseAIContractTests(unittest.TestCase):
             "amplitude_assessment", "turnover_assessment", "sector_resonance",
         ]:
             self.assertIn(field, item["required"])
+        self.assertEqual(schema["properties"]["decisions"]["maxItems"], 10)
+        self.assertIn("nonselected", schema["required"])
+
+    def test_compact_contract_covers_large_pool_without_verbose_rejections(self):
+        allowed = {f"{i:06d}" for i in range(1, 115)}
+        selected = [f"{i:06d}" for i in range(1, 11)]
+        result = {
+            "selected_codes": selected,
+            "decisions": [{"股票代码": code, "decision": "SELECT"} for code in selected],
+            "nonselected": [
+                {"股票代码": code, "decision": "WAIT", "reason_code": "LOWER_PRIORITY"}
+                for code in sorted(allowed - set(selected))
+            ],
+        }
+        actual, decisions = _validate_after_close_result(result, allowed)
+        self.assertEqual(actual, selected)
+        self.assertEqual(set(decisions), set(selected))
+
+    def test_compact_contract_rejects_missing_candidate(self):
+        with self.assertRaisesRegex(ValueError, "未覆盖全部输入候选"):
+            _validate_after_close_result({
+                "selected_codes": ["000001"],
+                "decisions": [{"股票代码": "000001", "decision": "SELECT"}],
+                "nonselected": [],
+            }, {"000001", "000002"})
 
     def test_sector_gate_removes_retreat_but_keeps_unverified_conditionally(self):
         selected = ["000001", "000002", "000003"]
@@ -105,8 +131,11 @@ class AfterCloseAIContractTests(unittest.TestCase):
         self.assertTrue(captured["text"]["format"]["strict"])
 
     def test_incomplete_openai_output_is_not_accepted_as_success(self):
+        calls = {"count": 0}
+
         class FakeResponses:
             def create(self, **kwargs):
+                calls["count"] += 1
                 return SimpleNamespace(
                     output_text='{"partial":', status="incomplete",
                     incomplete_details=SimpleNamespace(reason="max_output_tokens"),
@@ -125,6 +154,8 @@ class AfterCloseAIContractTests(unittest.TestCase):
                 audit = json.loads(Path("v5_data/openai_audit/latest.json").read_text(encoding="utf-8"))
                 self.assertEqual(audit["status"], "incomplete")
                 self.assertEqual(audit["incomplete_reason"], "max_output_tokens")
+                self.assertEqual(audit["attempt_count"], 1)
+                self.assertEqual(calls["count"], 1)
                 self.assertEqual(
                     Path("v5_data/openai_audit/latest_output.txt").read_text(encoding="utf-8"),
                     '{"partial":',
