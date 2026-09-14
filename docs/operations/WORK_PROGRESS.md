@@ -33,6 +33,20 @@ Updated: 2026-09-12 17:32 Asia/Shanghai
 - Three focused upload tests and Python compilation passed. Next resume point:
   run the complete data-layer test module, commit the engineering-only patch, and
   verify it before any daily-batch production commit.
+- Engineering PR `#9` was squash-merged as
+  `c41d7bbd51129764e2d5559f185414478b2e5ae0`. Local compilation and all 27
+  data-layer tests passed. GitHub Runner deterministic data-layer tests also passed
+  in run `34842422445`.
+- PR public-source checks were non-blocking upstream failures: run `34842422441`
+  obtained the complete THS concept/industry fund-flow tables but the separate THS
+  concept-index page returned unparsable HTML; run `34842422445` obtained Legulegu
+  and index evidence but Eastmoney closed both snapshot requests and Sina timed out
+  or returned HTML. These failures did not exercise the name resolver and made zero
+  OpenAI or PushPlus calls.
+- Production batch prepared as `v5_data/inbox/daily_20260914_201843.csv`, with an
+  identical `latest_daily_batch.csv`. Both contain the verified 72-row canonical
+  list. The atomic batch commit is intentionally deferred until all engineering
+  push checks finish and queued/in-progress Actions are rechecked as zero.
 
 ## 2026-09-12 takeover and reliability correction checkpoint
 
