@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed_ai_failed",
+  "stage": "ai_failed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-14T20:24:17.397578+08:00",
@@ -77,5 +77,6 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "ai_error": "OpenAI连续两次未返回完整合法JSON；attempt=1:RuntimeError:OpenAI响应未完成: status=incomplete, details=IncompleteDetails(reason='max_output_tokens') | attempt=2:RuntimeError:OpenAI响应未完成: status=incomplete, details=IncompleteDetails(reason='max_output_tokens')"
 }
