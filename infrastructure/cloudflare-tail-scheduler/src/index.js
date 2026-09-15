@@ -120,7 +120,8 @@ export async function dispatchOpinion(env, now = new Date(), fetchImpl = fetch) 
 
 export async function dispatchOpinionDelivery(env, now = new Date(), fetchImpl = fetch) {
   const workflow = env.OPINION_DELIVERY_WORKFLOW_FILE || "v5_market_opinion_delivery.yml";
-  return dispatchRecentSlot(env, workflow, now, 8, null, fetchImpl);
+  const sourceDate = shanghaiDate(now);
+  return dispatchRecentSlot(env, workflow, now, 8, { source_date: sourceDate }, fetchImpl);
 }
 
 export async function routeSchedule(cron, env, now = new Date(), fetchImpl = fetch) {

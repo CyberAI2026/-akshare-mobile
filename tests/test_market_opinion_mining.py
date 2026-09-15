@@ -18,6 +18,8 @@ from research.market_opinion_mining import (
     concept_search_terms,
     match_ths_concepts,
     current_summary_source_urls,
+    delivery_already_accepted,
+    delivery_source_date,
     group_attention_sectors,
     parse_published_at,
     render_source_links,
@@ -34,6 +36,21 @@ from research import market_opinion_mining as opinion
 
 
 class OpinionSectorGroupingTests(unittest.TestCase):
+    def test_delayed_delivery_schedule_keeps_previous_report_date(self):
+        cn = ZoneInfo("Asia/Shanghai")
+        self.assertEqual(
+            delivery_source_date(datetime(2026, 9, 15, 3, 20, tzinfo=cn), "schedule"),
+            date(2026, 9, 14),
+        )
+        self.assertEqual(
+            delivery_source_date(datetime(2026, 9, 15, 12, 0, tzinfo=cn), "schedule"),
+            date(2026, 9, 14),
+        )
+        self.assertEqual(
+            delivery_source_date(datetime(2026, 9, 15, 22, 10, tzinfo=cn), "schedule"),
+            date(2026, 9, 15),
+        )
+
     def test_opinion_collects_all_until_22_and_requires_fifteen(self):
         cn=ZoneInfo("Asia/Shanghai")
         self.assertEqual(opinion_finalization(15,datetime(2026,9,8,20,55,tzinfo=cn)),(False,"collect_until_22"))
@@ -259,6 +276,25 @@ class OpinionSectorGroupingTests(unittest.TestCase):
             }),encoding="utf-8")
             self.assertFalse(opinion.deliver_data(data))
         push.assert_not_called()
+
+    def test_delivery_guard_recognizes_exact_accepted_source_set(self):
+        data={
+            "source_date":"2026-09-14",
+            "trade_date":"2026-09-14",
+            "sources":[{"url":f"https://www.tgb.cn/a/{i}"} for i in range(15)],
+        }
+        with tempfile.TemporaryDirectory() as td, patch.object(opinion,"ROOT",Path(td)):
+            receipt=opinion.delivery_path("2026-09-14")
+            receipt.parent.mkdir(parents=True,exist_ok=True)
+            receipt.write_text(opinion.json.dumps({
+                "status":"request_accepted",
+                "source_date":"2026-09-14",
+                "article_count":15,
+                "source_set_sha256":opinion.source_set_fingerprint(data),
+            }),encoding="utf-8")
+            self.assertTrue(delivery_already_accepted(data))
+            data["sources"].append({"url":"https://www.tgb.cn/a/new"})
+            self.assertFalse(delivery_already_accepted(data))
 
     def test_delivery_is_blocked_before_2200_even_with_fifteen(self):
         data={

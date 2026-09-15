@@ -132,7 +132,9 @@ test("opinion delivery uses its dedicated workflow", async () => {
   };
   const result = await dispatchOpinionDelivery(env, new Date("2026-09-11T14:12:00Z"), fakeFetch);
   assert.equal(result.workflow, "v5_market_opinion_delivery.yml");
-  assert.equal(JSON.parse(calls[1].options.body).inputs, undefined);
+  assert.deepEqual(JSON.parse(calls[1].options.body).inputs, {
+    source_date: "2026-09-11",
+  });
 });
 
 test("cron routing separates tail, mining, and delivery", async () => {

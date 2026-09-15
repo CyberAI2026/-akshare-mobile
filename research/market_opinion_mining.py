@@ -83,6 +83,28 @@ def source_date(current: datetime | None = None) -> date:
     return day
 
 
+def delivery_source_date(
+    current: datetime | None = None,
+    event_name: str = "",
+    requested: str = "",
+) -> date:
+    """Resolve the report date for a delivery check, including delayed schedules.
+
+    Delivery crons are nominally evening jobs. GitHub may start them many hours
+    late, so any scheduled start before 20:00 belongs to the previous calendar
+    day's report. Explicit workflow-dispatch dates remain bounded to three days.
+    """
+    current = current or now_cn()
+    if requested:
+        day = date.fromisoformat(requested)
+        if day > current.date() or (current.date() - day).days > 3:
+            raise RuntimeError(f"delivery source_date输入超出安全窗口: {requested}")
+        return day
+    if event_name == "schedule" and current.hour < 20:
+        return current.date() - timedelta(days=1)
+    return source_date(current)
+
+
 def target_trade_date(current: datetime | None = None,
                       trade_dates: list[date] | None = None) -> date:
     """Attach weekend/holiday commentary to the next trading day, with audit dates."""
@@ -1011,6 +1033,24 @@ def source_set_fingerprint(data: dict) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def delivery_already_accepted(data: dict) -> bool:
+    """Return true only for an accepted receipt matching this exact source set."""
+    source_day = str(data.get("source_date") or data.get("trade_date") or "")
+    article_count = len(data.get("sources", []) or [])
+    receipt_path = delivery_path(source_day)
+    if not source_day or not receipt_path.exists():
+        return False
+    old = json.loads(receipt_path.read_text(encoding="utf-8"))
+    accepted = old.get("status") in {"delivered", "request_accepted"}
+    same_source_set = old.get("source_set_sha256") == source_set_fingerprint(data)
+    legacy_same_set = (
+        not old.get("source_set_sha256")
+        and str(old.get("source_date") or "") == source_day
+        and int(old.get("article_count") or 0) == article_count
+    )
+    return bool(accepted and (same_source_set or legacy_same_set))
+
+
 def deliver_data(data: dict) -> bool:
     source_day=str(data.get("source_date") or data.get("trade_date") or "")
     article_count=len(data.get("sources",[]) or [])
@@ -1032,18 +1072,9 @@ def deliver_data(data: dict) -> bool:
     target_day=str(data.get("trade_date") or "")
     fingerprint=source_set_fingerprint(data)
     receipt_path=delivery_path(source_day)
-    if receipt_path.exists():
-        old=json.loads(receipt_path.read_text(encoding="utf-8"))
-        accepted=old.get("status") in {"delivered","request_accepted"}
-        same_source_set=old.get("source_set_sha256")==fingerprint
-        legacy_same_set=(
-            not old.get("source_set_sha256")
-            and str(old.get("source_date") or "")==source_day
-            and int(old.get("article_count") or 0)==article_count
-        )
-        if accepted and (same_source_set or legacy_same_set):
-            print(f"OPINION_DELIVERY_ALREADY_DONE source_date={source_day}",flush=True)
-            return False
+    if delivery_already_accepted(data):
+        print(f"OPINION_DELIVERY_ALREADY_DONE source_date={source_day}",flush=True)
+        return False
     request_receipt=push_summary(data.get("daily_consensus",{}),source_day,target_day,data.get("sources",[]) or [])
     if request_receipt.get("accepted"):
         receipt_path.parent.mkdir(parents=True,exist_ok=True)
