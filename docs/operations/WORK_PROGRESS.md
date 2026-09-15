@@ -1,5 +1,39 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
+## 2026-09-15 staged pre-AI gate recovery
+
+- Active operation lock: `LOCK-20260915-2245-staged-pre-ai-recovery`.
+- Baseline at acquisition: production main
+  `409297dac66f661f59a889fb2e874312c6273e96`; zero queued or in-progress
+  Actions. The 2026-09-15 natural after-close run folder is
+  `v5_data/runs/20260915_213543`.
+- The first <=50 patch correctly added the gate to the monolithic
+  `v5_cli.run_after_close` path and its API fail-closed assertion. Production,
+  however, uses `research.after_close_stages`; its 250-day stage retained 97
+  candidates. The API assertion blocked the request before OpenAI, proving the
+  safety boundary worked but revealing incomplete staged-runner integration.
+- Natural run facts: active 689; 25-day 408; 120-day 159; old staged 250-day
+  output 97. Error: `OpenAI候选超过硬上限：97 > 50`. No OpenAI request was
+  made. The failed run may already have emitted failure alerts; do not replay
+  those alerts.
+- Current correction: apply the same lifecycle+3/3 maturity gate and complete
+  reason audit in the staged 250-day function; re-apply it defensively when
+  resuming an older `ai_failed` state; then use the existing dedicated AI
+  recovery workflow to resume only the failed AI stage from saved market/data
+  artifacts.
+- Recovery must send at most one formal recommendation delivery, only after a
+  successful OpenAI result. It must not re-run the 25-day/120-day fetches or
+  reconstruct the market context.
+- Recovery branch: `codex/staged-pre-ai-gate-recovery-20260915`; current head
+  before this checkpoint commit:
+  `a25173389a55368afb948665b306fd2a2a91e9ed`.
+- Encrypted trade ledger remains unchanged since its last ledger update on
+  2026-09-10; the requested 002902 sale is still pending because browser control
+  became unavailable before the Streamlit GitHub sign-in could be completed.
+- Reliable resume point: create PR, require deterministic staged-runner tests,
+  merge if valid, then observe the single guarded AI recovery run and its
+  persisted candidate counts/receipt.
+
 Updated: 2026-09-15 18:24 Asia/Shanghai
 
 ## 2026-09-15 pre-AI capacity and decision-alignment revision
