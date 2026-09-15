@@ -1,6 +1,6 @@
 name: V5 After-Close AI Recovery
 
-# V5.6 replay validates structured output, re-applies the <=50 staged pre-AI gate, and resumes only the failed AI stage.
+# V5.6 recovery validates structured output, isolates deterministic tests from production secrets, re-applies the <=50 staged pre-AI gate, and resumes only the failed AI stage.
 
 on:
   workflow_dispatch:
