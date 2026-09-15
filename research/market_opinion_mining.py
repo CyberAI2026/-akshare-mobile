@@ -1005,7 +1005,20 @@ def merge_staged_quality_pool(source_day: str, trade_day: str,
         article_id=str(item.get("article_id", ""))
         if article_id:
             mined_by_id[article_id]=item
-    common=sorted(set(sources_by_id)&set(mined_by_id))
+    # Incremental discovery may expose one publication under transiently
+    # different article IDs.  The canonical URL is the source identity, so keep
+    # exactly one source/mining pair per URL before counting the formal sample.
+    sources_by_url={}
+    for item in sources_by_id.values():
+        article_id=str(item.get("article_id", ""))
+        url=str(item.get("url", "")).strip()
+        identity=url or f"article_id:{article_id}"
+        sources_by_url[identity]=item
+    common=sorted(
+        str(item.get("article_id", ""))
+        for item in sources_by_url.values()
+        if item.get("article_id") and str(item.get("article_id", "")) in mined_by_id
+    )
     merged_sources=[sources_by_id[key] for key in common]
     merged_mined=[mined_by_id[key] for key in common]
     path=staged_quality_path(source_day)
