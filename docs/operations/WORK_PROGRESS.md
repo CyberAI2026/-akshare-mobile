@@ -1,10 +1,11 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-15 03:45 Asia/Shanghai
+Updated: 2026-09-15 08:15 Asia/Shanghai
 
 ## 2026-09-15 opinion-delivery rollover incident
 
-- Active operation lock: `LOCK-20260915-opinion-delivery-rollover`.
+- Operation lock `LOCK-20260915-opinion-delivery-rollover`: closed after merge,
+  validation, Worker deployment, and health verification.
 - Baseline production main: `ebbea4c0da5f8730b00e1c92810574af79e66de8`;
   assets main: `3ede4b8deb9c8e77bd3add81a379e629fe1254f7`; zero queued or
   in-progress Actions at acquisition.
@@ -55,6 +56,20 @@ Updated: 2026-09-15 03:45 Asia/Shanghai
   this upstream snapshot failure does not exercise the opinion delivery patch.
 - No PR job called OpenAI or PushPlus. Next unit: confirm unchanged main, merge
   PR #11, then inspect push-triggered validation jobs only.
+- PR #11 was squash-merged to production main as
+  `17e5efcd28c4f8dc9a01f2fce272c9ca247adb66`.
+- Push validation run `34911874638` succeeded. Only preflight and deterministic
+  validation ran; concept refresh, discovery, all article batches, aggregation,
+  and failure alert were skipped. OpenAI calls: 0. PushPlus calls: 0.
+- Cloudflare deployment run `34912073032` succeeded at the production main.
+  Scheduler tests, secret checks, Worker upload, and all five cron triggers passed.
+  Deployed Worker version: `46369bae-a758-4639-a9b8-aba7e392b34a`.
+  `GET /health` returned `status=ok`, `timezone=Asia/Shanghai`, and the expected
+  tail/opinion/opinion-delivery workflow list.
+- Final reliable checkpoint: the GitHub delivery guard and Cloudflare explicit
+  source-date handoff are live. The 2026-09-14 report remains the single valid
+  37-article delivery; no replay or resend occurred. Next action is read-only
+  acceptance of the natural 2026-09-15 20:30-22:12 opinion cycle.
 
 ## 2026-09-14 upload recovery checkpoint
 
