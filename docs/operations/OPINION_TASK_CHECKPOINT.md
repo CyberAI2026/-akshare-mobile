@@ -1,5 +1,41 @@
 # V5 Market Opinion Mining — Task Checkpoint
 
+## 2026-09-15 delayed-delivery false alert (active repair)
+
+- Lock: `LOCK-20260915-opinion-delivery-rollover`.
+- Production baseline: `ebbea4c0da5f8730b00e1c92810574af79e66de8`.
+- Run `34854501459` generated and delivered the 2026-09-14 formal report at
+  22:21 with 37 articles. The accepted delivery receipt is saved and the user
+  confirmed terminal receipt by screenshot.
+- GitHub delayed the nominal 22:10 delivery schedule until 03:19. Run
+  `34886191363` derived `2026-09-15` from wall-clock start time, rejected the
+  valid 2026-09-14 report as stale, and sent one false missing-report alert.
+- No OpenAI or PushPlus action is permitted during repair validation. Do not
+  replay or resend the valid 2026-09-14 report.
+- Next unit: implement schedule-aware source-date resolution plus accepted
+  receipt short-circuit, then run deterministic tests.
+- Implementation unit is complete locally: the delivery workflow uses the
+  schedule-aware resolver, passes the resolved date into the push stage, and
+  recognizes an exact accepted receipt before invoking that stage. Python
+  compilation and 30 focused tests passed with zero external side effects.
+- Reliable resume point: proceed with the wider offline regression suite and
+  diff review; do not run the production delivery workflow for 2026-09-14.
+- Wider acceptance completed: 129 Python tests and 10 Cloudflare scheduler tests
+  passed. A dry check against the saved 2026-09-14 production report resolved
+  the delayed 03:20 schedule to 2026-09-14 and returned
+  `accepted_exact_source_set=True` for all 37 articles.
+- The Cloudflare dispatcher also passes the source date explicitly. It is not
+  automatically deployed by a code push; deployment remains a separate manual
+  workflow after the repository fix is accepted.
+- Next unit: commit and validate the engineering patch without running a live
+  opinion delivery or sending any PushPlus message.
+- PR #11 head `610f15deb8c996f7df4a59053c47d5d7e57d7c20` is mergeable. THS public-data
+  run `34911565624` passed. Official-market-count run `34911565616` passed its
+  deterministic tests and failed later on unrelated public full-market snapshot
+  availability (Eastmoney connection closed; Sina timeout/HTML fallback).
+- No validation job called OpenAI or PushPlus. Next unit: merge after a final
+  main/active-run check; do not dispatch the delivery workflow manually.
+
 Updated: 2026-09-12 17:34 Asia/Shanghai
 
 ## Goal

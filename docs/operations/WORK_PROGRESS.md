@@ -1,6 +1,60 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-14 21:00 Asia/Shanghai
+Updated: 2026-09-15 03:45 Asia/Shanghai
+
+## 2026-09-15 opinion-delivery rollover incident
+
+- Active operation lock: `LOCK-20260915-opinion-delivery-rollover`.
+- Baseline production main: `ebbea4c0da5f8730b00e1c92810574af79e66de8`;
+  assets main: `3ede4b8deb9c8e77bd3add81a379e629fe1254f7`; zero queued or
+  in-progress Actions at acquisition.
+- The 2026-09-14 formal report is complete: 37 quality-approved articles,
+  generated at 22:21:17 Asia/Shanghai. Delivery receipt
+  `v5_data/opinion/delivery/2026-09-14.json` records `request_accepted` at
+  22:21:19 with source-set SHA-256
+  `9bb4c13b2aeaf50a16df1a4409c887fd65baf4308a1e77b056e23308ca07bb44`.
+  The user's screenshot independently verifies WeChat terminal receipt.
+- False-alert run `34886191363` started at 03:19 on 2026-09-15. Its delivery
+  step used the actual start date (`2026-09-15`) instead of the intended
+  scheduled source date (`2026-09-14`), then sent one erroneous missing-report
+  alert at 03:20. Earlier delayed delivery run `34880510837` shows the same
+  rollover defect; only the final cron is allowed to alert.
+- This is a delivery-guard defect, not a missing report or a low-sample result.
+  No report replay, OpenAI call, summary resend, or compensating PushPlus call
+  is authorized.
+- Current unit: make the delivery source date delay-safe, check the matching
+  accepted receipt before entering the push stage, and add deterministic
+  cross-midnight regression tests. Strategy impact: none.
+- Reliable resume point: incident evidence and lock are durable here; resume
+  with the delivery guard implementation and offline validation.
+- Delivery guard implementation completed locally. Scheduled delivery starts
+  before 20:00 Asia/Shanghai now resolve to the previous calendar day's report,
+  covering both the observed 03:19 delay and longer daytime queue delays.
+- The workflow now accepts an optional bounded `source_date`, exports the
+  resolved date to the push subprocess, and exits before that subprocess when
+  an accepted receipt matches the exact quality-approved source set.
+- Focused verification: Python compilation plus 30 opinion/workflow tests passed.
+  External OpenAI calls: 0. External PushPlus calls: 0; the one test response is
+  mocked. Next unit: run the wider reliability suite and inspect the final diff.
+- Full deterministic Python suite: 129 tests passed. Cloudflare scheduler suite:
+  10 tests passed. The Worker now passes its Shanghai `source_date` explicitly
+  to the delivery workflow so runner queue delay cannot change the business date.
+- Production-artifact dry check for the observed 03:20 start resolved
+  `2026-09-14`, found 37 articles, and matched the exact accepted source-set
+  receipt. It did not invoke the delivery stage. A first dry-check command from
+  the Worker subdirectory could not locate the repository Python module; rerun
+  from the repository root succeeded. This had no production side effect.
+- Reliable resume point: implementation and offline acceptance are complete;
+  inspect/commit the bounded engineering diff, then verify only CI validation.
+- Engineering PR: `#11`, head commit
+  `610f15deb8c996f7df4a59053c47d5d7e57d7c20`.
+- PR CI: THS public-sector run `34911565624` succeeded. Official-market-count
+  run `34911565616` passed its deterministic data-layer tests, then failed only
+  because Eastmoney closed both full-market snapshot requests and Sina timed out
+  once then returned HTML. The fallback data and public limit pools were obtained;
+  this upstream snapshot failure does not exercise the opinion delivery patch.
+- No PR job called OpenAI or PushPlus. Next unit: confirm unchanged main, merge
+  PR #11, then inspect push-triggered validation jobs only.
 
 ## 2026-09-14 upload recovery checkpoint
 

@@ -50,6 +50,15 @@ class WorkflowReliabilityTests(unittest.TestCase):
         self.assertGreaterEqual(text.count("now_cn.hour<6") + text.count("now.hour<6"), 2)
         self.assertIn('"source_date": business_day.isoformat()', text)
 
+    def test_delayed_opinion_delivery_uses_schedule_date_and_receipt_guard(self):
+        workflow = load_workflow("v5_market_opinion_delivery.yml")
+        triggers = workflow.get("on", workflow.get(True, {}))
+        self.assertIn("source_date", triggers["workflow_dispatch"]["inputs"])
+        text = (ROOT / ".github" / "workflows" / "v5_market_opinion_delivery.yml").read_text(encoding="utf-8")
+        self.assertIn("delivery_source_date", text)
+        self.assertIn("delivery_already_accepted", text)
+        self.assertIn('child_env["OPINION_SOURCE_DATE_OVERRIDE"] = today', text)
+
     def test_after_close_has_failure_alert(self):
         workflow = load_workflow("v5_after_close.yml")
         alert = workflow["jobs"]["failure-alert"]

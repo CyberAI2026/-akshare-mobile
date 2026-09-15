@@ -2,6 +2,11 @@ name: V5 Market Opinion Delivery
 
 on:
   workflow_dispatch:
+    inputs:
+      source_date:
+        description: "Optional YYYY-MM-DD report source date"
+        required: false
+        type: string
   push:
     branches: [main]
     paths:
@@ -25,6 +30,7 @@ jobs:
     env:
       TZ: Asia/Shanghai
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      REQUESTED_SOURCE_DATE: ${{ inputs.source_date }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,12 +46,18 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import os
           import subprocess
-          from datetime import datetime
           from pathlib import Path
-          from zoneinfo import ZoneInfo
+          from research.market_opinion_mining import (
+              delivery_already_accepted,
+              delivery_source_date,
+          )
 
-          today = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
+          today = delivery_source_date(
+              event_name=os.getenv("GITHUB_EVENT_NAME", ""),
+              requested=os.getenv("REQUESTED_SOURCE_DATE", "").strip(),
+          ).isoformat()
           latest_path = Path("v5_data/opinion/latest.json")
           staging_path = Path("v5_data/opinion/staging") / f"{today}.json"
 
@@ -55,9 +67,15 @@ jobs:
           latest_count = len(latest.get("sources", []) or [])
           same_day_ready = str(latest.get("source_date") or "") == today and latest_count >= 15
           if same_day_ready:
+              if delivery_already_accepted(latest):
+                  print(f"OPINION_DELIVERY_ALREADY_DONE source_date={today}")
+                  raise SystemExit(0)
+              child_env = dict(os.environ)
+              child_env["OPINION_SOURCE_DATE_OVERRIDE"] = today
               subprocess.run(
                   ["python", "research/market_opinion_mining.py", "--stage", "push"],
                   check=True,
+                  env=child_env,
               )
               raise SystemExit(0)
 
