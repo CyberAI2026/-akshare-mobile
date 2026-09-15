@@ -2,7 +2,7 @@
 
 ## 2026-09-15 staged pre-AI gate recovery
 
-- Active operation lock: `LOCK-20260915-2245-staged-pre-ai-recovery`.
+- Operation lock `LOCK-20260915-2245-staged-pre-ai-recovery`: closed after guarded production recovery.
 - Baseline at acquisition: production main
   `409297dac66f661f59a889fb2e874312c6273e96`; zero queued or in-progress
   Actions. The 2026-09-15 natural after-close run folder is
@@ -30,11 +30,23 @@
 - Encrypted trade ledger remains unchanged since its last ledger update on
   2026-09-10; the requested 002902 sale is still pending because browser control
   became unavailable before the Streamlit GitHub sign-in could be completed.
-- Reliable resume point: create PR, require deterministic staged-runner tests,
-  merge if valid, then observe the single guarded AI recovery run and its
-  persisted candidate counts/receipt.
+- Production merges: staged-runner gate `aa6c02e5075d8504f78e25bd47f068a206d0843f`;
+  recovery-test isolation `6fc06c29ab05cc4086c968e9f0111f3f8a1f309c`.
+- Guarded recovery run `34984834690` completed successfully. The saved 159-row
+  250-day audit contains 97 lifecycle-qualified stocks; 82 were rejected as
+  `STRUCTURE_NOT_MATURE`, 62 as `MID_TERM_TREND_WEAK`, and 15 entered OpenAI.
+  All 159 rows have nonblank elimination/qualification reasons; no capacity trim
+  was needed because 15 is below the hard cap of 50.
+- One OpenAI request completed: model `gpt-5.6-terra`, input 50,832 tokens,
+  output 1,764, total 52,596. The next-day observation pool contains one
+  conditional candidate (603011), and the formal PushPlus delivery was accepted
+  on the first production attempt.
+- Exact next state: after-close run `20260915_213543` is `completed:completed`;
+  do not replay AI or PushPlus. The requested 002902 sale remains pending because
+  authenticated browser control is unavailable; resume only the online ledger
+  entry after GitHub sign-in and explicit submission confirmation.
 
-Updated: 2026-09-15 18:24 Asia/Shanghai
+Updated: 2026-09-15 23:00 Asia/Shanghai
 
 ## 2026-09-15 pre-AI capacity and decision-alignment revision
 
