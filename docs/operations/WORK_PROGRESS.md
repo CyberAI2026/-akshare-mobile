@@ -1,5 +1,29 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
+## 2026-09-16 formal Work-window handoff
+
+- Outgoing Work window has completed its smallest safe closure and is now
+  read-only. It must not perform further production writes.
+- Pre-handoff main: `b68dabaea8708e8888a48af1f5d4dced95846c4e`.
+- Durable handoff commit:
+  `1512bb1e6c592b88888f6042624125ed8ba244b5`.
+- At the final read-only check: queued Actions 0; in-progress Actions 0; active
+  production lock none.
+- Completed side effects are persisted. Do not repeat the 2026-09-15 OpenAI
+  request, formal PushPlus delivery, saved market-data stages, or latest
+  encrypted-ledger update.
+- Pending work is analysis only until separately authorized: compare the current
+  3/3 structural gate with a 3/3-priority plus 2/3 supplemental pool capped at
+  50.
+- Successor window must read
+  `docs/operations/PROJECT_HANDOFF_CHECKPOINT.md`, re-check current main and
+  Actions, and report its read-only takeover assessment before acquiring a
+  write lock.
+- This checkpoint update is documentation-only and triggers no production
+  workflow, API, notification, trading, sizing, stop-loss, or take-profit action.
+
+Updated: 2026-09-16 00:13 Asia/Shanghai
+
 ## 2026-09-16 Project/Work automatic handoff mechanism
 
 - Long-term mechanism active: Project-level continuity + phased Work conversations +
