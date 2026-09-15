@@ -378,7 +378,12 @@ class IdentityAndOpenTradeTests(unittest.TestCase):
                 {"股票代码":"000001","股票名称":"平安银行"},
                 {"股票代码":"000002","股票名称":"万科A"},
             ])
-            eligible, excluded = cli.exclude_active_trades(pool, registry)
+            with patch.object(
+                cli,
+                "active_trade_codes",
+                side_effect=cli._active_recommendation_codes,
+            ):
+                eligible, excluded = cli.exclude_active_trades(pool, registry)
         self.assertEqual(excluded, ["000001", "600801"])
         self.assertEqual(eligible["股票代码"].tolist(), ["000002"])
 
