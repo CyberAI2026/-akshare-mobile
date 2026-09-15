@@ -1,5 +1,34 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
+## 2026-09-16 Project/Work automatic handoff mechanism
+
+- Long-term mechanism active: Project-level continuity + phased Work conversations +
+  durable automatic handoff.
+- Unified handoff file:
+  `docs/operations/PROJECT_HANDOFF_CHECKPOINT.md`.
+- Context policy: approximately 70% compress/update checkpoint; 80% prepare
+  handoff; 85% stop new large tasks, close the smallest safe unit, persist all
+  state, and instruct the user to open a new Work conversation in the same
+  Project.
+- If an exact context percentage is unavailable, estimate conservatively from
+  conversation length, tool/file volume, historical dependency, and task
+  complexity.
+- New Work conversations must begin read-only: verify current main SHA, running
+  Actions, state files, receipts, and locks before acquiring sole-writer
+  authority.
+- Production baseline before this documentation unit:
+  `36566aa793e91cf9aa8409bb224b7b5ee5961761`; no queued or in-progress
+  Actions. Handoff publication commit:
+  `9e9d7c43abf4f70b2e1df8f2c7aca3c6e3c719ea`.
+- The encrypted private trade ledger update is complete and verified; do not
+  duplicate the latest transaction. No plaintext trade details are recorded in
+  this public checkpoint.
+- Documentation-only lock `LOCK-20260916-project-handoff-policy`: closed.
+- This unit did not trigger OpenAI, PushPlus, stock screening, position sizing,
+  stop-loss, take-profit, or other production workflow side effects.
+
+Updated: 2026-09-16 00:07 Asia/Shanghai
+
 ## 2026-09-15 staged pre-AI gate recovery
 
 - Operation lock `LOCK-20260915-2245-staged-pre-ai-recovery`: closed after guarded production recovery.
@@ -27,9 +56,9 @@
 - Recovery branch: `codex/staged-pre-ai-gate-recovery-20260915`; current head
   before this checkpoint commit:
   `a25173389a55368afb948665b306fd2a2a91e9ed`.
-- Encrypted trade ledger remains unchanged since its last ledger update on
-  2026-09-10; the requested 002902 sale is still pending because browser control
-  became unavailable before the Streamlit GitHub sign-in could be completed.
+- Historical note: the encrypted ledger was still unchanged at this recovery
+  checkpoint; the later online ledger update completed successfully and is
+  recorded in the 2026-09-16 handoff section above.
 - Production merges: staged-runner gate `aa6c02e5075d8504f78e25bd47f068a206d0843f`;
   recovery-test isolation `6fc06c29ab05cc4086c968e9f0111f3f8a1f309c`.
 - Guarded recovery run `34984834690` completed successfully. The saved 159-row
@@ -42,9 +71,8 @@
   conditional candidate (603011), and the formal PushPlus delivery was accepted
   on the first production attempt.
 - Exact next state: after-close run `20260915_213543` is `completed:completed`;
-  do not replay AI or PushPlus. The requested 002902 sale remains pending because
-  authenticated browser control is unavailable; resume only the online ledger
-  entry after GitHub sign-in and explicit submission confirmation.
+  do not replay AI or PushPlus. The later authenticated online ledger update also
+  completed; do not duplicate it.
 
 Updated: 2026-09-15 23:00 Asia/Shanghai
 
