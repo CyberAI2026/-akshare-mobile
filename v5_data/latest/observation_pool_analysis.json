@@ -1,0 +1,119 @@
+{
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：9月15日全市场上涨1120家、下跌4375家，主要指数5日、20日收益均为负，跌停27家较前日增加；市场处于弱势分化与退潮压力下。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "硬科技局部承接：半导体当日上涨1.32%、净流入62.93亿元，电子化学品上涨2.51%；但多数宽口径科技概念资金与扩散性仍分化，不能视为全面共振。"
+  },
+  "opinion_assessment": {
+    "status": "可用",
+    "summary": "公开复盘聚合观点为谨慎偏空、退潮与分歧并存；PCB和半导体被认为相对占优但持续性存在分歧。该结论属于文本观点，不是行情事实。"
+  },
+  "selected_codes": [
+    "603011"
+  ],
+  "decisions": [
+    {
+      "股票代码": "603011",
+      "股票名称": "合锻智能",
+      "decision": "SELECT",
+      "priority": 1,
+      "confidence_level": "低",
+      "evidence": "计算事实：振幅收敛比0.540、成交量收敛比0.917，MA5三日斜率1.50%、MA10三日斜率-0.57%且已有短期下行停止证据；10日涨幅5.04%，距稳健5日上沿-0.44%。",
+      "risk": "当日上涨4.80%后接近短期上沿，且近5日换手率缺失，换手收敛未核验；板块同期客观共振未核验。；缺少同期板块客观行情，保留为条件观察，待14:40-14:45核验",
+      "next_day_watch": "14:40-14:45确认价格能否在短期上沿附近保持承接，成交量不出现明显失控扩张，并核验当日换手与所属方向是否有同步改善。",
+      "structure_assessment": "中期上升趋势延续；振幅收敛，MA5上行、MA10轻微下行但已标记短期下行停止；距稳健5日上沿-0.44%。",
+      "volume_assessment": "近5日平均成交量5299.12万，较前10日5780.47万收敛，收敛比0.917。",
+      "amplitude_assessment": "近5日振幅15.07%，较前10日区间振幅27.89%收敛，收敛比0.540。",
+      "turnover_assessment": "近5日平均换手率未提供，换手率收敛未核验。",
+      "sector_resonance": "未核验；仅有机械设备映射，未提供其同期客观行业或概念行情。"
+    }
+  ],
+  "nonselected": [
+    {
+      "股票代码": "688209",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "688485",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "603980",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "301282",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002870",
+      "decision": "WAIT",
+      "reason_code": "SECTOR_WEAK_OR_UNVERIFIED"
+    },
+    {
+      "股票代码": "600330",
+      "decision": "WAIT",
+      "reason_code": "SECTOR_WEAK_OR_UNVERIFIED"
+    },
+    {
+      "股票代码": "603228",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "002491",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002015",
+      "decision": "REJECT",
+      "reason_code": "SECTOR_WEAK_OR_UNVERIFIED"
+    },
+    {
+      "股票代码": "603400",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "301419",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "300363",
+      "decision": "REJECT",
+      "reason_code": "SECTOR_WEAK_OR_UNVERIFIED"
+    },
+    {
+      "股票代码": "600165",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "000628",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    }
+  ],
+  "portfolio_note": "程序板块证据门禁后，正式观察池共1只（603011）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：603011。",
+  "model_portfolio_note_before_sector_gate": "仅保留1只次日条件观察对象。弱势市场下以14:40-14:45个股承接、量能和换手核验为前提；未形成最终买入结论，不给出买入仓位。",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "603011"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "603011": 1.0
+  }
+}
