@@ -29,6 +29,12 @@
   workflow after the repository fix is accepted.
 - Next unit: commit and validate the engineering patch without running a live
   opinion delivery or sending any PushPlus message.
+- PR #11 head `610f15deb8c996f7df4a59053c47d5d7e57d7c20` is mergeable. THS public-data
+  run `34911565624` passed. Official-market-count run `34911565616` passed its
+  deterministic tests and failed later on unrelated public full-market snapshot
+  availability (Eastmoney connection closed; Sina timeout/HTML fallback).
+- No validation job called OpenAI or PushPlus. Next unit: merge after a final
+  main/active-run check; do not dispatch the delivery workflow manually.
 
 Updated: 2026-09-12 17:34 Asia/Shanghai
 

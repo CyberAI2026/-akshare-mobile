@@ -46,6 +46,15 @@ Updated: 2026-09-15 03:45 Asia/Shanghai
   from the repository root succeeded. This had no production side effect.
 - Reliable resume point: implementation and offline acceptance are complete;
   inspect/commit the bounded engineering diff, then verify only CI validation.
+- Engineering PR: `#11`, head commit
+  `610f15deb8c996f7df4a59053c47d5d7e57d7c20`.
+- PR CI: THS public-sector run `34911565624` succeeded. Official-market-count
+  run `34911565616` passed its deterministic data-layer tests, then failed only
+  because Eastmoney closed both full-market snapshot requests and Sina timed out
+  once then returned HTML. The fallback data and public limit pools were obtained;
+  this upstream snapshot failure does not exercise the opinion delivery patch.
+- No PR job called OpenAI or PushPlus. Next unit: confirm unchanged main, merge
+  PR #11, then inspect push-triggered validation jobs only.
 
 ## 2026-09-14 upload recovery checkpoint
 
