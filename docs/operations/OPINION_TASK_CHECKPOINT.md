@@ -1,6 +1,6 @@
 # V5 Market Opinion Mining — Task Checkpoint
 
-## 2026-09-15 delayed-delivery false alert (active repair)
+## 2026-09-15 delayed-delivery false alert (repair complete)
 
 - Lock: `LOCK-20260915-opinion-delivery-rollover`.
 - Production baseline: `ebbea4c0da5f8730b00e1c92810574af79e66de8`.
@@ -35,6 +35,15 @@
   availability (Eastmoney connection closed; Sina timeout/HTML fallback).
 - No validation job called OpenAI or PushPlus. Next unit: merge after a final
   main/active-run check; do not dispatch the delivery workflow manually.
+- Production commit: `17e5efcd28c4f8dc9a01f2fce272c9ca247adb66`.
+  Validation run `34911874638` succeeded with all production opinion stages and
+  the failure alert skipped.
+- Cloudflare deployment run `34912073032` succeeded. Worker version
+  `46369bae-a758-4639-a9b8-aba7e392b34a` is live and its health endpoint returned
+  the expected `ok` response.
+- Lock `LOCK-20260915-opinion-delivery-rollover` is closed. External OpenAI and
+  PushPlus calls during the entire repair: 0. The next acceptance point is the
+  natural 2026-09-15 evening cycle; never replay the 2026-09-14 report.
 
 Updated: 2026-09-12 17:34 Asia/Shanghai
 
