@@ -25,6 +25,7 @@ import requests
 APP_VERSION = "V5.5-second-start-evidence-layer"
 STRATEGY_VERSION = "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3"
 CN_TZ = ZoneInfo("Asia/Shanghai")
+PRE_AI_CANDIDATE_CAP = 50
 
 
 def _call_with_alarm(function, seconds: int = 12):
@@ -880,6 +881,118 @@ def stage3_rank(metrics: pd.DataFrame, max_n: int | None = None, return_audit: b
         x, "阶段3分", None, None, "阶段3通过", "三级生命周期筛选"
     )
     return (selected, audit) if return_audit else selected
+
+
+def align_pre_ai_candidates(
+    lifecycle_audit: pd.DataFrame,
+    cap: int = PRE_AI_CANDIDATE_CAP,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Align the deterministic 250-day output with the OpenAI decision contract.
+
+    The 120-day layer deliberately remains quota-free. This final deterministic
+    gate requires all three already-computed consolidation supports before a stock
+    is sent to the model, then ranks the remaining lifecycle-qualified stocks and
+    applies the hard API capacity limit. Every input row receives an auditable,
+    reason-code-compatible outcome; the cap therefore never becomes a silent
+    head(50) truncation.
+    """
+    x = lifecycle_audit.copy()
+    if x.empty:
+        return x, x
+    if not isinstance(cap, int) or isinstance(cap, bool) or cap < 1:
+        raise ValueError("OpenAI候选上限必须是正整数")
+    required = ["股票代码", "阶段3通过", "阶段3分", "整理收敛支持项"]
+    missing = [column for column in required if column not in x.columns]
+    if missing:
+        raise ValueError("OpenAI前置对齐缺少字段：" + "、".join(missing))
+
+    x["股票代码"] = x["股票代码"].astype(str).str.extract(r"(\d+)", expand=False).str[-6:].str.zfill(6)
+    for column in ["阶段3分", "阶段2分", "整理收敛支持项", "ret1", "ret40"]:
+        if column not in x.columns:
+            x[column] = np.nan
+        x[column] = pd.to_numeric(x[column], errors="coerce")
+
+    def bool_flags(series: pd.Series) -> pd.Series:
+        if pd.api.types.is_bool_dtype(series):
+            return series.fillna(False)
+        return series.fillna("").astype(str).str.strip().str.lower().isin({"true", "1", "yes", "y"})
+
+    lifecycle_ok = bool_flags(x["阶段3通过"])
+    x["OpenAI生命周期资格"] = lifecycle_ok
+    for support_column in ["振幅收敛", "流动性收敛", "短期下行停止"]:
+        if support_column in x.columns:
+            x[support_column] = bool_flags(x[support_column])
+    full_convergence = x["整理收敛支持项"].ge(3)
+    x["OpenAI结构成熟对齐"] = full_convergence
+    x["OpenAI基础资格"] = lifecycle_ok & full_convergence
+
+    # The score uses the same evidence families named in the API contract.
+    # Ret1/ret40 excess remains a ranking risk, not a standalone hard rejection.
+    x["OpenAI过热排序惩罚"] = (
+        x["ret1"].gt(0.06).fillna(False).astype(int) * 3
+        + x["ret40"].gt(0.80).fillna(False).astype(int) * 2
+    )
+    x["OpenAI前置对齐分"] = (
+        x["阶段3分"].fillna(-999)
+        + x["阶段2分"].fillna(0)
+        - x["OpenAI过热排序惩罚"]
+    )
+    eligible = x[x["OpenAI基础资格"]].sort_values(
+        ["OpenAI前置对齐分", "阶段3分", "股票代码"],
+        ascending=[False, False, True],
+        kind="stable",
+    )
+    selected_codes = set(eligible.head(cap)["股票代码"])
+    rank_map = {code: rank for rank, code in enumerate(eligible["股票代码"], start=1)}
+    x["OpenAI输入排名"] = x["股票代码"].map(rank_map).astype("Int64")
+    x["OpenAI输入资格"] = x["股票代码"].isin(selected_codes)
+    x["OpenAI输入上限"] = cap
+    x["OpenAI实际输入数"] = len(selected_codes)
+
+    def missing_supports(row) -> list[str]:
+        labels = [
+            ("振幅收敛", "振幅收敛"),
+            ("流动性收敛", "成交量/换手收敛"),
+            ("短期下行停止", "短期止跌"),
+        ]
+        return [
+            label for column, label in labels
+            if column in x.columns and not bool(row.get(column, False))
+        ]
+
+    def aligned_reason(row) -> tuple[str, str]:
+        if not bool(row.get("OpenAI生命周期资格", False)):
+            detail = str(row.get("阶段3风险提示", "") or "250日生命周期未通过")
+            return "MID_TERM_TREND_WEAK", f"程序前置淘汰：{detail}"
+        supports = int(row.get("整理收敛支持项", 0) or 0)
+        if supports < 3:
+            absent = "、".join(missing_supports(row)) or "至少一类结构证据"
+            return "STRUCTURE_NOT_MATURE", (
+                f"程序前置淘汰：三类整理成熟证据仅{supports}/3，缺少{absent}"
+            )
+        if bool(row.get("OpenAI输入资格", False)):
+            return "QUALIFIED_FOR_OPENAI", (
+                f"进入OpenAI：三类整理成熟证据3/3且250日生命周期通过；"
+                f"对齐排名{int(row['OpenAI输入排名'])}/{len(eligible)}，输入上限{cap}只"
+            )
+        return "LOWER_PRIORITY", (
+            f"程序前置淘汰：基础资格通过，但对齐排名{int(row['OpenAI输入排名'])}/{len(eligible)}"
+            f"位于OpenAI输入上限{cap}只之外"
+        )
+
+    outcomes = x.apply(aligned_reason, axis=1)
+    x["OpenAI前置判定代码"] = [outcome[0] for outcome in outcomes]
+    x["OpenAI前置判定原因"] = [outcome[1] for outcome in outcomes]
+    selected = x[x["OpenAI输入资格"]].sort_values(
+        ["OpenAI输入排名", "股票代码"], ascending=[True, True]
+    ).reset_index(drop=True)
+    audit = x.sort_values(
+        ["OpenAI输入资格", "OpenAI输入排名", "OpenAI前置对齐分", "股票代码"],
+        ascending=[False, True, False, True], na_position="last",
+    ).reset_index(drop=True)
+    if len(selected) > cap:
+        raise AssertionError(f"OpenAI前置门禁失效：{len(selected)} > {cap}")
+    return selected, audit
 
 
 # ---------- 14:45 实时 + 5分钟 ----------

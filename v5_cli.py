@@ -18,7 +18,9 @@ import pandas as pd
 from research.holding_exit import active_position_cycles, evaluate_holding_exits, saved_structure_stops
 
 from v5_core import (
+    PRE_AI_CANDIDATE_CAP,
     STRATEGY_VERSION,
+    align_pre_ai_candidates,
     build_metrics,
     confirmation_metrics,
     fetch_market_review,
@@ -1044,7 +1046,7 @@ def _post_gate_portfolio_note(selected: list[str], retreat: list[str], condition
 
 
 def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, breadth: pd.DataFrame, market_history: pd.DataFrame, market_context: pd.DataFrame, base: Path, generated_trade_date, source_summary: dict, sector_tables: dict[str,pd.DataFrame] | None = None) -> tuple[pd.DataFrame, dict, dict]:
-    """动态三级研究池 -> 0~10。严格验证代码集合、数量和日期。"""
+    """不超过50只的三级研究池 -> 0~10。严格验证代码集合、数量和日期。"""
     LATEST.mkdir(parents=True, exist_ok=True)
     for stale in [LATEST/"observation_pool.csv", LATEST/"observation_pool_meta.json", LATEST/"observation_pool_analysis.json"]:
         try:
@@ -1053,6 +1055,11 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
             pass
     if research_pack is None or research_pack.empty:
         raise RuntimeError("三级研究包为空，不能调用OpenAI。")
+    if len(research_pack) > PRE_AI_CANDIDATE_CAP:
+        raise RuntimeError(
+            f"OpenAI候选超过硬上限：{len(research_pack)} > {PRE_AI_CANDIDATE_CAP}；"
+            "禁止调用API，请检查250日/OpenAI前置门禁。"
+        )
     research_pack = refresh_stock_names(research_pack)
     source_candidate_count = len(research_pack)
     research_pack, excluded_active_trade_codes = exclude_active_trades(research_pack)
@@ -1095,6 +1102,8 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "candidate_stock_sector_attribution":stock_sector_context,
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
+            f"candidate_count已经经过程序250日生命周期与结构成熟对齐门禁，必须小于等于{PRE_AI_CANDIDATE_CAP}；不得要求扩大输入池",
+            "每只candidates均已由程序确认振幅收敛、流动性收敛、短期下行停止三类支持3/3；不得以‘只有两类结构支持’为由判STRUCTURE_NOT_MATURE",
             "selected_codes只能来自candidates，最多10只，可以0只；实际持仓已经在进入模型前排除，严禁从输入外补入",
             "decisions只详细覆盖selected_codes且最多10条；nonselected用代码、WAIT/REJECT和固定reason_code紧凑覆盖其余全部候选，不得遗漏或重复",
             "逐股文字保持简洁，每个判断字段只写一项结论和对应数值/板块名，避免重复叙述导致输出截断",
@@ -1260,17 +1269,31 @@ def run_after_close(batch_path: str | None):
     save_bytes(base / "120d" / "result.xlsx", to_excel_bytes({"120日日线": d120, "质量校验": q120, "结构指标": m120, "筛选审计": a2, "二级合格池": s2}))
     git_commit(f"V5 after-close 120d {stamp}")
 
-    # 三级：对全部二级合格股票做250日生命周期筛选，不设置数量目标。
+    # 三级：先做250日生命周期审计，再用与AI同口径的成熟度门禁和硬上限形成API输入。
     d250, q250 = fetch_pool_history_incremental(p2, 250, CACHE, checkpoint_factory(base / "250d"))
     m250 = build_metrics(d250)
     if not s2.empty and "阶段2分" in s2.columns:
         m250 = m250.merge(s2[["股票代码", "阶段2分"]], on="股票代码", how="left")
-    lifecycle_selected, lifecycle_audit = stage3_rank(m250, return_audit=True)
-    research_pack = lifecycle_selected.copy()
+    lifecycle_selected, raw_lifecycle_audit = stage3_rank(m250, return_audit=True)
+    research_pack, lifecycle_audit = align_pre_ai_candidates(
+        raw_lifecycle_audit, cap=PRE_AI_CANDIDATE_CAP
+    )
+    lifecycle_qualified_count = len(lifecycle_selected)
+    alignment_eliminated_count = int(
+        (lifecycle_audit["OpenAI前置判定代码"] == "STRUCTURE_NOT_MATURE").sum()
+    )
+    capacity_eliminated_count = int(
+        (lifecycle_audit["OpenAI前置判定代码"] == "LOWER_PRIORITY").sum()
+    )
     save_df(base / "250d" / "research_pack_stage3.csv", research_pack)
     save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
     save_df(base / "250d" / "lifecycle_audit.csv", lifecycle_audit)
-    save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI三级合格输入": research_pack}))
+    save_df(base / "250d" / "pre_ai_gate_audit.csv", lifecycle_audit)
+    save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({
+        "250日日线": d250, "质量校验": q250, "生命周期指标": m250,
+        "生命周期基础合格": lifecycle_selected, "生命周期与AI门禁审计": lifecycle_audit,
+        "AI最终输入不超过50": research_pack,
+    }))
 
     # 主池维护：仅自动淘汰“较久未再次提交 + 趋势同步转弱”；淘汰可被以后再次提交重新激活。
     cache_metrics = _cache_metrics_for_master(registry)
@@ -1323,6 +1346,10 @@ def run_after_close(batch_path: str | None):
             "status":"completed_ai_failed","engine":"V5.3-auditable-market-sector-layer","strategy":STRATEGY_VERSION,
             "started_cn":started.isoformat(),"completed_cn":now_cn().isoformat(),"batch_count":len(daily),
             "master_count":len(current),"eliminated_count":len(eliminated),"stage1":len(p1),"stage2_research_pool":len(p2),
+            "stage3_lifecycle_qualified":lifecycle_qualified_count,
+            "pre_ai_alignment_eliminated":alignment_eliminated_count,
+            "pre_ai_capacity_eliminated":capacity_eliminated_count,
+            "stage3_research_pool":len(research_pack),"openai_candidate_cap":PRE_AI_CANDIDATE_CAP,
             "observation_pool_count":0,"ai_error":str(e),"sector_validation":sector_validation,"folder":str(base)
         }
         save_json(base/"summary.json",fail_summary); save_json(LATEST/"latest_after_close.json",fail_summary)
@@ -1355,8 +1382,12 @@ def run_after_close(batch_path: str | None):
         "master_pool_capacity_note": "动态证据池；不按固定500只硬砍，按长期未提交且趋势同步转弱可逆淘汰",
         "cache_summary": cache_summary,
         "stage1": len(p1), "stage2_research_pool": len(p2),
+        "stage3_lifecycle_qualified": lifecycle_qualified_count,
+        "pre_ai_alignment_eliminated": alignment_eliminated_count,
+        "pre_ai_capacity_eliminated": capacity_eliminated_count,
         "stage3_research_pool": len(research_pack),
-        "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
+        "openai_candidate_cap": PRE_AI_CANDIDATE_CAP,
+        "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment",{}),
         "sector_validation": sector_validation,

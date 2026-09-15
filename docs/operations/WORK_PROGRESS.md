@@ -1,6 +1,53 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-15 08:15 Asia/Shanghai
+Updated: 2026-09-15 18:18 Asia/Shanghai
+
+## 2026-09-15 pre-AI capacity and decision-alignment revision
+
+- Active operation lock: `LOCK-20260915-1618-pre-ai-cap-alignment`.
+- Sole executor: current maintenance account/current window. Baseline production
+  main: `b878937618893c1cc44241e157d22b897cdb290d`; zero open pull requests and
+  zero queued or in-progress Actions at acquisition and at the post-interruption
+  resume check.
+- User-approved requirements: record an actual sale of `002902` for 900 shares
+  at CNY 29.22 on 2026-09-15 before close; keep the 25-day and 120-day stages free
+  from numeric quotas; ensure the final 250-day/pre-AI research pool never exceeds
+  50 stocks; preserve a complete per-stock elimination reason; align deterministic
+  program decisions with the OpenAI reason taxonomy before the API call.
+- The sale must be appended through the encrypted private ledger. Do not expose the
+  plaintext ledger or key, and do not fabricate an account when the existing active
+  position is ambiguous. The Streamlit secure-login request was interrupted before
+  any credentials or trade data were submitted, so this transaction remains pending.
+- Latest verified screening evidence: the 2026-09-14 run was 681 -> 408 -> 172 ->
+  114 -> 1. The 113-stock API request used 171,555 input tokens. Among its outcomes,
+  79 were `STRUCTURE_NOT_MATURE`; all 79 had only two of the three deterministic
+  convergence supports, while the sole SELECT had all three.
+- Implemented an explicit pre-AI gate after the quota-free 120-day stage: candidates
+  must pass the 250-day lifecycle gate and have all three program evidence families
+  (amplitude contraction, volume/turnover contraction, and short-term decline
+  stopped). Eligible stocks are then ranked using the same structure/lifecycle/
+  overheating evidence families and hard-capped at 50.
+- Every 250-day audit row now receives `OpenAI前置判定代码` and
+  `OpenAI前置判定原因`. The output distinguishes
+  `STRUCTURE_NOT_MATURE`, `MID_TERM_TREND_WEAK`, `LOWER_PRIORITY`, and
+  `QUALIFIED_FOR_OPENAI`; capacity trimming is therefore never silent.
+- A second fail-closed guard blocks the OpenAI function itself if more than 50
+  candidates reach it. No after-close replay, OpenAI call, or PushPlus delivery
+  occurred.
+- Offline verification before the execution environment disconnected: Python
+  compilation passed; all 131 deterministic tests passed. Replay against the saved
+  2026-09-14 172-row lifecycle audit produced 22 API candidates, 92 program-side
+  `STRUCTURE_NOT_MATURE` outcomes, 58 `MID_TERM_TREND_WEAK` outcomes, and zero
+  blank reasons. It made no network or model call.
+- Recovery branch: `codex/pre-ai-cap-alignment-20260915`; latest saved branch
+  commit before this checkpoint update: `6bc4072227821f8ab340556d1a5f7bcdb226d43a`.
+  The local execution environment later became unavailable, so the already-tested
+  change was reconstructed on this branch from the verified patch units rather than
+  modifying production main directly.
+- Reliable resume point: code, tests, and evidence are durable on the recovery
+  branch. Next action is PR/CI verification and merge if checks pass. The encrypted
+  002902 trade append remains a separate pending unit and must not be claimed as
+  completed until the live ledger confirms it.
 
 ## 2026-09-15 opinion-delivery rollover incident
 

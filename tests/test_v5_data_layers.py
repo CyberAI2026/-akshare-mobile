@@ -433,6 +433,64 @@ class GithubFileTransportTests(unittest.TestCase):
                 core.gh_get_bytes(config,"v5_data/private/trades.enc")
 
 
+class PreAiCandidateAlignmentTests(unittest.TestCase):
+    @staticmethod
+    def candidate(index, *, lifecycle=True, supports=3, score=None):
+        code = f"{index:06d}"
+        return {
+            "股票代码": code, "股票名称": f"测试{index}",
+            "阶段3通过": lifecycle,
+            "阶段3分": float(score if score is not None else 100 - index),
+            "阶段2分": 12.0, "整理收敛支持项": supports,
+            "振幅收敛": True, "流动性收敛": supports >= 3,
+            "短期下行停止": True, "ret1": 0.02, "ret40": 0.30,
+            "阶段3风险提示": "长期下降趋势中的修复/反弹，降级" if not lifecycle else "",
+        }
+
+    def test_alignment_gate_caps_at_50_and_audits_every_elimination(self):
+        frame = pd.DataFrame([
+            *[self.candidate(i) for i in range(1, 61)],
+            self.candidate(61, supports=2),
+            self.candidate(62, lifecycle=False),
+        ])
+        selected, audit = core.align_pre_ai_candidates(frame, cap=50)
+        self.assertEqual(len(selected), 50)
+        self.assertEqual(len(audit), len(frame))
+        self.assertEqual(
+            set(selected["OpenAI前置判定代码"]), {"QUALIFIED_FOR_OPENAI"}
+        )
+        self.assertEqual(
+            (audit["OpenAI前置判定代码"] == "LOWER_PRIORITY").sum(), 10
+        )
+        immature = audit[audit["股票代码"] == "000061"].iloc[0]
+        self.assertEqual(
+            immature["OpenAI前置判定代码"], "STRUCTURE_NOT_MATURE"
+        )
+        self.assertIn("2/3", immature["OpenAI前置判定原因"])
+        weak = audit[audit["股票代码"] == "000062"].iloc[0]
+        self.assertEqual(weak["OpenAI前置判定代码"], "MID_TERM_TREND_WEAK")
+        self.assertTrue(
+            audit["OpenAI前置判定原因"].astype(str).str.len().gt(0).all()
+        )
+
+    def test_after_close_api_fails_closed_above_candidate_cap(self):
+        pool = pd.DataFrame([
+            {"股票代码": f"{i:06d}", "股票名称": f"测试{i}"}
+            for i in range(1, core.PRE_AI_CANDIDATE_CAP + 2)
+        ])
+        with tempfile.TemporaryDirectory() as td, \
+             patch.object(cli, "LATEST", Path(td) / "latest"), \
+             patch.object(
+                 cli, "openai_analyze",
+                 side_effect=AssertionError("API must not be called"),
+             ):
+            with self.assertRaisesRegex(RuntimeError, "超过硬上限"):
+                cli.run_openai_after_close(
+                    pool, pd.DataFrame(), pd.DataFrame(), pd.DataFrame(),
+                    pd.DataFrame(), Path(td), date(2026, 9, 15), {}, None,
+                )
+
+
 class PrivateTradeLedgerTests(unittest.TestCase):
     @staticmethod
     def trade(side, qty, price=10.0, trade_time="14:45:00"):
