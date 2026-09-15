@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed_ai_failed",
+  "stage": "ai_failed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-15T21:35:43.670630+08:00",
@@ -77,5 +77,6 @@
     "concept_table_count": 4,
     "industry_table_count": 5,
     "scope_note": "仅使用已通过校验的板块类型；缺失板块不得推断"
-  }
+  },
+  "ai_error": "OpenAI候选超过硬上限：97 > 50；禁止调用API，请检查250日/OpenAI前置门禁。"
 }
