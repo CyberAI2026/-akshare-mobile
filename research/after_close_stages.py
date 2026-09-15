@@ -9,7 +9,9 @@ import pandas as pd
 
 import v5_cli as cli
 from v5_core import (
+    PRE_AI_CANDIDATE_CAP,
     STRATEGY_VERSION,
+    align_pre_ai_candidates,
     build_metrics,
     fetch_market_review,
     fetch_pool_history_incremental,
@@ -86,6 +88,26 @@ def _attach_stage2_evidence(research_pack: pd.DataFrame, stage2_audit: pd.DataFr
     out = research_pack.drop(columns=[c for c in available if c in research_pack.columns]).copy()
     out["股票代码"] = out["股票代码"].astype(str).str.zfill(6)
     return out.merge(evidence, on="股票代码", how="left")
+
+
+def _apply_pre_ai_alignment(
+    base: Path,
+    lifecycle_audit: pd.DataFrame,
+    stage2_audit: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Build and persist the <=50 API input from the complete 250-day audit."""
+    research_pack, aligned_audit = align_pre_ai_candidates(
+        lifecycle_audit, cap=PRE_AI_CANDIDATE_CAP
+    )
+    research_pack = _attach_stage2_evidence(research_pack, stage2_audit)
+    cli.save_df(base / "250d" / "research_pack_stage3.csv", research_pack)
+    cli.save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
+    cli.save_df(base / "250d" / "lifecycle_audit.csv", aligned_audit)
+    cli.save_df(base / "250d" / "pre_ai_gate_audit.csv", aligned_audit)
+    cli.save_df(cli.LATEST / "research_pool_30_50.csv", research_pack)
+    cli.save_df(cli.LATEST / "research_pool_30.csv", research_pack)
+    cli.save_df(cli.LATEST / "research_pool_stage3.csv", research_pack)
+    return research_pack, aligned_audit
 
 
 def _plan_25d_cache_refresh(
@@ -348,14 +370,24 @@ def run_250d() -> None:
     stage2_audit = _read_csv(base / "120d" / "stage_audit.csv")
     if not stage2_audit.empty and "阶段2分" in stage2_audit.columns:
         m250 = m250.merge(stage2_audit[["股票代码", "阶段2分"]], on="股票代码", how="left")
-    lifecycle_selected, lifecycle_audit = stage3_rank(m250, return_audit=True)
-    research_pack = lifecycle_selected.copy()
-    research_pack = _attach_stage2_evidence(research_pack, stage2_audit)
-    cli.save_df(base / "250d" / "research_pack_stage3.csv", research_pack)
-    cli.save_df(base / "250d" / "research_pack_30_40.csv", research_pack)
-    cli.save_df(base / "250d" / "lifecycle_audit.csv", lifecycle_audit)
+    lifecycle_selected, raw_lifecycle_audit = stage3_rank(m250, return_audit=True)
+    research_pack, lifecycle_audit = _apply_pre_ai_alignment(
+        base, raw_lifecycle_audit, stage2_audit
+    )
+    lifecycle_qualified_count = len(lifecycle_selected)
+    alignment_eliminated_count = int(
+        (lifecycle_audit["OpenAI前置判定代码"] == "STRUCTURE_NOT_MATURE").sum()
+    )
+    capacity_eliminated_count = int(
+        (lifecycle_audit["OpenAI前置判定代码"] == "LOWER_PRIORITY").sum()
+    )
     cli.save_df(base / "stages" / "q250.csv", q250)
-    cli.save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({"250日日线": d250, "质量校验": q250, "生命周期指标": m250, "生命周期审计": lifecycle_audit, "AI三级合格输入": research_pack}))
+    cli.save_bytes(base / "250d" / "result.xlsx", to_excel_bytes({
+        "250日日线": d250, "质量校验": q250, "生命周期指标": m250,
+        "生命周期基础合格": lifecycle_selected,
+        "生命周期与AI门禁审计": lifecycle_audit,
+        "AI最终输入不超过50": research_pack,
+    }))
 
     registry = _read_csv(base / "stages" / "registry_merged.csv")
     cache_metrics = cli._cache_metrics_for_master(registry)
@@ -385,7 +417,11 @@ def run_250d() -> None:
         "daily_eliminated_count": int((maintenance_audit.get("淘汰日期", pd.Series(dtype=str)).astype(str) == str(pd.Timestamp(state["started_cn"]).date())).sum()) if not maintenance_audit.empty else 0,
         "cooling_count": int((registry["当前状态"].astype(str) == "冷却观察").sum()) if not registry.empty else 0,
         "qa250": _qa_cache_summary(q250),
+        "stage3_lifecycle_qualified": lifecycle_qualified_count,
+        "pre_ai_alignment_eliminated": alignment_eliminated_count,
+        "pre_ai_capacity_eliminated": capacity_eliminated_count,
         "stage3_research_pool": len(research_pack),
+        "openai_candidate_cap": PRE_AI_CANDIDATE_CAP,
     })
     _save_state(state)
     cli.git_commit(f"V5 after-close 250d {state['stamp']}")
@@ -440,8 +476,29 @@ def run_ai() -> None:
         raise RuntimeError(f"阶段顺序错误：需要 market_context_complete/ai_failed，当前为 {state.get('stage')}")
     research_pack = _read_csv(base / "250d" / "research_pack_30_40.csv")
     stage2_audit_path = base / "120d" / "stage_audit.csv"
-    if stage2_audit_path.exists():
-        research_pack = _attach_stage2_evidence(research_pack, _read_csv(stage2_audit_path))
+    stage2_audit = _read_csv(stage2_audit_path) if stage2_audit_path.exists() else pd.DataFrame()
+    lifecycle_audit_path = base / "250d" / "lifecycle_audit.csv"
+    if lifecycle_audit_path.exists():
+        prior_audit = _read_csv(lifecycle_audit_path)
+        research_pack, aligned_audit = _apply_pre_ai_alignment(
+            base, prior_audit, stage2_audit
+        )
+        state.update({
+            "stage3_lifecycle_qualified": int(
+                aligned_audit["OpenAI生命周期资格"].sum()
+            ),
+            "pre_ai_alignment_eliminated": int(
+                (aligned_audit["OpenAI前置判定代码"] == "STRUCTURE_NOT_MATURE").sum()
+            ),
+            "pre_ai_capacity_eliminated": int(
+                (aligned_audit["OpenAI前置判定代码"] == "LOWER_PRIORITY").sum()
+            ),
+            "stage3_research_pool": len(research_pack),
+            "openai_candidate_cap": PRE_AI_CANDIDATE_CAP,
+        })
+        _save_state(state)
+    else:
+        research_pack = _attach_stage2_evidence(research_pack, stage2_audit)
     market_sheets = pd.read_excel(base / "market_review.xlsx", sheet_name=None)
     sector_sheets = pd.read_excel(base / "sector_fund_flow.xlsx", sheet_name=None)
     idx = market_sheets.get("五大指数180日", pd.DataFrame())
@@ -511,7 +568,7 @@ def run_ai() -> None:
         "status": "completed", "stage": "completed", "completed_cn": completed.isoformat(),
         "elapsed_minutes": round((completed - started).total_seconds() / 60, 2),
         "cache_summary": {"25日": state.get("qa25", {}), "120日": state.get("qa120", {}), "250日": state.get("qa250", {})},
-        "python_final": "三级资格筛选研究包（各阶段不设置数量目标，OpenAI最终最多10只）",
+        "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
         "observation_pool_count": len(obs), "target_trade_date": obs_meta.get("target_trade_date"),
         "openai_model": obs_meta.get("model"), "market_assessment": obs_meta.get("market_assessment", {}),
         "sector_validation": sector_validation,
