@@ -1,8 +1,8 @@
 {
   "status": "completed",
   "snapshot_date": "2026-09-05",
-  "rows": 1932,
-  "stocks": 674,
+  "rows": 1945,
+  "stocks": 682,
   "multi_concept_stocks": 265,
   "fact_board_count": 477,
   "version": "stock-sector-attribution-v0.1.0",
