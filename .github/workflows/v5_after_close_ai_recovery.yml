@@ -36,6 +36,10 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
       - run: pip install -r requirements.txt
+      - name: Validate staged recovery before any external call
+        run: |
+          python -m py_compile v5_core.py v5_cli.py research/after_close_stages.py
+          python -m unittest tests/test_v5_data_layers.py tests/test_after_close_stages.py
       - name: Resume only the failed OpenAI stage
         shell: bash
         run: |
