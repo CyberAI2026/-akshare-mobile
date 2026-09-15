@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-15",
   "trade_date": "2026-09-15",
-  "updated_at_cn": "2026-09-15T21:14:41.656337+08:00",
+  "updated_at_cn": "2026-09-15T21:24:58.372308+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -87,6 +87,21 @@
       "body_chars": 5196,
       "body_sha256": "407646cb5191843111733317d1c3b103cb84a4aa1711529dfb81d68bbcf07626",
       "published_at_cn": "2026-09-15T15:10:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "56cfa857e9916a99",
+      "title": "Lazybread—20260915（高位补跌加速出清）_lazybread_淘股吧",
+      "url": "https://www.tgb.cn/a/2v77qWcMOSR",
+      "read_count": 107,
+      "body_chars": 2375,
+      "body_sha256": "56cfa857e9916a993bd749fc4846a78387599c4156fcd779a7d508248029a59f",
+      "published_at_cn": "2026-09-15T18:10:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -954,6 +969,89 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "56cfa857e9916a99",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮"
+      ],
+      "market_summary": "作者认为高位补跌正在加速出清，接力负反馈严重，建议先放缓节奏。",
+      "sectors": [
+        {
+          "name": "电力",
+          "stance": "活跃",
+          "evidence": "闽东电力5板，中闽能源等个股跟随。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "宏盛股份2板，吉鑫科技、大金重工等首板。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "中新赛克4板，启明信息、博汇科技等连板。"
+        },
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "澳鸿电子3板，华正新材、欧克科技等首板。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "分化",
+          "evidence": "金龙羽首板，诺德股份、英联股份等响应。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "闽东电力",
+          "sector": "电力/风电",
+          "role": "龙头"
+        },
+        {
+          "name": "中新赛克",
+          "sector": "AI应用/网络安全",
+          "role": "核心"
+        },
+        {
+          "name": "澳鸿电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "启明信息",
+          "sector": "网络安全/车联网",
+          "role": "高关注"
+        },
+        {
+          "name": "博汇科技",
+          "sector": "网络安全",
+          "role": "高关注"
+        },
+        {
+          "name": "金龙羽",
+          "sector": "锂电池",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "接力负反馈是否缓解",
+        "高位补跌出清情况",
+        "闽东电力的高度节点表现"
+      ],
+      "numeric_claims": [
+        "闽东电力5板",
+        "中新赛克4板",
+        "澳鸿电子3板",
+        "启明信息2板",
+        "博汇科技20cm2连",
+        "宏盛股份2板"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
