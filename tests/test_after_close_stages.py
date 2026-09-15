@@ -138,6 +138,38 @@ class AfterCloseStageTests(unittest.TestCase):
         self.assertTrue(bool(out["整理成熟"]))
         self.assertTrue(bool(out["流动性收敛"]))
 
+    def test_staged_alignment_gate_persists_at_most_50_with_full_audit(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            base = root / "run"
+            latest = root / "latest"
+            (base / "250d").mkdir(parents=True)
+            lifecycle = pd.DataFrame([
+                {
+                    "股票代码": f"{i:06d}", "股票名称": f"测试{i}",
+                    "阶段3通过": True, "阶段3分": 100 - i,
+                    "阶段2分": 12, "整理收敛支持项": 3,
+                    "振幅收敛": True, "流动性收敛": True,
+                    "短期下行停止": True, "ret1": 0.02, "ret40": 0.30,
+                }
+                for i in range(1, 61)
+            ])
+            with patch.object(stages.cli, "LATEST", latest):
+                selected, audit = stages._apply_pre_ai_alignment(
+                    base, lifecycle, pd.DataFrame()
+                )
+            self.assertEqual(len(selected), 50)
+            self.assertEqual(len(audit), 60)
+            self.assertEqual(
+                (audit["OpenAI前置判定代码"] == "LOWER_PRIORITY").sum(), 10
+            )
+            saved = pd.read_csv(
+                base / "250d" / "pre_ai_gate_audit.csv",
+                dtype={"股票代码": str},
+            )
+            self.assertEqual(len(saved), 60)
+            self.assertTrue(saved["OpenAI前置判定原因"].astype(str).str.len().gt(0).all())
+
     def test_ai_rerun_retries_delivery_without_repeating_openai(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
