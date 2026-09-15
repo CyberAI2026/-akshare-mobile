@@ -1,10 +1,10 @@
 # Strong Stock Production Operations — Unified Checkpoint
 
-Updated: 2026-09-15 18:18 Asia/Shanghai
+Updated: 2026-09-15 18:24 Asia/Shanghai
 
 ## 2026-09-15 pre-AI capacity and decision-alignment revision
 
-- Active operation lock: `LOCK-20260915-1618-pre-ai-cap-alignment`.
+- Operation lock `LOCK-20260915-1618-pre-ai-cap-alignment`: closed after PR validation and production merge.
 - Sole executor: current maintenance account/current window. Baseline production
   main: `b878937618893c1cc44241e157d22b897cdb290d`; zero open pull requests and
   zero queued or in-progress Actions at acquisition and at the post-interruption
@@ -44,10 +44,17 @@ Updated: 2026-09-15 18:18 Asia/Shanghai
   The local execution environment later became unavailable, so the already-tested
   change was reconstructed on this branch from the verified patch units rather than
   modifying production main directly.
-- Reliable resume point: code, tests, and evidence are durable on the recovery
-  branch. Next action is PR/CI verification and merge if checks pass. The encrypted
-  002902 trade append remains a separate pending unit and must not be claimed as
-  completed until the live ledger confirms it.
+- PR #13 was squash-merged to production main as
+  `f1c52f586074ef9be39def90be7ecf3dae625322`. THS public-sector validation
+  succeeded. The official-market workflow's deterministic data-layer suite also
+  succeeded; its later live snapshot step failed only because Eastmoney closed both
+  requests and Sina timed out then returned HTML. This upstream result does not
+  exercise or invalidate the screening revision.
+- Final reliable checkpoint: the <=50 fail-closed API boundary, aligned maturity
+  gate, complete per-stock audit, run summary fields, and UI wording are live on
+  production main. The encrypted 002902 trade append remains a separate pending unit
+  because the secure Streamlit login was interrupted before submission; it must not
+  be claimed as completed until the live ledger confirms it.
 
 ## 2026-09-15 opinion-delivery rollover incident
 
