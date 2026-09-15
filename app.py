@@ -448,12 +448,12 @@ with t5:
 - V4旧池自动迁移到V5云端主池；以后每天只提交当天30–40只强势股。
 - 指数与个股彻底隔离，避免000001/000688之类的代码歧义污染筛选。
 - 全局历史缓存+增量更新，避免每天重新下载500只完整历史。
-- Python只负责约500→150–200→30–40，并给30–40只生成250日生命周期研究包；容量是软区间，不为凑数降低资格线。
+- 25日和120日阶段不设数量目标；250日生命周期审计后增加与OpenAI口径一致的结构成熟门禁，API输入硬上限50只，并逐股保留淘汰原因。
 - 盘后研究、14:40尾盘确认、每周备份拆成独立Workflow。
 - 尾盘任务增加交易日、目标日期、上一交易日来源、池大小等安全锁。
 - 每周五自动备份主池到GitHub。
 
-**已接入：OpenAI API盘后30–40→0–10 + 14:45最终0→5，并通过 PushPlus 推送微信通知。**
+**已接入：OpenAI API盘后≤50→0–10 + 14:45最终0→5，并通过 PushPlus 推送微信通知。**
 """)
     st.code('''Streamlit Secrets：\nGITHUB_PAT = "..."\nGITHUB_REPO = "CyberAI2026/-akshare-mobile"\nGITHUB_BRANCH = "main"\nTRADING_DATA_KEY = "Fernet密钥"\nTRADING_UI_PASSWORD = "交易台账独立口令（可选）"\n\nGitHub Actions Secrets：\nTRADING_DATA_KEY = "与Streamlit完全相同的Fernet密钥"''')
     st.warning("旧的 v4_background.yml 必须去掉 schedule；V5安装包中已提供一个‘仅手动兼容版’覆盖文件，防止再次出现#9那种晚上误触发。")
