@@ -1,18 +1,20 @@
 {
   "status": "succeeded",
-  "kind": "盘后三级研究池→0~10次日观察池",
-  "requested_at_cn": "2026-09-15T22:56:04.370247+08:00",
-  "completed_at_cn": "2026-09-15T22:56:33.795725+08:00",
-  "response_id": "resp_077d2c48a8d4052c006aa95c8594ac87d191e00b81e06ec007",
+  "kind": "14:45尾盘0-5最终确认",
+  "requested_at_cn": "2026-09-16T14:48:08.040748+08:00",
+  "completed_at_cn": "2026-09-16T14:48:45.095895+08:00",
+  "response_id": "resp_076086160e9012ef006aaa3bae875087d0adad975b9c52cef0",
   "model": "gpt-5.6-terra",
-  "input_tokens": 50832,
-  "output_tokens": 1764,
-  "total_tokens": 52596,
+  "input_tokens": 33648,
+  "output_tokens": 2274,
+  "total_tokens": 35922,
   "response_status": "completed",
   "incomplete_reason": null,
-  "structured_output": true,
+  "structured_output": false,
   "max_output_tokens": 20000,
-  "prompt_sha256": "c1ee181248659de0f7c764afa026908378f624d7e29102115b1c7f11681afc73",
-  "attempt_count": 1,
-  "errors": []
+  "prompt_sha256": "09e159949c169d326fc48febfef7f10566de9d2be07f41fb12ede5b2d5a1732c",
+  "attempt_count": 2,
+  "errors": [
+    "attempt=1:InternalServerError:Error code: 503 - {'error': {'message': 'Our servers are currently overloaded. Please try again later.', 'type': 'service_unavailable_error', 'param': None, 'code': 'server_is_overloaded'}}"
+  ]
 }
