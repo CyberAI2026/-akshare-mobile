@@ -11,7 +11,10 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-from research.private_trade_ledger import build_trade_cycles, load_encrypted_transactions
+try:
+    from research.private_trade_ledger import build_trade_cycles, load_encrypted_transactions
+except ModuleNotFoundError:  # Support direct `python research/recommendation_feedback.py` execution.
+    from private_trade_ledger import build_trade_cycles, load_encrypted_transactions
 
 TZ = ZoneInfo("Asia/Shanghai")
 ROOT = Path("v5_data/feedback")

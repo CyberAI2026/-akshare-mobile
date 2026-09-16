@@ -55,12 +55,12 @@ jobs:
             ASOF=$(jq -r '.asof' "$TRIGGER")
             TITLE=$(jq -r '.title' "$TRIGGER")
             KEY=$(jq -r '.delivery_key' "$TRIGGER")
-            python research/recommendation_feedback.py update \
+            python -m research.recommendation_feedback update \
               --asof "$ASOF" --notify-title "$TITLE" --delivery-key "$KEY"
           elif [ "${{ github.event_name }}" = "push" ]; then
-            python research/recommendation_feedback.py update --no-notify
+            python -m research.recommendation_feedback update --no-notify
           else
-            python research/recommendation_feedback.py update
+            python -m research.recommendation_feedback update
           fi
       - name: Build stock-to-multiple-sector attribution
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '40 11 * * 1-5'
