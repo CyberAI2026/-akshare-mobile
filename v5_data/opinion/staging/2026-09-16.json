@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-16",
   "trade_date": "2026-09-16",
-  "updated_at_cn": "2026-09-16T21:15:06.352588+08:00",
+  "updated_at_cn": "2026-09-16T21:24:43.555254+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -192,6 +192,21 @@
       "body_chars": 11083,
       "body_sha256": "56dcd5e8af99fef37e4dea1dfe9186746d3aa2d7d77e0a3ec6fbf7fb3c1d2c18",
       "published_at_cn": "2026-09-16T19:26:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "59f1a0a9bdae1b47",
+      "title": "2026年9月16日复盘_Honeyzzz_淘股吧",
+      "url": "https://www.tgb.cn/a/2v8EhsiBw7E",
+      "read_count": 60,
+      "body_chars": 1628,
+      "body_sha256": "59f1a0a9bdae1b47673a3f39fd145729ca3935596035b48e379ac10397090c58",
+      "published_at_cn": "2026-09-16T16:17:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1804,6 +1819,65 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "59f1a0a9bdae1b47",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为大盘回暖，科技对指数拉动明显，但量能尚未达到其认定的科技回暖节点；农业可能进入退潮。",
+      "sectors": [
+        {
+          "name": "半导体",
+          "stance": "加强",
+          "evidence": "作者称科技回流时，半导体板块一路向上。"
+        },
+        {
+          "name": "科技",
+          "stance": "活跃",
+          "evidence": "作者认为科技确实容易拉动大盘，但回暖仍缺量能确认。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者判断农业可能真的要退潮。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "华微电子",
+          "sector": "半导体",
+          "role": "不明确"
+        },
+        {
+          "name": "康达新材",
+          "sector": "不明确",
+          "role": "不明确"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "华电辽能",
+          "sector": "不明确",
+          "role": "不明确"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技板块量能能否达到作者认定的回暖节点",
+        "金健米业后续走势及龙虎榜是否出现“家人们”"
+      ],
+      "numeric_claims": [
+        "华微电子亏损3.5个点",
+        "金健米业换手率接近50",
+        "作者当日亏损5个点"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
