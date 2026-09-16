@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from research.holding_exit import active_position_cycles, evaluate_holding_exits
+from research.holding_exit import active_position_cycles, evaluate_after_close_holdings, evaluate_holding_exits
 
 
 def transactions(today_buy=False):
@@ -50,6 +50,24 @@ class HoldingExitTests(unittest.TestCase):
             pos = active_position_cycles(transactions(), date(2026, 9, 8))
             out = evaluate_holding_exits(pos, pd.DataFrame(), pd.DataFrame(), td, {})
             self.assertEqual(out.iloc[0]["卖出建议"], "DATA_ERROR")
+
+    def test_after_close_review_raises_stop_and_reports_trailing_reference(self):
+        with tempfile.TemporaryDirectory() as td:
+            closes = [24.8, 25.0, 25.3, 25.7, 26.2, 26.8, 27.0, 26.7, 26.6, 26.5, 26.5]
+            pd.DataFrame({"日期": pd.bdate_range("2026-09-04", periods=len(closes)), "收盘价": closes}).to_csv(
+                Path(td) / "600801.csv", index=False
+            )
+            positions = active_position_cycles(transactions(), date(2026, 9, 16))
+            out = evaluate_after_close_holdings(positions, td, {"600801": 23.82})
+            row = out.iloc[0]
+            self.assertEqual(row["盘后建议"], "HOLD")
+            self.assertTrue(bool(row["止损是否上调"]))
+            self.assertGreater(float(row["当前结构止损位"]), 23.82)
+            self.assertAlmostEqual(float(row["回撤止盈触发价"]), 27.0 * 0.95, places=4)
+
+    def test_after_close_review_without_active_position_is_empty(self):
+        out = evaluate_after_close_holdings(pd.DataFrame(), ".", {})
+        self.assertTrue(out.empty)
 
 
 if __name__ == "__main__":

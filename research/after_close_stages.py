@@ -8,6 +8,8 @@ from pathlib import Path
 import pandas as pd
 
 import v5_cli as cli
+from research.holding_exit import active_position_cycles, evaluate_after_close_holdings, saved_structure_stops
+from research.private_trade_ledger import decrypt_transactions
 from v5_core import (
     PRE_AI_CANDIDATE_CAP,
     STRATEGY_VERSION,
@@ -447,6 +449,28 @@ def run_market() -> None:
     print(f"AFTER_CLOSE_STAGE_OK stage=market sector_status={sector_validation.get('status')}")
 
 
+def _build_after_close_holding_review(base: Path, trade_date) -> pd.DataFrame:
+    ledger = cli.PRIVATE_TRADE_LEDGER
+    key = os.getenv("TRADING_DATA_KEY", "").strip()
+    if not ledger.exists() and not key:
+        return pd.DataFrame()
+    if ledger.exists() and not key:
+        raise RuntimeError("存在加密交易台账但TRADING_DATA_KEY缺失，禁止省略盘后持仓复核")
+    if ledger.exists():
+        transactions = decrypt_transactions(ledger.read_bytes(), key)
+        positions = active_position_cycles(transactions, trade_date)
+    else:
+        positions = pd.DataFrame()
+    stops = saved_structure_stops(cli.RECOMMENDATION_REGISTRY)
+    review = evaluate_after_close_holdings(positions, cli.CACHE, stops)
+    cli.save_private_exit_decisions(
+        review,
+        base / "holdings" / "after_close_holding_review.enc",
+        cli.LATEST / "after_close_holding_review.enc",
+    )
+    return review
+
+
 def run_ai() -> None:
     state, base = _load_state()
     notify_enabled = str(os.getenv("AFTER_CLOSE_NOTIFY", "true")).strip().lower() not in {
@@ -460,7 +484,8 @@ def run_ai() -> None:
         if not meta_path.exists():
             raise FileNotFoundError("盘后微信重试缺少观察池元数据")
         obs_meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        push_ok = bool(cli.notify_after_close_success(state, obs, obs_meta))
+        holding_review = cli.load_private_exit_decisions(cli.LATEST / "after_close_holding_review.enc")
+        push_ok = bool(cli.notify_after_close_success(state, obs, obs_meta, holding_review))
         state["pushplus_delivery_ok"] = push_ok
         state["status"] = "completed" if push_ok else "completed_push_failed"
         cli.save_json(base / "summary.json", state)
@@ -508,6 +533,15 @@ def run_ai() -> None:
     sector_qa = sector_sheets.pop("板块质量校验", pd.DataFrame())
     sector_tables_for_ai, sector_validation = cli._sector_readiness(sector_sheets, sector_qa)
     generated_trade_date = pd.Timestamp(state["generated_trade_date"]).date()
+    holding_review = _build_after_close_holding_review(base, generated_trade_date)
+    state["holding_review_summary"] = {
+        "position_count": int(len(holding_review)),
+        "hold_count": int((holding_review.get("盘后建议", pd.Series(dtype=str)) == "HOLD").sum()),
+        "exit_count": int((holding_review.get("盘后建议", pd.Series(dtype=str)) == "EXIT_NEXT_SESSION").sum()),
+        "reduce_count": int((holding_review.get("盘后建议", pd.Series(dtype=str)) == "REDUCE_NEXT_SESSION").sum()),
+        "data_error_count": int((holding_review.get("盘后建议", pd.Series(dtype=str)) == "DATA_ERROR").sum()),
+    }
+    _save_state(state)
     try:
         if research_pack.empty:
             obs = research_pack.reindex(columns=["股票代码", "股票名称"]).copy()
@@ -578,7 +612,7 @@ def run_ai() -> None:
         "stock_qa_250_success": state.get("qa250", {}).get("成功", 0),
         "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
     }
-    push_ok = bool(cli.notify_after_close_success(summary, obs, obs_meta)) if notify_enabled else None
+    push_ok = bool(cli.notify_after_close_success(summary, obs, obs_meta, holding_review)) if notify_enabled else None
     summary["pushplus_delivery_ok"] = push_ok
     summary["pushplus_delivery_status"] = (
         "request_accepted" if push_ok else "failed" if notify_enabled else "suppressed_strategy_replay"

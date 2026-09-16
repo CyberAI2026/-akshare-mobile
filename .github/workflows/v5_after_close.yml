@@ -1,6 +1,8 @@
 name: V5 After-Close Research
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       batch_path:
@@ -18,7 +20,13 @@ on:
     paths:
       - 'v5_data/inbox/daily_*.csv'
       - 'research/after_close_stages.py'
+      - 'research/holding_exit.py'
+      - 'research/private_trade_ledger.py'
+      - 'research/recommendation_feedback.py'
       - 'tests/test_after_close_stages.py'
+      - 'tests/test_holding_exit.py'
+      - 'tests/test_recommendation_feedback.py'
+      - 'v5_cli.py'
       - '.github/workflows/v5_after_close.yml'
       - '.github/workflows/v5_after_close_stage.yml'
 
@@ -46,8 +54,8 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Validate staged runner
         run: |
-          python -m py_compile v5_cli.py research/after_close_stages.py
-          python -m unittest tests/test_v5_data_layers.py tests/test_after_close_stages.py
+          python -m py_compile v5_cli.py research/after_close_stages.py research/holding_exit.py research/recommendation_feedback.py
+          python -m unittest tests/test_v5_data_layers.py tests/test_after_close_stages.py tests/test_holding_exit.py tests/test_recommendation_feedback.py
       - name: Decide whether this event contains a daily batch
         id: scope
         shell: bash
@@ -177,6 +185,7 @@ jobs:
     timeout-minutes: 10
     env:
       TZ: Asia/Shanghai
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:

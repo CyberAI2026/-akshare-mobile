@@ -15,6 +15,12 @@ EXIT_COLUMNS = [
     "回撤止盈已激活", "卖出建议", "建议卖出数量", "规则理由",
 ]
 
+AFTER_CLOSE_COLUMNS = [
+    "账户", "股票代码", "股票名称", "持仓数量", "平均成本", "数据日期", "最新收盘价",
+    "最高收盘价", "最高浮盈%", "距高点回撤%", "原结构止损位", "当前结构止损位",
+    "止损是否上调", "止盈激活价", "回撤止盈触发价", "盘后建议", "规则理由",
+]
+
 
 def active_position_cycles(transactions: pd.DataFrame, trade_date: date) -> pd.DataFrame:
     """Build active lots without persisting decrypted account data."""
@@ -156,3 +162,70 @@ def evaluate_holding_exits(
             "卖出建议": action, "建议卖出数量": qty, "规则理由": reason,
         })
     return pd.DataFrame(rows, columns=EXIT_COLUMNS)
+
+
+def evaluate_after_close_holdings(
+    positions: pd.DataFrame,
+    history_dir: str | Path,
+    stops: dict[str, float],
+) -> pd.DataFrame:
+    """Review every actual open holding from completed daily bars without lowering its stop."""
+    if positions is None or positions.empty:
+        return pd.DataFrame(columns=AFTER_CLOSE_COLUMNS)
+    rows = []
+    for _, pos in positions.iterrows():
+        code = str(pos["股票代码"]).zfill(6)
+        history_path = Path(history_dir) / f"{code}.csv"
+        hist = pd.read_csv(history_path) if history_path.exists() else pd.DataFrame()
+        if not hist.empty and "日期" in hist and "收盘价" in hist:
+            hist = hist.copy()
+            hist["日期"] = pd.to_datetime(hist["日期"], errors="coerce")
+            hist["收盘价"] = pd.to_numeric(hist["收盘价"], errors="coerce")
+            entered = pd.to_datetime(pos.get("持仓起始日期"), errors="coerce")
+            hist = hist.dropna(subset=["日期", "收盘价"]).sort_values("日期")
+            if not pd.isna(entered):
+                hist = hist[hist["日期"] >= entered]
+        cost = float(pos.get("平均成本", 0) or 0)
+        saved_stop = float(stops.get(code, 0) or 0)
+        if hist.empty or cost <= 0 or saved_stop <= 0:
+            rows.append({
+                "账户": pos.get("账户", ""), "股票代码": code, "股票名称": pos.get("股票名称", ""),
+                "持仓数量": int(pos.get("持仓数量", 0) or 0), "平均成本": round(cost, 4) if cost > 0 else None,
+                "原结构止损位": round(saved_stop, 4) if saved_stop > 0 else None,
+                "盘后建议": "DATA_ERROR", "规则理由": "完整日线、持仓成本或原结构止损缺失，禁止默认继续持有",
+            })
+            continue
+        closes = hist["收盘价"]
+        rolling_ma10 = closes.rolling(10, min_periods=5).mean()
+        running_high = closes.cummax()
+        gain_reached = running_high / cost - 1 >= 0.05
+        raised_candidates = rolling_ma10[gain_reached].dropna()
+        current_stop = max(saved_stop, float(raised_candidates.max()) if len(raised_candidates) else 0.0)
+        latest = float(closes.iloc[-1])
+        high_close = float(running_high.iloc[-1])
+        max_gain = high_close / cost - 1
+        drawdown = (high_close - latest) / high_close if high_close > 0 else float("nan")
+        trailing_active = max_gain >= 0.08
+        take_profit_activation = cost * 1.08
+        trailing_trigger = high_close * 0.95 if trailing_active else None
+        if latest < current_stop:
+            action = "EXIT_NEXT_SESSION"
+            reason = "收盘价已低于当前结构止损，若仍有持仓，下一交易时段优先退出并由14:45规则继续确认"
+        elif trailing_trigger is not None and latest <= trailing_trigger:
+            action = "REDUCE_NEXT_SESSION"
+            reason = "最高浮盈已达8%且收盘回撤达到5%，下一交易时段优先减仓并继续执行盘中规则"
+        else:
+            action = "HOLD"
+            reason = "收盘结构仍有效；继续持有并使用更新后的结构止损和回撤止盈参考"
+        rows.append({
+            "账户": pos.get("账户", ""), "股票代码": code, "股票名称": pos.get("股票名称", ""),
+            "持仓数量": int(pos.get("持仓数量", 0) or 0), "平均成本": round(cost, 4),
+            "数据日期": hist.iloc[-1]["日期"].date().isoformat(), "最新收盘价": round(latest, 4),
+            "最高收盘价": round(high_close, 4), "最高浮盈%": round(max_gain * 100, 2),
+            "距高点回撤%": round(drawdown * 100, 2), "原结构止损位": round(saved_stop, 4),
+            "当前结构止损位": round(current_stop, 4), "止损是否上调": current_stop > saved_stop + 1e-9,
+            "止盈激活价": round(take_profit_activation, 4),
+            "回撤止盈触发价": round(trailing_trigger, 4) if trailing_trigger is not None else None,
+            "盘后建议": action, "规则理由": reason,
+        })
+    return pd.DataFrame(rows, columns=AFTER_CLOSE_COLUMNS)

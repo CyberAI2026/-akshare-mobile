@@ -90,6 +90,7 @@ class RecommendationFeedbackTests(unittest.TestCase):
             with patch.object(rf,"ROOT",root), patch.object(rf,"REGISTRY",registry), \
                  patch.object(rf,"LATEST_DAILY",root/"latest_daily.json"), \
                  patch.object(rf,"LATEST_WEEKLY",root/"latest_weekly.json"), \
+                 patch.object(rf,"TRADE_LEDGER",root/"missing-trades.enc"), \
                  patch.object(rf,"fetch_bars",return_value=bars), \
                  patch.object(rf,"_recover_reference_from_tail",return_value=24.7), \
                  patch.object(rf.time,"sleep"):
@@ -97,6 +98,64 @@ class RecommendationFeedbackTests(unittest.TestCase):
             saved=pd.read_csv(registry)
             self.assertEqual(saved.iloc[0]["数据状态"],"跟踪中")
             self.assertEqual(saved.iloc[0]["推荐时参考价"],24.7)
+
+    def test_real_full_exit_stops_horizon_tracking_and_uses_actual_loss(self):
+        records = pd.DataFrame([{
+            "推荐ID": "2026-09-04_600801", "推荐日期": "2026-09-04", "股票代码": "600801",
+            "股票名称": "华新建材", "决策": "TRADE", "数据状态": "跟踪中",
+            "D+3日期": "2026-09-09", "D+3涨跌幅%": 1.2097,
+        }])
+        trades = pd.DataFrame([
+            {"交易日期":"2026-09-04","交易时间":"14:48:00","账户":"默认账户","操作":"买入",
+             "股票代码":"600801","股票名称":"华新建材","成交价格":24.8,"成交数量":2100,"手续费":5},
+            {"交易日期":"2026-09-16","交易时间":"13:05:00","账户":"默认账户","操作":"卖出",
+             "股票代码":"600801","股票名称":"华新建材","成交价格":23.5,"成交数量":2100,"手续费":5},
+        ])
+        linked = rf.apply_actual_trade_outcomes(records, trades)
+        row = linked.iloc[0]
+        self.assertEqual(row["数据状态"], "实盘已卖出")
+        self.assertEqual(row["实际结果"], "亏损卖出")
+        self.assertLess(float(row["实际收益率%"]), 0)
+        daily = rf.build_daily_summary(linked, pd.Timestamp("2026-09-09").date())
+        self.assertEqual(daily["actual_closed"], 1)
+        self.assertEqual(daily["due_cohorts"]["D+3"], [])
+        weekly = rf.build_weekly_summary(linked, pd.Timestamp("2026-09-16").date())
+        actual = weekly["真实交易结果"]
+        self.assertEqual(actual["已完成实盘数"], 1)
+        self.assertEqual(actual["亏损卖出数"], 1)
+        self.assertEqual(actual["胜率%"], 0.0)
+        self.assertIsNone(actual["盈亏比"])
+
+    def test_open_real_position_remains_eligible_for_horizon_tracking(self):
+        records = pd.DataFrame([{
+            "推荐ID":"x", "推荐日期":"2026-09-04", "股票代码":"600801",
+            "股票名称":"华新建材", "决策":"TRADE", "数据状态":"跟踪中",
+            "D+3日期":"2026-09-09", "D+3涨跌幅%":1.2,
+        }])
+        trades = pd.DataFrame([{
+            "交易日期":"2026-09-04","交易时间":"14:48:00","账户":"默认账户","操作":"买入",
+            "股票代码":"600801","股票名称":"华新建材","成交价格":24.8,"成交数量":2100,"手续费":0,
+        }])
+        linked = rf.apply_actual_trade_outcomes(records, trades)
+        self.assertEqual(linked.iloc[0]["真实交易状态"], "持仓中")
+        daily = rf.build_daily_summary(linked, pd.Timestamp("2026-09-09").date())
+        self.assertEqual(len(daily["due_cohorts"]["D+3"]), 1)
+
+    def test_same_recommendation_aggregates_real_cycles_across_accounts(self):
+        records = pd.DataFrame([{
+            "推荐ID":"x", "推荐日期":"2026-09-04", "股票代码":"600801",
+            "股票名称":"华新建材", "决策":"TRADE", "数据状态":"跟踪中",
+        }])
+        trades = pd.DataFrame([
+            {"交易日期":"2026-09-04","账户":"A","操作":"买入","股票代码":"600801","股票名称":"华新建材","成交价格":10,"成交数量":100},
+            {"交易日期":"2026-09-04","账户":"B","操作":"买入","股票代码":"600801","股票名称":"华新建材","成交价格":10,"成交数量":100},
+            {"交易日期":"2026-09-16","账户":"A","操作":"卖出","股票代码":"600801","股票名称":"华新建材","成交价格":11,"成交数量":100},
+            {"交易日期":"2026-09-16","账户":"B","操作":"卖出","股票代码":"600801","股票名称":"华新建材","成交价格":9,"成交数量":100},
+        ])
+        linked = rf.apply_actual_trade_outcomes(records, trades)
+        self.assertEqual(linked.iloc[0]["真实交易状态"], "已清仓")
+        self.assertEqual(linked.iloc[0]["实际结果"], "平本卖出")
+        self.assertEqual(float(linked.iloc[0]["实际收益率%"]), 0.0)
 
 
 class AttributionTests(unittest.TestCase):

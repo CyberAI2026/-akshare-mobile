@@ -222,6 +222,8 @@ class AfterCloseStageTests(unittest.TestCase):
                 pd.DataFrame().to_excel(writer, sheet_name="板块质量校验", index=False)
             with patch.object(stages, "STATE", state_path), \
                  patch.object(stages.cli, "LATEST", latest), \
+                 patch.object(stages.cli, "PRIVATE_TRADE_LEDGER", root / "private" / "trades.enc"), \
+                 patch.object(stages.cli, "RECOMMENDATION_REGISTRY", root / "feedback" / "recommendations.csv"), \
                  patch.object(stages.cli, "run_openai_after_close", side_effect=RuntimeError("stop-after-gate")), \
                  patch.object(stages.cli, "git_commit"), \
                  patch.object(stages.cli, "notify_failure"):
@@ -256,6 +258,8 @@ class AfterCloseStageTests(unittest.TestCase):
             with patch.dict("os.environ", {"AFTER_CLOSE_NOTIFY": "false"}), \
                  patch.object(stages, "STATE", state_path), \
                  patch.object(stages.cli, "LATEST", latest), \
+                 patch.object(stages.cli, "PRIVATE_TRADE_LEDGER", root / "private" / "trades.enc"), \
+                 patch.object(stages.cli, "RECOMMENDATION_REGISTRY", root / "feedback" / "recommendations.csv"), \
                  patch.object(stages.cli, "run_openai_after_close", return_value=(candidate, meta, {})), \
                  patch.object(stages.cli, "_sector_readiness", return_value=({}, {"status": "test"})), \
                  patch.object(stages.cli, "_attention_sector_market_groups", return_value={}), \

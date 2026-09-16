@@ -784,4 +784,15 @@ run and natural-cycle acceptance.
 - Forbidden side effects: duplicate OpenAI calls, PushPlus deliveries, stock screening, recommendations, or synthetic/manual transaction creation.
 - Status: active; implementation not yet merged.
 
+### Unit 1 checkpoint
+
+- Implemented real recommendation-to-trade-cycle linkage from the encrypted ledger. Multiple accounts for the same recommendation are aggregated; only a fully closed real position cycle ends D+3/D+5/D+10 tracking.
+- Added plaintext-safe result fields only: real trade status, entry/exit dates, actual return percentage, and profit/loss/breakeven result. Account, quantity, cost basis, prices, and cash P/L remain outside plaintext feedback artifacts.
+- Added aggregate real-trade metrics: completed trades, wins/losses/breakevens, win rate, mean actual return, average win, average loss, and payoff ratio.
+- Added deterministic after-close review for every encrypted active holding, including hold/next-session exit/reduce guidance, non-decreasing structural stop, profit-trailing activation price, and 5% pullback trigger. Detailed reviews are encrypted, including an explicit encrypted empty review to prevent stale holdings.
+- Added the holding section and real-trade aggregate line to the normal after-close message; no message was sent during implementation.
+- Verification: Python compilation; 64 targeted tests; 140 full unit tests; workflow YAML parsing; and `git diff --check` all passed. OpenAI and PushPlus outputs in tests were mocks only.
+- Changed files: `research/private_trade_ledger.py`, `research/recommendation_feedback.py`, `research/holding_exit.py`, `research/after_close_stages.py`, `v5_cli.py`, both related workflows, three test modules, and `docs/HOLDING_EXIT_POLICY.md`.
+- Next action: commit this unit to the task branch, open a PR, accept validation-only Actions, merge once, then run exactly one no-notify encrypted-ledger reconciliation.
+
 Updated: 2026-09-16
