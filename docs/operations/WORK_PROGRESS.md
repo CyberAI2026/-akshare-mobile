@@ -769,4 +769,19 @@ run and natural-cycle acceptance.
 - No OpenAI, PushPlus, stock-screening, recommendation, trade, or ledger-write side effect was triggered by this change.
 - Lock status: `LOCK-20260916-trading-page-password-removal` closed.
 
+
+## 2026-09-16 actual-exit feedback and after-close holding review
+
+- Operation lock: `LOCK-20260916-actual-exit-feedback-holding-review`.
+- Authorized goal: stop D+3/D+5/D+10 cohort tracking after a recommended stock has a real fully closed trade; classify the real exit as profit/loss/breakeven and report actual win rate, average return, and payoff ratio.
+- Authorized goal: every natural after-close run must review all actual open holdings and report hold/exit guidance plus current stop-loss and take-profit references.
+- Baseline production main: `40a6c52d34fbb2e29fb1db20bc712cb5942709e6`.
+- At acquisition: queued Actions 0; in-progress Actions 0.
+- Data authority: encrypted `v5_data/private/trades.enc`; an exit suggestion alone must never be recorded as an executed sale.
+- Privacy: account, quantity, cost, and holding-level decisions remain encrypted; only aggregate actual-trade statistics may be written in plaintext feedback summaries.
+- Preserve existing 14:45 exit rules, selection rules, position sizing, and recommendation gates unless explicitly required for this linkage.
+- Allowed side effects: validation-only Actions and one no-notify encrypted-ledger reconciliation after merge.
+- Forbidden side effects: duplicate OpenAI calls, PushPlus deliveries, stock screening, recommendations, or synthetic/manual transaction creation.
+- Status: active; implementation not yet merged.
+
 Updated: 2026-09-16
