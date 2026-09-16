@@ -32,6 +32,7 @@ jobs:
     env:
       TZ: Asia/Shanghai
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:

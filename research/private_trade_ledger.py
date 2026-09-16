@@ -28,6 +28,11 @@ TRANSACTION_COLUMNS = [
     "录入时间",
 ]
 
+TRADE_CYCLE_COLUMNS = [
+    "账户", "股票代码", "股票名称", "持仓周期", "买入日期", "卖出日期",
+    "买入数量", "卖出数量", "买入成本", "卖出净额", "已实现盈亏", "收益率%", "状态",
+]
+
 
 def empty_transactions() -> pd.DataFrame:
     return pd.DataFrame(columns=TRANSACTION_COLUMNS)
@@ -213,6 +218,57 @@ def build_positions(transactions: pd.DataFrame) -> pd.DataFrame:
             "状态": "持仓中" if state["qty"] > 0 else "已清仓",
         })
     return pd.DataFrame(rows, columns=columns).sort_values(["状态", "账户", "股票代码"], ascending=[False, True, True]).reset_index(drop=True)
+
+
+def build_trade_cycles(transactions: pd.DataFrame) -> pd.DataFrame:
+    """Build real position cycles so recommendation results use executed trades, not model prices."""
+    tx = _sort_transactions(normalize_transactions(transactions))
+    if tx.empty:
+        return pd.DataFrame(columns=TRADE_CYCLE_COLUMNS)
+    counters: dict[tuple[str, str], int] = {}
+    active: dict[tuple[str, str], dict] = {}
+    rows: list[dict] = []
+    for _, row in tx.iterrows():
+        key = (str(row["账户"]), str(row["股票代码"]))
+        cycle = active.get(key)
+        qty = int(row["成交数量"])
+        amount = float(row["成交金额"])
+        fee = float(row["手续费"])
+        if row["操作"] == "买入":
+            if cycle is None:
+                counters[key] = counters.get(key, 0) + 1
+                cycle = {
+                    "账户": key[0], "股票代码": key[1], "股票名称": str(row["股票名称"] or ""),
+                    "持仓周期": counters[key], "买入日期": str(row["交易日期"]), "卖出日期": "",
+                    "买入数量": 0, "卖出数量": 0, "买入成本": 0.0, "卖出净额": 0.0,
+                    "已实现盈亏": None, "收益率%": None, "状态": "持仓中", "_余额": 0,
+                }
+                active[key] = cycle
+            cycle["股票名称"] = str(row["股票名称"] or cycle["股票名称"])
+            cycle["买入数量"] += qty
+            cycle["买入成本"] += amount + fee
+            cycle["_余额"] += qty
+        else:
+            if cycle is None or qty > int(cycle["_余额"]):
+                raise ValueError(f"{key[0]} 的 {key[1]} 卖出数量超过当前持仓周期")
+            cycle["卖出数量"] += qty
+            cycle["卖出净额"] += amount - fee
+            cycle["_余额"] -= qty
+            cycle["卖出日期"] = str(row["交易日期"])
+            if cycle["_余额"] == 0:
+                pnl = float(cycle["卖出净额"]) - float(cycle["买入成本"])
+                cost = float(cycle["买入成本"])
+                cycle["已实现盈亏"] = round(pnl, 2)
+                cycle["收益率%"] = round(pnl / cost * 100, 4) if cost > 0 else None
+                cycle["状态"] = "已清仓"
+                rows.append({k: v for k, v in cycle.items() if not k.startswith("_")})
+                active.pop(key, None)
+    for cycle in active.values():
+        rows.append({k: v for k, v in cycle.items() if not k.startswith("_")})
+    out = pd.DataFrame(rows, columns=TRADE_CYCLE_COLUMNS)
+    for col in ["买入成本", "卖出净额"]:
+        out[col] = pd.to_numeric(out[col], errors="coerce").round(2)
+    return out.sort_values(["买入日期", "账户", "股票代码", "持仓周期"], kind="stable").reset_index(drop=True)
 
 
 def active_position_codes(transactions: pd.DataFrame) -> set[str]:

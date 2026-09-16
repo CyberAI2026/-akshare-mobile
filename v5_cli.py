@@ -171,8 +171,7 @@ def load_active_positions_for_exit(trade_date) -> pd.DataFrame:
 
 def save_private_exit_decisions(frame: pd.DataFrame, *paths: Path):
     """Persist the audit trail encrypted because it contains actual holdings and cost basis."""
-    if frame is None or frame.empty:
-        return
+    frame = frame.copy() if frame is not None else pd.DataFrame()
     key = os.getenv("TRADING_DATA_KEY", "").strip()
     if not key:
         raise RuntimeError("TRADING_DATA_KEY缺失，无法加密保存持仓卖出决策")
@@ -181,6 +180,19 @@ def save_private_exit_decisions(frame: pd.DataFrame, *paths: Path):
     blob = Fernet(key.encode("utf-8")).encrypt(frame.to_json(orient="records", force_ascii=False).encode("utf-8"))
     for path in paths:
         save_bytes(path, blob)
+
+
+def load_private_exit_decisions(path: str | Path) -> pd.DataFrame:
+    source = Path(path)
+    if not source.exists():
+        return pd.DataFrame()
+    key = os.getenv("TRADING_DATA_KEY", "").strip()
+    if not key:
+        raise RuntimeError("TRADING_DATA_KEY缺失，无法读取加密持仓决策")
+    from cryptography.fernet import Fernet
+
+    payload = Fernet(key.encode("utf-8")).decrypt(source.read_bytes()).decode("utf-8")
+    return pd.DataFrame(json.loads(payload))
 
 def exclude_active_trades(frame: pd.DataFrame, registry_path: str | Path = RECOMMENDATION_REGISTRY) -> tuple[pd.DataFrame, list[str]]:
     out = frame.copy() if frame is not None else pd.DataFrame()
@@ -303,7 +315,12 @@ def _sector_readiness(tables: dict[str, pd.DataFrame], qa: pd.DataFrame) -> tupl
     return (usable if ai_enabled else {}), validation
 
 
-def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict):
+def notify_after_close_success(
+    summary: dict,
+    obs: pd.DataFrame,
+    obs_meta: dict,
+    holding_review: pd.DataFrame | None = None,
+):
     ma = obs_meta.get("market_assessment", {}) or {}
     lines = [
         f"<b>目标交易日：</b>{summary.get('target_trade_date','—')}",
@@ -315,6 +332,25 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
     ]
     if ma.get("summary"):
         lines.append(f"<b>市场判断：</b>{ma.get('summary')}")
+    if holding_review is not None and not holding_review.empty:
+        action_label = {
+            "HOLD": "继续持有", "EXIT_NEXT_SESSION": "下一交易时段优先退出",
+            "REDUCE_NEXT_SESSION": "下一交易时段优先减仓", "DATA_ERROR": "数据异常待核验",
+        }
+        lines.append("<br><b>现有持仓盘后复核：</b>")
+        for _, row in holding_review.iterrows():
+            action = str(row.get("盘后建议", "DATA_ERROR"))
+            stop_raised = "（已上调）" if bool(row.get("止损是否上调", False)) else ""
+            trailing = row.get("回撤止盈触发价")
+            trailing_text = trailing if pd.notna(trailing) else f"浮盈达到8%后启用（激活价{row.get('止盈激活价','—')}）"
+            lines.append(
+                f"<b>{str(row.get('股票代码','')).zfill(6)} {row.get('股票名称','')}</b>｜"
+                f"{action_label.get(action, action)}<br>"
+                f"收盘 {row.get('最新收盘价','—')}｜结构止损 {row.get('当前结构止损位','—')}{stop_raised}｜"
+                f"回撤止盈参考 {trailing_text}<br>{row.get('规则理由','')}"
+            )
+    else:
+        lines.append("<br><b>现有持仓盘后复核：</b>当前没有已登记的实际持仓。")
     feedback_path = Path("v5_data/feedback/latest_daily.json")
     if feedback_path.exists():
         try:
@@ -326,6 +362,19 @@ def notify_after_close_success(summary: dict, obs: pd.DataFrame, obs_meta: dict)
                         lines.append(f"{horizon}到期：{item.get('股票代码','')} {item.get('股票名称','')}｜{item.get(horizon+'涨跌幅%','—')}%")
         except Exception as exc:
             print("feedback summary warning:", exc)
+    weekly_feedback_path = Path("v5_data/feedback/latest_weekly.json")
+    if weekly_feedback_path.exists():
+        try:
+            weekly_fb = json.loads(weekly_feedback_path.read_text(encoding="utf-8"))
+            actual = weekly_fb.get("真实交易结果", {}) or {}
+            if actual:
+                lines.append(
+                    f"<b>真实交易结果：</b>完成{actual.get('已完成实盘数',0)}笔｜"
+                    f"胜率{actual.get('胜率%','—')}%｜均值{actual.get('平均实际收益率%','—')}%｜"
+                    f"盈亏比{actual.get('盈亏比','—')}"
+                )
+        except Exception as exc:
+            print("actual trade summary warning:", exc)
     sa = obs_meta.get("sector_assessment", {}) or {}
     sv = summary.get("sector_validation", {}) or {}
     lines.append(f"<b>板块数据：</b>{sv.get('status','—')}｜AI启用：{'是' if sv.get('ai_enabled') else '否'}")

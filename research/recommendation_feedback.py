@@ -11,6 +11,8 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
+from research.private_trade_ledger import build_trade_cycles, load_encrypted_transactions
+
 TZ = ZoneInfo("Asia/Shanghai")
 ROOT = Path("v5_data/feedback")
 REGISTRY = ROOT / "recommendations.csv"
@@ -18,6 +20,7 @@ LATEST_DAILY = ROOT / "latest_daily.json"
 LATEST_WEEKLY = ROOT / "latest_weekly.json"
 DELIVERY_RECEIPTS = ROOT / "delivery_receipts.json"
 NAME_MASTER = Path("v5_data/reference/a_share_code_name_master.csv")
+TRADE_LEDGER = Path("v5_data/private/trades.enc")
 
 BASE_COLUMNS = [
     "推荐ID", "推荐日期", "推荐时间", "股票代码", "股票名称", "决策", "推荐时参考价",
@@ -25,7 +28,8 @@ BASE_COLUMNS = [
     "主导板块归因", "全部概念", "板块归因证据", "来源观察池日期", "OpenAI模型",
     "D+3日期", "D+3收盘价", "D+3涨跌幅%", "D+5日期", "D+5收盘价", "D+5涨跌幅%",
     "D+10日期", "D+10收盘价", "D+10涨跌幅%", "3日内触碰止损", "5日内触碰止损",
-    "首次触碰止损日期", "最后更新日期", "数据状态",
+    "首次触碰止损日期", "真实交易状态", "实际买入日期", "实际卖出日期", "实际收益率%",
+    "实际结果", "退出跟踪日期", "最后更新日期", "数据状态",
 ]
 
 
@@ -220,6 +224,77 @@ def fetch_bars(code: str, start_date: str, end_date: str) -> pd.DataFrame:
     return raw.sort_values("日期").drop_duplicates("日期")
 
 
+def load_actual_transactions(
+    ledger_path: str | Path | None = None,
+    key: str | None = None,
+) -> pd.DataFrame:
+    ledger = Path(ledger_path or TRADE_LEDGER)
+    if not ledger.exists():
+        return pd.DataFrame()
+    secret_key = (key if key is not None else os.getenv("TRADING_DATA_KEY", "")).strip()
+    if not secret_key:
+        raise RuntimeError("存在加密交易台账但TRADING_DATA_KEY缺失，禁止生成失真的实盘反馈")
+    return load_encrypted_transactions(ledger, secret_key)
+
+
+def apply_actual_trade_outcomes(records: pd.DataFrame, transactions: pd.DataFrame) -> pd.DataFrame:
+    """Pair real position cycles to recommendations and close theoretical tracking after a real exit."""
+    out = records.copy().astype(object)
+    if out.empty:
+        return out
+    for col in BASE_COLUMNS:
+        if col not in out:
+            out[col] = None
+    out["股票代码"] = out["股票代码"].map(norm_code)
+    out["推荐日期"] = pd.to_datetime(out["推荐日期"], errors="coerce").dt.date
+    cycles = build_trade_cycles(transactions)
+    if cycles.empty:
+        out["推荐日期"] = out["推荐日期"].astype(str)
+        return out
+    cycles = cycles.copy()
+    cycles["股票代码"] = cycles["股票代码"].map(norm_code)
+    cycles["买入日期"] = pd.to_datetime(cycles["买入日期"], errors="coerce").dt.date
+    assignments: dict[int, list[pd.Series]] = {}
+    for _, cycle in cycles.sort_values(["买入日期", "账户", "持仓周期"], kind="stable").iterrows():
+        candidates = out[
+            (out["股票代码"] == cycle["股票代码"]) &
+            (out["推荐日期"].notna()) &
+            (out["推荐日期"] <= cycle["买入日期"]) &
+            ((cycle["买入日期"] - out["推荐日期"]).map(lambda delta: delta.days) <= 14)
+        ]
+        if candidates.empty:
+            continue
+        idx = candidates.sort_values("推荐日期", ascending=False, kind="stable").index[0]
+        assignments.setdefault(idx, []).append(cycle)
+    for idx, matched in assignments.items():
+        closed = all(str(cycle["状态"]) == "已清仓" for cycle in matched)
+        buy_cost = sum(float(cycle.get("买入成本", 0) or 0) for cycle in matched)
+        sell_net = sum(float(cycle.get("卖出净额", 0) or 0) for cycle in matched)
+        pnl = sell_net - buy_cost if closed else None
+        actual_return = pnl / buy_cost * 100 if closed and buy_cost > 0 else None
+        buy_date = min(cycle["买入日期"] for cycle in matched)
+        sell_dates = [str(cycle.get("卖出日期", "")) for cycle in matched if str(cycle.get("卖出日期", ""))]
+        sell_date = max(sell_dates) if sell_dates else ""
+        result = ""
+        if closed:
+            result = "盈利卖出" if pnl is not None and pnl > 0 else "亏损卖出" if pnl is not None and pnl < 0 else "平本卖出"
+        values = {
+            "真实交易状态": "已清仓" if closed else "持仓中", "实际买入日期": str(buy_date),
+            "实际卖出日期": sell_date,
+            "实际收益率%": round(actual_return, 4) if actual_return is not None else None,
+            "实际结果": result,
+        }
+        for key_name, value in values.items():
+            out.at[idx, key_name] = value
+        if closed:
+            out.at[idx, "退出跟踪日期"] = sell_date
+            out.at[idx, "数据状态"] = "实盘已卖出"
+        elif not str(out.at[idx, "数据状态"] or "").startswith("D+10"):
+            out.at[idx, "数据状态"] = "实盘持仓中"
+    out["推荐日期"] = out["推荐日期"].astype(str)
+    return out
+
+
 def evaluate_record(row: pd.Series, bars: pd.DataFrame, asof=None) -> dict:
     out = {}
     if bars is None or bars.empty:
@@ -282,28 +357,56 @@ def _metric(records: pd.DataFrame, horizon: int) -> dict:
 
 
 def build_daily_summary(records: pd.DataFrame, asof) -> dict:
+    closed = records.get("真实交易状态", pd.Series("", index=records.index)).fillna("").astype(str).eq("已清仓")
+    theoretical = records.loc[~closed]
     due = {}
     for horizon in (3, 5, 10):
         col = f"D+{horizon}日期"
-        if col in records:
-            due[f"D+{horizon}"] = records[records[col].astype(str) == str(asof)][
+        if col in theoretical:
+            due[f"D+{horizon}"] = theoretical[theoretical[col].astype(str) == str(asof)][
                 ["推荐日期", "股票代码", "股票名称", col, f"D+{horizon}涨跌幅%"]
             ].fillna("").to_dict("records")
         else:
             due[f"D+{horizon}"] = []
     return {
         "asof": str(asof), "total_recommendations": int(len(records)),
-        "tracking": int(records.get("数据状态", pd.Series(dtype=str)).astype(str).str.startswith("跟踪中").sum()),
-        "completed_d10": int(records.get("D+10日期", pd.Series(dtype=object)).notna().sum()),
+        "tracking": int((~closed & records.get("数据状态", pd.Series("", index=records.index)).astype(str).ne("D+10完成")).sum()),
+        "actual_closed": int(closed.sum()),
+        "completed_d10": int(theoretical.get("D+10日期", pd.Series(dtype=object)).notna().sum()),
         "due_cohorts": due,
-        "method": "推荐日正式收盘价为锚；D+N按后续第N个交易日收盘；止损触碰按推荐后交易日最低价<=结构止损位。",
+        "method": "真实交易一旦全部卖出即退出D+3/D+5/D+10名单；未卖出推荐仍按推荐日收盘锚点跟踪。",
+    }
+
+
+def build_actual_trade_summary(records: pd.DataFrame) -> dict:
+    status = records.get("真实交易状态", pd.Series("", index=records.index)).fillna("").astype(str)
+    closed = records[status.eq("已清仓")].copy()
+    returns = pd.to_numeric(
+        closed.get("实际收益率%", pd.Series(dtype=float)), errors="coerce"
+    ).dropna()
+    wins = returns[returns > 0]
+    losses = returns[returns < 0]
+    avg_win = float(wins.mean()) if len(wins) else None
+    avg_loss = float(losses.mean()) if len(losses) else None
+    payoff = avg_win / abs(avg_loss) if avg_win is not None and avg_loss not in (None, 0) else None
+    return {
+        "已完成实盘数": int(len(returns)), "盈利卖出数": int((returns > 0).sum()),
+        "亏损卖出数": int((returns < 0).sum()), "平本卖出数": int((returns == 0).sum()),
+        "胜率%": round(float((returns > 0).mean() * 100), 2) if len(returns) else None,
+        "平均实际收益率%": round(float(returns.mean()), 4) if len(returns) else None,
+        "平均盈利%": round(avg_win, 4) if avg_win is not None else None,
+        "平均亏损%": round(avg_loss, 4) if avg_loss is not None else None,
+        "盈亏比": round(payoff, 4) if payoff is not None else None,
     }
 
 
 def build_weekly_summary(records: pd.DataFrame, asof) -> dict:
+    closed = records.get("真实交易状态", pd.Series("", index=records.index)).fillna("").astype(str).eq("已清仓")
+    theoretical = records.loc[~closed]
     summary = {
         "asof": str(asof), "generated_at_cn": now_cn().isoformat(),
-        "D+3": _metric(records, 3), "D+5": _metric(records, 5), "D+10": _metric(records, 10),
+        "D+3": _metric(theoretical, 3), "D+5": _metric(theoretical, 5), "D+10": _metric(theoretical, 10),
+        "真实交易结果": build_actual_trade_summary(records),
     }
     for horizon in (3, 5):
         col = f"{horizon}日内触碰止损"
@@ -379,7 +482,11 @@ def update_all(asof=None, notify=True, notify_title="A股二次启动｜推荐�
     # Tracking columns intentionally mix numbers, booleans, dates and blanks.
     # Object dtype prevents pandas from rejecting a later date/blank assignment into an all-NaN column.
     records = refresh_names(pd.read_csv(REGISTRY, dtype={"股票代码": str}).astype(object))
+    transactions = load_actual_transactions()
+    records = apply_actual_trade_outcomes(records, transactions)
     for idx, row in records.iterrows():
+        if str(row.get("真实交易状态", "")) == "已清仓":
+            continue
         code = norm_code(row.get("股票代码"))
         start = str(row.get("推荐日期"))
         if _number(row.get("推荐时参考价")) is None:
@@ -416,6 +523,11 @@ def update_all(asof=None, notify=True, notify_title="A股二次启动｜推荐�
         (weekly_dir / f"{iso.year}-W{iso.week:02d}.json").write_text(json.dumps(weekly, ensure_ascii=False, indent=2), encoding="utf-8")
     if notify:
         rows = [f"<b>推荐跟踪：</b>累计{len(records)}只"]
+        actual = weekly["真实交易结果"]
+        rows.append(
+            f"<b>真实交易：</b>完成{actual['已完成实盘数']}笔｜胜率{actual['胜率%']}%｜"
+            f"均值{actual['平均实际收益率%']}%｜盈亏比{actual['盈亏比']}"
+        )
         for h in (3, 5, 10):
             m = weekly[f"D+{h}"]
             rows.append(f"<b>D+{h}：</b>样本{m['样本数']}｜胜率{m['胜率%']}%｜均值{m['平均收益%']}%｜盈亏比{m['盈亏比']}")
