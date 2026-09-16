@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-16T19:24:43.327289+08:00",
@@ -81,5 +81,49 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "completed_cn": "2026-09-16T19:37:46.801028+08:00",
+  "elapsed_minutes": 13.06,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 702,
+      "总数": 703,
+      "成功": 702
+    },
+    "120日": {
+      "命中或增量": 414,
+      "总数": 417,
+      "成功": 417
+    },
+    "250日": {
+      "命中或增量": 171,
+      "总数": 171,
+      "成功": 171
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 3,
+  "target_trade_date": "2026-09-17",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "9月16日市场宽度显著修复，上涨4170家、涨停89家、跌停4家，成交额较前日增加13.98%；但主要指数近20日及60日多数仍偏弱，反弹持续性待验证。",
+    "next_day_aggressiveness": "中性"
+  },
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 702,
+  "stock_qa_120_success": 417,
+  "stock_qa_250_success": 171,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
