@@ -1,9 +1,24 @@
 {
   "source_date": "2026-09-16",
   "trade_date": "2026-09-16",
-  "updated_at_cn": "2026-09-16T21:34:54.634625+08:00",
+  "updated_at_cn": "2026-09-16T21:44:37.795441+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
+    {
+      "article_id": "02d60d1636f0f661",
+      "title": "Lazybread—20260916（积极信号都在科技）_lazybread_淘股吧",
+      "url": "https://www.tgb.cn/a/2v8Ypr58Dfd",
+      "read_count": 4,
+      "body_chars": 3532,
+      "body_sha256": "02d60d1636f0f661e14a5eafe4f536164f1f472e2ba5bb7d6f06d2a02c60a8a4",
+      "published_at_cn": "2026-09-16T20:59:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
     {
       "article_id": "02e34ac2aca13e35",
       "title": "260916（周三）盘后复盘｜科创50暴涨4.14%，半导体全面爆发，闽东电力6连板，地天板与跌停潮共存_邵柳智_淘股吧",
@@ -162,6 +177,21 @@
       "body_chars": 2845,
       "body_sha256": "47fb6eccd8ed0e4af8d0d67700ab6994a8fc28af5b58b49b54f17a504c6026c6",
       "published_at_cn": "2026-09-16T16:20:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "4ae3a5b09e54363e",
+      "title": "9月16日A股复盘_明镜V_淘股吧",
+      "url": "https://www.tgb.cn/a/2v915MCxuLY",
+      "read_count": 6,
+      "body_chars": 3131,
+      "body_sha256": "4ae3a5b09e54363ecd9c557158a71ac91f7cb2e000a59eaf6ef3f1331a99468d",
+      "published_at_cn": "2026-09-16T21:36:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -546,6 +576,102 @@
     }
   ],
   "article_mining": [
+    {
+      "article_id": "02d60d1636f0f661",
+      "market_stance": "偏多",
+      "market_phase": [
+        "修复",
+        "发酵"
+      ],
+      "market_summary": "作者认为积极信号集中在科技方向，并以情绪回暖描述博汇科技冲刺；PCB、芯片、光纤CPO及福建、电力股活跃。",
+      "sectors": [
+        {
+          "name": "PCB",
+          "stance": "加强",
+          "evidence": "作者列出澳弘电子4板，并称其突破PCB三板高度。"
+        },
+        {
+          "name": "芯片",
+          "stance": "活跃",
+          "evidence": "作者列举中晶科技、德尔未来等多只连板或涨停股。"
+        },
+        {
+          "name": "光纤CPO",
+          "stance": "加强",
+          "evidence": "作者列出通鼎互联2板及多只光纤、CPO涨停股。"
+        },
+        {
+          "name": "电力",
+          "stance": "活跃",
+          "evidence": "作者以闽东电力6板为代表，并称乐山电力推闽东。"
+        },
+        {
+          "name": "福建",
+          "stance": "活跃",
+          "evidence": "作者列出闽东电力6板及多只福建属性涨停股。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "活跃",
+          "evidence": "作者列举英联股份2板及乐凯胶片等涨停股。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "闽东电力",
+          "sector": "电力",
+          "role": "龙头"
+        },
+        {
+          "name": "澳弘电子",
+          "sector": "PCB",
+          "role": "龙头"
+        },
+        {
+          "name": "博汇科技",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "中晶科技",
+          "sector": "芯片",
+          "role": "核心"
+        },
+        {
+          "name": "通鼎互联",
+          "sector": "光纤CPO",
+          "role": "核心"
+        },
+        {
+          "name": "英联股份",
+          "sector": "锂电池",
+          "role": "高关注"
+        },
+        {
+          "name": "会稽山",
+          "sector": "黄酒",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "闽东电力的高位穿越表现",
+        "澳弘电子能否延续PCB高度突破",
+        "科技方向情绪回暖后的连板股表现"
+      ],
+      "numeric_claims": [
+        "闽东电力6板",
+        "澳弘电子4板",
+        "博汇科技20cm3连板",
+        "华瓷股份3板",
+        "通鼎互联2板",
+        "英联股份2板",
+        "中晶科技2板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
     {
       "article_id": "02e34ac2aca13e35",
       "market_stance": "谨慎",
@@ -1646,6 +1772,101 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "4ae3a5b09e54363e",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵"
+      ],
+      "market_summary": "作者列举光通信、PCB、半导体材料、芯片等多条强势主线，并称三市放量上涨，科技成长方向表现突出。",
+      "sectors": [
+        {
+          "name": "光通信",
+          "stance": "加强",
+          "evidence": "作者列为强势板块，列举光迅科技等多只涨停股。"
+        },
+        {
+          "name": "PCB",
+          "stance": "加强",
+          "evidence": "作者称上游涨价正向PCB品类传导，并列举多只涨停股。"
+        },
+        {
+          "name": "半导体材料",
+          "stance": "加强",
+          "evidence": "作者称重掺硅片或继续涨价，列举有研新材等涨停。"
+        },
+        {
+          "name": "芯片产业",
+          "stance": "活跃",
+          "evidence": "作者列举盈方微、民德电子等涨停及多只强势股。"
+        },
+        {
+          "name": "光纤",
+          "stance": "加强",
+          "evidence": "作者援引长期供应协议信息，列举通鼎互联等涨停。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "活跃",
+          "evidence": "作者列举英联股份等涨停，并援引8月装车量数据。"
+        },
+        {
+          "name": "福建本地",
+          "stance": "活跃",
+          "evidence": "作者列举平潭发展、福建金森、漳州发展涨停。"
+        },
+        {
+          "name": "电力",
+          "stance": "活跃",
+          "evidence": "作者列举乐山电力、闽东电力涨停。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "光迅科技",
+          "sector": "光通信",
+          "role": "高关注"
+        },
+        {
+          "name": "通鼎互联",
+          "sector": "光纤",
+          "role": "高关注"
+        },
+        {
+          "name": "有研新材",
+          "sector": "半导体材料",
+          "role": "高关注"
+        },
+        {
+          "name": "盈方微",
+          "sector": "芯片产业",
+          "role": "高关注"
+        },
+        {
+          "name": "英联股份",
+          "sector": "锂电池",
+          "role": "高关注"
+        },
+        {
+          "name": "闽东电力",
+          "sector": "电力",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [],
+      "numeric_claims": [
+        "沪指涨0.71%",
+        "深证成指涨1.26%",
+        "创业板指涨1.96%",
+        "科创50指数涨4.14%",
+        "沪深京三市成交额超过1.8万亿元，较昨日放量逾2000亿元",
+        "8月国内动力电池装车量79.0GWh，环比增长5.9%，同比增长26.3%",
+        "山东主流N330炭黑报价11500-12000元/吨，较9月初上涨3650元/吨，涨幅45%"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
