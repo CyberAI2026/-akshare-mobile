@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-16",
   "trade_date": "2026-09-16",
-  "updated_at_cn": "2026-09-16T21:24:43.555254+08:00",
+  "updated_at_cn": "2026-09-16T21:34:54.634625+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -312,6 +312,21 @@
       "body_chars": 2431,
       "body_sha256": "8fad4ea738ebf0b91d4197e2f5b65acfecdbf2033726f2be3d9a029f55f64d7a",
       "published_at_cn": "2026-09-16T17:05:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "af856df81c804984",
+      "title": "9/16复盘_卢小东_淘股吧",
+      "url": "https://www.tgb.cn/a/2v90itOQWfm",
+      "read_count": 11,
+      "body_chars": 1782,
+      "body_sha256": "af856df81c80498406be208a8a1140823c1a9da9eadbcfd71473c91d9d690b31",
+      "published_at_cn": "2026-09-16T21:25:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -2438,6 +2453,98 @@
       ],
       "quality_flags": [
         "无"
+      ]
+    },
+    {
+      "article_id": "af856df81c804984",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "修复"
+      ],
+      "market_summary": "作者认为指数探底回升、科技与指数共振，但情绪负反馈仍需观察；科技进攻须量能、高度及负反馈可控，不能盲目乐观。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "活跃",
+          "evidence": "作者称科技与指数共振，但需量能配合且不能盲目乐观。"
+        },
+        {
+          "name": "元器件",
+          "stance": "分化",
+          "evidence": "开盘分歧后随指数走强，部分个股尾盘回落，作者判断为弱分歧。"
+        },
+        {
+          "name": "CPO",
+          "stance": "加强",
+          "evidence": "作者称其与半导体材料共振指数，且CPO更抗跌、共振创业板。"
+        },
+        {
+          "name": "半导体材料",
+          "stance": "活跃",
+          "evidence": "作者称其为当日与指数共振的两个方向之一。"
+        },
+        {
+          "name": "半导体设备",
+          "stance": "分化",
+          "evidence": "作者称已连续两天大涨，预计次日面临获利盘抛压，暂作反弹看待。"
+        },
+        {
+          "name": "医药",
+          "stance": "不明确",
+          "evidence": "作者认为若科技表现不佳，医药可能出来表现，并称只能低吸不能追涨。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "闽东",
+          "sector": "连板",
+          "role": "高关注"
+        },
+        {
+          "name": "澳弘",
+          "sector": "连板",
+          "role": "高关注"
+        },
+        {
+          "name": "龙版",
+          "sector": "连板",
+          "role": "风险"
+        },
+        {
+          "name": "桂林",
+          "sector": "抱团",
+          "role": "风险"
+        },
+        {
+          "name": "深中华",
+          "sector": "抱团",
+          "role": "高关注"
+        },
+        {
+          "name": "捷荣",
+          "sector": "抱团",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "中位断板股是否继续A杀，情绪负反馈是否超预期",
+        "元器件能否避免极致负反馈并继续打开高度",
+        "科技拉升是否获得持续量能配合"
+      ],
+      "numeric_claims": [
+        "上证收盘成交额1.85万亿元",
+        "上证放量2272亿元",
+        "创业板指面临13日线考验",
+        "闽东晋级6板",
+        "澳弘晋级4板",
+        "作者称本轮A杀幅度约35个点",
+        "深中华、捷荣下跌35个点后止跌并于当日翻红",
+        "半导体设备已连续两天大涨"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
       ]
     },
     {
