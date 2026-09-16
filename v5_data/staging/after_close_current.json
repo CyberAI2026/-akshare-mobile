@@ -45,7 +45,8 @@
   "completed_120d_shards": [
     0,
     1,
-    2
+    2,
+    3
   ],
   "shard_count_120d": 4
 }
