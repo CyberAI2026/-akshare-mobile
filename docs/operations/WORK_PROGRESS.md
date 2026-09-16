@@ -757,4 +757,16 @@ run and natural-cycle acceptance.
 - Security acceptance: removal of the UI password intentionally makes the page accessible to anyone who obtains the site URL; encrypted-at-rest storage does not itself prevent an authorized running app from displaying decrypted data.
 - Status: active; code change not yet merged.
 
+
+### Closure
+
+- Status: completed and merged through PR #16.
+- Production merge commit: `4e9eefc73029232c1eb6c57941f8bac8c2d34d7a`.
+- Direct-access assertions and Python compilation passed in GitHub Actions run `35091563053` before merge.
+- THS public-sector live validation passed in run `35090355901`.
+- Market-count live probe run `35090355844` failed only after deterministic tests passed because Eastmoney disconnected and Sina timed out; no market-fetch code was changed.
+- The page no longer reads or checks `TRADING_UI_PASSWORD`; `TRADING_DATA_KEY`, encrypted ledger storage, and transaction logic remain in place.
+- No OpenAI, PushPlus, stock-screening, recommendation, trade, or ledger-write side effect was triggered by this change.
+- Lock status: `LOCK-20260916-trading-page-password-removal` closed.
+
 Updated: 2026-09-16
