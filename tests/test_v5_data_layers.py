@@ -553,5 +553,32 @@ class PrivateTradeLedgerTests(unittest.TestCase):
             append_transactions(empty_transactions(), self.trade("卖出", 100))
 
 
+class TradingPageDirectAccessTests(unittest.TestCase):
+    APP = Path(__file__).resolve().parents[1] / "app.py"
+
+    def test_app_compiles_after_direct_trade_access_change(self):
+        import ast
+        ast.parse(self.APP.read_text(encoding="utf-8"))
+
+    def test_trading_page_has_no_password_gate(self):
+        source = self.APP.read_text(encoding="utf-8")
+        forbidden = (
+            "TRADING_UI_PASSWORD",
+            "trade_access_ok",
+            "trade_access_password",
+            "交易台账访问口令",
+            "进入交易台账",
+            "退出台账",
+        )
+        self.assertFalse(any(item in source for item in forbidden))
+
+    def test_encrypted_ledger_protection_remains(self):
+        source = self.APP.read_text(encoding="utf-8")
+        self.assertIn('secret("TRADING_DATA_KEY")', source)
+        self.assertIn("decrypt_transactions", source)
+        self.assertIn("encrypt_transactions", source)
+        self.assertIn("TRADE_LEDGER_PATH", source)
+
+
 if __name__ == "__main__":
     unittest.main()
