@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-16",
   "trade_date": "2026-09-16",
-  "updated_at_cn": "2026-09-16T21:05:23.371561+08:00",
+  "updated_at_cn": "2026-09-16T21:15:06.352588+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -447,6 +447,21 @@
       "body_chars": 1394,
       "body_sha256": "d7ae3bd425f465234d9c24bdd8d4031fd6a23daa161e5a40737b1a7b44a24b6e",
       "published_at_cn": "2026-09-16T15:09:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "dfc018d3df7124e7",
+      "title": "9.16：科技硬件共振指数反弹，情绪出清_会飞的外星人_淘股吧",
+      "url": "https://www.tgb.cn/a/2v8Z0WRLhnC",
+      "read_count": 3,
+      "body_chars": 1952,
+      "body_sha256": "dfc018d3df7124e742490978ab88049995e5d89fd23168c9888d9caff8370125",
+      "published_at_cn": "2026-09-16T21:07:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -3183,6 +3198,94 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "dfc018d3df7124e7",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为指数放量反弹、科技硬件共振走强，但风电及医药农业消费回落，建议关注持续性并控制仓位、降低预期。",
+      "sectors": [
+        {
+          "name": "科技硬件",
+          "stance": "加强",
+          "evidence": "作者称科技硬件早盘与指数共振，午后进一步强化并有多股涨停。"
+        },
+        {
+          "name": "CPO",
+          "stance": "加强",
+          "evidence": "作者称CPO与半导体领涨科技硬件并共振指数。"
+        },
+        {
+          "name": "半导体",
+          "stance": "加强",
+          "evidence": "作者称半导体与CPO领涨科技硬件。"
+        },
+        {
+          "name": "风电",
+          "stance": "分化",
+          "evidence": "作者称风电高开冲高后回落，闽东电力晋级后反复炸板。"
+        },
+        {
+          "name": "医药",
+          "stance": "退潮",
+          "evidence": "作者称医药核心票反核后被科技硬件虹吸资金而回落。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业核心票反核后被科技硬件虹吸资金而回落。"
+        },
+        {
+          "name": "消费",
+          "stance": "退潮",
+          "evidence": "作者称消费核心票反核后被科技硬件虹吸资金而回落。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "闽东电力",
+          "sector": "电力",
+          "role": "风险"
+        },
+        {
+          "name": "光迅科技",
+          "sector": "算力",
+          "role": "高关注"
+        },
+        {
+          "name": "星网锐捷",
+          "sector": "交换机",
+          "role": "高关注"
+        },
+        {
+          "name": "通鼎互联",
+          "sector": "光通信",
+          "role": "高关注"
+        },
+        {
+          "name": "威尔高",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技硬件强势的持续性",
+        "科技硬件内部核心股的强弱",
+        "指数放量反弹后的承接情况"
+      ],
+      "numeric_claims": [
+        "威尔高龙虎榜席位紫阳东路净买入12735万元、知春路净买入8000万元",
+        "光迅科技龙虎榜席位紫阳东路净买入22600万元",
+        "星网锐捷龙虎榜席位紫阳东路净买入23100万元",
+        "通鼎互联龙虎榜席位紫阳东路净买入8600万元、知春路净卖出14400万元",
+        "平潭发展龙虎榜席位紫阳东路净买入15700万元"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
