@@ -741,3 +741,20 @@ run and natural-cycle acceptance.
   WeChat receipt.
 - Lock status: `LOCK-20260909-cloudflare-ci-deploy` closed after successful
   deployment and health verification.
+
+
+## 2026-09-16 trading-page password removal
+
+- Operation lock: `LOCK-20260916-trading-page-password-removal`.
+- Authorized by the user to remove the Trading & Positions page password prompt and allow direct page access.
+- Baseline production main: `c1af60e613c9a550c6dd48310442e5711253b925`.
+- At acquisition: queued Actions 0; in-progress Actions 0.
+- Scope: `app.py`, deterministic validation/tests if needed, and this checkpoint.
+- Preserve `TRADING_DATA_KEY` encryption, encrypted ledger storage, GitHub credentials, position de-duplication, and all trading/recommendation rules.
+- `TRADING_UI_PASSWORD` may remain configured in Streamlit Secrets but will be ignored by the application after this change.
+- Allowed side effects: validation-only GitHub Actions and Streamlit source refresh after merge.
+- Forbidden side effects: OpenAI, PushPlus, stock screening, recommendations, trades, ledger mutations, position sizing, stop-loss, or take-profit changes.
+- Security acceptance: removal of the UI password intentionally makes the page accessible to anyone who obtains the site URL; encrypted-at-rest storage does not itself prevent an authorized running app from displaying decrypted data.
+- Status: active; code change not yet merged.
+
+Updated: 2026-09-16
