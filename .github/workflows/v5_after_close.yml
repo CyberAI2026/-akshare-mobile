@@ -200,7 +200,7 @@ jobs:
         run: |
           python -m py_compile research/recommendation_feedback.py
           python -m unittest tests/test_recommendation_feedback.py
-          python research/recommendation_feedback.py update --no-notify
+          python -m research.recommendation_feedback update --no-notify
       - name: Commit refreshed feedback
         run: |
           git config user.name "V5 Feedback Automation"

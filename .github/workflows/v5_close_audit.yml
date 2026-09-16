@@ -27,6 +27,7 @@ jobs:
     env:
       TZ: Asia/Shanghai
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,7 +40,7 @@ jobs:
       - name: Reconcile 14:45 snapshot with official close-time snapshot
         run: python v5_cli.py close_audit
       - name: Backfill recommendation close anchors
-        run: python research/recommendation_feedback.py update --no-notify
+        run: python -m research.recommendation_feedback update --no-notify
       - name: Persist recommendation close anchors
         shell: bash
         run: |

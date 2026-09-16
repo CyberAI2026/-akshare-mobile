@@ -795,4 +795,11 @@ run and natural-cycle acceptance.
 - Changed files: `research/private_trade_ledger.py`, `research/recommendation_feedback.py`, `research/holding_exit.py`, `research/after_close_stages.py`, `v5_cli.py`, both related workflows, three test modules, and `docs/HOLDING_EXIT_POLICY.md`.
 - Next action: commit this unit to the task branch, open a PR, accept validation-only Actions, merge once, then run exactly one no-notify encrypted-ledger reconciliation.
 
+### Reconciliation correction
+
+- PR #17 merged as `f32682818d37d6b3498887c44c578f75b8175aa1` after validation run `35101468009` succeeded; all production stages after validation were skipped. THS run `35101467602` and official market-count run `35101467590` also succeeded.
+- The single automatic no-notify reconciliation run `35101895093` failed before reading the encrypted ledger because direct script execution could not import the `research` package (`ModuleNotFoundError`). Deterministic tests passed; no feedback commit, OpenAI call, PushPlus request, screening, recommendation, or transaction mutation occurred.
+- Forward correction: use module execution (`python -m research.recommendation_feedback`) in every workflow, retain a direct-script compatibility import, and supply `TRADING_DATA_KEY` to the close-audit backfill path.
+- Next action: validate and merge the forward correction, then retry exactly one no-notify reconciliation.
+
 Updated: 2026-09-16
