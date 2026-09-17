@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-17T18:14:07.823102+08:00",
@@ -81,5 +81,56 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "holding_review_summary": {
+    "position_count": 1,
+    "hold_count": 0,
+    "exit_count": 1,
+    "reduce_count": 0,
+    "data_error_count": 0
+  },
+  "completed_cn": "2026-09-17T18:28:41.197277+08:00",
+  "elapsed_minutes": 14.56,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 726,
+      "总数": 727,
+      "成功": 726
+    },
+    "120日": {
+      "命中或增量": 421,
+      "总数": 424,
+      "成功": 424
+    },
+    "250日": {
+      "命中或增量": 181,
+      "总数": 181,
+      "成功": 181
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 2,
+  "target_trade_date": "2026-09-18",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：主要指数近20日及60日多数为负，当日市场上涨2503家、下跌2558家，较前一日广度明显回落；研究判断：反弹持续性仍需确认。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 726,
+  "stock_qa_120_success": 424,
+  "stock_qa_250_success": 181,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
