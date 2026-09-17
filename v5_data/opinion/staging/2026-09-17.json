@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-17",
   "trade_date": "2026-09-17",
-  "updated_at_cn": "2026-09-17T21:07:04.946456+08:00",
+  "updated_at_cn": "2026-09-17T21:15:50.730844+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -350,6 +350,21 @@
       ]
     },
     {
+      "article_id": "89f811642f7ed776",
+      "title": "9月17日主题复盘 | 农业、医药强势轮动，机器人迎反弹，烟草股走势加强_风胡子2023_淘股吧",
+      "url": "https://www.tgb.cn/a/2vaDG9HTMeu",
+      "read_count": 3,
+      "body_chars": 2748,
+      "body_sha256": "89f811642f7ed776c09af37c3ec3de06bc9458da7b9c8979f6afe32edb56f0f6",
+      "published_at_cn": "2026-09-17T21:04:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "a77aebd8f0b9ca26",
       "title": "20260917复盘：科技兑现退潮，双线博弈避险轮动_harry0755_淘股吧",
       "url": "https://www.tgb.cn/a/2vazco4rwQw",
@@ -402,6 +417,21 @@
       "body_chars": 2813,
       "body_sha256": "de90ff0a26c1fdb16f37ecf98056d78ce35e842ab791f2241c820a47f02bba17",
       "published_at_cn": "2026-09-17T16:06:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "df54fb59c8ee4321",
+      "title": "2026年9月17日复盘_Honeyzzz_淘股吧",
+      "url": "https://www.tgb.cn/a/2van953RFkW",
+      "read_count": 63,
+      "body_chars": 1763,
+      "body_sha256": "df54fb59c8ee4321fef57022c7b6d6062a43a83d4280fbde74033bc5f749021b",
+      "published_at_cn": "2026-09-17T17:12:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -2415,6 +2445,69 @@
       ]
     },
     {
+      "article_id": "89f811642f7ed776",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者称市场冲高回落、三大指数小跌，个股涨跌互现；农业、医药、机器人及烟草等题材轮动活跃，贵金属调整。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "加强",
+          "evidence": "作者称农业股逆势走强，敦煌种业、万向德农、金健米业涨停。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称创新药、CRO表现活跃，金石亚药、百花医药涨停。"
+        },
+        {
+          "name": "机器人",
+          "stance": "活跃",
+          "evidence": "作者称机器人迎反弹，板块11股大涨，多股涨停。"
+        },
+        {
+          "name": "烟草",
+          "stance": "加强",
+          "evidence": "作者称烟草股走势加强，新宏泽、恒丰纸业、华宝股份涨停。"
+        },
+        {
+          "name": "汽车整车",
+          "stance": "活跃",
+          "evidence": "作者称汽车整车股拉升，众泰汽车、安凯客车涨停。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者称贵金属板块调整，山东黄金、湖南黄金跌超6%。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [],
+      "numeric_claims": [
+        "今日成交1.84万亿",
+        "沪指跌0.41%",
+        "深成指跌0.33%",
+        "创业板指跌0.4%",
+        "医药板块6股大涨",
+        "近岸蛋白涨18.8%",
+        "泰林生物涨10.6%",
+        "农业板块5股大涨",
+        "万向德农18天9板",
+        "金丹科技涨14.1%",
+        "机器人板块11股大涨",
+        "科森科技4天2板",
+        "田中精机涨12.9%",
+        "万讯自控涨12.6%",
+        "集智股份涨10.5%",
+        "山东黄金、湖南黄金跌超6%"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
       "article_id": "a77aebd8f0b9ca26",
       "market_stance": "偏空",
       "market_phase": [
@@ -2805,6 +2898,80 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "df54fb59c8ee4321",
+      "market_stance": "中性",
+      "market_phase": [
+        "混沌"
+      ],
+      "market_summary": "作者认为市场处于轮动行情，尚未出现明确主线，宜等待明显变化并避免盲目追逐当日热门板块。",
+      "sectors": [
+        {
+          "name": "电力",
+          "stance": "不明确",
+          "evidence": "作者称华电震荡，认为次日可能轮动到电力，但未作确定判断。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "金健",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "华电",
+          "sector": "电力",
+          "role": "高关注"
+        },
+        {
+          "name": "爱丽家具",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "百花医药",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "华瓷股份",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "",
+          "role": "风险"
+        },
+        {
+          "name": "太极实业",
+          "sector": "",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "电力板块是否出现轮动",
+        "金健是轮动上涨还是二波起势",
+        "市场是否出现明确主线及明显变化"
+      ],
+      "numeric_claims": [
+        "作者称当日盈利6.3个点",
+        "作者称太极实业3天涨幅接近10个点"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
