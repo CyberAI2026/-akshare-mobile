@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-18",
   "trade_date": "2026-09-18",
-  "updated_at_cn": "2026-09-18T21:38:03.553348+08:00",
+  "updated_at_cn": "2026-09-18T21:46:10.286906+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -357,6 +357,21 @@
       "body_chars": 2190,
       "body_sha256": "e4ab9511b3bbf00e30ccd98af3396d8b97089c317521a077896778cf849ada5a",
       "published_at_cn": "2026-09-18T18:08:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "e7f349fc0aea8e44",
+      "title": "9月18日主题复盘 | 次新股大爆发，国产芯片、机器人双双加强，房地产午后大涨_风胡子2023_淘股吧",
+      "url": "https://www.tgb.cn/a/2vckfJg8MzW",
+      "read_count": 8,
+      "body_chars": 2909,
+      "body_sha256": "e7f349fc0aea8e4463c36cada54d8312225853f320f99215958b13c438a39ddf",
+      "published_at_cn": "2026-09-18T21:27:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -2562,6 +2577,103 @@
       "quality_flags": [
         "广告",
         "无"
+      ]
+    },
+    {
+      "article_id": "e7f349fc0aea8e44",
+      "market_stance": "偏多",
+      "market_phase": [],
+      "market_summary": "作者称市场全天高开高走，双创指数涨超2%，约4300股飘红；次新、芯片、机器人及地产等方向表现活跃。",
+      "sectors": [
+        {
+          "name": "次新股",
+          "stance": "加强",
+          "evidence": "作者称近端次新股集体爆发，板块11股大涨。"
+        },
+        {
+          "name": "国产芯片",
+          "stance": "加强",
+          "evidence": "作者称半导体芯片股延续涨势，板块30股大涨。"
+        },
+        {
+          "name": "机器人",
+          "stance": "加强",
+          "evidence": "作者称机器人板块11股大涨，并提及量产审厂催化。"
+        },
+        {
+          "name": "房地产",
+          "stance": "活跃",
+          "evidence": "作者称房地产板块午后拉升，世联行3连板。"
+        },
+        {
+          "name": "大消费",
+          "stance": "活跃",
+          "evidence": "作者称消费股表现活跃，七匹狼等涨停。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称医药概念盘中活跃。"
+        },
+        {
+          "name": "光通信",
+          "stance": "活跃",
+          "evidence": "作者称光通信概念盘中活跃。"
+        },
+        {
+          "name": "PCB板",
+          "stance": "活跃",
+          "evidence": "作者称PCB板概念盘中活跃。"
+        },
+        {
+          "name": "云计算数据中心",
+          "stance": "活跃",
+          "evidence": "作者称云计算数据中心概念盘中活跃。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "C沈鼓",
+          "sector": "次新股",
+          "role": "龙头"
+        },
+        {
+          "name": "锡华科技",
+          "sector": "次新股",
+          "role": "高关注"
+        },
+        {
+          "name": "世联行",
+          "sector": "房地产",
+          "role": "高关注"
+        },
+        {
+          "name": "科森科技",
+          "sector": "机器人",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [],
+      "numeric_claims": [
+        "双创指数均涨超2%",
+        "C沈鼓盘中涨近300%",
+        "C信诺维一度涨超90%",
+        "锡华科技4连板",
+        "沪深京三市约4300股飘红",
+        "今日成交2.09万亿",
+        "沪指涨0.94%",
+        "深成指涨1.72%",
+        "创业板指涨2.25%",
+        "次新股板块11股大涨",
+        "C信诺维涨34.5%",
+        "东微半导涨15.2%",
+        "云天励飞涨15.1%",
+        "佰奥智能涨19.4%",
+        "中捷精工涨15.0%",
+        "房地产板块5股大涨"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
