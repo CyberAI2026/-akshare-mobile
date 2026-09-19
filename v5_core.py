@@ -26,6 +26,7 @@ APP_VERSION = "V5.5-second-start-evidence-layer"
 STRATEGY_VERSION = "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3"
 CN_TZ = ZoneInfo("Asia/Shanghai")
 PRE_AI_CANDIDATE_CAP = 50
+TAIL_UPSTREAM_TIMEOUT_SECONDS = 8
 
 
 def _call_with_alarm(function, seconds: int = 12):
@@ -1016,7 +1017,7 @@ def fetch_spot_pool(pool: pd.DataFrame) -> tuple[pd.DataFrame, str, list[str]]:
     spot = pd.DataFrame(); used=""
     for source, fn in sources:
         try:
-            raw = fn(); tmp = _std_spot(raw)
+            raw = _call_with_alarm(fn, TAIL_UPSTREAM_TIMEOUT_SECONDS); tmp = _std_spot(raw)
             if tmp.empty or "股票代码" not in tmp:
                 raise RuntimeError("实时接口字段异常/空")
             spot=tmp; used=source; break
@@ -1047,7 +1048,10 @@ def _std_minute(df: pd.DataFrame) -> pd.DataFrame:
 def fetch_5m(code: str) -> tuple[pd.DataFrame, str, list[str]]:
     errors=[]; today=now_cn().date()
     try:
-        raw=ak.stock_zh_a_minute(symbol=market_prefix(code), period="5", adjust="")
+        raw=_call_with_alarm(
+            lambda:ak.stock_zh_a_minute(symbol=market_prefix(code), period="5", adjust=""),
+            TAIL_UPSTREAM_TIMEOUT_SECONDS,
+        )
         x=_std_minute(raw)
         if not x.empty:
             x=x[x["时间"].dt.date==today]
@@ -1055,7 +1059,12 @@ def fetch_5m(code: str) -> tuple[pd.DataFrame, str, list[str]]:
     except Exception as e: errors.append(f"sina:{type(e).__name__}:{e}")
     try:
         start=f"{today:%Y-%m-%d} 09:30:00"; end=f"{today:%Y-%m-%d} 15:00:00"
-        raw=ak.stock_zh_a_hist_min_em(symbol=code, start_date=start, end_date=end, period="5", adjust="")
+        raw=_call_with_alarm(
+            lambda:ak.stock_zh_a_hist_min_em(
+                symbol=code, start_date=start, end_date=end, period="5", adjust=""
+            ),
+            TAIL_UPSTREAM_TIMEOUT_SECONDS,
+        )
         x=_std_minute(raw)
         if not x.empty: return x.reset_index(drop=True), "eastmoney", errors
     except Exception as e: errors.append(f"eastmoney:{type(e).__name__}:{e}")
