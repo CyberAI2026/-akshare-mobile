@@ -1,5 +1,11 @@
 const GITHUB_API = "https://api.github.com";
 const SHANGHAI_TZ = "Asia/Shanghai";
+const TAIL_CRONS = new Set([
+  "26 6 * * 1-5",
+  "31 6 * * 1-5",
+  "35 6 * * 1-5",
+  "38 6 * * 1-5",
+]);
 
 export function shanghaiDate(date) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -124,8 +130,36 @@ export async function dispatchOpinionDelivery(env, now = new Date(), fetchImpl =
   return dispatchRecentSlot(env, workflow, now, 8, { source_date: sourceDate }, fetchImpl);
 }
 
+export async function sendSchedulerFailureAlert(env, cron, error, fetchImpl = fetch) {
+  if (!env.PUSHPLUS_TOKEN) {
+    return { action: "alert_skipped", reason: "PUSHPLUS_TOKEN missing" };
+  }
+  const payload = {
+    token: env.PUSHPLUS_TOKEN,
+    title: "A股二次启动系统｜外部调度器故障",
+    content: [
+      `Cloudflare 定时入口执行失败（cron=${cron}）。`,
+      `错误：${String(error && error.message ? error.message : error).slice(0, 500)}`,
+      "请检查 Worker 日志与 GitHub Actions；不要用收盘后数据补造尾盘信号。",
+    ].join("<br>"),
+    template: "html",
+    channel: "wechat",
+  };
+  const response = await fetchImpl("https://www.pushplus.plus/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error(`PushPlus HTTP ${response.status}`);
+  const result = await response.json();
+  if (Number(result.code) !== 200) {
+    throw new Error(`PushPlus rejected scheduler alert: ${result.code}`);
+  }
+  return { action: "alert_accepted", code: Number(result.code) };
+}
+
 export async function routeSchedule(cron, env, now = new Date(), fetchImpl = fetch) {
-  if (cron === "26,31,35 6 * * 1-5") return dispatchTail(env, now, fetchImpl);
+  if (TAIL_CRONS.has(cron)) return dispatchTail(env, now, fetchImpl);
   if (["30 12 * * *", "0,10,20,30,40,50 13 * * *", "0 14 * * *"].includes(cron)) {
     return dispatchOpinion(env, now, fetchImpl);
   }
@@ -136,7 +170,17 @@ export async function routeSchedule(cron, env, now = new Date(), fetchImpl = fet
 export default {
   async scheduled(controller, env, ctx) {
     ctx.waitUntil(
-      routeSchedule(controller.cron, env).then((result) => console.log(JSON.stringify(result)))
+      routeSchedule(controller.cron, env)
+        .then((result) => console.log(JSON.stringify(result)))
+        .catch(async (error) => {
+          console.error("scheduler route failed", controller.cron, error);
+          try {
+            console.log(JSON.stringify(await sendSchedulerFailureAlert(env, controller.cron, error)));
+          } catch (alertError) {
+            console.error("scheduler failure alert failed", alertError);
+          }
+          throw error;
+        })
     );
   },
 
