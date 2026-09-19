@@ -97,18 +97,20 @@ class TailStageTests(unittest.TestCase):
             root = Path(td)
             pool = pd.DataFrame([{"股票代码": "603318", "股票名称": "水发燃气"}])
             empty = pd.DataFrame()
+            order = []
             with patch.object(cli, "ROOT", root), patch.object(cli, "LATEST", root / "latest"), \
                  patch.object(cli, "_enforce_tail_stage_window", return_value=date(2026, 9, 7)), \
                  patch.object(cli, "_load_tail_pool", return_value=(pool, {"target_trade_date": "2026-09-07"})), \
-                 patch.object(cli, "wait_until_cn"), \
-                 patch.object(cli, "fetch_realtime_package", return_value=(pool, empty, empty)), \
-                 patch.object(cli, "fetch_candidate_decision_context", return_value=({}, empty)), \
+                 patch.object(cli, "wait_until_cn", side_effect=lambda *_: order.append("wait-1440")), \
+                 patch.object(cli, "fetch_realtime_package", side_effect=lambda *_: (order.append("realtime") or (pool, empty, empty))), \
+                 patch.object(cli, "fetch_candidate_decision_context", side_effect=lambda *_: (order.append("context") or ({}, empty))), \
                  patch.object(cli, "save_bytes"), patch.object(cli, "git_commit"), \
                  patch.object(cli, "now_cn", return_value=datetime(2026, 9, 7, 14, 41, tzinfo=CN)):
                 cli.run_tail_precheck()
             marker = json.loads((root / "latest" / "tail_precheck_meta.json").read_text(encoding="utf-8"))
             self.assertEqual(marker["candidate_codes"], ["603318"])
             self.assertEqual(marker["status"], "precheck_completed")
+            self.assertEqual(order, ["context", "wait-1440", "realtime"])
 
 
 if __name__ == "__main__":
