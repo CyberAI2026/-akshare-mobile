@@ -913,3 +913,43 @@ run and natural-cycle acceptance.
 - Status: completed; natural-cycle acceptance pending by design.
 
 Updated: 2026-09-19
+
+
+## 2026-09-19 account-dependency and actual-exit verification
+
+- Operation lock: `LOCK-20260919-account-dependency-checkpoint`.
+- This was a read-only evidence review plus checkpoint publication. No workflow was
+  dispatched or rerun; no OpenAI request, PushPlus message, screening decision,
+  recommendation, transaction, position, or encrypted-ledger mutation occurred.
+- Recommendation feedback already records `600801` as fully closed with actual
+  return `-4.1129%` / `亏损卖出`, and `002902` as fully closed with actual return
+  `5.9379%` / `盈利卖出`. Both are excluded from D+3/D+5/D+10 cohorts.
+- User-confirmed execution cause for both exits is a structural-stop exit. Profit
+  outcome and exit cause are independent dimensions: `002902` is simultaneously a
+  profitable sale and a structural-stop exit. The current plaintext feedback
+  schema records the outcome but has no dedicated exit-cause field; no cause was
+  inferred into or written back to the encrypted ledger during this review.
+- The deterministic 2026-09-17 after-close holding rule for `002902` reproduces a
+  raised structural stop of `29.568` from completed daily bars. Its 2026-09-17
+  close was `29.16`, so the encrypted holding review summary correctly counted one
+  `EXIT_NEXT_SESSION` case. The saved 2026-09-18 daily low is `29.67`; therefore
+  the repository supports "exit next session because the prior close broke the
+  stop", but does not support a second intraday cross below `29.568` on 2026-09-18.
+- The 2026-09-17 after-close run `35209282129` completed independently in GitHub
+  Actions, called the repository-keyed OpenAI API successfully at 18:28 China time
+  (`resp_082299bfa956a1d2006aabc0b3b09487d29c83d40752caa611`), and received
+  PushPlus business code 200. The 2026-09-18 after-close run `35341893531` failed
+  in deterministic validation on the stock-name internal-whitespace fixture, so
+  it never reached market collection, OpenAI, or formal delivery.
+- ChatGPT Work usage is not an input to either production workflow. After-close is
+  event-driven by a daily-batch commit (or explicit workflow dispatch), while tail
+  is independently dispatched by Cloudflare/GitHub schedules. Runtime dependencies
+  are GitHub Actions, repository secrets, market providers, OpenAI API billing/key,
+  and PushPlus. Work usage exhaustion can pause development or a Work-assisted
+  upload, but cannot directly exhaust or block the OpenAI API account.
+- At checkpoint verification: production `main` was
+  `5325fa0eaca42219ec2ee3beb349de8ba3efc7f8`; queued Actions 0; in-progress
+  Actions 0. The already-deployed tail repair remains pending only its next natural
+  trading-day acceptance. No missed-date signal is authorized for replay.
+- Lock status: `LOCK-20260919-account-dependency-checkpoint` closed after this
+  documentation-only checkpoint is published.
