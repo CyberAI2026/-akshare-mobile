@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-19",
   "trade_date": "2026-09-21",
-  "updated_at_cn": "2026-09-19T20:33:52.465544+08:00",
+  "updated_at_cn": "2026-09-19T21:03:49.680143+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -12,6 +12,21 @@
       "body_chars": 2641,
       "body_sha256": "12d1bd0ff9f73033ef188e23f764af32cf3b04a4c98e8b18629d266c73e4a090",
       "published_at_cn": "2026-09-19T15:05:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "5742ab1774ff85db",
+      "title": "周度复盘｜风过千潮，云未定形_一只幽灵手_淘股吧",
+      "url": "https://www.tgb.cn/a/2vdL6Gl13dn",
+      "read_count": 12,
+      "body_chars": 1624,
+      "body_sha256": "5742ab1774ff85db612ae44d31cccf4516185bb7aeae9e63354fd78e161ee13e",
+      "published_at_cn": "2026-09-19T18:11:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -154,6 +169,73 @@
       ],
       "quality_flags": [
         "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "5742ab1774ff85db",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "混沌",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场量能抬升但主线未定，题材快速轮动、持续性不足；农业最强但周尾分歧加大，需警惕高位情绪与次新接力风险。",
+      "sectors": [
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "整周最醒目，受国际粮价预期支撑，但无实质利好，周尾分歧加大。"
+        },
+        {
+          "name": "科技硬件",
+          "stance": "分化",
+          "evidence": "华天科技、存储、PCB仅零星表现，多数标的一日游后沉寂。"
+        },
+        {
+          "name": "汽车",
+          "stance": "退潮",
+          "evidence": "众泰短暂反包后转日深水兑现，未带出板块延续性。"
+        },
+        {
+          "name": "医药",
+          "stance": "退潮",
+          "evidence": "政策利好带来短暂冲高后兑现，老龙头悄然退潮。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "万向德农",
+          "sector": "农业",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "东航种业",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "众泰",
+          "sector": "汽车",
+          "role": "风险"
+        },
+        {
+          "name": "华天科技",
+          "sector": "科技硬件",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "农业板块周尾分歧是否扩大",
+        "新股严管信号对高位情绪及次新接力的影响",
+        "科技硬件能否摆脱一日游并形成持续性"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
         "明显情绪化"
       ]
     }
