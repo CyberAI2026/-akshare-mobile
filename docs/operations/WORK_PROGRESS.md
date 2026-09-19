@@ -853,6 +853,30 @@ run and natural-cycle acceptance.
 - Next unit: bound realtime/minute upstream calls, move time-insensitive candidate
   context before 14:40, remove the brittle display-whitespace assertion, split the
   external cron slots, and make scheduler/cancelled-run failures observable.
+- Unit 1 implementation complete locally:
+  - Eastmoney/Sina realtime and 5-minute calls now have an 8-second per-source
+    hard deadline and preserve provider fallback/error evidence.
+  - Candidate profile/fund-flow/news context is fetched before the 14:40 wait;
+    only the actual quote/minute snapshot remains in the short time window.
+  - The precheck job limit is 30 minutes, but bounded calls prevent that extra
+    allowance from accepting an unbounded late snapshot.
+  - The unstable display-whitespace fixture now asserts the deterministic
+    normalized stock-name key, preserving the intended name-to-code gate.
+  - A cancelled/timed-out stage now reaches the failure alert. One same-day
+    Actions-cache receipt suppresses duplicate alerts from the staggered native
+    cron runs.
+  - Cloudflare now has four independent weekday tail cron expressions at
+    14:26/14:31/14:35/14:38 China time. A GitHub API route failure produces a
+    direct Cloudflare-to-PushPlus fault alert; it never constructs a trade signal.
+- Verification: 61 targeted Python tests passed; 142 full Python tests passed;
+  12 Worker tests passed; both modified workflow YAML files parsed; Python
+  compilation and `git diff --check` passed. Two initial test commands were run
+  from the wrong working directory (`npm test` at repository root and Python
+  discovery inside the Worker folder); both failed before tests and were corrected
+  without changing production state.
+- Next unit: publish the implementation on the locked branch, open a PR, accept
+  validation-only Actions, merge once, then deploy the Worker exactly once without
+  dispatching a tail workflow.
 - Status: active.
 
 Updated: 2026-09-19
