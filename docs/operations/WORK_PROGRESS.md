@@ -892,6 +892,24 @@ run and natural-cycle acceptance.
   executions; all other grid ticks are deterministic no-ops.
 - Next unit: validate and merge the five-cron correction, deploy once, and verify
   the deployed trigger list/health without dispatching tail production.
-- Status: active.
+- PR #20 merged as `5325fa0eaca42219ec2ee3beb349de8ba3efc7f8` after
+  validation runs `35438695104`, `35438694993`, and `35438695010` succeeded.
+- Corrected deployment run `35438841023` succeeded. Cloudflare Worker version is
+  `021e06cd-751f-4046-a579-72af73a084ee`; its health endpoint returned
+  `status=ok`, timezone `Asia/Shanghai`, and all three workflow roles.
+- Cloudflare confirmed exactly five active schedules: four independent tail
+  checks at 06:26/06:31/06:35/06:38 UTC on weekdays and the single auxiliary
+  routing grid `0,10,12,20,30,40,50 12-14 * * *`.
+- No missed-date tail signal was reconstructed. No manual tail workflow, OpenAI
+  request, formal trade PushPlus message, recommendation, or ledger mutation was
+  triggered by the repair/deployment. The only PushPlus behavior added is a
+  future fault alert when the external scheduler cannot complete its GitHub route.
+- Direct causes are closed in code and deployment. The next natural trading-day
+  acceptance must verify: external dispatch in the 14:26-14:38 window, bounded
+  14:40 data capture, one 14:45 API decision, one persisted PushPlus receipt, and
+  no duplicate native-cron side effect.
+- At closure: queued Actions 0; in-progress Actions 0; pending Actions 0.
+- Lock status: `LOCK-20260919-tail-delivery-reliability` closed.
+- Status: completed; natural-cycle acceptance pending by design.
 
 Updated: 2026-09-19
