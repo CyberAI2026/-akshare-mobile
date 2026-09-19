@@ -1668,11 +1668,14 @@ def run_tail_precheck():
 
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
     base.mkdir(parents=True, exist_ok=True)
+    # Profiles, recent fund flow, and event titles are not 14:40 tick data. Fetch
+    # them during the early safe window so a slow upstream cannot consume the
+    # short 14:40-to-14:45 quote window.
+    candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
+    save_bytes(base / "candidate_decision_context.xlsx", to_excel_bytes({**candidate_context,"数据质量":candidate_context_qa}))
     wait_until_cn(14, 40)
     snap40, min40, qa40 = fetch_realtime_package(pool)
     save_bytes(base / "1440_precheck.xlsx", to_excel_bytes({"14点40实时快照": snap40, "当日5分钟K线": min40, "数据质量": qa40}))
-    candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
-    save_bytes(base / "candidate_decision_context.xlsx", to_excel_bytes({**candidate_context,"数据质量":candidate_context_qa}))
     marker = {
         "status": "precheck_completed", "trade_date": str(today),
         "generated_at_cn": now_cn().isoformat(),
