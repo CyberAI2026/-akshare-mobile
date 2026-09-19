@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     # External dispatch may intentionally arrive a few minutes before the 14:32
     # safe window, and this stage then waits for the 14:40 sample.
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       TZ: Asia/Shanghai
       GITHUB_REPO: ${{ github.repository }}
@@ -110,13 +110,30 @@ jobs:
 
   failure-alert:
     needs: [precheck-1440, finalize-1445]
-    if: failure()
+    # A job-level timeout is reported as cancelled, so failure() alone silently
+    # skipped the alert on 2026-09-17. Ordinary validation-only pushes stay quiet.
+    if: >-
+      ${{ always() && github.event_name != 'push' &&
+          (needs.precheck-1440.result != 'success' || needs.finalize-1445.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
     steps:
+      - name: Resolve China trading date
+        id: alert-date
+        shell: bash
+        run: echo "date=$(TZ=Asia/Shanghai date +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore same-day failure-alert receipt
+        id: alert-receipt
+        uses: actions/cache/restore@v4
+        with:
+          path: .tail-failure-alert-receipt
+          key: tail-failure-alert-${{ steps.alert-date.outputs.date }}
+
       - name: Send one failure alert through PushPlus
+        if: steps.alert-receipt.outputs.cache-hit != 'true'
         shell: bash
         run: |
           python - <<'PY'
@@ -150,4 +167,14 @@ jobs:
               result = json.loads(resp.read().decode("utf-8", errors="replace"))
               if int(result.get("code", -1)) != 200:
                   raise SystemExit(f"PushPlus failure alert rejected: {result}")
+              print(f"PushPlus failure alert accepted code={result.get('code')}")
+          with open(".tail-failure-alert-receipt", "w", encoding="utf-8") as handle:
+              json.dump({"accepted": True, "date": now[:10]}, handle)
           PY
+
+      - name: Save same-day failure-alert receipt
+        if: steps.alert-receipt.outputs.cache-hit != 'true' && hashFiles('.tail-failure-alert-receipt') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .tail-failure-alert-receipt
+          key: tail-failure-alert-${{ steps.alert-date.outputs.date }}
