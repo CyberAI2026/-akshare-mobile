@@ -877,6 +877,21 @@ run and natural-cycle acceptance.
 - Next unit: publish the implementation on the locked branch, open a PR, accept
   validation-only Actions, merge once, then deploy the Worker exactly once without
   dispatching a tail workflow.
+- PR #19 merged as `48c92701751ffc811650925cdbe4214760d9948e` after
+  validation runs `35438285929`, `35438285810`, and `35438285809` all succeeded.
+  Merge validation run `35438457032` succeeded with precheck/finalize/alert all
+  skipped; no tail production side effect occurred.
+- Deployment run `35438570230` uploaded the Worker code and both secrets, then
+  failed while updating schedules because the eight requested cron expressions
+  exceeded the Cloudflare Workers Free account limit of five (API code 10072).
+  Cloudflare reported that successful trigger changes were not rolled back, so
+  schedule state is treated as uncertain until the forward deployment succeeds.
+- Forward correction: keep the four independent tail expressions and consolidate
+  opinion mining/delivery into one fifth routing-grid expression. Worker time-slot
+  checks preserve only the prior 20:30, 21:00-21:50, 22:00, and 22:12 Shanghai
+  executions; all other grid ticks are deterministic no-ops.
+- Next unit: validate and merge the five-cron correction, deploy once, and verify
+  the deployed trigger list/health without dispatching tail production.
 - Status: active.
 
 Updated: 2026-09-19
