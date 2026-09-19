@@ -9,7 +9,9 @@ send PushPlus itself. It checks nearby GitHub workflow runs and sends an idempot
 
 Cloudflare cron is UTC. The production checks are:
 
-- tail: 06:26/06:31/06:35 UTC (14:26/14:31/14:35 Shanghai), weekdays;
+- tail: 06:26/06:31/06:35/06:38 UTC
+  (14:26/14:31/14:35/14:38 Shanghai), weekdays, as four independent cron
+  expressions;
 - opinion mining: 12:30, 13:00-13:50 every ten minutes, and 14:00 UTC
   (20:30, 21:00-21:50, and 22:00 Shanghai), daily;
 - opinion delivery fallback: 14:12 UTC (22:12 Shanghai), daily.
@@ -18,6 +20,11 @@ The first accepted dispatch normally reaches the workflow before its 14:32 safe
 window. Later tail checks skip a queued, in-progress, or successful same-day run. A
 completed failed/cancelled run blocks automatic retry because its external side
 effects cannot be assumed absent.
+
+If a cron event runs but its GitHub API check/dispatch fails, the Worker sends a
+direct PushPlus scheduler-failure alert. This alert path is independent of GitHub
+Actions and OpenAI. It does not create a trading decision or attempt to reconstruct
+a missed tail signal after close.
 
 Opinion checks are slot-aware: an active or nearby scheduled/externally dispatched
 run suppresses a duplicate, but a later collection slot is still allowed. External
@@ -44,7 +51,9 @@ The preferred production path is the manually dispatched GitHub Actions workflow
 
 - `CLOUDFLARE_API_TOKEN`: a Cloudflare API token limited to Workers deployment;
 - `CLOUDFLARE_ACCOUNT_ID`: the target Cloudflare account ID;
-- `TAIL_DISPATCH_GITHUB_TOKEN`: the fine-grained GitHub token described above.
+- `TAIL_DISPATCH_GITHUB_TOKEN`: the fine-grained GitHub token described above;
+- `PUSHPLUS_TOKEN`: used only for an external-scheduler failure alert when the
+  Worker cannot complete its GitHub API route.
 
 Run the workflow only with confirmation value `DEPLOY`. It tests the scheduler,
 deploys the Worker, and uploads `TAIL_DISPATCH_GITHUB_TOKEN` to Cloudflare as the

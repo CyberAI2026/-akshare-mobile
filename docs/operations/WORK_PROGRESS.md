@@ -802,4 +802,81 @@ run and natural-cycle acceptance.
 - Forward correction: use module execution (`python -m research.recommendation_feedback`) in every workflow, retain a direct-script compatibility import, and supply `TRADING_DATA_KEY` to the close-audit backfill path.
 - Next action: validate and merge the forward correction, then retry exactly one no-notify reconciliation.
 
-Updated: 2026-09-16
+### Closure
+
+- PR #18 merged as `fd4b69de4bcbbe2273e0e3cbf3abc759ed10620c`; validation run
+  `35102238798` succeeded and production stages were skipped.
+- The one authorized no-notify reconciliation retry, run `35102358586`, succeeded
+  and persisted commit `c53af8f`. It made no OpenAI call, PushPlus request,
+  screening decision, recommendation, or ledger mutation.
+- The encrypted ledger classified recommendation `600801` as fully closed on
+  2026-09-16 and the plaintext-safe feedback result as `亏损卖出`, actual return
+  `-4.1129%`. It is absent from all D+3/D+5/D+10 due cohorts.
+- The latest verified aggregate on 2026-09-18 contains two completed real trades:
+  one win and one loss, 50.0% win rate, 0.9125% mean actual return, and 1.4437
+  payoff ratio. No account, quantity, cost, price, or cash-P/L detail was exposed.
+- Natural after-close run `35437037831` on 2026-09-19 successfully exercised the
+  production holding-review path. Exact-duplicate pending run `35437040173` was
+  cancelled before any stage ran, preventing duplicate OpenAI/PushPlus effects.
+- Lock status: `LOCK-20260916-actual-exit-feedback-holding-review` closed.
+
+
+## 2026-09-19 tail-delivery reliability incident
+
+- Operation lock: `LOCK-20260919-tail-delivery-reliability`.
+- Baseline production main: `cfb789fbec7fc4150c58690e0e35a4ef4d24cb08`.
+- At acquisition: queued Actions 0; in-progress Actions 0; pending Actions 0.
+- Authorized goal: establish the 2026-09-17 and 2026-09-18 14:40-14:45 failure
+  chains, repair the proven causes, and keep the production tail task independent
+  of ChatGPT Work conversation/usage state.
+- Evidence established: 2026-09-17 external run `35189873338` started at 14:27
+  China time, but `precheck-1440` exceeded its 25-minute job timeout during market
+  data collection and was cancelled at 14:53. `finalize-1445`, OpenAI, and the
+  formal trade PushPlus delivery never ran.
+- Evidence established: no external 14:26/14:31/14:35 workflow run exists for
+  2026-09-18. The three delayed native GitHub schedules reached Actions only at
+  19:40-19:47 China time and all failed validation because a code-name fixture's
+  insignificant internal whitespace changed. No market fetch, OpenAI request,
+  decision, or formal trade PushPlus delivery ran.
+- Quota separation: the workflow uses repository `OPENAI_API_KEY` in GitHub
+  Actions and has no ChatGPT Work session dependency. A separate after-close API
+  call succeeded on 2026-09-17 at 18:28 on its first attempt (response
+  `resp_082299bfa956a1d2006aabc0b3b09487d29c83d40752caa611`), so the Thursday tail
+  miss was not a ChatGPT Work-usage or API-quota failure. Friday tail never called
+  the API, so no Friday tail billing/rate/auth response exists.
+- Allowed side effects: validation-only PR Actions and one Cloudflare scheduler
+  deployment after verified merge. Deployment itself must not dispatch the tail
+  workflow, call OpenAI, or send PushPlus.
+- Forbidden side effects: reconstructing either missed day's tail signal after
+  close; manual tail dispatch; duplicate OpenAI/PushPlus; trading-ledger mutation;
+  recommendation/position/risk-rule changes.
+- Next unit: bound realtime/minute upstream calls, move time-insensitive candidate
+  context before 14:40, remove the brittle display-whitespace assertion, split the
+  external cron slots, and make scheduler/cancelled-run failures observable.
+- Unit 1 implementation complete locally:
+  - Eastmoney/Sina realtime and 5-minute calls now have an 8-second per-source
+    hard deadline and preserve provider fallback/error evidence.
+  - Candidate profile/fund-flow/news context is fetched before the 14:40 wait;
+    only the actual quote/minute snapshot remains in the short time window.
+  - The precheck job limit is 30 minutes, but bounded calls prevent that extra
+    allowance from accepting an unbounded late snapshot.
+  - The unstable display-whitespace fixture now asserts the deterministic
+    normalized stock-name key, preserving the intended name-to-code gate.
+  - A cancelled/timed-out stage now reaches the failure alert. One same-day
+    Actions-cache receipt suppresses duplicate alerts from the staggered native
+    cron runs.
+  - Cloudflare now has four independent weekday tail cron expressions at
+    14:26/14:31/14:35/14:38 China time. A GitHub API route failure produces a
+    direct Cloudflare-to-PushPlus fault alert; it never constructs a trade signal.
+- Verification: 61 targeted Python tests passed; 142 full Python tests passed;
+  12 Worker tests passed; both modified workflow YAML files parsed; Python
+  compilation and `git diff --check` passed. Two initial test commands were run
+  from the wrong working directory (`npm test` at repository root and Python
+  discovery inside the Worker folder); both failed before tests and were corrected
+  without changing production state.
+- Next unit: publish the implementation on the locked branch, open a PR, accept
+  validation-only Actions, merge once, then deploy the Worker exactly once without
+  dispatching a tail workflow.
+- Status: active.
+
+Updated: 2026-09-19

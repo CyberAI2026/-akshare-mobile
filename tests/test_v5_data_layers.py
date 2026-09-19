@@ -38,7 +38,10 @@ class StockPoolUploadTests(unittest.TestCase):
              patch.object(core.ak, "stock_zh_a_spot_em", side_effect=AssertionError("must stay local")):
             result = core.pool_from_dataframe(source)
         self.assertEqual(result.iloc[0]["股票代码"], "000002")
-        self.assertEqual(result.iloc[0]["股票名称"], "万 科Ａ")
+        # The reference snapshot owns the display spelling and may contain one
+        # or more harmless internal spaces/full-width characters. Matching is
+        # deterministic on the normalized key, not that presentation detail.
+        self.assertEqual(core._norm_stock_name(result.iloc[0]["股票名称"]), "万科A")
 
     def test_unregistered_name_is_rejected_instead_of_guessed(self):
         source = pd.DataFrame({"名称": ["不存在的近似股票名"]})
@@ -46,6 +49,29 @@ class StockPoolUploadTests(unittest.TestCase):
              patch.object(core.ak, "stock_zh_a_spot_em", side_effect=RuntimeError("offline")):
             with self.assertRaisesRegex(ValueError, "无法唯一匹配代码"):
                 core.pool_from_dataframe(source)
+
+
+class TailRealtimeTimeoutTests(unittest.TestCase):
+    def test_spot_source_timeout_falls_back_to_second_provider(self):
+        pool = pd.DataFrame([{"股票代码": "000001", "股票名称": "平安银行"}])
+        fallback = pd.DataFrame([{"代码": "000001", "名称": "平安银行", "最新": 12.3}])
+        with patch.object(core, "_call_with_alarm", side_effect=[TimeoutError("slow"), fallback]) as bounded:
+            result, source, errors = core.fetch_spot_pool(pool)
+        self.assertEqual(source, "sina")
+        self.assertEqual(result["股票代码"].tolist(), ["000001"])
+        self.assertIn("TimeoutError", errors[0])
+        self.assertEqual(bounded.call_args_list[0].args[1], core.TAIL_UPSTREAM_TIMEOUT_SECONDS)
+
+    def test_minute_sources_are_both_hard_bounded(self):
+        with patch.object(core, "_call_with_alarm", side_effect=[TimeoutError("slow-1"), TimeoutError("slow-2")]) as bounded:
+            result, source, errors = core.fetch_5m("000001")
+        self.assertTrue(result.empty)
+        self.assertEqual(source, "")
+        self.assertEqual(len(errors), 2)
+        self.assertEqual(
+            [call.args[1] for call in bounded.call_args_list],
+            [core.TAIL_UPSTREAM_TIMEOUT_SECONDS, core.TAIL_UPSTREAM_TIMEOUT_SECONDS],
+        )
 
 
 class MasterPoolHardRuleTests(unittest.TestCase):

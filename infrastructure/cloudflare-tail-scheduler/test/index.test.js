@@ -6,6 +6,7 @@ import {
   dispatchOpinionDelivery,
   dispatchTail,
   routeSchedule,
+  sendSchedulerFailureAlert,
   shanghaiDate,
 } from "../src/index.js";
 
@@ -140,10 +141,43 @@ test("opinion delivery uses its dedicated workflow", async () => {
 test("cron routing separates tail, mining, and delivery", async () => {
   const fakeFetch = async (_url, options = {}) =>
     options.method === "POST" ? response(204) : response(200, { workflow_runs: [] });
-  const tail = await routeSchedule("26,31,35 6 * * 1-5", env, now, fakeFetch);
+  const tail = await routeSchedule("26 6 * * 1-5", env, now, fakeFetch);
   const mining = await routeSchedule("30 12 * * *", env, now, fakeFetch);
   const delivery = await routeSchedule("12 14 * * *", env, now, fakeFetch);
   assert.equal(tail.workflow, "v5_tail_confirmation.yml");
   assert.equal(mining.workflow, "v5_market_opinion.yml");
   assert.equal(delivery.workflow, "v5_market_opinion_delivery.yml");
+});
+
+test("each independent tail cron routes to the tail workflow", async () => {
+  const fakeFetch = async (_url, options = {}) =>
+    options.method === "POST" ? response(204) : response(200, { workflow_runs: [] });
+  for (const cron of [
+    "26 6 * * 1-5",
+    "31 6 * * 1-5",
+    "35 6 * * 1-5",
+    "38 6 * * 1-5",
+  ]) {
+    const result = await routeSchedule(cron, env, now, fakeFetch);
+    assert.equal(result.workflow, "v5_tail_confirmation.yml");
+  }
+});
+
+test("scheduler failures can alert independently of GitHub Actions", async () => {
+  const calls = [];
+  const fakeFetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    return response(200, { code: 200, data: "receipt" });
+  };
+  const result = await sendSchedulerFailureAlert(
+    { ...env, PUSHPLUS_TOKEN: "push-token" },
+    "26 6 * * 1-5",
+    new Error("GitHub API 503"),
+    fakeFetch,
+  );
+  assert.equal(result.action, "alert_accepted");
+  assert.equal(calls.length, 1);
+  const body = JSON.parse(calls[0].options.body);
+  assert.equal(body.token, "push-token");
+  assert.match(body.content, /GitHub API 503/);
 });
