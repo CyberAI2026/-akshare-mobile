@@ -12,9 +12,10 @@ Cloudflare cron is UTC. The production checks are:
 - tail: 06:26/06:31/06:35/06:38 UTC
   (14:26/14:31/14:35/14:38 Shanghai), weekdays, as four independent cron
   expressions;
-- opinion mining: 12:30, 13:00-13:50 every ten minutes, and 14:00 UTC
-  (20:30, 21:00-21:50, and 22:00 Shanghai), daily;
-- opinion delivery fallback: 14:12 UTC (22:12 Shanghai), daily.
+- opinion mining and delivery share one routing-grid cron to stay within the
+  Workers Free five-trigger account limit. The Worker accepts only 12:30,
+  13:00-13:50 every ten minutes, 14:00, and 14:12 UTC (20:30, 21:00-21:50,
+  22:00, and 22:12 Shanghai); other grid ticks are no-ops.
 
 The first accepted dispatch normally reaches the workflow before its 14:32 safe
 window. Later tail checks skip a queued, in-progress, or successful same-day run. A

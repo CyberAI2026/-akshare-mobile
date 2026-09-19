@@ -181,3 +181,18 @@ test("scheduler failures can alert independently of GitHub Actions", async () =>
   assert.equal(body.token, "push-token");
   assert.match(body.content, /GitHub API 503/);
 });
+
+test("one auxiliary grid cron preserves opinion and delivery slots", async () => {
+  const cron = "0,10,12,20,30,40,50 12-14 * * *";
+  const calls = [];
+  const fakeFetch = async (url, options = {}) => {
+    calls.push({ url, options });
+    return options.method === "POST" ? response(204) : response(200, { workflow_runs: [] });
+  };
+  const opinion = await routeSchedule(cron, env, new Date("2026-09-11T12:30:00Z"), fakeFetch);
+  assert.equal(opinion.workflow, "v5_market_opinion.yml");
+  const delivery = await routeSchedule(cron, env, new Date("2026-09-11T14:12:00Z"), fakeFetch);
+  assert.equal(delivery.workflow, "v5_market_opinion_delivery.yml");
+  const ignored = await routeSchedule(cron, env, new Date("2026-09-11T12:10:00Z"), fakeFetch);
+  assert.equal(ignored.action, "ignored_auxiliary_grid_slot");
+});
