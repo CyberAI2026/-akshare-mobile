@@ -6,6 +6,7 @@ const TAIL_CRONS = new Set([
   "35 6 * * 1-5",
   "38 6 * * 1-5",
 ]);
+const AUXILIARY_CRON = "0,10,12,20,30,40,50 12-14 * * *";
 
 export function shanghaiDate(date) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -160,6 +161,17 @@ export async function sendSchedulerFailureAlert(env, cron, error, fetchImpl = fe
 
 export async function routeSchedule(cron, env, now = new Date(), fetchImpl = fetch) {
   if (TAIL_CRONS.has(cron)) return dispatchTail(env, now, fetchImpl);
+  if (cron === AUXILIARY_CRON) {
+    const hour = now.getUTCHours();
+    const minute = now.getUTCMinutes();
+    const opinionSlot =
+      (hour === 12 && minute === 30) ||
+      (hour === 13 && [0, 10, 20, 30, 40, 50].includes(minute)) ||
+      (hour === 14 && minute === 0);
+    if (opinionSlot) return dispatchOpinion(env, now, fetchImpl);
+    if (hour === 14 && minute === 12) return dispatchOpinionDelivery(env, now, fetchImpl);
+    return { action: "ignored_auxiliary_grid_slot", cron, hour, minute };
+  }
   if (["30 12 * * *", "0,10,20,30,40,50 13 * * *", "0 14 * * *"].includes(cron)) {
     return dispatchOpinion(env, now, fetchImpl);
   }
