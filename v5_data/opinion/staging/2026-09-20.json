@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-20",
   "trade_date": "2026-09-21",
-  "updated_at_cn": "2026-09-20T21:45:48.314572+08:00",
+  "updated_at_cn": "2026-09-20T21:54:11.760161+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -57,6 +57,21 @@
       "body_chars": 13767,
       "body_sha256": "5d894d2bf238c7b04c38aed8de1feffcab8091317a5f9a6386ac013177e69f00",
       "published_at_cn": "2026-09-20T20:21:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "8b6be5efd1107308",
+      "title": "2026.9.20复盘次日应对思路_廷哥挥镰刀_淘股吧",
+      "url": "https://www.tgb.cn/a/2vfFFsQmzcb",
+      "read_count": 1,
+      "body_chars": 1613,
+      "body_sha256": "8b6be5efd110730822913654c86c4f49f110951d3d5cbcdb27916a3d4d422ced",
+      "published_at_cn": "2026-09-20T21:50:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -589,6 +604,77 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "8b6be5efd1107308",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "混沌"
+      ],
+      "market_summary": "作者称市场震荡拉升、热点快速轮动；对次日操作思路偏向锁仓、减仓或清仓。",
+      "sectors": [
+        {
+          "name": "近端次新股",
+          "stance": "活跃",
+          "evidence": "作者称近端次新股集体爆发。"
+        },
+        {
+          "name": "房地产",
+          "stance": "活跃",
+          "evidence": "世联行3连板，绿地控股、万科A涨停。"
+        },
+        {
+          "name": "芯片产业链",
+          "stance": "活跃",
+          "evidence": "作者称芯片产业链表现活跃。"
+        },
+        {
+          "name": "大消费",
+          "stance": "活跃",
+          "evidence": "国芳集团、国光连锁、陕西旅游涨停。"
+        },
+        {
+          "name": "种业",
+          "stance": "退潮",
+          "evidence": "作者称种业板块跌幅居前。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "退潮",
+          "evidence": "作者称煤炭板块跌幅居前。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "锡华科技",
+          "sector": "近端次新股",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒下周一复牌后的市场反馈",
+        "近端次新股强势能否延续",
+        "作者提出的锁仓、减仓、清仓应对"
+      ],
+      "numeric_claims": [
+        "沪指涨近1%",
+        "创业板指涨超2%",
+        "全市场超4200只个股上涨",
+        "沪深两市成交额2.08万亿元",
+        "成交额较上一个交易日放量2540亿元",
+        "锡华科技4连板",
+        "世联行3连板",
+        "华软科技2连板",
+        "沈鼓集团盘中一度涨超290%"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
