@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-20",
   "trade_date": "2026-09-21",
-  "updated_at_cn": "2026-09-21T00:25:42.249725+08:00",
+  "updated_at_cn": "2026-09-21T00:46:12.814134+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -87,6 +87,21 @@
       "body_chars": 1613,
       "body_sha256": "8b6be5efd110730822913654c86c4f49f110951d3d5cbcdb27916a3d4d422ced",
       "published_at_cn": "2026-09-20T21:50:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a377b83487e61f6f",
+      "title": "0920看图_guitar_淘股吧",
+      "url": "https://www.tgb.cn/a/2vf0V2u8r8J",
+      "read_count": 1414,
+      "body_chars": 1492,
+      "body_sha256": "a377b83487e61f6fac9ad876b2d8e2f72a41900df8e5933ccc6ac505a84543e8",
+      "published_at_cn": "2026-09-20T12:19:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -813,6 +828,55 @@
         "世联行3连板",
         "华软科技2连板",
         "沈鼓集团盘中一度涨超290%"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "a377b83487e61f6f",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为加息预期及高利率压制风险偏好，当前并非单边行情，科技股仍以结构性机会为主。",
+      "sectors": [
+        {
+          "name": "科技板块",
+          "stance": "分化",
+          "evidence": "作者称科技板块内部分化，英伟达相对抗跌，Meta、微软走弱。"
+        },
+        {
+          "name": "AI赛道",
+          "stance": "不明确",
+          "evidence": "作者认为AI安全边界与算力资本开支预期仍是板块变量。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "英伟达",
+          "sector": "科技板块",
+          "role": "高关注"
+        },
+        {
+          "name": "Meta",
+          "sector": "科技板块",
+          "role": "风险"
+        },
+        {
+          "name": "微软",
+          "sector": "科技板块",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "美国PMI数据对经济韧性的验证",
+        "美联储后续政策及利率预期变化",
+        "AI算力资本开支预期"
+      ],
+      "numeric_claims": [
+        "市场定价年内还有一次加息机会",
+        "10年期美债收益率维持高位"
       ],
       "quality_flags": [
         "广告"
