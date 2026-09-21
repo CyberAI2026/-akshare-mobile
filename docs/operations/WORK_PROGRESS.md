@@ -1004,3 +1004,50 @@ Updated: 2026-09-19
   of the new gate; historical 2026-09-19 artifacts remain unchanged.
 - Status: completed and deployed. Lock
   `LOCK-20260921-stage1-ma25-gate` closed.
+
+
+## 2026-09-21 breakout-retest entry gate v0.1
+
+- Operation lock: `LOCK-20260921-breakout-retest-v01`.
+- Sole executor: current authorized maintenance account/current Work window.
+- Baseline production main: `bde36a733e6ff64dd60076c39f9d6d9e675ec53d`.
+- User-authorized production change: keep the 25/120/250-day screening and
+  structural-stop rules unchanged; change only the 14:40-14:45 new-entry layer.
+  A first platform breakout defaults to `WAIT`. A `TRADE` is allowed only after
+  a 1-3-session pullback confirmation, or through the separately auditable
+  strong-breakout exception agreed for v0.1.
+- Temporary v0.1 parameters: at most 2% intraday platform undercut; two
+  consecutive 5-minute closes back above the platform; pullback volume at most
+  80% of breakout-day volume; entry extension at most 3%; strong-breakout
+  intraday location at least 75%, volume 1.2-2.5 times the previous five-session
+  mean, entry extension at most 3%, and verified sector resonance.
+- Safety design: implement a deterministic pre-AI audit and a post-AI fail-closed
+  downgrade, so a model `TRADE` cannot bypass the gate. Existing structural stops
+  are not loosened.
+- At acquisition, no historical tail/after-close replay is authorized. Do not
+  call OpenAI, PushPlus, mutate the encrypted ledger, or dispatch Actions during
+  implementation. Today's completed 2026-09-21 tail artifacts remain immutable.
+- Exact next unit: add deterministic gate helpers and focused unit tests, run
+  offline verification, then update this checkpoint before publishing a PR.
+- Implementation unit completed in `v5_cli.py`: the production tail payload now
+  contains a per-stock `breakout_retest_v0.1` audit; both run-scoped and latest
+  CSV audits are saved. The post-model gate automatically converts any
+  non-compliant model `TRADE` to `WAIT`, clears its buy zone/position, and records
+  the downgrade. Tail PushPlus output displays the admitted route or WAIT cause.
+- Focused verification: 12 tail-stage tests passed, including first-breakout
+  WAIT, strong-breakout exception, confirmed pullback, and post-model downgrade.
+  Full deterministic verification: 147 tests passed, Python compilation and
+  `git diff --check` passed. Test OpenAI/PushPlus messages were mocked fixtures;
+  external calls made by this unit: OpenAI 0, PushPlus 0, Actions dispatch 0.
+- Read-only replay against the already-saved 2026-09-21 14:45 workbook classified
+  `300679` as `RETEST_CONFIRMED` and `300142` as
+  `STRONG_BREAKOUT_EXCEPTION`; both historical selected names pass v0.1. The
+  replay also proved that an ordinary first breakout with unverified sector
+  evidence is held at WAIT. No historical artifact was rewritten.
+- Current branch checkpoint before implementation commit:
+  `50602b030c57eb0dbdddd7ccbdb7e1179aa11e72`.
+- Exact next unit: commit the verified implementation, publish the locked branch,
+  open a PR, accept validation-only CI, merge once, then close the lock. Do not
+  dispatch a tail or after-close run.
+
+Updated: 2026-09-21

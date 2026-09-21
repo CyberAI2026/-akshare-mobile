@@ -18,6 +18,92 @@ CN = ZoneInfo("Asia/Shanghai")
 
 
 class TailStageTests(unittest.TestCase):
+    @staticmethod
+    def _write_history(cache: Path, code: str, breakout: bool = False):
+        dates = pd.date_range("2026-09-10", periods=8, freq="D")
+        highs = [10.00, 10.10, 9.90, 10.00, 10.05, 10.00, 10.00, 10.00]
+        closes = [9.80, 9.90, 9.85, 9.95, 9.90, 9.92, 9.95, 9.95]
+        volumes = [100.0] * 8
+        if breakout:
+            highs[6], closes[6], volumes[6] = 10.40, 10.20, 200.0
+            highs[7], closes[7], volumes[7] = 10.25, 10.15, 100.0
+        pd.DataFrame({
+            "日期": dates, "最高价": highs, "最低价": [9.70] * 8,
+            "收盘价": closes, "成交量": volumes,
+        }).to_csv(cache / f"{code}.csv", index=False)
+
+    @staticmethod
+    def _snapshot(code: str, price: float, high: float, low: float, volume: float):
+        return pd.DataFrame([{
+            "股票代码": code, "股票名称": "测试股", "当前价": price,
+            "今日最高价": high, "今日最低价": low, "截至当前成交量": volume,
+        }])
+
+    @staticmethod
+    def _minutes(code: str, closes):
+        return pd.DataFrame({
+            "股票代码": [code] * len(closes),
+            "时间": [f"14:{35 + i * 5:02d}" for i in range(len(closes))],
+            "收盘价": closes,
+        })
+
+    def test_first_breakout_defaults_to_wait(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            self._write_history(cache, "000001")
+            gate = cli.build_breakout_retest_gate(
+                pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股"}]),
+                self._snapshot("000001", 10.20, 10.25, 9.90, 100.0),
+                self._minutes("000001", [10.10, 10.20]),
+                {"stocks": [{"股票代码": "000001", "板块共振状态": "同期概念共振"}]},
+                date(2026, 9, 21), cache,
+            ).iloc[0]
+        self.assertFalse(bool(gate["允许新开仓"]))
+        self.assertEqual(gate["入场路径"], "WAIT")
+        self.assertIn("首次突破默认WAIT", gate["入场门禁原因"])
+
+    def test_strong_breakout_exception_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            self._write_history(cache, "000001")
+            gate = cli.build_breakout_retest_gate(
+                pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股"}]),
+                self._snapshot("000001", 10.20, 10.25, 9.90, 150.0),
+                self._minutes("000001", [10.10, 10.20]),
+                {"stocks": [{"股票代码": "000001", "板块共振状态": "同期概念共振"}]},
+                date(2026, 9, 21), cache,
+            ).iloc[0]
+        self.assertTrue(bool(gate["允许新开仓"]))
+        self.assertEqual(gate["入场路径"], "STRONG_BREAKOUT_EXCEPTION")
+
+    def test_pullback_confirmation_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            self._write_history(cache, "000001", breakout=True)
+            gate = cli.build_breakout_retest_gate(
+                pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股"}]),
+                self._snapshot("000001", 10.12, 10.20, 10.00, 150.0),
+                self._minutes("000001", [10.08, 10.12]),
+                {"stocks": [{"股票代码": "000001", "板块共振状态": "同期概念分化"}]},
+                date(2026, 9, 21), cache,
+            ).iloc[0]
+        self.assertTrue(bool(gate["允许新开仓"]))
+        self.assertEqual(gate["入场路径"], "RETEST_CONFIRMED")
+        self.assertLessEqual(gate["相对突破日成交量"], 0.8)
+
+    def test_post_model_gate_downgrades_disallowed_trade(self):
+        decisions = {"000001": {"decision": "TRADE", "position_pct_total_capital": 15,
+                                  "buy_zone_low": 10.0, "buy_zone_high": 10.2, "risk": "原风险"}}
+        gate = pd.DataFrame([{"股票代码": "000001", "允许新开仓": False,
+                              "入场门禁原因": "首次突破默认WAIT"}])
+        selected, downgraded = cli._apply_breakout_retest_post_gate(
+            ["000001"], decisions, gate, "谨慎"
+        )
+        self.assertEqual(selected, [])
+        self.assertEqual(downgraded, ["000001"])
+        self.assertEqual(decisions["000001"]["decision"], "WAIT")
+        self.assertEqual(decisions["000001"]["position_pct_total_capital"], 0)
+
     def test_stage_windows_are_bounded(self):
         with patch.object(cli, "is_trade_day", return_value=True), \
              patch.object(cli, "now_cn", return_value=datetime(2026, 9, 7, 14, 36, tzinfo=CN)):
