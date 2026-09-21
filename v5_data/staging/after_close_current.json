@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.8-25d-limitup+ma25-trend+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-21T22:34:44.531784+08:00",
@@ -81,5 +81,108 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "holding_review_summary": {
+    "position_count": 1,
+    "hold_count": 1,
+    "exit_count": 0,
+    "reduce_count": 0,
+    "data_error_count": 0
+  },
+  "completed_cn": "2026-09-21T22:49:59.237401+08:00",
+  "elapsed_minutes": 15.25,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 756,
+      "总数": 768,
+      "成功": 756
+    },
+    "120日": {
+      "命中或增量": 229,
+      "总数": 230,
+      "成功": 230
+    },
+    "250日": {
+      "命中或增量": 119,
+      "总数": 119,
+      "成功": 119
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 3,
+  "target_trade_date": "2026-09-22",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "计算事实：当日上涨4535家、涨停103家、成交额较前日增10.57%，广度与成交活跃；但深创指数60日仍为负，且公开复盘聚合提示修复后或进入分歧。",
+    "next_day_aggressiveness": "中性"
+  },
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [
+        {
+          "板块": "贵金属",
+          "文章提及数": 8,
+          "观点状态": "退潮",
+          "板块类型": "行业",
+          "当日涨跌幅%": -1.45,
+          "当日涨幅排名": 90,
+          "同类板块数": 90,
+          "净额亿元": -17.68
+        },
+        {
+          "板块": "近端次新股",
+          "文章提及数": 7,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "医药生物（创新药、CRO、化学制药）",
+          "文章提及数": 29,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "科技硬件（半导体、PCB、光模块、算力）",
+          "文章提及数": 22,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "房地产及地产服务",
+          "文章提及数": 17,
+          "观点状态": "活跃"
+        },
+        {
+          "板块": "华字辈及新华系题材",
+          "文章提及数": 15,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "MLCC及电子材料",
+          "文章提及数": 14,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "农业",
+          "文章提及数": 11,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "消费零售",
+          "文章提及数": 10,
+          "观点状态": "活跃"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 756,
+  "stock_qa_120_success": 230,
+  "stock_qa_250_success": 119,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
