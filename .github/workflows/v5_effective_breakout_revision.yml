@@ -8,6 +8,10 @@ on:
         required: true
         default: "v5_data/runs/20260921_223444"
         type: string
+  push:
+    branches: [main]
+    paths:
+      - "v5_data/control/requests/effective_breakout_revision_20260921.json"
 
 permissions:
   contents: write
@@ -27,7 +31,7 @@ jobs:
         with: {python-version: "3.11", cache: pip}
       - run: pip install -r requirements.txt
       - run: python -m unittest discover -s tests -p 'test_*.py'
-      - run: python -m research.effective_breakout_revision prepare --source-run "${{ inputs.source_run }}"
+      - run: python -m research.effective_breakout_revision prepare --source-run "${{ inputs.source_run || 'v5_data/runs/20260921_223444' }}"
 
   ai:
     needs: prepare
