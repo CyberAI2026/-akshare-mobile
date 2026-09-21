@@ -1,0 +1,99 @@
+{
+  "status": "ai_complete",
+  "stage": "revision_ai_complete",
+  "strategy": "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool",
+  "source_run": "v5_data/runs/20260921_223444",
+  "folder": "v5_data/runs/20260921_effective_breakout_v1",
+  "generated_trade_date": "2026-09-21",
+  "target_trade_date": "2026-09-22",
+  "master_count": 768,
+  "stage1": 232,
+  "stage2_research_pool": 18,
+  "stage3_research_pool": 8,
+  "observation_pool_count": 6,
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "计算事实：当日上涨4535家、下跌936家，成交额较前日增加10.57%，市场档位为较好/活跃；但宽度、涨停与成交额均处于现有滚动样本高位，次日存在强势方向分歧和去弱留强风险。",
+    "next_day_aggressiveness": "中性"
+  },
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [
+        {
+          "板块": "贵金属",
+          "文章提及数": 8,
+          "观点状态": "退潮",
+          "板块类型": "行业",
+          "当日涨跌幅%": -1.45,
+          "当日涨幅排名": 90,
+          "同类板块数": 90,
+          "净额亿元": -17.68
+        },
+        {
+          "板块": "近端次新股",
+          "文章提及数": 7,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "医药生物（创新药、CRO、化学制药）",
+          "文章提及数": 29,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "科技硬件（半导体、PCB、光模块、算力）",
+          "文章提及数": 22,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "房地产及地产服务",
+          "文章提及数": 17,
+          "观点状态": "活跃"
+        },
+        {
+          "板块": "华字辈及新华系题材",
+          "文章提及数": 15,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "MLCC及电子材料",
+          "文章提及数": 14,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "农业",
+          "文章提及数": 11,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "消费零售",
+          "文章提及数": 10,
+          "观点状态": "活跃"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "cache_summary": {
+    "修订来源": "2026-09-21已保存缓存；未联网重抓"
+  },
+  "daily_new_count": 0,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 0,
+  "cooling_count": "沿用源运行",
+  "revision_notice": "原盘后推送已送达；本条是有效突破新规则的正式更正版本"
+}

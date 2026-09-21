@@ -1,5 +1,5 @@
 {
-  "status": "prepared",
+  "status": "ai_complete",
   "lock": "LOCK-20260921-effective-breakout-v1",
   "source_run": "v5_data/runs/20260921_223444",
   "revision_run": "v5_data/runs/20260921_effective_breakout_v1",
@@ -15,6 +15,26 @@
     "lifecycle": 15,
     "pre_ai": 8
   },
-  "openai_calls": 0,
-  "corrected_push_attempts": 0
+  "openai_calls": 1,
+  "corrected_push_attempts": 0,
+  "observation_count": 6,
+  "market_pool_policy": {
+    "market_regime": "较好/活跃",
+    "minimum": 5,
+    "maximum": 10,
+    "上涨比例": 0.8150611071171819,
+    "成交额较前一日变化率": 0.1056552932913666,
+    "rule": "上涨比例>=60%且全市场成交额较前日放大>=5%时为较好/活跃，否则为一般或偏弱"
+  },
+  "pool_minimum_shortfall": 0,
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  }
 }
