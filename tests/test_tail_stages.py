@@ -60,9 +60,9 @@ class TailStageTests(unittest.TestCase):
             ).iloc[0]
         self.assertFalse(bool(gate["允许新开仓"]))
         self.assertEqual(gate["入场路径"], "WAIT")
-        self.assertIn("首次突破默认WAIT", gate["入场门禁原因"])
+        self.assertIn("首次突破一律WAIT", gate["入场门禁原因"])
 
-    def test_strong_breakout_exception_passes(self):
+    def test_strong_breakout_never_bypasses_retest(self):
         with tempfile.TemporaryDirectory() as td:
             cache = Path(td)
             self._write_history(cache, "000001")
@@ -73,8 +73,9 @@ class TailStageTests(unittest.TestCase):
                 {"stocks": [{"股票代码": "000001", "板块共振状态": "同期概念共振"}]},
                 date(2026, 9, 21), cache,
             ).iloc[0]
-        self.assertTrue(bool(gate["允许新开仓"]))
-        self.assertEqual(gate["入场路径"], "STRONG_BREAKOUT_EXCEPTION")
+        self.assertFalse(bool(gate["允许新开仓"]))
+        self.assertEqual(gate["入场路径"], "WAIT")
+        self.assertIn("首次突破一律WAIT", gate["入场门禁原因"])
 
     def test_pullback_confirmation_passes(self):
         with tempfile.TemporaryDirectory() as td:
@@ -103,6 +104,18 @@ class TailStageTests(unittest.TestCase):
         self.assertEqual(downgraded, ["000001"])
         self.assertEqual(decisions["000001"]["decision"], "WAIT")
         self.assertEqual(decisions["000001"]["position_pct_total_capital"], 0)
+
+    def test_dynamic_pool_range_uses_breadth_and_turnover(self):
+        active = cli._after_close_pool_policy(
+            pd.DataFrame([{"上涨比例": 0.70}]),
+            pd.DataFrame([{"成交额较前一日变化率": 0.08}]),
+        )
+        weak = cli._after_close_pool_policy(
+            pd.DataFrame([{"上涨比例": 0.58}]),
+            pd.DataFrame([{"成交额较前一日变化率": 0.20}]),
+        )
+        self.assertEqual((active["minimum"], active["maximum"]), (5, 10))
+        self.assertEqual((weak["minimum"], weak["maximum"]), (0, 5))
 
     def test_stage_windows_are_bounded(self):
         with patch.object(cli, "is_trade_day", return_value=True), \
