@@ -94,6 +94,37 @@ class SecondStartEvidenceTests(unittest.TestCase):
         rejected = audit.set_index("股票代码").loc["600002"]
         self.assertFalse(bool(rejected["阶段1通过"]))
 
+    def test_stage1_requires_close_above_rising_ma25(self):
+        def history(code: str, closes: list[float]) -> pd.DataFrame:
+            return pd.DataFrame({
+                "股票代码": [code] * len(closes),
+                "股票名称": ["测试股份"] * len(closes),
+                "日期": pd.date_range("2026-08-06", periods=len(closes), freq="B"),
+                "收盘价": closes,
+                "未复权收盘价": closes,
+                "最高价": closes,
+                "最低价": closes,
+                "成交量": np.full(len(closes), 1000.0),
+                "换手率": np.full(len(closes), 2.0),
+            })
+
+        passing = self.limit_history("600001", 10.0, 11.0)
+        above_but_falling = history("600002", [11.0, 12.1] + [9.5] * 23 + [10.5])
+        rising_but_below = history("600003", [10.0, 11.0] + [11.0] * 23 + [10.5])
+        metrics = build_metrics(pd.concat([passing, above_but_falling, rising_but_below], ignore_index=True))
+        selected, audit = stage1_rank(metrics, return_audit=True)
+
+        self.assertEqual(selected["股票代码"].tolist(), ["600001"])
+        rows = audit.set_index("股票代码")
+        self.assertTrue(bool(rows.loc["600001", "收盘价高于MA25"]))
+        self.assertTrue(bool(rows.loc["600001", "MA25向上"]))
+        self.assertTrue(bool(rows.loc["600002", "收盘价高于MA25"]))
+        self.assertFalse(bool(rows.loc["600002", "MA25向上"]))
+        self.assertFalse(bool(rows.loc["600003", "收盘价高于MA25"]))
+        self.assertTrue(bool(rows.loc["600003", "MA25向上"]))
+        self.assertFalse(bool(rows.loc["600002", "阶段1通过"]))
+        self.assertFalse(bool(rows.loc["600003", "阶段1通过"]))
+
     def test_metrics_expose_volume_turnover_and_consolidation(self):
         metrics = build_metrics(sample_history()).iloc[0]
         self.assertLess(metrics["成交量收敛比"], 1.0)

@@ -953,3 +953,41 @@ Updated: 2026-09-19
   trading-day acceptance. No missed-date signal is authorized for replay.
 - Lock status: `LOCK-20260919-account-dependency-checkpoint` closed after this
   documentation-only checkpoint is published.
+
+
+## 2026-09-21 stage-1 MA25 trend gate
+
+- Operation lock: `LOCK-20260921-stage1-ma25-gate`.
+- Authorized production-rule change: preserve the verified requirement of at
+  least one board-specific actual limit-up in the latest 25 trading sessions,
+  and additionally require the latest close to be strictly above MA25 and the
+  current MA25 to be strictly above the previous trading session's MA25.
+- Definition is deterministic and uses the existing 26 completed daily bars:
+  `MA25_distance = latest_close / current_MA25 - 1` and
+  `MA25_1d_slope = current_MA25 / previous_MA25 - 1`. Both must be positive.
+- Implementation unit completed locally in `v5_core.py`; strategy version is
+  advanced to `research_v0.8-25d-limitup+ma25-trend+...`. Auditable fields add
+  MA25, distance, one-day slope, close-above-MA25, MA25-rising, explicit missing
+  evidence, and the full hard-gate explanation.
+- Deterministic test coverage was added to prove three separate cases: all three
+  gates pass; close is above MA25 but MA25 is falling; MA25 is rising but the
+  close is below it. Eleven focused tests and Python compilation passed.
+- Read-only cached impact study on the saved 2026-09-19 run used no network,
+  OpenAI, Actions, or PushPlus. Of 744 active names, 742 had 26 cached bars; 338
+  met the old limit-up-only gate and 192 met all three new gates (56.8% retained),
+  which is within the established approximately 150-200-name stage-1 range.
+  Among 146 newly excluded names, 84 were below MA25 only, 10 had a falling MA25
+  only, and 52 failed both. No old-qualified name lacked MA25 evidence.
+- Two first impact-study launches stopped before computation because the local
+  lightweight interpreter lacked `akshare`, then `requests`. The successful
+  retry injected inert module stubs because the study only calls pure metric
+  functions on saved CSVs; no dependency was installed and no external call was
+  made.
+- Full deterministic verification passed: 143 tests, Python compilation, and
+  `git diff --check`. OpenAI and PushPlus lines printed by tests were mocked test
+  fixtures only; no external API or notification call occurred.
+- Pending unit: publish a PR from the current production main, accept
+  validation-only Actions, merge, close the lock, and let the next natural
+  after-close batch use the new rule.
+- Forbidden replay: do not rerun the 2026-09-19 after-close OpenAI request or
+  PushPlus message merely to regenerate its historical stage-1 pool.
