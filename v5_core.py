@@ -23,7 +23,7 @@ import pandas as pd
 import requests
 
 APP_VERSION = "V5.5-second-start-evidence-layer"
-STRATEGY_VERSION = "research_v0.7-25d-limitup+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3"
+STRATEGY_VERSION = "research_v0.8-25d-limitup+ma25-trend+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3"
 CN_TZ = ZoneInfo("Asia/Shanghai")
 PRE_AI_CANDIDATE_CAP = 50
 TAIL_UPSTREAM_TIMEOUT_SECONDS = 8
@@ -603,7 +603,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
     last = float(c.iloc[-1])
     def ret(n):
         return float(last / c.iloc[-n-1] - 1) if len(c) > n and pd.notna(c.iloc[-n-1]) and c.iloc[-n-1] else np.nan
-    ma5 = c.rolling(5).mean(); ma10 = c.rolling(10).mean(); ma20 = c.rolling(20).mean(); ma30 = c.rolling(30).mean(); ma60 = c.rolling(60).mean(); ma120 = c.rolling(120).mean()
+    ma5 = c.rolling(5).mean(); ma10 = c.rolling(10).mean(); ma20 = c.rolling(20).mean(); ma25 = c.rolling(25).mean(); ma30 = c.rolling(30).mean(); ma60 = c.rolling(60).mean(); ma120 = c.rolling(120).mean()
     amp5 = float((h.tail(5).max() - l.tail(5).min()) / l.tail(5).min()) if len(g) >= 5 and l.tail(5).min() > 0 else np.nan
     amp_prev10 = float((h.iloc[-15:-5].max() - l.iloc[-15:-5].min()) / l.iloc[-15:-5].min()) if len(g) >= 15 and l.iloc[-15:-5].min() > 0 else np.nan
     amp_contraction = amp5 / amp_prev10 if pd.notna(amp5) and pd.notna(amp_prev10) and amp_prev10 > 0 else np.nan
@@ -660,6 +660,9 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         "距250日高点": last / hi250 - 1 if hi250 else np.nan,
         "250日位置": (last - lo250) / (hi250 - lo250) if hi250 > lo250 else np.nan,
         "MA20距离": last / ma20.iloc[-1] - 1 if len(ma20) and pd.notna(ma20.iloc[-1]) else np.nan,
+        "MA25": float(ma25.iloc[-1]) if len(ma25) and pd.notna(ma25.iloc[-1]) else np.nan,
+        "MA25距离": last / ma25.iloc[-1] - 1 if len(ma25) and pd.notna(ma25.iloc[-1]) and ma25.iloc[-1] else np.nan,
+        "MA25_1日斜率": ma25.iloc[-1] / ma25.iloc[-2] - 1 if len(ma25) >= 26 and pd.notna(ma25.iloc[-1]) and pd.notna(ma25.iloc[-2]) and ma25.iloc[-2] else np.nan,
         "MA30_5日斜率": ma30.iloc[-1] / ma30.iloc[-6] - 1 if len(ma30) >= 35 and pd.notna(ma30.iloc[-6]) else np.nan,
         "MA60_10日斜率": ma60.iloc[-1] / ma60.iloc[-11] - 1 if len(ma60) >= 70 and pd.notna(ma60.iloc[-11]) else np.nan,
         "MA120_20日斜率": ma120.iloc[-1] / ma120.iloc[-21] - 1 if len(ma120) >= 140 and pd.notna(ma120.iloc[-21]) else np.nan,
@@ -737,11 +740,12 @@ def _rank_and_audit(x: pd.DataFrame, score_col: str, min_n: int | None = None,
     return selected, audit
 
 def stage1_rank(metrics: pd.DataFrame, min_n: int | None = None, max_n: int | None = None, return_audit: bool = False):
-    """25日一级：先要求最近25个交易日至少出现一次实际涨停。
+    """25日一级：要求真实涨停、收盘站上MA25且MA25正在上扬。
 
     研究约束：
     - 不使用“距20日高点越近越好”作为核心得分；
-    - 不使用精确MA20距离作为资格线；
+    - 最新收盘价必须严格高于当日MA25；
+    - 当日MA25必须严格高于前一交易日MA25；
     - 5日振幅只用于识别仍然极端的短波动，不假设某个固定振幅最优；
     - 涨停按未复权收盘价和所属板块的常规涨停价核验；
     - 本层不是买点判断，通过涨停资格后再以既有方向/波动证据排序。
@@ -749,28 +753,35 @@ def stage1_rank(metrics: pd.DataFrame, min_n: int | None = None, max_n: int | No
     x = metrics.copy()
     if x.empty:
         return (x, x) if return_audit else x
-    for c in ["ret10", "ret20", "amp5", "MA20距离", "距稳健5日上沿"]:
+    for c in ["ret10", "ret20", "amp5", "MA20距离", "MA25距离", "MA25_1日斜率", "距稳健5日上沿"]:
+        if c not in x.columns:
+            x[c] = np.nan
         x[c] = pd.to_numeric(x[c], errors="coerce")
 
     x["20日方向证据"] = (x["ret20"] >= 0).astype(int) * 2
-    x["MA20上方证据"] = (x["MA20距离"] >= 0).astype(int) * 2
+    x["MA25上方证据"] = (x["MA25距离"] > 0).astype(int) * 2
     x["短波动非极端证据"] = (x["amp5"] <= 0.18).astype(int)
     x["10日不过热证据"] = (x["ret10"] <= 0.20).astype(int)
     x["10日非急跌证据"] = (x["ret10"] >= -0.12).astype(int)
     # 仅作为很宽的结构辅助，不使用20日最高点距离做核心排序。
     x["短沿附近辅助"] = x["距稳健5日上沿"].between(-0.10, 0.06, inclusive="both").astype(int)
-    x["阶段1分"] = x[["20日方向证据", "MA20上方证据", "短波动非极端证据", "10日不过热证据", "10日非急跌证据", "短沿附近辅助"]].sum(axis=1)
+    x["阶段1分"] = x[["20日方向证据", "MA25上方证据", "短波动非极端证据", "10日不过热证据", "10日非急跌证据", "短沿附近辅助"]].sum(axis=1)
     if "最近25日曾涨停" not in x.columns:
         x["最近25日曾涨停"] = False
     x["阶段1通过"] = (
         x["最新收盘"].notna()
         & (x["最新收盘"] > 0)
         & x["最近25日曾涨停"].fillna(False).astype(bool)
+        & (x["MA25距离"] > 0)
+        & (x["MA25_1日斜率"] > 0)
     )
+    x["收盘价高于MA25"] = (x["MA25距离"] > 0).fillna(False)
+    x["MA25向上"] = (x["MA25_1日斜率"] > 0).fillna(False)
     x["阶段1风险提示"] = np.select(
-        [x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret20"] < 0],
-        ["近5日波动仍偏大", "近10日速度偏快", "20日方向仍偏弱"], default="")
-    x["阶段1规则说明"] = "硬资格：最近25个交易日（含当日）至少一次按板块涨停价核验的实际涨停；通过后再按方向/非极端波动/不过热排序"
+        [x["MA25距离"].isna() | x["MA25_1日斜率"].isna(), x["MA25距离"] <= 0, x["MA25_1日斜率"] <= 0,
+         x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret20"] < 0],
+        ["MA25证据不足", "收盘价未站上MA25", "MA25未上扬", "近5日波动仍偏大", "近10日速度偏快", "20日方向仍偏弱"], default="")
+    x["阶段1规则说明"] = "硬资格：最近25个交易日（含当日）至少一次按板块涨停价核验的实际涨停，且最新收盘价严格高于MA25、当日MA25严格高于前一交易日MA25；通过后再按方向/非极端波动/不过热排序"
     selected, audit = _rank_and_audit(x, "阶段1分", min_n, max_n, "阶段1通过", "一级粗筛")
     return (selected, audit) if return_audit else selected
 
