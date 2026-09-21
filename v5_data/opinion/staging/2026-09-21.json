@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-21",
   "trade_date": "2026-09-21",
-  "updated_at_cn": "2026-09-21T21:45:01.372808+08:00",
+  "updated_at_cn": "2026-09-21T21:54:49.929575+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -72,6 +72,21 @@
       "body_chars": 2086,
       "body_sha256": "3e1d98dbe4bd40cf6853831febd6b6871e1332e3c5944913baf4d36306c546ef",
       "published_at_cn": "2026-09-21T16:02:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "446bad5ffd7ac552",
+      "title": "2026.9.21复盘 啊高潮啊_白皮主_淘股吧",
+      "url": "https://www.tgb.cn/a/2vhka2iBvhY",
+      "read_count": 1,
+      "body_chars": 1771,
+      "body_sha256": "446bad5ffd7ac5523183aee4c056d19a377b29c2e3962357b179814cd5c95193",
+      "published_at_cn": "2026-09-21T21:44:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1010,6 +1025,117 @@
       ],
       "numeric_claims": [
         "闽东电力涉及“10+1”的异动规则"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "446bad5ffd7ac552",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "高潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为指数仍属横盘震荡，防御板块拉升突破缺口偏积极；但市场无明确主线，情绪高潮后次日或进入去弱留强的分歧。",
+      "sectors": [
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "上午与科技共同拉升，下午仍维持强势，哈药涨停。"
+        },
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "上午拉升、下午回落；易中天在前高压力下回落。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称银行与保险、证券尾盘维护指数。"
+        },
+        {
+          "name": "保险",
+          "stance": "活跃",
+          "evidence": "作者称银行与保险、证券尾盘维护指数。"
+        },
+        {
+          "name": "证券",
+          "stance": "活跃",
+          "evidence": "作者称银行与保险、证券尾盘维护指数。"
+        },
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "金建涨停。"
+        },
+        {
+          "name": "电力",
+          "stance": "活跃",
+          "evidence": "闽东涨停。"
+        },
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "龙版涨停。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "国芳涨停。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "宁德",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "易中天",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "哈药",
+          "sector": "医药",
+          "role": "不明确"
+        },
+        {
+          "name": "金建",
+          "sector": "农业",
+          "role": "不明确"
+        },
+        {
+          "name": "闽东",
+          "sector": "电力",
+          "role": "不明确"
+        },
+        {
+          "name": "龙版",
+          "sector": "传媒",
+          "role": "不明确"
+        },
+        {
+          "name": "国芳",
+          "sector": "消费",
+          "role": "不明确"
+        }
+      ],
+      "tomorrow_watch": [
+        "沪指能否站稳20日线",
+        "情绪高潮后能否完成去弱留强",
+        "老周期核心与华字辈个股的分化表现"
+      ],
+      "numeric_claims": [
+        "沪指涨幅约1个百分点",
+        "沪指突破3935缺口",
+        "收盘量能约2万亿元，较前日微缩量",
+        "上涨4536家，下跌936家",
+        "涨停106家",
+        "连板高度5板"
       ],
       "quality_flags": [
         "广告",
