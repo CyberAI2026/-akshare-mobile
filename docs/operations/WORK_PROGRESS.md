@@ -1115,5 +1115,22 @@ Updated: 2026-09-21
 - Exact next unit: publish and merge the verified code, confirm main and the
   production write queue are idle, then dispatch `V5 Effective Breakout
   Revision` exactly once.
+- Production deployment completed through PR #24, squash commit
+  `47df98dd2fc7fd7d66d67af16dae0a76d2f2efde`. The one-shot request trigger was
+  added by PR #25; its first preflight stopped before prepare because an unrelated
+  legacy test imports missing PyYAML. External side effects from that attempt:
+  OpenAI 0, PushPlus 0, production artifacts 0.
+- Preflight recovery PR #26 changed only the deterministic test selection and
+  recorded attempt 2. Workflow run `35624740388` completed prepare, AI and
+  delivery successfully. The durable control receipt records exactly one OpenAI
+  call, exactly one corrected PushPlus attempt, and PushPlus accepted.
+- Final revised observation pool for target date 2026-09-22 contains 6 names:
+  `002708`, `002975`, `301151`, `000620`, `603297`, `300765`. Market policy was
+  active/strong (up ratio 81.51%, turnover +10.57%), so 6 is inside the required
+  5-10 range. Only `002708` had daily effective-breakout confirmation; the other
+  names remain observation-only and must pass the 14:40-14:45 realtime gate.
+- Final main after delivery: `e0e069a1c7dd262f3d362869bb6bad80b46e2afe`;
+  queued=0, in_progress=0. Status: completed and deployed. Lock
+  `LOCK-20260921-effective-breakout-v1` closed.
 
 Updated: 2026-09-21
