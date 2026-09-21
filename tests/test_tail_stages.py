@@ -40,6 +40,16 @@ class TailStageTests(unittest.TestCase):
         }])
 
     @staticmethod
+    def _write_high_hold_history(cache: Path, code: str):
+        pd.DataFrame({
+            "日期": pd.date_range("2026-09-10", periods=8, freq="D"),
+            "最高价": [10.00, 10.10, 9.90, 10.00, 10.05, 10.30, 10.16, 10.17],
+            "最低价": [9.70, 9.80, 9.75, 9.80, 9.85, 10.06, 10.08, 10.09],
+            "收盘价": [9.80, 9.90, 9.85, 9.95, 9.90, 10.20, 10.13, 10.14],
+            "成交量": [100.0, 100.0, 100.0, 100.0, 100.0, 200.0, 90.0, 80.0],
+        }).to_csv(cache / f"{code}.csv", index=False)
+
+    @staticmethod
     def _minutes(code: str, closes):
         return pd.DataFrame({
             "股票代码": [code] * len(closes),
@@ -91,6 +101,37 @@ class TailStageTests(unittest.TestCase):
         self.assertTrue(bool(gate["允许新开仓"]))
         self.assertEqual(gate["入场路径"], "RETEST_CONFIRMED")
         self.assertLessEqual(gate["相对突破日成交量"], 0.8)
+
+    def test_above_platform_tight_hold_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            self._write_high_hold_history(cache, "000001")
+            gate = cli.build_breakout_retest_gate(
+                pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股"}]),
+                self._snapshot("000001", 10.16, 10.18, 10.10, 100.0),
+                self._minutes("000001", [10.14, 10.16]),
+                {"stocks": [{"股票代码": "000001", "板块共振状态": "同期概念分化"}]},
+                date(2026, 9, 21), cache,
+            ).iloc[0]
+        self.assertTrue(bool(gate["允许新开仓"]))
+        self.assertEqual(gate["入场路径"], "ABOVE_PLATFORM_TIGHT_HOLD")
+        self.assertLessEqual(gate["平台上方横盘振幅"], 0.06)
+
+    def test_micro_platform_rebreak_passes(self):
+        with tempfile.TemporaryDirectory() as td:
+            cache = Path(td)
+            self._write_high_hold_history(cache, "000001")
+            gate = cli.build_breakout_retest_gate(
+                pd.DataFrame([{"股票代码": "000001", "股票名称": "测试股"}]),
+                self._snapshot("000001", 10.20, 10.22, 10.11, 110.0),
+                self._minutes("000001", [10.18, 10.20]),
+                {"stocks": [{"股票代码": "000001", "板块共振状态": "同期概念分化"}]},
+                date(2026, 9, 21), cache,
+            ).iloc[0]
+        self.assertTrue(bool(gate["允许新开仓"]))
+        self.assertEqual(gate["入场路径"], "MICRO_PLATFORM_REBREAK")
+        self.assertGreaterEqual(gate["微平台再突破量比"], 1.05)
+        self.assertLessEqual(gate["微平台再突破量比"], 1.80)
 
     def test_post_model_gate_downgrades_disallowed_trade(self):
         decisions = {"000001": {"decision": "TRADE", "position_pct_total_capital": 15,
