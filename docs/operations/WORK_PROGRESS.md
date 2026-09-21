@@ -1049,5 +1049,21 @@ Updated: 2026-09-19
 - Exact next unit: commit the verified implementation, publish the locked branch,
   open a PR, accept validation-only CI, merge once, then close the lock. Do not
   dispatch a tail or after-close run.
+- PR #23 was rebased onto the completed natural after-close production head and
+  squash-merged as `1af3c8018192f7b083778122032687d3aa14efc1`.
+- The pre-merge natural after-close run `35612929802` completed successfully,
+  including its single normal AI/final delivery and no-notify feedback refresh;
+  it was not cancelled, replayed, or duplicated by this change.
+- PR validation run `35615137661` succeeded with every production stage skipped.
+  Post-merge after-close validation run `35615550581` succeeded with screening,
+  market, AI, delivery, and feedback stages skipped. Post-merge tail validation
+  run `35615550210` succeeded with precheck, finalize, and failure alert skipped.
+- Production verification found `breakout_retest_v0.1` and the post-model
+  fail-closed gate on main. The next natural 14:40-14:45 tail cycle will use the
+  rule; no historical tail signal was reconstructed.
+- External side effects from implementation/merge validation: OpenAI 0,
+  PushPlus 0, ledger mutations 0, manual production dispatches 0.
+- Status: completed and deployed. Lock
+  `LOCK-20260921-breakout-retest-v01` closed.
 
 Updated: 2026-09-21
