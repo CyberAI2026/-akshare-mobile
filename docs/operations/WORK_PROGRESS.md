@@ -991,3 +991,16 @@ Updated: 2026-09-19
   after-close batch use the new rule.
 - Forbidden replay: do not rerun the 2026-09-19 after-close OpenAI request or
   PushPlus message merely to regenerate its historical stage-1 pool.
+- PR #22 merged as `a5fee868cb0c67a98c1acb6b76266dd798c5e00c`.
+  PR after-close validation run `35585720360` and THS public-sector run
+  `35585720129` succeeded. PR official-market run `35585720157` failed only in
+  the live public snapshot step after its deterministic tests passed: Eastmoney
+  disconnected twice and Sina timed out twice; the failure is unrelated to the
+  MA25 calculation and was not retried.
+- Post-merge THS run `35586078178` succeeded. Post-merge official-market run
+  `35586078125` reproduced the same upstream-only snapshot failure. No natural
+  after-close batch, OpenAI request, or PushPlus delivery was started by the
+  merge. The next uploaded daily batch will be the first natural production use
+  of the new gate; historical 2026-09-19 artifacts remain unchanged.
+- Status: completed and deployed. Lock
+  `LOCK-20260921-stage1-ma25-gate` closed.
