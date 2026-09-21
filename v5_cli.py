@@ -320,6 +320,7 @@ def notify_after_close_success(
     obs: pd.DataFrame,
     obs_meta: dict,
     holding_review: pd.DataFrame | None = None,
+    title: str = "A股二次启动｜盘后研究完成",
 ):
     ma = obs_meta.get("market_assessment", {}) or {}
     lines = [
@@ -425,7 +426,7 @@ def notify_after_close_success(
     else:
         lines.append("<br><b>结论：</b>今日OpenAI未选出次日观察标的（0只）。")
     lines.append("<br><small>盘后观察池不是买入名单，需次日14:40–14:45再次确认。</small>")
-    return pushplus_notify("A股二次启动｜盘后研究完成", "<br>".join(lines))
+    return pushplus_notify(title, "<br>".join(lines))
 
 
 def notify_tail_success(final_df: pd.DataFrame, meta: dict, holding_exits: pd.DataFrame | None = None):
@@ -1075,6 +1076,28 @@ def _cap_observation_pool(selected: list[str], decision_by_code: dict[str, dict]
     return kept,trimmed,scores
 
 
+def _after_close_pool_policy(breadth: pd.DataFrame, market_context: pd.DataFrame) -> dict:
+    """Map auditable market breadth/turnover facts to the requested pool range."""
+    breadth_row = breadth.iloc[-1] if breadth is not None and not breadth.empty else pd.Series(dtype=object)
+    context_row = market_context.iloc[-1] if market_context is not None and not market_context.empty else pd.Series(dtype=object)
+    up_ratio = _finite_number(breadth_row.get("上涨比例"))
+    if up_ratio is None:
+        up = _finite_number(breadth_row.get("上涨家数"))
+        total = _finite_number(breadth_row.get("股票数"))
+        up_ratio = up / total if up is not None and total else None
+    amount_change = _finite_number(context_row.get("成交额较前一日变化率"))
+    active = bool(up_ratio is not None and up_ratio >= 0.60
+                  and amount_change is not None and amount_change >= 0.05)
+    return {
+        "market_regime": "较好/活跃" if active else "一般或偏弱",
+        "minimum": 5 if active else 0,
+        "maximum": 10 if active else 5,
+        "上涨比例": up_ratio,
+        "成交额较前一日变化率": amount_change,
+        "rule": "上涨比例>=60%且全市场成交额较前日放大>=5%时为较好/活跃，否则为一般或偏弱",
+    }
+
+
 def _post_gate_portfolio_note(selected: list[str], retreat: list[str], conditional: list[str],
                               trimmed: list[str] | None = None, cap: int = 10) -> str:
     """Build the authoritative note from the post-gate pool, not the model's pre-gate count."""
@@ -1117,11 +1140,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         raise RuntimeError("全部研究候选均处于未关闭TRADE周期，不生成重复新开仓观察池。")
     allowed={str(x).zfill(6) for x in research_pack["股票代码"].astype(str)}
     target=next_trade_day(generated_trade_date)
+    pool_policy = _after_close_pool_policy(breadth, market_context)
+    pool_cap = int(pool_policy["maximum"])
+    effective_min = min(int(pool_policy["minimum"]), len(research_pack))
     schema={
         "market_assessment": {"risk_level":"低/中/高", "summary":"基于输入市场数据的简洁判断", "next_day_aggressiveness":"偏防守/中性/偏积极"},
         "sector_assessment": {"status":"正式可用/实验性未启用", "summary":"板块环境判断；无正式数据时明确写未启用"},
         "opinion_assessment": {"status":"可用/未启用", "summary":"公开复盘正文挖掘形成的市场与板块观点共识；明确其不是行情事实"},
-        "selected_codes":["最多10个、必须来自输入候选的6位股票代码"],
+        "selected_codes":[f"{effective_min}至{pool_cap}个、必须来自输入候选的6位股票代码；若合格输入不足则不得凑数"],
         "decisions":[{
             "股票代码":"6位代码","股票名称":"输入名称","decision":"SELECT/WAIT/REJECT",
             "priority":1,"confidence_level":"低/中/高","evidence":"最关键的2-4项输入证据","risk":"主要风险","next_day_watch":"次日14:40-14:45需要确认什么",
@@ -1150,12 +1176,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "sector_data_status":"正式可用" if sector_tables else "实验性未启用",
         "sector_fund_flow_enhancement":_sector_payload(sector_tables),
         "candidate_stock_sector_attribution":stock_sector_context,
+        "market_pool_policy": pool_policy,
         "market_opinion_text_mining":_json_clean(opinion_context),
         "hard_constraints":[
             f"candidate_count已经经过程序250日生命周期与结构成熟对齐门禁，必须小于等于{PRE_AI_CANDIDATE_CAP}；不得要求扩大输入池",
             "每只candidates均已由程序确认振幅收敛、流动性收敛、短期下行停止三类支持3/3；不得以‘只有两类结构支持’为由判STRUCTURE_NOT_MATURE",
-            "selected_codes只能来自candidates，最多10只，可以0只；实际持仓已经在进入模型前排除，严禁从输入外补入",
-            "decisions只详细覆盖selected_codes且最多10条；nonselected用代码、WAIT/REJECT和固定reason_code紧凑覆盖其余全部候选，不得遗漏或重复",
+            f"当前市场档位为{pool_policy['market_regime']}：selected_codes目标{effective_min}至{pool_cap}只；只有合格输入不足时才可低于下限，严禁从输入外凑数",
+            f"selected_codes只能来自candidates且最多{pool_cap}只；实际持仓已经在进入模型前排除，严禁从输入外补入",
+            f"decisions只详细覆盖selected_codes且最多{pool_cap}条；nonselected用代码、WAIT/REJECT和固定reason_code紧凑覆盖其余全部候选，不得遗漏或重复",
             "逐股文字保持简洁，每个判断字段只写一项结论和对应数值/板块名，避免重复叙述导致输出截断",
             "本阶段只形成次日观察池，不得声称已经出现14:45买点",
             "长期下降趋势修复是重要降级证据；40日加速过大是风险提示而非固定一票否决",
@@ -1172,7 +1200,7 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "required_output_schema":schema,
     }
     raw=openai_analyze(
-        "盘后三级研究池→0~10次日观察池", payload,
+        f"盘后三级研究池→动态{effective_min}~{pool_cap}次日观察池", payload,
         output_schema=_after_close_response_schema(),
         schema_name="after_close_observation_pool",
         max_output_tokens=20000,
@@ -1195,14 +1223,14 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         selected,decision_by_code,stock_sector_context
     )
     selected,pool_cap_trimmed,pool_ranking_scores=_cap_observation_pool(
-        selected,decision_by_code,stock_sector_context,cap=10
+        selected,decision_by_code,stock_sector_context,cap=pool_cap
     )
     sector_state_by_code={str(item.get("股票代码","")).zfill(6):str(item.get("板块共振状态","") or "板块未核验")
                           for item in stock_sector_context.get("stocks",[]) if isinstance(item,dict)}
     sector_divergence_conditional=[code for code in selected if sector_state_by_code.get(code)=="同期概念分化"]
     result["model_portfolio_note_before_sector_gate"]=str(result.get("portfolio_note","") or "").strip()
     result["portfolio_note"]=_post_gate_portfolio_note(
-        selected,downgraded,sector_unverified_downgraded,pool_cap_trimmed,cap=10
+        selected,downgraded,sector_unverified_downgraded,pool_cap_trimmed,cap=pool_cap
     )
     result["selected_codes"]=selected
     result["sector_retreat_downgraded_codes"]=downgraded
@@ -1211,6 +1239,8 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
     result["sector_divergence_conditional_codes"]=sector_divergence_conditional
     result["pool_cap_trimmed_codes"]=pool_cap_trimmed
     result["pool_ranking_scores_70_30"]=pool_ranking_scores
+    result["market_pool_policy"] = pool_policy
+    result["pool_minimum_shortfall"] = max(0, effective_min - len(selected))
     result["decisions"]=[decision_by_code.get(str(d.get("股票代码","")).zfill(6),d) if isinstance(d,dict) else d for d in decisions]
     # 观察池保留原始量化证据 + AI判断，便于次日尾盘继续分析。
     rows=[]
@@ -1245,7 +1275,9 @@ def run_openai_after_close(research_pack: pd.DataFrame, indices: pd.DataFrame, b
         "market_assessment":result.get("market_assessment",{}),"sector_assessment":result.get("sector_assessment",{}),
         "opinion_assessment":result.get("opinion_assessment",{}),"opinion_context":opinion_context,
         "portfolio_note":result.get("portfolio_note",""),
-        "second_start_evidence_version":"v0.6",
+        "second_start_evidence_version":"effective_breakout_v1.0",
+        "market_pool_policy": pool_policy,
+        "pool_minimum_shortfall": max(0, effective_min - len(obs)),
         "sector_retreat_downgraded_codes":result.get("sector_retreat_downgraded_codes",[]),
         "sector_unverified_downgraded_codes":result.get("sector_unverified_downgraded_codes",[]),
         "sector_unverified_conditional_codes":result.get("sector_unverified_conditional_codes",[]),
@@ -1484,16 +1516,14 @@ def wait_until_cn(hour: int, minute: int):
 
 
 BREAKOUT_RETEST_POLICY = {
-    "version": "breakout_retest_v0.1",
+    "version": "effective_breakout_v1.0",
     "retest_min_sessions": 1,
     "retest_max_sessions": 3,
     "max_intraday_undercut": 0.02,
     "max_entry_extension": 0.03,
     "max_retest_volume_ratio": 0.80,
     "required_five_minute_closes": 2,
-    "strong_min_intraday_location": 0.75,
-    "strong_min_volume_ratio_5d": 1.20,
-    "strong_max_volume_ratio_5d": 2.50,
+    "min_breakout_volume_ratio": 1.20,
 }
 
 
@@ -1509,7 +1539,7 @@ def _robust_platform_upper(highs: pd.Series):
 
 
 def _completed_breakouts(history: pd.DataFrame, lookback_sessions: int = 3) -> list[dict]:
-    """Return completed-session closes that broke their preceding robust five-day platform."""
+    """Return completed volume-backed breakouts of a robust five-day platform."""
     events = []
     if history is None or history.empty or len(history) < 6:
         return events
@@ -1520,12 +1550,16 @@ def _completed_breakouts(history: pd.DataFrame, lookback_sessions: int = 3) -> l
         close = _finite_number(h.loc[i, "收盘价"])
         prior_close = _finite_number(h.loc[i - 1, "收盘价"])
         volume = _finite_number(h.loc[i, "成交量"] if "成交量" in h else None)
-        if platform and close and prior_close and close > platform and prior_close <= platform:
+        prior_volume = pd.to_numeric(h.loc[i - 5:i - 1, "成交量"], errors="coerce").mean() if "成交量" in h else None
+        volume_ratio = volume / prior_volume if volume and prior_volume and prior_volume > 0 else None
+        if (platform and close and prior_close and close > platform and prior_close <= platform
+                and volume_ratio is not None and volume_ratio >= BREAKOUT_RETEST_POLICY["min_breakout_volume_ratio"]):
             events.append({
                 "date": str(pd.to_datetime(h.loc[i, "日期"]).date()),
                 "sessions_ago": len(h) - i,
                 "platform": platform,
                 "volume": volume,
+                "volume_ratio": volume_ratio,
             })
     return events
 
@@ -1590,13 +1624,13 @@ def build_breakout_retest_gate(
         undercut = max(0.0, platform / current_low - 1) if current_low and platform and current_low < platform else 0.0 if current_low and platform else None
         retest_volume_ratio = current_volume / event["volume"] if current_volume and event and event.get("volume") else None
         strong_volume_ratio = current_volume / mean5_volume if current_volume and mean5_volume else None
-        intraday_location = ((current - current_low) / (current_high - current_low)
-                             if current is not None and current_high is not None and current_low is not None and current_high > current_low else None)
         mm = mins[mins["股票代码"] == code].copy() if not mins.empty else pd.DataFrame()
         if not mm.empty and "时间" in mm:
             mm = mm.sort_values("时间")
         last_closes = pd.to_numeric(mm.get("收盘价", pd.Series(dtype=float)), errors="coerce").dropna().tail(policy["required_five_minute_closes"])
-        two_closes = bool(platform and len(last_closes) >= policy["required_five_minute_closes"] and (last_closes >= platform).all())
+        two_closes = bool(platform and len(last_closes) >= policy["required_five_minute_closes"]
+                          and (last_closes >= platform).all() and last_closes.is_monotonic_increasing
+                          and last_closes.iloc[-1] > last_closes.iloc[0])
         sector_not_retreat = "退潮" not in state
         retest_ok = bool(
             event
@@ -1607,20 +1641,12 @@ def build_breakout_retest_gate(
             and two_closes and sector_not_retreat
         )
         first_breakout_today = bool(current and today_platform and last_close and current > today_platform and last_close <= today_platform)
-        strong_ok = bool(
-            first_breakout_today
-            and extension is not None and 0 <= extension <= policy["max_entry_extension"]
-            and intraday_location is not None and intraday_location >= policy["strong_min_intraday_location"]
-            and strong_volume_ratio is not None
-            and policy["strong_min_volume_ratio_5d"] <= strong_volume_ratio <= policy["strong_max_volume_ratio_5d"]
-            and state == "同期概念共振"
-        )
-        allowed = retest_ok or strong_ok
-        route = "RETEST_CONFIRMED" if retest_ok else "STRONG_BREAKOUT_EXCEPTION" if strong_ok else "WAIT"
+        allowed = retest_ok
+        route = "RETEST_CONFIRMED" if retest_ok else "WAIT"
         if allowed:
-            reasons.append("回踩确认通过" if retest_ok else "强突破例外通过")
+            reasons.append("放量突破后缩量回踩守位，且价格重新缓慢走强")
         elif first_breakout_today:
-            reasons.append("首次突破默认WAIT，强突破例外条件未全部满足")
+            reasons.append("首次突破一律WAIT，等待缩量回踩不破并重新走强")
         elif event:
             reasons.append("存在近1-3日突破，但回踩缩量/站稳/伸展条件未全部满足")
         else:
@@ -1632,7 +1658,7 @@ def build_breakout_retest_gate(
             "突破日期": event.get("date", "") if event else "",
             "突破后交易日数": event.get("sessions_ago") if event else None,
             "盘中下穿平台幅度": undercut, "相对突破日成交量": retest_volume_ratio,
-            "连续两根5分钟站稳": two_closes, "强突破日内位置": intraday_location,
+            "连续两根5分钟站稳并走强": two_closes,
             "强突破量比5日": strong_volume_ratio, "板块共振状态": state,
             "入场门禁原因": "；".join(reasons), "入场门禁版本": policy["version"],
         })

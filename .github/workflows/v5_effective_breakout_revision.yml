@@ -1,0 +1,63 @@
+name: V5 Effective Breakout Revision
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: "Completed 2026-09-21 run to revise without refetching"
+        required: true
+        default: "v5_data/runs/20260921_223444"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v5-data-write
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -p 'test_*.py'
+      - run: python -m research.effective_breakout_revision prepare --source-run "${{ inputs.source_run }}"
+
+  ai:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-5.6-terra
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: python -m research.effective_breakout_revision ai
+
+  deliver:
+    needs: ai
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TZ: Asia/Shanghai
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      TRADING_DATA_KEY: ${{ secrets.TRADING_DATA_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main, fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: python -m research.effective_breakout_revision deliver

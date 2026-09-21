@@ -1067,3 +1067,53 @@ Updated: 2026-09-19
   `LOCK-20260921-breakout-retest-v01` closed.
 
 Updated: 2026-09-21
+
+
+## 2026-09-21 effective-breakout production revision and same-day rerun
+
+- Operation lock: `LOCK-20260921-effective-breakout-v1`.
+- Sole executor: current authorized maintenance account/current Work window.
+- Baseline production main: `bf3c936efdc5bca62aba72801fd6abbc79add602`;
+  queued/in-progress Actions at acquisition: 0.
+- Reliable rollback point: completed natural after-close run
+  `v5_data/runs/20260921_223444`, target trade date `2026-09-22`, observation
+  pool `000620`, `603150`, `002886`. Its original OpenAI call and PushPlus
+  delivery are complete and must not be replayed as if they had not happened.
+- User-authorized revision: use effective breakout as the entry core—volume
+  expansion on breakout, contracting-volume pullback that holds the platform,
+  stabilization and renewed gradual strength. Do not buy the breakout instant or
+  a blind pullback. Remove left-side trends, consolidations longer than one week,
+  and N-shaped rebounds. Preserve the prior-limit-up preference as a hard stage-1
+  fact already in production.
+- Observation-pool target: objectively strong/active market 5-10 names; normal
+  or weak market 0-5. The range is a target among qualified stocks and must not
+  fabricate unqualified names merely to fill a quota.
+- Authorized side effects after code/offline acceptance: exactly one revised
+  same-day OpenAI analysis and exactly one clearly labelled corrected PushPlus
+  delivery, reusing saved 2026-09-21 histories and market/sector artifacts.
+  Do not repeat upstream market/history fetches or mutate the private ledger.
+- Exact next unit: implement auditable daily effective-breakout evidence and
+  dynamic pool sizing, run cached impact analysis and deterministic tests, then
+  publish/merge before the guarded revised AI+delivery stage.
+- Implementation/offline acceptance completed: first breakout is always WAIT;
+  breakout volume must be at least 1.20 times platform mean; the 1-3-session
+  retest must contract to at most 0.80 of breakout volume, hold within a 2%
+  platform undercut, and show two rising 5-minute closes above the platform.
+  Stage 2 now requires an obvious right-side trend, a compact 3-5-session
+  platform, no N-shape, and an auditable breakout observation state.
+- Dynamic pool policy completed: breadth at least 60% plus total turnover growth
+  at least 5% maps to a 5-10 target; otherwise the range is 0-5. Qualified-input
+  shortages are recorded and never backfilled with unqualified stocks.
+- Read-only recomputation from all 768 saved caches: stage1=232, stage2=18,
+  lifecycle-qualified=15, final pre-AI 3/3-aligned input=8. No history/market
+  refetch occurred. Full regression, compilation, and whitespace validation
+  passed (148/148 tests); external OpenAI/PushPlus calls remain zero.
+- A guarded three-checkpoint revision workflow now exists: prepare from saved
+  cache, one AI call, then one corrected delivery. Each phase is independently
+  idempotent; source artifacts and the original three-name pool are copied into
+  the revision rollback directory before the AI phase.
+- Exact next unit: publish and merge the verified code, confirm main and the
+  production write queue are idle, then dispatch `V5 Effective Breakout
+  Revision` exactly once.
+
+Updated: 2026-09-21

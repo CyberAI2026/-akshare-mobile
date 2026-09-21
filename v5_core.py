@@ -23,7 +23,7 @@ import pandas as pd
 import requests
 
 APP_VERSION = "V5.5-second-start-evidence-layer"
-STRATEGY_VERSION = "research_v0.8-25d-limitup+ma25-trend+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3"
+STRATEGY_VERSION = "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool"
 CN_TZ = ZoneInfo("Asia/Shanghai")
 PRE_AI_CANDIDATE_CAP = 50
 TAIL_UPSTREAM_TIMEOUT_SECONDS = 8
@@ -591,6 +591,107 @@ def _recent_limit_up_evidence(g: pd.DataFrame, sessions: int = 25) -> dict:
     }
 
 
+def _effective_breakout_evidence(g: pd.DataFrame) -> dict:
+    """Build auditable daily evidence for observation and entry qualification.
+
+    Observation may start on a volume-backed breakout or its 1-3 session retest.
+    A buy is only confirmed after the retest holds, contracts in volume, and price
+    starts rising again.  A first breakout is deliberately never a confirmed buy.
+    """
+    default = {
+        "有效突破阶段": "INELIGIBLE", "有效突破观察资格": False, "有效突破确认": False,
+        "整理交易日数": 0, "整理超过一周": False, "平台上沿": np.nan,
+        "突破日期": "", "突破放量比": np.nan, "回踩缩量比": np.nan,
+        "回踩守位": False, "重新缓慢走强": False, "N型走势": False,
+        "有效突破原因": "量价证据不足",
+    }
+    if g is None or len(g) < 10:
+        return default
+    x = g.sort_values("日期").reset_index(drop=True).copy()
+    close = pd.to_numeric(x["收盘价"], errors="coerce")
+    high = pd.to_numeric(x["最高价"], errors="coerce")
+    low = pd.to_numeric(x["最低价"], errors="coerce")
+    volume = pd.to_numeric(x.get("成交量"), errors="coerce")
+    if close.tail(10).isna().any() or high.tail(10).isna().any() or low.tail(10).isna().any():
+        return default
+
+    # N-shape: a sharp fall after an earlier high followed by a sharp rebound,
+    # without a compact platform. This is deliberately conservative and auditable.
+    recent = close.tail(10).reset_index(drop=True)
+    peak_i = int(recent.iloc[:7].idxmax())
+    trough_slice = recent.iloc[peak_i + 1:] if peak_i + 1 < len(recent) else pd.Series(dtype=float)
+    n_shape = False
+    if not trough_slice.empty:
+        trough_i = int(trough_slice.idxmin())
+        peak, trough, last = float(recent.iloc[peak_i]), float(recent.iloc[trough_i]), float(recent.iloc[-1])
+        n_shape = bool(trough_i < len(recent) - 1 and trough / peak - 1 <= -0.08 and last / trough - 1 >= 0.05)
+
+    def compact_window(end: int) -> tuple[int, float | None, float | None]:
+        best = (0, None, None)
+        for days in range(3, 6):
+            start = end - days
+            if start < 0:
+                continue
+            window_high, window_low = high.iloc[start:end], low.iloc[start:end]
+            floor = float(window_low.min())
+            amp = float((window_high.max() - floor) / floor) if floor > 0 else np.inf
+            mean_vol = float(volume.iloc[start:end].mean()) if volume.iloc[start:end].notna().any() else np.nan
+            # Small range plus non-expanding volume defines the compact platform.
+            prior_vol = volume.iloc[max(0, start - days):start].mean()
+            volume_ok = pd.isna(prior_vol) or pd.isna(mean_vol) or mean_vol <= float(prior_vol) * 1.05
+            if amp <= 0.10 and volume_ok:
+                vals = sorted(window_high.dropna().tolist(), reverse=True)
+                upper = float(vals[1] if len(vals) >= 2 else vals[0])
+                best = (days, upper, mean_vol)
+        return best
+
+    event = None
+    # Search only today and the previous three sessions. Older breakouts have
+    # exceeded the defined confirmation window and are not current candidates.
+    for i in range(max(5, len(x) - 4), len(x)):
+        days, upper, mean_vol = compact_window(i)
+        if not days or not upper or not mean_vol or mean_vol <= 0:
+            continue
+        prior_close = float(close.iloc[i - 1])
+        breakout_close = float(close.iloc[i])
+        breakout_volume = float(volume.iloc[i]) if pd.notna(volume.iloc[i]) else np.nan
+        ratio = breakout_volume / mean_vol if pd.notna(breakout_volume) else np.nan
+        if prior_close <= upper and breakout_close > upper and pd.notna(ratio) and ratio >= 1.20:
+            event = {"index": i, "days": days, "upper": upper, "volume": breakout_volume, "ratio": ratio}
+
+    if event:
+        i, upper = event["index"], event["upper"]
+        sessions = len(x) - 1 - i
+        after = x.iloc[i + 1:]
+        after_low = pd.to_numeric(after.get("最低价"), errors="coerce")
+        after_vol = pd.to_numeric(after.get("成交量"), errors="coerce")
+        holds = bool(sessions >= 1 and not after_low.empty and after_low.min() >= upper * 0.98)
+        vol_ratio = float(after_vol.mean() / event["volume"]) if sessions >= 1 and after_vol.notna().any() and event["volume"] > 0 else np.nan
+        contracted = bool(pd.notna(vol_ratio) and vol_ratio <= 0.80)
+        ret1 = float(close.iloc[-1] / close.iloc[-2] - 1)
+        renewed = bool(sessions >= 1 and close.iloc[-1] >= upper and 0 < ret1 <= 0.03)
+        confirmed = bool(1 <= sessions <= 3 and holds and contracted and renewed and not n_shape)
+        stage = "EFFECTIVE_BREAKOUT_CONFIRMED" if confirmed else "BREAKOUT_AWAIT_RETEST" if sessions == 0 else "RETEST_STABILIZING"
+        reason = ("放量突破后缩量回踩守位，价格重新缓慢走强" if confirmed else
+                  "首次放量突破，仅观察，等待缩量回踩确认" if sessions == 0 else
+                  "突破后处于1-3日确认窗，回踩守位/缩量/重新走强尚未全部成立")
+        return {
+            **default, "有效突破阶段": stage, "有效突破观察资格": bool(sessions <= 3 and not n_shape),
+            "有效突破确认": confirmed, "整理交易日数": event["days"], "整理超过一周": False,
+            "平台上沿": upper, "突破日期": str(pd.to_datetime(x.loc[i, "日期"]).date()),
+            "突破放量比": event["ratio"], "回踩缩量比": vol_ratio, "回踩守位": holds,
+            "重新缓慢走强": renewed, "N型走势": n_shape, "有效突破原因": reason,
+        }
+
+    days, upper, _ = compact_window(len(x))
+    return {
+        **default, "有效突破阶段": "READY_FOR_BREAKOUT" if days and not n_shape else "INELIGIBLE",
+        "整理交易日数": days, "整理超过一周": False, "平台上沿": upper or np.nan,
+        "N型走势": n_shape,
+        "有效突破原因": "紧凑缩量平台形成，尚未出现放量突破" if days and not n_shape else "未形成合格的短周期缩量平台或呈N型走势",
+    }
+
+
 def _series_metrics(g: pd.DataFrame) -> dict:
     g = g.sort_values("日期").copy()
     c = pd.to_numeric(g["收盘价"], errors="coerce")
@@ -648,6 +749,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
     lo5 = float(l.tail(min(5, len(l))).min()) if len(l) else np.nan
     lo10 = float(l.tail(min(10, len(l))).min()) if len(l) else np.nan
     limit_up_evidence = _recent_limit_up_evidence(g, sessions=25)
+    breakout_evidence = _effective_breakout_evidence(g)
     return {
         "最新收盘": last, "ret1": ret(1), "ret5": ret(5), "ret10": ret(10), "ret20": ret(20), "ret40": ret(40), "ret60": ret(60), "ret120": ret(120),
         "amp5": amp5, "距20日高点": last / hi20 - 1 if hi20 else np.nan,
@@ -670,7 +772,7 @@ def _series_metrics(g: pd.DataFrame) -> dict:
         "近5日低点": lo5, "近10日低点": lo10,
         "距近5日低点": last / lo5 - 1 if pd.notna(lo5) and lo5 > 0 else np.nan,
         "距近10日低点": last / lo10 - 1 if pd.notna(lo10) and lo10 > 0 else np.nan,
-        **limit_up_evidence,
+        **limit_up_evidence, **breakout_evidence,
     }
 
 
@@ -820,6 +922,16 @@ def stage2_rank(metrics: pd.DataFrame, min_n: int | None = None, max_n: int | No
     x["整理成熟"] = x["基础整理条件"] & (x["整理证据可用项"] >= 2) & (x["整理收敛支持项"] >= 2)
     x["中期趋势仍活"] = x["ret40"] >= 0
     x["均线趋势辅助"] = (x["MA20距离"] > 0) & (x["MA30_5日斜率"] > 0)
+    for c, default_value in [("有效突破观察资格", False), ("有效突破确认", False),
+                             ("整理超过一周", True), ("N型走势", True)]:
+        if c not in x.columns:
+            x[c] = default_value
+        x[c] = x[c].fillna(default_value).astype(bool)
+    if "整理交易日数" not in x.columns:
+        x["整理交易日数"] = 0
+    x["整理交易日数"] = pd.to_numeric(x["整理交易日数"], errors="coerce").fillna(0)
+    x["明显右侧"] = x["中期趋势仍活"] & x["均线趋势辅助"]
+    x["短周期整理合格"] = x["整理交易日数"].between(3, 5, inclusive="both") & ~x["整理超过一周"]
     x["稳健上沿核心区"] = x["距稳健5日上沿"].between(-0.02, 0.03, inclusive="both")
     x["稳健上沿宽区"] = x["距稳健5日上沿"].between(-0.05, 0.05, inclusive="both")
     x["适度重新加速"] = x["ret1"].between(0.02, 0.06, inclusive="both")
@@ -835,12 +947,15 @@ def stage2_rank(metrics: pd.DataFrame, min_n: int | None = None, max_n: int | No
     x["阶段2分"] = x[["整理成熟贡献", "振幅收敛贡献", "流动性收敛贡献", "短期止跌贡献",
                        "40日趋势贡献", "均线趋势辅助贡献", "稳健上沿贡献", "重新加速辅助贡献"]].sum(axis=1)
 
-    # 只把反复验证较强的“成熟+趋势仍活”作为最低资格；上沿距离和重新加速用于排序，不做绝对门槛。
-    x["阶段2通过"] = x["整理成熟"] & x["中期趋势仍活"]
+    # 观察池要求右侧、短周期平台、非N型且已经出现放量突破；买入仍由确认门禁单独把关。
+    x["阶段2通过"] = (
+        x["整理成熟"] & x["明显右侧"] & x["短周期整理合格"]
+        & ~x["N型走势"] & x["有效突破观察资格"]
+    )
     x["阶段2风险提示"] = np.select(
         [x["整理证据可用项"] < 2, x["整理收敛支持项"] < 2, x["amp5"] > 0.18, x["ret10"] > 0.20, x["ret40"] < 0, x["距稳健5日上沿"].abs() > 0.08],
         ["量价/换手整理证据不足", "振幅、量能、换手或短期趋势尚未形成两类收敛支持", "短波动仍偏大", "10日速度仍偏快，整理可能未完成", "40日趋势偏弱", "距离短周期稳健上沿较远"], default="")
-    x["阶段2规则说明"] = "核心：振幅、流动性（成交量/换手合并）与短期止跌三类证据中至少两类支持+40日趋势仍活；缺失量价/换手必须明示；2%-6%单日加速仅为中等证据"
+    x["阶段2规则说明"] = "硬资格：明显右侧（40日非负、站上MA20且MA30上扬）+3至5日紧凑缩量平台+非N型+已出现放量突破；首次突破/回踩中只进入观察，只有缩量回踩不破后重新缓慢走强才确认买点"
     selected, audit = _rank_and_audit(x, "阶段2分", min_n, max_n, "阶段2通过", "二级结构筛选")
     return (selected, audit) if return_audit else selected
 
