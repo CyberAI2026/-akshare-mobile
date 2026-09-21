@@ -1110,6 +1110,19 @@ Updated: 2026-09-21
 - Exact next unit: publish these verified files on a branch from the baseline
   main, merge only after validation-only checks pass, verify production main, then
   close this lock. Do not dispatch after-close/tail jobs or repeat any delivery.
+- PR #27 validation completed successfully: After-Close Research run
+  `35628070003`, Official Market Count run `35628069693`, and THS Public Sector
+  Data run `35628069738`. In the after-close run only `validate` executed;
+  initialize, screening, market, AI, feedback, delivery, and failure-alert jobs
+  were all skipped.
+- PR #27 squash-merged as `9439c7ab67cb4d56ba3875fff8dcfc90cf2b7061`.
+  Production `main` was read back and contains strategy
+  `research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool` and tail
+  gate `effective_breakout_v1.1-multi-route`.
+- Deployment side effects: manual workflow dispatches 0, OpenAI calls 0,
+  PushPlus attempts 0, market/history fetch reruns 0, ledger mutations 0.
+  Status: completed and deployed. Lock
+  `LOCK-20260922-effective-breakout-multiroute-v11` closed.
 
 Updated: 2026-09-22
 
