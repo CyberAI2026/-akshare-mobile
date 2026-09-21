@@ -1516,7 +1516,7 @@ def wait_until_cn(hour: int, minute: int):
 
 
 BREAKOUT_RETEST_POLICY = {
-    "version": "effective_breakout_v1.0",
+    "version": "effective_breakout_v1.1-multi-route",
     "retest_min_sessions": 1,
     "retest_max_sessions": 3,
     "max_intraday_undercut": 0.02,
@@ -1524,6 +1524,12 @@ BREAKOUT_RETEST_POLICY = {
     "max_retest_volume_ratio": 0.80,
     "required_five_minute_closes": 2,
     "min_breakout_volume_ratio": 1.20,
+    "tight_hold_min_sessions": 2,
+    "tight_hold_max_sessions": 4,
+    "max_tight_hold_amplitude": 0.06,
+    "max_micro_platform_amplitude": 0.05,
+    "min_micro_rebreak_volume_ratio": 1.05,
+    "max_micro_rebreak_volume_ratio": 1.80,
 }
 
 
@@ -1560,6 +1566,7 @@ def _completed_breakouts(history: pd.DataFrame, lookback_sessions: int = 3) -> l
                 "platform": platform,
                 "volume": volume,
                 "volume_ratio": volume_ratio,
+                "index": i,
             })
     return events
 
@@ -1617,7 +1624,7 @@ def build_breakout_retest_gate(
         last_close = _finite_number(history.iloc[-1].get("收盘价"))
         last5_volume = pd.to_numeric(history["成交量"].tail(5), errors="coerce") if "成交量" in history else pd.Series(dtype=float)
         mean5_volume = _finite_number(last5_volume.mean())
-        events = _completed_breakouts(history, policy["retest_max_sessions"])
+        events = _completed_breakouts(history, policy["tight_hold_max_sessions"])
         event = events[-1] if events else None
         platform = event["platform"] if event else today_platform
         extension = current / platform - 1 if current and platform else None
@@ -1628,9 +1635,11 @@ def build_breakout_retest_gate(
         if not mm.empty and "时间" in mm:
             mm = mm.sort_values("时间")
         last_closes = pd.to_numeric(mm.get("收盘价", pd.Series(dtype=float)), errors="coerce").dropna().tail(policy["required_five_minute_closes"])
-        two_closes = bool(platform and len(last_closes) >= policy["required_five_minute_closes"]
-                          and (last_closes >= platform).all() and last_closes.is_monotonic_increasing
-                          and last_closes.iloc[-1] > last_closes.iloc[0])
+        def rising_closes_above(level) -> bool:
+            return bool(level and len(last_closes) >= policy["required_five_minute_closes"]
+                        and (last_closes >= level).all() and last_closes.is_monotonic_increasing
+                        and last_closes.iloc[-1] > last_closes.iloc[0])
+        two_closes = rising_closes_above(platform)
         sector_not_retreat = "退潮" not in state
         retest_ok = bool(
             event
@@ -1640,17 +1649,64 @@ def build_breakout_retest_gate(
             and retest_volume_ratio is not None and retest_volume_ratio <= policy["max_retest_volume_ratio"]
             and two_closes and sector_not_retreat
         )
+        post = history.iloc[event["index"] + 1:].copy() if event and event.get("index") is not None else pd.DataFrame()
+        post_close = pd.to_numeric(post.get("收盘价"), errors="coerce")
+        post_high = pd.to_numeric(post.get("最高价"), errors="coerce")
+        post_low = pd.to_numeric(post.get("最低价"), errors="coerce")
+        post_volume = pd.to_numeric(post.get("成交量"), errors="coerce")
+        combined_floor = min(float(post_low.min()), current_low) if not post.empty and current_low is not None else None
+        combined_ceiling = max(float(post_high.max()), current_high) if not post.empty and current_high is not None else None
+        tight_amp = ((combined_ceiling - combined_floor) / combined_floor
+                     if combined_floor and combined_ceiling else None)
+        post_volume_ratio = (float(post_volume.mean()) / event["volume"]
+                             if event and not post.empty and post_volume.notna().any() and event.get("volume") else None)
+        completed_hold_ok = bool(
+            event and policy["tight_hold_min_sessions"] <= event["sessions_ago"] <= policy["tight_hold_max_sessions"]
+            and not post.empty and (post_close >= platform).all() and (post_low >= platform * 0.98).all()
+            and post_volume_ratio is not None and post_volume_ratio <= policy["max_retest_volume_ratio"]
+        )
+        tight_hold_ok = bool(
+            completed_hold_ok and tight_amp is not None and tight_amp <= policy["max_tight_hold_amplitude"]
+            and extension is not None and 0 <= extension <= policy["max_entry_extension"]
+            and current_low is not None and current_low >= platform * (1 - policy["max_intraday_undercut"])
+            and retest_volume_ratio is not None and retest_volume_ratio <= policy["max_retest_volume_ratio"]
+            and current is not None and last_close is not None and current > last_close
+            and two_closes and sector_not_retreat
+        )
+        micro_upper = float(post_high.max()) if len(post) >= 2 and post_high.notna().all() else None
+        micro_floor = float(post_low.min()) if len(post) >= 2 and post_low.notna().all() else None
+        micro_amp = ((micro_upper - micro_floor) / micro_floor if micro_upper and micro_floor else None)
+        micro_mean_volume = float(post_volume.mean()) if len(post) >= 2 and post_volume.notna().all() else None
+        micro_rebreak_volume_ratio = (current_volume / micro_mean_volume
+                                      if current_volume and micro_mean_volume else None)
+        micro_extension = current / micro_upper - 1 if current and micro_upper else None
+        micro_rebreak_ok = bool(
+            completed_hold_ok and len(post) >= 2
+            and micro_amp is not None and micro_amp <= policy["max_micro_platform_amplitude"]
+            and current is not None and micro_upper is not None and current > micro_upper
+            and micro_rebreak_volume_ratio is not None
+            and policy["min_micro_rebreak_volume_ratio"] <= micro_rebreak_volume_ratio <= policy["max_micro_rebreak_volume_ratio"]
+            and micro_extension is not None and 0 <= micro_extension <= policy["max_entry_extension"]
+            and current_low is not None and current_low >= platform * (1 - policy["max_intraday_undercut"])
+            and rising_closes_above(micro_upper) and sector_not_retreat
+        )
         first_breakout_today = bool(current and today_platform and last_close and current > today_platform and last_close <= today_platform)
-        allowed = retest_ok
-        route = "RETEST_CONFIRMED" if retest_ok else "WAIT"
+        allowed = retest_ok or tight_hold_ok or micro_rebreak_ok
+        route = ("MICRO_PLATFORM_REBREAK" if micro_rebreak_ok else
+                 "ABOVE_PLATFORM_TIGHT_HOLD" if tight_hold_ok else
+                 "RETEST_CONFIRMED" if retest_ok else "WAIT")
         if allowed:
-            reasons.append("放量突破后缩量回踩守位，且价格重新缓慢走强")
+            reasons.append({
+                "MICRO_PLATFORM_REBREAK": "平台上方缩量小平台形成，当前温和放量再突破并站稳",
+                "ABOVE_PLATFORM_TIGHT_HOLD": "突破后在平台上方缩量横住，低点稳定且重新缓慢走强",
+                "RETEST_CONFIRMED": "放量突破后缩量回踩守位，且价格重新缓慢走强",
+            }[route])
         elif first_breakout_today:
             reasons.append("首次突破一律WAIT，等待缩量回踩不破并重新走强")
         elif event:
-            reasons.append("存在近1-3日突破，但回踩缩量/站稳/伸展条件未全部满足")
+            reasons.append("存在一周内放量突破，但回踩、平台上方横住或小平台再突破条件未全部满足")
         else:
-            reasons.append("最近1-3日未识别到可复核的已完成突破")
+            reasons.append("最近一周未识别到可复核的已完成放量突破")
         rows.append({
             "股票代码": code, "股票名称": name, "允许新开仓": allowed,
             "入场门禁结论": "PASS" if allowed else "WAIT", "入场路径": route,
@@ -1659,6 +1715,9 @@ def build_breakout_retest_gate(
             "突破后交易日数": event.get("sessions_ago") if event else None,
             "盘中下穿平台幅度": undercut, "相对突破日成交量": retest_volume_ratio,
             "连续两根5分钟站稳并走强": two_closes,
+            "平台上方横盘振幅": tight_amp, "平台上方缩量比": post_volume_ratio,
+            "微平台上沿": micro_upper, "微平台振幅": micro_amp,
+            "微平台再突破量比": micro_rebreak_volume_ratio,
             "强突破量比5日": strong_volume_ratio, "板块共振状态": state,
             "入场门禁原因": "；".join(reasons), "入场门禁版本": policy["version"],
         })
@@ -1741,9 +1800,10 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
             "每只TRADE必须分别评价形态、5分钟量价关系、换手率和实时量比；它们是相互校验的证据，不得把成交量与换手重复计票，也不得凭单项放量或上涨直接下单；输入缺失必须写未核验",
             "按大盘—行业/概念—个股三层研判；板块数据只作增强证据；sector_validation.ai_enabled不为true时不得臆测板块结论",
             "尾盘所用同花顺概念日线只允许截至上一完整交易日，严禁把当日收盘后数据倒灌到14:45决策",
-            "突破回踩v0.1是确定性硬门禁：首次突破默认WAIT；仅允许新开仓=true的股票可以TRADE，模型不得绕过",
-            "回踩确认窗口为突破后1-3个交易日：盘中下穿平台不超过2%、回踩量不超过突破日80%、连续两根5分钟收盘站回平台、买入伸展不超过3%",
-            "强突破例外必须同时满足：日内位置至少75%、量为前5日均量1.2-2.5倍、伸展不超过3%、同期概念共振",
+            "有效突破v1.1是确定性硬门禁：首次突破一律WAIT；仅允许新开仓=true的股票可以TRADE，模型不得绕过",
+            "允许三条审计路径：1-3日缩量回踩守位后重新走强、平台上方缩量横住后重新缓慢走强、平台上方形成缩量小平台后温和放量再突破",
+            "共同硬条件：突破量至少为平台均量1.2倍、盘中下穿原平台不超过2%、确认量价不失控、连续两根5分钟收盘站稳并走强、买入相对确认参考位伸展不超过3%、板块不得退潮",
+            "不存在强突破直接买入例外；平台上方横住振幅最多6%，小平台振幅最多5%，小平台再突破量比为1.05-1.80",
             "基本面、资金面、事件面或个股板块映射缺失时必须明确写未核验，不得用常识补全；TRADE必须分别给出基本面、技术面、资金面、事件面和板块证据"
         ],"required_output_schema":schema
     }

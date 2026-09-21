@@ -43,6 +43,30 @@ def sample_history(contracting: bool = True, with_turnover: bool = True) -> pd.D
 
 class SecondStartEvidenceTests(unittest.TestCase):
     @staticmethod
+    def effective_breakout_history(last_close: float, last_volume: float) -> pd.DataFrame:
+        closes = [9.70, 9.75, 9.80, 9.85, 9.90, 9.92, 9.94, 9.95,
+                  10.20, 10.13, 10.14, last_close]
+        highs = [x + 0.05 for x in closes]
+        lows = [x - 0.05 for x in closes]
+        volumes = [100.0] * 8 + [200.0, 90.0, 80.0, last_volume]
+        return pd.DataFrame({
+            "股票代码": ["000001"] * len(closes), "股票名称": ["测试股份"] * len(closes),
+            "日期": pd.date_range("2026-09-01", periods=len(closes), freq="B"),
+            "收盘价": closes, "最高价": highs, "最低价": lows,
+            "成交量": volumes, "换手率": [2.0] * len(closes),
+        })
+
+    def test_daily_above_platform_tight_hold_route(self):
+        row = build_metrics(self.effective_breakout_history(10.16, 70.0)).iloc[0]
+        self.assertTrue(bool(row["有效突破确认"]))
+        self.assertEqual(row["有效突破确认路径"], "ABOVE_PLATFORM_TIGHT_HOLD")
+
+    def test_daily_micro_platform_rebreak_route(self):
+        row = build_metrics(self.effective_breakout_history(10.20, 110.0)).iloc[0]
+        self.assertTrue(bool(row["有效突破确认"]))
+        self.assertEqual(row["有效突破确认路径"], "MICRO_PLATFORM_REBREAK")
+
+    @staticmethod
     def limit_history(code: str, before: float, limit_close: float) -> pd.DataFrame:
         n = 26
         close = np.full(n, before, dtype=float)

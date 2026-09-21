@@ -23,7 +23,7 @@ import pandas as pd
 import requests
 
 APP_VERSION = "V5.5-second-start-evidence-layer"
-STRATEGY_VERSION = "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool"
+STRATEGY_VERSION = "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool"
 CN_TZ = ZoneInfo("Asia/Shanghai")
 PRE_AI_CANDIDATE_CAP = 50
 TAIL_UPSTREAM_TIMEOUT_SECONDS = 8
@@ -603,6 +603,8 @@ def _effective_breakout_evidence(g: pd.DataFrame) -> dict:
         "整理交易日数": 0, "整理超过一周": False, "平台上沿": np.nan,
         "突破日期": "", "突破放量比": np.nan, "回踩缩量比": np.nan,
         "回踩守位": False, "重新缓慢走强": False, "N型走势": False,
+        "有效突破确认路径": "", "平台上方横盘振幅": np.nan,
+        "微平台上沿": np.nan, "微平台再突破量比": np.nan,
         "有效突破原因": "量价证据不足",
     }
     if g is None or len(g) < 10:
@@ -646,9 +648,9 @@ def _effective_breakout_evidence(g: pd.DataFrame) -> dict:
         return best
 
     event = None
-    # Search only today and the previous three sessions. Older breakouts have
-    # exceeded the defined confirmation window and are not current candidates.
-    for i in range(max(5, len(x) - 4), len(x)):
+    # Search today and the previous four sessions. This keeps every confirmation
+    # route inside one trading week while allowing a 2-3 day high hold to form.
+    for i in range(max(5, len(x) - 5), len(x)):
         days, upper, mean_vol = compact_window(i)
         if not days or not upper or not mean_vol or mean_vol <= 0:
             continue
@@ -664,23 +666,73 @@ def _effective_breakout_evidence(g: pd.DataFrame) -> dict:
         sessions = len(x) - 1 - i
         after = x.iloc[i + 1:]
         after_low = pd.to_numeric(after.get("最低价"), errors="coerce")
+        after_high = pd.to_numeric(after.get("最高价"), errors="coerce")
+        after_close = pd.to_numeric(after.get("收盘价"), errors="coerce")
         after_vol = pd.to_numeric(after.get("成交量"), errors="coerce")
         holds = bool(sessions >= 1 and not after_low.empty and after_low.min() >= upper * 0.98)
         vol_ratio = float(after_vol.mean() / event["volume"]) if sessions >= 1 and after_vol.notna().any() and event["volume"] > 0 else np.nan
         contracted = bool(pd.notna(vol_ratio) and vol_ratio <= 0.80)
         ret1 = float(close.iloc[-1] / close.iloc[-2] - 1)
         renewed = bool(sessions >= 1 and close.iloc[-1] >= upper and 0 < ret1 <= 0.03)
-        confirmed = bool(1 <= sessions <= 3 and holds and contracted and renewed and not n_shape)
+        retest_confirmed = bool(1 <= sessions <= 3 and holds and contracted and renewed and not n_shape)
+
+        hold_floor = float(after_low.min()) if sessions >= 1 and not after_low.empty else np.nan
+        hold_ceiling = float(after_high.max()) if sessions >= 1 and not after_high.empty else np.nan
+        hold_amp = ((hold_ceiling - hold_floor) / hold_floor
+                    if pd.notna(hold_floor) and hold_floor > 0 and pd.notna(hold_ceiling) else np.nan)
+        closes_above = bool(sessions >= 2 and after_close.notna().all() and (after_close >= upper).all())
+        lows_nonfalling = bool(sessions >= 2 and after_low.iloc[-1] >= after_low.iloc[0] * 0.98)
+        not_extended = bool(close.iloc[-1] / upper - 1 <= 0.05)
+        tight_hold_confirmed = bool(
+            2 <= sessions <= 4 and holds and contracted and closes_above and lows_nonfalling
+            and pd.notna(hold_amp) and hold_amp <= 0.06 and renewed and not_extended and not n_shape
+        )
+
+        prior_micro = after.iloc[:-1]
+        micro_high = pd.to_numeric(prior_micro.get("最高价"), errors="coerce")
+        micro_low = pd.to_numeric(prior_micro.get("最低价"), errors="coerce")
+        micro_vol = pd.to_numeric(prior_micro.get("成交量"), errors="coerce")
+        micro_upper = float(micro_high.max()) if len(prior_micro) >= 2 and micro_high.notna().all() else np.nan
+        micro_floor = float(micro_low.min()) if len(prior_micro) >= 2 and micro_low.notna().all() else np.nan
+        micro_amp = ((micro_upper - micro_floor) / micro_floor
+                     if pd.notna(micro_upper) and pd.notna(micro_floor) and micro_floor > 0 else np.nan)
+        latest_volume = float(volume.iloc[-1]) if pd.notna(volume.iloc[-1]) else np.nan
+        micro_mean_volume = float(micro_vol.mean()) if micro_vol.notna().any() else np.nan
+        micro_rebreak_ratio = (latest_volume / micro_mean_volume
+                               if pd.notna(latest_volume) and pd.notna(micro_mean_volume) and micro_mean_volume > 0 else np.nan)
+        micro_rebreak_confirmed = bool(
+            3 <= sessions <= 4 and len(prior_micro) >= 2 and holds
+            and pd.notna(micro_amp) and micro_amp <= 0.05
+            and micro_vol.mean() <= event["volume"] * 0.80
+            and (micro_low >= upper * 0.98).all()
+            and close.iloc[-1] > micro_upper
+            and 1.05 <= micro_rebreak_ratio <= 1.80
+            and close.iloc[-1] / micro_upper - 1 <= 0.03
+            and not n_shape
+        )
+        confirmed = retest_confirmed or tight_hold_confirmed or micro_rebreak_confirmed
+        confirmation_route = (
+            "MICRO_PLATFORM_REBREAK" if micro_rebreak_confirmed else
+            "ABOVE_PLATFORM_TIGHT_HOLD" if tight_hold_confirmed else
+            "RETEST_RENEWED_STRENGTH" if retest_confirmed else ""
+        )
         stage = "EFFECTIVE_BREAKOUT_CONFIRMED" if confirmed else "BREAKOUT_AWAIT_RETEST" if sessions == 0 else "RETEST_STABILIZING"
-        reason = ("放量突破后缩量回踩守位，价格重新缓慢走强" if confirmed else
+        confirmed_reason = {
+            "MICRO_PLATFORM_REBREAK": "放量突破后在平台上方形成缩量小平台，并温和放量再次突破",
+            "ABOVE_PLATFORM_TIGHT_HOLD": "放量突破后在平台上方缩量横住，低点稳定并重新缓慢走强",
+            "RETEST_RENEWED_STRENGTH": "放量突破后缩量回踩守位，价格重新缓慢走强",
+        }.get(confirmation_route, "")
+        reason = (confirmed_reason if confirmed else
                   "首次放量突破，仅观察，等待缩量回踩确认" if sessions == 0 else
-                  "突破后处于1-3日确认窗，回踩守位/缩量/重新走强尚未全部成立")
+                  "突破后处于一周内确认窗，守位/缩量/横住或小平台再突破条件尚未全部成立")
         return {
-            **default, "有效突破阶段": stage, "有效突破观察资格": bool(sessions <= 3 and not n_shape),
+            **default, "有效突破阶段": stage, "有效突破观察资格": bool(sessions <= 4 and not n_shape),
             "有效突破确认": confirmed, "整理交易日数": event["days"], "整理超过一周": False,
             "平台上沿": upper, "突破日期": str(pd.to_datetime(x.loc[i, "日期"]).date()),
             "突破放量比": event["ratio"], "回踩缩量比": vol_ratio, "回踩守位": holds,
             "重新缓慢走强": renewed, "N型走势": n_shape, "有效突破原因": reason,
+            "有效突破确认路径": confirmation_route, "平台上方横盘振幅": hold_amp,
+            "微平台上沿": micro_upper, "微平台再突破量比": micro_rebreak_ratio,
         }
 
     days, upper, _ = compact_window(len(x))

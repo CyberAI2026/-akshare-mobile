@@ -1069,6 +1069,51 @@ Updated: 2026-09-19
 Updated: 2026-09-21
 
 
+## 2026-09-22 effective-breakout multi-route production trial
+
+- Operation lock: `LOCK-20260922-effective-breakout-multiroute-v11`.
+- Sole executor: current authorized maintenance account/current Work window.
+- Baseline production main: `2a187ead945b0ed7745a562741a40340cb4a24a5`;
+  the preceding effective-breakout revision is complete and its OpenAI/PushPlus
+  effects must not be replayed.
+- User-authorized production additions: preserve the canonical contracted-volume
+  retest route and add two independently auditable entry routes:
+  `ABOVE_PLATFORM_TIGHT_HOLD` and `MICRO_PLATFORM_REBREAK`. First breakout still
+  always waits; no strong-breakout direct-entry exception is restored.
+- Common hard gate remains fail-closed: breakout volume at least 1.20 times the
+  compact-platform mean, original platform undercut no more than 2%, two rising
+  5-minute closes above the applicable reference level, entry extension no more
+  than 3%, and sector state not retreating. Tight-hold amplitude is capped at 6%;
+  micro-platform amplitude at 5%; micro rebreak volume ratio at 1.05-1.80.
+- Implementation completed in `v5_core.py`, `v5_cli.py`, and the stage-2 audit
+  contract. Daily and tail audits now persist the confirmation route, tight-hold
+  amplitude, micro-platform upper edge, and micro-rebreak volume ratio. The
+  post-model downgrade remains authoritative, so AI cannot bypass the gate.
+- Verification after the final prompt/version patch: focused 50/50 tests and full
+  152/152 tests passed; Python compilation and `git diff --check` passed. All
+  OpenAI/PushPlus messages printed by tests were mocks. External effects from this
+  implementation unit: OpenAI 0, PushPlus 0, workflow dispatches 0, ledger writes 0.
+- Read-only impact check reused all 768 saved 2026-09-21 histories: stage1=232,
+  stage2=18, lifecycle-qualified=15, pre-AI=8. Across all histories the route
+  counts were tight-hold=5, canonical retest=4, micro-rebreak=1. The eight-name
+  pre-AI set did not expand; only `002708` is confirmed and is classified as
+  tight-hold. No market/history data was fetched or rewritten.
+- Deferred validation target for Saturday evening, 2026-09-26 Asia/Shanghai:
+  intraday false-break reclaim, consecutive-close confirmation, weak-market
+  relative strength, gap hold, and limit-up hold. Validate from historical cache
+  with Python and report win rate, mean return, payoff ratio, MFE/MAE, confirmation
+  delay, and false-positive rate before any production change.
+- Reminder creation is blocked because the account currently has 5/5 active
+  automations. This checkpoint preserves the work item but is not a notification;
+  one existing automation must be freed or explicitly replaced before the reminder
+  can be created.
+- Exact next unit: publish these verified files on a branch from the baseline
+  main, merge only after validation-only checks pass, verify production main, then
+  close this lock. Do not dispatch after-close/tail jobs or repeat any delivery.
+
+Updated: 2026-09-22
+
+
 ## 2026-09-21 effective-breakout production revision and same-day rerun
 
 - Operation lock: `LOCK-20260921-effective-breakout-v1`.
