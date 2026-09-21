@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-21",
   "trade_date": "2026-09-21",
-  "updated_at_cn": "2026-09-21T21:25:20.776531+08:00",
+  "updated_at_cn": "2026-09-21T21:35:16.011420+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -132,6 +132,21 @@
       "body_chars": 2633,
       "body_sha256": "588a31bac606bcaf17c1b5d8069dca71460ce572477313b17f33be2eed1f3a64",
       "published_at_cn": "2026-09-21T19:04:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "5d4bc46a25a12971",
+      "title": "拆解闽东电力突破五板空间时伴生华瓷股份的情绪传导题材套利逻辑_夜的温柔_淘股吧",
+      "url": "https://www.tgb.cn/a/2vgV0JaCIVS",
+      "read_count": 47,
+      "body_chars": 3270,
+      "body_sha256": "5d4bc46a25a12971c03229ba36db91776bf5e54ae9953e05ab765d98263eb1fb",
+      "published_at_cn": "2026-09-21T15:52:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -462,6 +477,21 @@
       "body_chars": 3559,
       "body_sha256": "ee4d9049c2f9028606d56f3648fe2ef740250b3b46efc86027917d5847171a5d",
       "published_at_cn": "2026-09-21T08:28:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "f5dfec2649d76bc6",
+      "title": "论如何从百亿封单看“新华”题材梯队的资金传导逻辑_夜的温柔_淘股吧",
+      "url": "https://www.tgb.cn/a/2vgUfT3IxZD",
+      "read_count": 59,
+      "body_chars": 3544,
+      "body_sha256": "f5dfec2649d76bc6349c5e6d6266520714e6cec3c8892192e509b32ae59dbc17",
+      "published_at_cn": "2026-09-21T15:41:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1307,6 +1337,57 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "5d4bc46a25a12971",
+      "market_stance": "偏多",
+      "market_phase": [
+        "修复",
+        "发酵"
+      ],
+      "market_summary": "作者认为闽东电力五连板打破高度压制、修复短线风险偏好，电力主线向电网配套及标签补涨扩散，但后排退潮风险更高。",
+      "sectors": [
+        {
+          "name": "绿电",
+          "stance": "加强",
+          "evidence": "作者称闽东电力成为空间标杆，电力梯队轮动助攻并形成板块共振。"
+        },
+        {
+          "name": "电网及特高压",
+          "stance": "活跃",
+          "evidence": "作者认为电网投资预期形成板块Beta，华瓷属于电网配套补涨。"
+        },
+        {
+          "name": "华字辈标签题材",
+          "stance": "活跃",
+          "evidence": "作者称量化资金挖掘华字标签，形成批量套利和资金抱团。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "闽东电力",
+          "sector": "绿电",
+          "role": "龙头"
+        },
+        {
+          "name": "华瓷股份",
+          "sector": "电网及特高压",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "闽东电力高位承接、放量断板及负反馈情况",
+        "电网和特高压板块的持续性及梯队表现",
+        "华字辈标的的联动与标签套利扩散强度"
+      ],
+      "numeric_claims": [
+        "闽东电力走出换手五连板",
+        "闽东电力2至3板缩量锁仓",
+        "闽东电力在4板出现高位大分歧炸板后晋级5板"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
@@ -2894,6 +2975,67 @@
       ],
       "quality_flags": [
         "无"
+      ]
+    },
+    {
+      "article_id": "f5dfec2649d76bc6",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "启动",
+        "发酵"
+      ],
+      "market_summary": "作者认为新华传媒重组预期引爆“新华”标签扩散，医药分支有板块共振，零售分支更依赖情绪，题材脆弱且需防总龙分歧。",
+      "sectors": [
+        {
+          "name": "文化传媒",
+          "stance": "加强",
+          "evidence": "作者称新华传媒重组预期驱动复牌涨停，并成为题材源头。"
+        },
+        {
+          "name": "上海国资改革",
+          "stance": "活跃",
+          "evidence": "作者将新华传媒归为上海国资改革与资产整合预期赛道。"
+        },
+        {
+          "name": "医药",
+          "stance": "加强",
+          "evidence": "作者称创新药、原料药集体回暖，为新华制药提供板块共振。"
+        },
+        {
+          "name": "商贸零售",
+          "stance": "分化",
+          "evidence": "作者认为零售板块强度弱于医药和传媒，独立催化有限。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "文化传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "新华制药",
+          "sector": "化学制药",
+          "role": "核心"
+        },
+        {
+          "name": "新华百货",
+          "sector": "商贸零售",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒封单变化、放量开板后的承接强度",
+        "医药板块强度能否延续",
+        "其他“新华”系标的晋级及题材扩散持续性"
+      ],
+      "numeric_claims": [
+        "新华传媒盘中封单峰值108亿元",
+        "新华传媒拟发行股份收购界面财联社100%股权"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
       ]
     },
     {
