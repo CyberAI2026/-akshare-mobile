@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "screen120_complete",
+  "stage": "lifecycle250_complete",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.8-25d-limitup+ma25-trend+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
   "started_cn": "2026-09-21T22:34:44.531784+08:00",
@@ -54,5 +54,22 @@
     "命中或增量": 229,
     "总数": 230,
     "成功": 230
-  }
+  },
+  "generated_trade_date": "2026-09-21",
+  "master_count": 768,
+  "eliminated_count": 1,
+  "daily_new_count": 24,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 1,
+  "cooling_count": 316,
+  "qa250": {
+    "命中或增量": 119,
+    "总数": 119,
+    "成功": 119
+  },
+  "stage3_lifecycle_qualified": 79,
+  "pre_ai_alignment_eliminated": 51,
+  "pre_ai_capacity_eliminated": 0,
+  "stage3_research_pool": 28,
+  "openai_candidate_cap": 50
 }
