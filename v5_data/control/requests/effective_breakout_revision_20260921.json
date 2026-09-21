@@ -3,6 +3,8 @@
   "source_run": "v5_data/runs/20260921_223444",
   "authorized_openai_calls": 1,
   "authorized_corrected_pushplus_deliveries": 1,
+  "attempt": 2,
+  "previous_attempt": "preflight_failed_before_prepare_due_to_missing_PyYAML",
   "reuse_saved_market_and_history_cache": true,
   "created_for_strategy": "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool"
 }
