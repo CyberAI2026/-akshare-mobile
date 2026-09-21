@@ -1,0 +1,20 @@
+{
+  "status": "prepared",
+  "lock": "LOCK-20260921-effective-breakout-v1",
+  "source_run": "v5_data/runs/20260921_223444",
+  "revision_run": "v5_data/runs/20260921_effective_breakout_v1",
+  "strategy": "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool",
+  "generated_trade_date": "2026-09-21",
+  "target_trade_date": "2026-09-22",
+  "source_delivery_preserved": true,
+  "network_history_refetch": false,
+  "counts": {
+    "active": 768,
+    "stage1": 232,
+    "stage2": 18,
+    "lifecycle": 15,
+    "pre_ai": 8
+  },
+  "openai_calls": 0,
+  "corrected_push_attempts": 0
+}

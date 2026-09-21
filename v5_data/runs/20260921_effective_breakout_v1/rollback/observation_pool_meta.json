@@ -1,0 +1,424 @@
+{
+  "status": "valid",
+  "generated_trade_date": "2026-09-21",
+  "target_trade_date": "2026-09-22",
+  "generated_at_cn": "2026-09-21T22:49:59.233581+08:00",
+  "source_candidate_count": 28,
+  "ai_candidate_count_after_active_trade_exclusion": 27,
+  "excluded_active_trade_count": 1,
+  "observation_count": 3,
+  "model": "gpt-5.6-terra",
+  "strategy": "research_v0.8-25d-limitup+ma25-trend+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
+  "source_run": "v5_data/runs/20260921_223444",
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "计算事实：当日上涨4535家、涨停103家、成交额较前日增10.57%，广度与成交活跃；但深创指数60日仍为负，且公开复盘聚合提示修复后或进入分歧。",
+    "next_day_aggressiveness": "中性"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "医药、地产当日强势且资金流入，半导体/通信等科技中短期较强但内部存在分化；板块数据仅作交叉验证，不替代个股整理结构。"
+  },
+  "opinion_assessment": {
+    "status": "可用",
+    "summary": "公开复盘正文聚合为“谨慎偏多、修复后分歧”的主观看法，不是行情事实；医药与地产受关注，科技及高位情绪题材持续性存在分歧。"
+  },
+  "opinion_context": {
+    "status": "available",
+    "trade_date": "2026-09-21",
+    "article_count": 37,
+    "daily_consensus": {
+      "market_consensus": {
+        "stance": "谨慎偏多",
+        "phase": [
+          "修复",
+          "高潮",
+          "分歧"
+        ],
+        "summary": "多篇观点将当日行情概括为缩量普涨后的情绪修复与题材扩散：医药、地产等方向集中走强，市场赚钱效应改善；但成交未明显放大、高位连板和名称题材热度偏高，作者普遍预期下一交易日将进入去弱留强的分歧检验。",
+        "confidence": "高"
+      },
+      "market_disagreements": [
+        "科技方向存在明显分歧：部分作者仍将PCB、芯片、光模块、算力等视为中期或当前主线，另一些作者认为半导体资金流出、科技高位兑现，短线已转入分化甚至退潮。",
+        "医药的持续性判断不一致：多数观点认可其为当日最强方向，但部分作者认为其主要由政策或消息催化，属于轮动修复，不宜直接界定为持续主升。",
+        "房地产被部分观点视为第二主线或政策驱动加强方向，另有观点将其定义为午后护盘、超跌反弹或消息轮动，持续性尚待验证。",
+        "市场所处周期判断不一：有作者认为新周期启动、退潮结束，也有作者认为行情仍是缩量修复、接近高潮或箱体顶部，存在回落风险。",
+        "“华字辈”及新华系题材被部分作者视为最强情绪主线，但更多观点提示其已接近情绪高潮，后排标签套利面临较大分化风险。"
+      ],
+      "sector_consensus": [
+        {
+          "sector": "医药生物（创新药、CRO、化学制药）",
+          "mention_count": 29,
+          "consensus": "多数观点认同医药是当日最强或最完整的题材方向，创新药、CRO、医疗服务及化学制药获得集中关注；但普遍要求后续观察板块承接、连板梯队和分歧后的持续性。",
+          "stance": "加强",
+          "representative_stocks": [
+            "南华生物",
+            "哈药股份",
+            "百花医药",
+            "瑞康医药",
+            "新华制药"
+          ]
+        },
+        {
+          "sector": "房地产及地产服务",
+          "mention_count": 17,
+          "consensus": "地产午后走强并获得较多讨论，世联行、万科A等被用作板块强弱观察标的。多数观点认可其活跃度提升，但对其是否具备持续主线属性仍较谨慎。",
+          "stance": "活跃",
+          "representative_stocks": [
+            "世联行",
+            "万科A",
+            "绿地控股",
+            "金地集团"
+          ]
+        },
+        {
+          "sector": "科技硬件（半导体、PCB、光模块、算力）",
+          "mention_count": 22,
+          "consensus": "科技方向仍是高频讨论领域，但内部强弱分化显著：PCB、光模块、通信及部分算力方向仍有承接，而半导体设备、存储及高位机构股被多篇观点提示存在兑现压力。",
+          "stance": "分化",
+          "representative_stocks": [
+            "胜宏科技",
+            "新易盛",
+            "天孚通信",
+            "兆易创新",
+            "中材科技"
+          ]
+        },
+        {
+          "sector": "MLCC及电子材料",
+          "mention_count": 14,
+          "consensus": "华瓷股份带来的高度和涨价预期使MLCC保持较高热度，但多篇观点指出板块联动并不充分，双星新材与风华高科等个股反馈存在差异，需观察后排修复与板块共振。",
+          "stance": "分化",
+          "representative_stocks": [
+            "华瓷股份",
+            "双星新材",
+            "风华高科"
+          ]
+        },
+        {
+          "sector": "华字辈及新华系题材",
+          "mention_count": 15,
+          "consensus": "新华传媒重组预期和“华”字标签扩散推动题材热度上升，新华系、传媒及名称套利股获得集中关注；不过多数观点将其视作情绪驱动较强的高潮型题材，并提示后排淘汰和高位分歧风险。",
+          "stance": "分化",
+          "representative_stocks": [
+            "新华传媒",
+            "内蒙新华",
+            "华瓷股份",
+            "新华制药"
+          ]
+        },
+        {
+          "sector": "农业",
+          "mention_count": 11,
+          "consensus": "农业在多篇文章中被列为轮动修复方向，金健米业等标的维持辨识度，但持续性和梯队完整度未形成统一强共识。",
+          "stance": "分化",
+          "representative_stocks": [
+            "金健米业",
+            "万向德农"
+          ]
+        },
+        {
+          "sector": "消费零售",
+          "mention_count": 10,
+          "consensus": "零售、黄酒、旅游及节前消费方向有所活跃，国芳集团、会稽山等被反复提及；但多数观点仍将其归为节前轮动或情绪驱动分支。",
+          "stance": "活跃",
+          "representative_stocks": [
+            "国芳集团",
+            "会稽山",
+            "龙头股份"
+          ]
+        },
+        {
+          "sector": "贵金属",
+          "mention_count": 8,
+          "consensus": "多篇观点认为贵金属处于资金流出和相对走弱状态，是当日较明确的弱势方向之一。",
+          "stance": "退潮",
+          "representative_stocks": [
+            "山金国际",
+            "赤峰黄金"
+          ]
+        },
+        {
+          "sector": "近端次新股",
+          "mention_count": 7,
+          "consensus": "近端次新和高弹性新股方向被多篇观点提示情绪快速退潮，C沈鼓等个股被作为高波动和负反馈案例。",
+          "stance": "退潮",
+          "representative_stocks": [
+            "C沈鼓",
+            "沈鼓集团"
+          ]
+        }
+      ],
+      "stock_attention": [
+        {
+          "stock": "华瓷股份",
+          "mention_count": 30,
+          "sectors": [
+            "MLCC",
+            "电子材料",
+            "科技硬件",
+            "华字辈题材",
+            "电网及特高压"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "情绪锚定",
+            "高关注",
+            "风险观察标的"
+          ]
+        },
+        {
+          "stock": "南华生物",
+          "mention_count": 18,
+          "sectors": [
+            "医药生物",
+            "医疗服务",
+            "华字辈题材"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注",
+            "风险观察标的"
+          ]
+        },
+        {
+          "stock": "世联行",
+          "mention_count": 16,
+          "sectors": [
+            "房地产",
+            "地产服务"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注"
+          ]
+        },
+        {
+          "stock": "金健米业",
+          "mention_count": 14,
+          "sectors": [
+            "农业",
+            "粮油",
+            "情绪题材"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注"
+          ]
+        },
+        {
+          "stock": "国芳集团",
+          "mention_count": 12,
+          "sectors": [
+            "零售消费",
+            "大消费"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注",
+            "风险观察标的"
+          ]
+        },
+        {
+          "stock": "内蒙新华",
+          "mention_count": 11,
+          "sectors": [
+            "文化传媒",
+            "出版传媒",
+            "新华系题材",
+            "华字辈题材"
+          ],
+          "roles": [
+            "核心",
+            "跟随",
+            "高关注"
+          ]
+        },
+        {
+          "stock": "新华传媒",
+          "mention_count": 10,
+          "sectors": [
+            "文化传媒",
+            "上海国资改革",
+            "新华系题材",
+            "华字辈题材"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "风险观察标的"
+          ]
+        },
+        {
+          "stock": "万科A",
+          "mention_count": 9,
+          "sectors": [
+            "房地产",
+            "地产开发"
+          ],
+          "roles": [
+            "核心",
+            "风险观察标的"
+          ]
+        },
+        {
+          "stock": "百花医药",
+          "mention_count": 8,
+          "sectors": [
+            "医药",
+            "创新药",
+            "CRO"
+          ],
+          "roles": [
+            "龙头",
+            "跟随",
+            "高关注"
+          ]
+        },
+        {
+          "stock": "闽东电力",
+          "mention_count": 8,
+          "sectors": [
+            "电力",
+            "绿电"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注",
+            "风险观察标的"
+          ]
+        }
+      ],
+      "tomorrow_consensus_watch": [
+        "成交额能否重新放大并维持在约2万亿元以上，部分观点进一步关注能否回升至2.1万亿至2.2万亿元区间。",
+        "医药板块在集中爆发后能否维持梯队和承接，重点关注南华生物、哈药股份、瑞康医药、百花医药等高辨识度标的反馈。",
+        "地产方向能否延续强度，以及世联行、万科A、绿地控股等对板块情绪和指数的带动情况。",
+        "华瓷股份等高标能否承接分歧，MLCC后排是否出现修复及板块联动。",
+        "新华传媒、内蒙新华及“华字辈”题材在情绪高潮后是否出现后排掉队、炸板或标签套利退潮。",
+        "科技资金是否回流，重点观察半导体资金流出是否收窄，以及PCB、光模块、通信等趋势方向的承接。",
+        "高位连板、中位股和次新股是否出现批量负反馈，以判断情绪分歧是否扩大。"
+      ],
+      "limitations": [
+        "输入内容主要为作者主观复盘与盘前推演，不能视为对市场走势、行业强弱或个股表现的客观预测。",
+        "多篇文章存在广告、明显情绪化等质量标记，部分观点的措辞、周期划分和结论可能带有较强交易风格偏好。",
+        "同一市场数据在不同文章中存在成交额、涨停数量、指数点位等口径差异，聚合时以方向性共识为主，未对原始数值逐项核验。",
+        "部分股票被赋予多个题材标签，且简称、全称或角色定义不一致，文中已按常见名称进行合并，统计次数为文章提及层面的近似聚合。",
+        "文章可能来自不同作者、不同盘中时点或不同复盘框架，因此“启动、高潮、分歧、退潮”等阶段标签并不完全可直接横向比较。"
+      ],
+      "article_count": 37,
+      "source_platform": "淘股吧公开复盘",
+      "sample_status": "正式样本",
+      "finalization": {
+        "reason": "deadline_minimum_met",
+        "quality_article_count": 37,
+        "minimum_quality_articles": 15,
+        "finalized_at_cn": "2026-09-21T22:05:48.157806+08:00",
+        "ai_quality_rejected_count": 6
+      },
+      "ths_concept_index": {
+        "status": "ready",
+        "asof_date": "2026-09-21",
+        "items": [
+          {
+            "concept": "创新药",
+            "ths_code": "308014",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 4.27,
+            "five_day_pct": 5.57,
+            "volume_ratio_5d": 1.71,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "医药电商",
+            "ths_code": "301565",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 3.59,
+            "five_day_pct": 3.5,
+            "volume_ratio_5d": 1.66,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "PCB概念",
+            "ths_code": "308832",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 1.32,
+            "five_day_pct": 5.71,
+            "volume_ratio_5d": 0.98,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "第三代半导体",
+            "ths_code": "308700",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 0.71,
+            "five_day_pct": 7.12,
+            "volume_ratio_5d": 1.14,
+            "state": "趋势偏强但当日分化",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "MLCC概念",
+            "ths_code": "309269",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 1.92,
+            "five_day_pct": 6.66,
+            "volume_ratio_5d": 1.03,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "消费电子概念",
+            "ths_code": "308384",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 1.63,
+            "five_day_pct": 6.47,
+            "volume_ratio_5d": 1.1,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "无人零售",
+            "ths_code": "304756",
+            "asof_date": "2026-09-21",
+            "one_day_pct": 2.16,
+            "five_day_pct": 2.82,
+            "volume_ratio_5d": 1.19,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          }
+        ],
+        "note": "客观指数数据与文章观点分开记录。",
+        "matched_concepts": 9,
+        "failed_concepts": 2,
+        "errors": [
+          "算力租赁:SSLError:HTTPSConnectionPool(host='q.10jqka.com.cn', port=443): Max retries exceeded with url: /gn/detail/code/309068 (Caused by ",
+          "农业种植:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+        ]
+      }
+    }
+  },
+  "portfolio_note": "程序板块证据门禁后，正式观察池共3只（000620、603150、002886）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：603150。",
+  "second_start_evidence_version": "v0.6",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "603150"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "000620": 1.0,
+    "603150": 1.0,
+    "002886": 1.0
+  },
+  "rule": "仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单"
+}

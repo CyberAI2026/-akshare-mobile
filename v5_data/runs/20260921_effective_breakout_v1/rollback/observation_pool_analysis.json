@@ -1,0 +1,203 @@
+{
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "计算事实：当日上涨4535家、涨停103家、成交额较前日增10.57%，广度与成交活跃；但深创指数60日仍为负，且公开复盘聚合提示修复后或进入分歧。",
+    "next_day_aggressiveness": "中性"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "医药、地产当日强势且资金流入，半导体/通信等科技中短期较强但内部存在分化；板块数据仅作交叉验证，不替代个股整理结构。"
+  },
+  "opinion_assessment": {
+    "status": "可用",
+    "summary": "公开复盘正文聚合为“谨慎偏多、修复后分歧”的主观看法，不是行情事实；医药与地产受关注，科技及高位情绪题材持续性存在分歧。"
+  },
+  "selected_codes": [
+    "000620",
+    "603150",
+    "002886"
+  ],
+  "decisions": [
+    {
+      "股票代码": "000620",
+      "股票名称": "盈新发展",
+      "decision": "SELECT",
+      "priority": 1,
+      "confidence_level": "中",
+      "evidence": "振幅收敛比0.625、成交量收敛比1.032、换手收敛比0.962，MA5/MA10三日斜率均为正；距稳健5日上沿1.24%，中期趋势仍活。",
+      "risk": "20日收益-5.76%，仍需确认由整理转为有效突破；地产持续性存在分歧。",
+      "next_day_watch": "14:40-14:45确认价格仍守住整理上沿附近、成交与换手不显著放大失控，且地产方向承接未转弱。",
+      "structure_assessment": "右上角趋势；振幅收敛，MA5/MA10斜率0.014/0.020，短期下行已停止；距稳健5日上沿1.24%。",
+      "volume_assessment": "近5日均量3.06亿，较前10日3.03亿基本稳定，收敛比1.032。",
+      "amplitude_assessment": "近5日振幅9.54%，较前10日区间振幅15.25%收敛，收敛比0.625。",
+      "turnover_assessment": "近5日平均换手6.40%，较前10日6.65%小幅收敛，收敛比0.962。",
+      "sector_resonance": "同期概念共振：土地流转当日2.84%、5日2.53%，主导板块候选房地产当日上涨3.68%；成分时点不一致，仅作交叉验证。"
+    },
+    {
+      "股票代码": "603150",
+      "股票名称": "万朗磁塑",
+      "decision": "SELECT",
+      "priority": 2,
+      "confidence_level": "低",
+      "evidence": "振幅收敛比0.219、成交量收敛比0.580、换手收敛比0.579；10日收益1.27%未见短期速度过热，MA10三日斜率0.012为正，接近稳健5日上沿。",
+      "risk": "20日收益33.07%、股价高于MA20 11.23%，存在趋势延续后的分歧风险；板块共振未核验。；缺少同期板块客观行情，保留为条件观察，待14:40-14:45核验",
+      "next_day_watch": "14:40-14:45确认MA5下行未扩大、价格能维持5日整理上沿，成交量和换手不出现异常扩张。",
+      "structure_assessment": "右上角趋势；振幅显著收敛，MA5斜率-0.005但MA10斜率0.012，程序确认短期下行停止；距稳健5日上沿-0.44%。",
+      "volume_assessment": "近5日均量235.78万，较前10日406.50万收敛，收敛比0.580。",
+      "amplitude_assessment": "近5日振幅8.32%，较前10日区间振幅37.98%显著收敛，收敛比0.219。",
+      "turnover_assessment": "近5日平均换手2.79%，较前10日4.82%收敛，收敛比0.579。",
+      "sector_resonance": "未核验：仅有基础化工行业映射，未提供同期客观概念行情。"
+    },
+    {
+      "股票代码": "002886",
+      "股票名称": "沃特股份",
+      "decision": "SELECT",
+      "priority": 3,
+      "confidence_level": "低",
+      "evidence": "振幅收敛比0.392、成交量收敛比0.724、换手收敛比0.709，MA5/MA10斜率0.023/0.0005；华为汽车、光伏概念均有同期上涨加强数据。",
+      "risk": "25日内5次涨停、20日收益31.59%、近5日平均换手18.83%，高波动和趋势成熟风险较高。",
+      "next_day_watch": "14:40-14:45确认整理上沿附近不出现放量冲高回落，换手不继续失控，华为汽车或光伏概念维持承接。",
+      "structure_assessment": "中期上升趋势延续；振幅收敛且短期下行停止，MA10斜率接近持平；距稳健5日上沿-0.63%。",
+      "volume_assessment": "近5日均量3851.49万，较前10日5317.73万收敛，收敛比0.724。",
+      "amplitude_assessment": "近5日振幅11.48%，较前10日区间振幅29.31%收敛，收敛比0.392。",
+      "turnover_assessment": "近5日平均换手18.83%，较前10日26.56%收敛，收敛比0.709，但绝对换手偏高。",
+      "sector_resonance": "同期概念共振：华为汽车当日1.49%、5日3.15%，光伏概念当日1.36%、5日3.78%，均为上涨加强。"
+    }
+  ],
+  "nonselected": [
+    {
+      "股票代码": "001210",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002708",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "605168",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "002975",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "002638",
+      "decision": "WAIT",
+      "reason_code": "SECTOR_WEAK_OR_UNVERIFIED"
+    },
+    {
+      "股票代码": "300765",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "301151",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "600172",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "603466",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "000628",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "601869",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "603083",
+      "decision": "WAIT",
+      "reason_code": "LOWER_PRIORITY"
+    },
+    {
+      "股票代码": "688209",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002988",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "002194",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "601595",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "603297",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "603668",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "688152",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "002947",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "603989",
+      "decision": "WAIT",
+      "reason_code": "STRUCTURE_NOT_MATURE"
+    },
+    {
+      "股票代码": "002918",
+      "decision": "WAIT",
+      "reason_code": "MID_TERM_TREND_WEAK"
+    },
+    {
+      "股票代码": "600857",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    },
+    {
+      "股票代码": "688185",
+      "decision": "REJECT",
+      "reason_code": "OVERHEATED"
+    }
+  ],
+  "portfolio_note": "程序板块证据门禁后，正式观察池共3只（000620、603150、002886）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：603150。",
+  "model_portfolio_note_before_sector_gate": "观察池仅保留3只整理证据完整且相对具备上沿验证条件的标的；市场广度偏强但修复后分歧风险存在，次日以14:40-14:45的量价、换手与板块承接验证为前提，不构成最终买入或仓位建议。",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "603150"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "000620": 1.0,
+    "603150": 1.0,
+    "002886": 1.0
+  }
+}
