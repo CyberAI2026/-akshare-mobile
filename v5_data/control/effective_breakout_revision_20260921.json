@@ -37,5 +37,7 @@
     "industry_table_count": 5,
     "scope_note": ""
   },
-  "pushplus_delivery_ok": true
+  "pushplus_delivery_ok": true,
+  "lock_closed": true,
+  "lock_closed_at_cn": "2026-09-22T00:24:00+08:00"
 }
