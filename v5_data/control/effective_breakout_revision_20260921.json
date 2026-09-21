@@ -1,5 +1,5 @@
 {
-  "status": "ai_complete",
+  "status": "delivered",
   "lock": "LOCK-20260921-effective-breakout-v1",
   "source_run": "v5_data/runs/20260921_223444",
   "revision_run": "v5_data/runs/20260921_effective_breakout_v1",
@@ -16,7 +16,7 @@
     "pre_ai": 8
   },
   "openai_calls": 1,
-  "corrected_push_attempts": 0,
+  "corrected_push_attempts": 1,
   "observation_count": 6,
   "market_pool_policy": {
     "market_regime": "较好/活跃",
@@ -36,5 +36,6 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  }
+  },
+  "pushplus_delivery_ok": true
 }

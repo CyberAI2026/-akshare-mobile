@@ -1,5 +1,5 @@
 {
-  "status": "ai_complete",
+  "status": "completed",
   "stage": "revision_ai_complete",
   "strategy": "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool",
   "source_run": "v5_data/runs/20260921_223444",
@@ -95,5 +95,7 @@
   "daily_reactivated_count": 0,
   "daily_eliminated_count": 0,
   "cooling_count": "沿用源运行",
-  "revision_notice": "原盘后推送已送达；本条是有效突破新规则的正式更正版本"
+  "revision_notice": "原盘后推送已送达；本条是有效突破新规则的正式更正版本",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }

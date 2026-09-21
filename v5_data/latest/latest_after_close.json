@@ -1,77 +1,21 @@
 {
   "status": "completed",
-  "stage": "completed",
-  "engine": "V5.3-auditable-market-sector-layer",
-  "strategy": "research_v0.8-25d-limitup+ma25-trend+pool-v0.4+market-v0.3+sector-v0.2+ai-v0.3",
-  "started_cn": "2026-09-21T22:34:44.531784+08:00",
-  "stamp": "20260921_223444",
-  "folder": "v5_data/runs/20260921_223444",
-  "batch_path": "v5_data/inbox/daily_20260921_143311.csv",
-  "batch_count": 111,
-  "master_before_screen": 768,
-  "bootstrapped_from_v4": false,
-  "cache_seed": {
-    "seeded": 0,
-    "scanned": 772,
-    "available": 535
-  },
-  "cache_refresh": {
-    "asof_trade_date": "2026-09-21",
-    "source": "sina-spot",
-    "pool_count": 768,
-    "already_current": 0,
-    "bulk_appended": 734,
-    "needs_history_fallback": 34,
-    "missing_cache": 24,
-    "corporate_action_guard": 1,
-    "errors": [
-      "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
-    ]
-  },
-  "cache_asof_trade_date": "2026-09-21",
-  "cache_deep_ready_count": 603,
-  "cache_current_count": 734,
-  "cache_fallback_count": 34,
-  "isolated_index_count": 0,
-  "stage1": 230,
-  "qa25": {
-    "命中或增量": 756,
-    "总数": 768,
-    "成功": 756
-  },
-  "cache25_refresh_requested": 36,
-  "cache25_current_ranked": 756,
-  "cache25_stale_deferred": 12,
-  "completed_120d_shards": [
-    0,
-    1,
-    2,
-    3
-  ],
-  "shard_count_120d": 4,
-  "stage2_research_pool": 119,
-  "qa120": {
-    "命中或增量": 229,
-    "总数": 230,
-    "成功": 230
-  },
+  "stage": "revision_ai_complete",
+  "strategy": "research_v0.9-effective-breakout+right-side+compact-platform+dynamic-pool",
+  "source_run": "v5_data/runs/20260921_223444",
+  "folder": "v5_data/runs/20260921_effective_breakout_v1",
   "generated_trade_date": "2026-09-21",
+  "target_trade_date": "2026-09-22",
   "master_count": 768,
-  "eliminated_count": 1,
-  "daily_new_count": 24,
-  "daily_reactivated_count": 0,
-  "daily_eliminated_count": 1,
-  "cooling_count": 316,
-  "qa250": {
-    "命中或增量": 119,
-    "总数": 119,
-    "成功": 119
+  "stage1": 232,
+  "stage2_research_pool": 18,
+  "stage3_research_pool": 8,
+  "observation_pool_count": 6,
+  "market_assessment": {
+    "risk_level": "中",
+    "summary": "计算事实：当日上涨4535家、下跌936家，成交额较前日增加10.57%，市场档位为较好/活跃；但宽度、涨停与成交额均处于现有滚动样本高位，次日存在强势方向分歧和去弱留强风险。",
+    "next_day_aggressiveness": "中性"
   },
-  "stage3_lifecycle_qualified": 79,
-  "pre_ai_alignment_eliminated": 51,
-  "pre_ai_capacity_eliminated": 0,
-  "stage3_research_pool": 28,
-  "openai_candidate_cap": 50,
   "sector_validation": {
     "status": "正式可用",
     "table_count": 10,
@@ -81,41 +25,6 @@
     "concept_table_count": 5,
     "industry_table_count": 5,
     "scope_note": ""
-  },
-  "holding_review_summary": {
-    "position_count": 1,
-    "hold_count": 1,
-    "exit_count": 0,
-    "reduce_count": 0,
-    "data_error_count": 0
-  },
-  "completed_cn": "2026-09-21T22:49:59.237401+08:00",
-  "elapsed_minutes": 15.25,
-  "cache_summary": {
-    "25日": {
-      "命中或增量": 756,
-      "总数": 768,
-      "成功": 756
-    },
-    "120日": {
-      "命中或增量": 229,
-      "总数": 230,
-      "成功": 230
-    },
-    "250日": {
-      "命中或增量": 119,
-      "总数": 119,
-      "成功": 119
-    }
-  },
-  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
-  "observation_pool_count": 3,
-  "target_trade_date": "2026-09-22",
-  "openai_model": "gpt-5.6-terra",
-  "market_assessment": {
-    "risk_level": "中",
-    "summary": "计算事实：当日上涨4535家、涨停103家、成交额较前日增10.57%，广度与成交活跃；但深创指数60日仍为负，且公开复盘聚合提示修复后或进入分歧。",
-    "next_day_aggressiveness": "中性"
   },
   "high_attention_sector_market": {
     "status": "available",
@@ -179,10 +88,14 @@
     },
     "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
   },
-  "stock_qa_25_success": 756,
-  "stock_qa_120_success": 230,
-  "stock_qa_250_success": 119,
-  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "cache_summary": {
+    "修订来源": "2026-09-21已保存缓存；未联网重抓"
+  },
+  "daily_new_count": 0,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 0,
+  "cooling_count": "沿用源运行",
+  "revision_notice": "原盘后推送已送达；本条是有效突破新规则的正式更正版本",
   "pushplus_delivery_ok": true,
   "pushplus_delivery_status": "request_accepted"
 }
