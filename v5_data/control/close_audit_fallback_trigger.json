@@ -1,6 +1,6 @@
 {
-  "beijing_time": "2026-09-21T15:36:21+08:00",
-  "trade_date": "2026-09-21",
+  "beijing_time": "2026-09-22T15:35:39+08:00",
+  "trade_date": "2026-09-22",
   "watchdog_stage": "post_close_acceptance_recovery",
-  "main_sha_before_trigger": "292a8ef74cb6a868aa8e9038252b0cedbea72ccc"
+  "main_sha_before_trigger": "d01b68dd7055d9b5620eb60d2da6498fac19be7b"
 }
