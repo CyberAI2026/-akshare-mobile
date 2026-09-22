@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-22",
   "trade_date": "2026-09-22",
-  "updated_at_cn": "2026-09-22T21:25:24.800846+08:00",
+  "updated_at_cn": "2026-09-22T21:34:40.216984+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -162,6 +162,21 @@
       "body_chars": 1922,
       "body_sha256": "46a2b4e33b339547fe603c887953f326344efff493bb39376bc437c379a22b3d",
       "published_at_cn": "2026-09-22T15:39:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "4ae44c0ca9400a15",
+      "title": "老剧本又来了，就差一分钱！_陌尘青羽_淘股吧",
+      "url": "https://www.tgb.cn/a/2viH6X1RMU9",
+      "read_count": 177,
+      "body_chars": 1849,
+      "body_sha256": "4ae44c0ca9400a15bb5442d73717b3d120696009e553223e3265a0e75ac8b1be",
+      "published_at_cn": "2026-09-22T17:33:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1297,6 +1312,55 @@
       ],
       "quality_flags": [
         "无"
+      ]
+    },
+    {
+      "article_id": "4ae44c0ca9400a15",
+      "market_stance": "偏空",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为局部仍有赚钱效应，但高位抱团隐患显现；节前、异动及出金压力或降低风险偏好，整体偏空谨慎。",
+      "sectors": [
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "百花医药烂板反复开板，作者认为资金分歧大、封板决心不足。"
+        },
+        {
+          "name": "电力",
+          "stance": "分化",
+          "evidence": "闽东电力触发异动，作者认为或引发高位资金避险和负反馈。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "闽东电力",
+          "sector": "电力",
+          "role": "龙头"
+        },
+        {
+          "name": "哈药股份",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "百花医药",
+          "sector": "医药",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "闽东电力开盘及是否出现严重负反馈",
+        "哈药股份分歧下的承接力度",
+        "百花医药及医药板块情绪"
+      ],
+      "numeric_claims": [
+        "闽东电力控异动差1分钱",
+        "文章浏览187次"
+      ],
+      "quality_flags": [
+        "明显情绪化"
       ]
     },
     {
