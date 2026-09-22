@@ -1132,6 +1132,55 @@ Updated: 2026-09-21
 Updated: 2026-09-22
 
 
+## 2026-09-22 three-trading-day rolling tail pool
+
+- Operation lock: `LOCK-20260922-rolling-tail-pool-v1`.
+- Sole executor: current authorized maintenance account/current Work window.
+- Baseline production main: `ca585689863f40097538c32f535631851a57b729`;
+  queued/in-progress Actions at acquisition: 0. Today's after-close and tail
+  production effects are complete and must not be replayed.
+- User-authorized goal: today's 14:40-14:45 decision may use the deduplicated
+  union of observation pools generated on the previous three trading days. The
+  current decision remains date-locked to today; an older pool is only a
+  candidate source, never an old buy signal.
+- Safety boundaries: require a valid pool from the immediately preceding trading
+  day; expire sources after three trading days; preserve current-day candidates
+  first and cap the tail input at 10; exclude active holdings/open TRADE cycles;
+  exclude sold recommendations unless a genuinely newer post-sale source signal
+  exists; keep the deterministic effective-breakout gate authoritative; final
+  `TRADE` count remains 0-5.
+- Existing run folders are the source of truth for prior pools. If multiple valid
+  runs share a generated trade date, use the one with the latest generated
+  timestamp. Persist source dates, continuity count, trim and exclusion audits in
+  the tail metadata.
+- No historical tail replay is authorized. Implementation and tests must make
+  OpenAI 0 calls, PushPlus 0 attempts, workflow dispatches 0, and ledger writes 0.
+- Exact next unit: implement deterministic three-day source loading/dedup/cap and
+  source-aware exclusions, add focused tests, then update this checkpoint before
+  publication.
+- Implementation completed in `v5_cli.py`: source dates are derived from the
+  trading calendar; one latest valid run is selected per source date; candidates
+  are deduplicated with newest evidence retained; newest-day candidates rank
+  before older supplements; the final tail input is capped at 10. The precheck
+  now saves both the rolling pool and its source/exclusion/trim metadata.
+- Active holdings and open recommendation cycles remain excluded. A completed
+  sale excludes source signals dated on or before the exit; a genuinely newer
+  post-sale after-close signal may re-enter and must still pass today's tail gate.
+- Read-only impact calculation for target 2026-09-23 reused the saved 2026-09-22,
+  2026-09-21, and 2026-09-18 pools. Deduplicated union=12; open-TRADE exclusions=2
+  (`300142`, `300679`); closed-old-source exclusions=0; cap trims=0; final tail
+  candidates=10. No file, market data, API, or delivery side effect was produced.
+- Verification: 17/17 focused tail tests and 154/154 full tests passed; Python
+  compilation and `git diff --check` passed. OpenAI/PushPlus messages in test
+  output were mocks only. External effects remain OpenAI 0, PushPlus 0, workflow
+  dispatches 0, ledger writes 0.
+- Exact next unit: commit the verified implementation, publish a branch from
+  current production main, merge only after validation-only checks pass, verify
+  post-merge jobs skip production stages, then close the lock.
+
+Updated: 2026-09-22
+
+
 ## 2026-09-21 effective-breakout production revision and same-day rerun
 
 - Operation lock: `LOCK-20260921-effective-breakout-v1`.
