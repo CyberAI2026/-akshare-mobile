@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-22",
   "trade_date": "2026-09-22",
-  "updated_at_cn": "2026-09-22T21:05:15.660598+08:00",
+  "updated_at_cn": "2026-09-22T21:14:44.325484+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -102,6 +102,21 @@
       "body_chars": 11711,
       "body_sha256": "322ead8a40b1ecbb88d814ac28b23046a0d3aa497cd923664e9fba896a2d9204",
       "published_at_cn": "2026-09-22T15:56:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "33b525cbf1b7122c",
+      "title": "2026年9月22日复盘_Honeyzzz_淘股吧",
+      "url": "https://www.tgb.cn/a/2viyE8XJxLD",
+      "read_count": 55,
+      "body_chars": 2076,
+      "body_sha256": "33b525cbf1b7122cd7d63c3ce9777cfc47b37a8c8d5f5604aef016cceda0f49c",
+      "published_at_cn": "2026-09-22T15:34:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1006,6 +1021,69 @@
         "龙头股份全天振幅接近15%，换手率28%",
         "南威软件换手金额需达到6至8亿元",
         "文章设置800个赞及50位打赏解锁高阶计划"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "33b525cbf1b7122c",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者称指数上下震荡，认为传媒和医药较强；其自身因追逐非强势后排导致回撤。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "加强",
+          "evidence": "作者称“今天的传媒和药板块多强”。"
+        },
+        {
+          "name": "医药",
+          "stance": "加强",
+          "evidence": "作者称医药板块表现强势。"
+        },
+        {
+          "name": "农业",
+          "stance": "不明确",
+          "evidence": "作者预期节前农业高度或需由万向德农打出。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "核心"
+        },
+        {
+          "name": "万向德农",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "华胜天成",
+          "sector": "不明确",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "万向德农能否符合作者对农业高度的预期",
+        "金健米业是否仍有低位做T机会",
+        "传媒和医药板块强势能否延续"
+      ],
+      "numeric_claims": [
+        "作者称华胜天成合计亏损5个点",
+        "作者称金健米业本次收益不到8个点",
+        "作者称国芳集团当日亏损1.2个点",
+        "作者称万向德农当日亏损3.7个点",
+        "作者称账户当日亏损2.8个点"
       ],
       "quality_flags": [
         "广告",
