@@ -1177,6 +1177,22 @@ Updated: 2026-09-22
 - Exact next unit: commit the verified implementation, publish a branch from
   current production main, merge only after validation-only checks pass, verify
   post-merge jobs skip production stages, then close the lock.
+- PR #28 checks completed successfully: After-Close Research `35731388355`,
+  Official Market Count `35731387954`, and THS Public Sector Data
+  `35731387901`. The after-close production stages were all skipped.
+- PR #28 squash-merged as `94519c3dcad08fe988bbd4139537c865e5bbdc08`.
+  Post-merge validation also succeeded: Tail Confirmation `35731703251`,
+  After-Close Research `35731703591`, Official Market Count `35731703241`, and
+  THS Public Sector Data `35731703240`. Tail precheck/finalize/failure-alert and
+  every after-close production stage were skipped.
+- An independent Market Opinion Mining dispatch `35731732708` ran concurrently,
+  completed successfully, and advanced main to
+  `41d121af1986f40ea7d124ee080c377ebdd66b94`; it was not cancelled, replayed, or
+  overwritten. Final queued=0 and in_progress=0.
+- Deployment side effects from this change: manual workflow dispatches 0,
+  OpenAI calls 0, PushPlus attempts 0, market/history reruns 0, ledger writes 0.
+  Status: completed and deployed. Lock `LOCK-20260922-rolling-tail-pool-v1`
+  closed.
 
 Updated: 2026-09-22
 
