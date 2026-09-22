@@ -55,6 +55,8 @@ MARKET_HISTORY = ROOT / "market" / "market_breadth_history.csv"
 CODE_NAME_MASTER = ROOT / "reference" / "a_share_code_name_master.csv"
 RECOMMENDATION_REGISTRY = ROOT / "feedback" / "recommendations.csv"
 PRIVATE_TRADE_LEDGER = ROOT / "private" / "trades.enc"
+ROLLING_TAIL_POOL_DAYS = 3
+TAIL_POOL_CAP = 10
 
 
 def now_cn() -> datetime:
@@ -1881,28 +1883,189 @@ def run_openai_tail(pool: pd.DataFrame, snap40: pd.DataFrame, snap45: pd.DataFra
     return out,meta
 
 
+def _as_trade_date(value):
+    parsed = pd.to_datetime(value, errors="coerce")
+    return None if pd.isna(parsed) else parsed.date()
+
+
+def _rolling_source_dates(today, count: int = ROLLING_TAIL_POOL_DAYS) -> list:
+    dates = []
+    cursor = today
+    for _ in range(count):
+        cursor = previous_trade_day(cursor)
+        if cursor is None:
+            break
+        dates.append(cursor)
+    return dates
+
+
+def _observation_pool_source_pairs() -> list[tuple[Path, Path]]:
+    pairs = [(LATEST / "observation_pool_meta.json", LATEST / "observation_pool.csv")]
+    pairs.extend(
+        (meta_path, meta_path.with_name("observation_pool.csv"))
+        for meta_path in sorted((ROOT / "runs").glob("*/ai/observation_pool_meta.json"))
+    )
+    return [(meta_path, pool_path) for meta_path, pool_path in pairs
+            if meta_path.exists() and pool_path.exists()]
+
+
+def _latest_valid_pool_sources(today) -> tuple[list, dict]:
+    """Pick one latest valid source for each of the previous three trade dates."""
+    source_dates = _rolling_source_dates(today)
+    expected_target = {
+        source_date: (today if rank == 0 else source_dates[rank - 1])
+        for rank, source_date in enumerate(source_dates)
+    }
+    candidates: dict = {source_date: [] for source_date in source_dates}
+    for meta_path, pool_path in _observation_pool_source_pairs():
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            continue
+        generated = _as_trade_date(meta.get("generated_trade_date"))
+        target = _as_trade_date(meta.get("target_trade_date"))
+        if (generated not in candidates or target != expected_target.get(generated)
+                or str(meta.get("status", "valid")) != "valid"):
+            continue
+        generated_at = pd.to_datetime(meta.get("generated_at_cn"), errors="coerce", utc=True)
+        timestamp_key = int(generated_at.value) if pd.notna(generated_at) else -1
+        candidates[generated].append((timestamp_key, str(meta_path), meta_path, pool_path, meta))
+    chosen = {}
+    for source_date in source_dates:
+        if candidates[source_date]:
+            chosen[source_date] = max(candidates[source_date], key=lambda item: (item[0], item[1]))
+    if source_dates and source_dates[0] not in chosen:
+        raise RuntimeError("今日缺少有效的上一交易日OpenAI观察池，禁止仅用更旧观察池替代")
+    return source_dates, chosen
+
+
+def _closed_recommendation_exit_dates(registry_path: str | Path | None = None) -> dict[str, object]:
+    path = Path(registry_path or RECOMMENDATION_REGISTRY)
+    if not path.exists():
+        return {}
+    try:
+        records = pd.read_csv(path, dtype={"股票代码": str})
+    except Exception as exc:
+        print("closed-trade registry warning:", type(exc).__name__, exc)
+        return {}
+    if records.empty or "股票代码" not in records:
+        return {}
+    real_status = records.get("真实交易状态", pd.Series("", index=records.index)).fillna("").astype(str)
+    data_status = records.get("数据状态", pd.Series("", index=records.index)).fillna("").astype(str)
+    closed = real_status.eq("已清仓") | data_status.str.contains("已退出|已卖出|止盈退出|止损退出", regex=True)
+    exits = {}
+    for _, row in records[closed].iterrows():
+        code = _norm_stock_code(row.get("股票代码"))
+        dates = [_as_trade_date(row.get(column)) for column in
+                 ["实际卖出日期", "退出跟踪日期", "最后更新日期", "推荐日期"]]
+        dates = [value for value in dates if value is not None]
+        exit_date = max(dates) if dates else None
+        if not code:
+            continue
+        if code not in exits:
+            exits[code] = exit_date
+        elif exit_date is not None and (exits[code] is None or exit_date > exits[code]):
+            exits[code] = exit_date
+    return exits
+
+
+def _exclude_closed_rolling_sources(pool: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
+    if pool.empty:
+        return pool, []
+    exits = _closed_recommendation_exit_dates()
+    excluded = []
+    keep = []
+    for _, row in pool.iterrows():
+        code = _norm_stock_code(row.get("股票代码"))
+        exit_date = exits.get(code)
+        newest_source = _as_trade_date(row.get("滚动池最新来源日"))
+        stale_closed = code in exits and (exit_date is None or newest_source is None or newest_source <= exit_date)
+        keep.append(not stale_closed)
+        if stale_closed:
+            excluded.append(code)
+    return pool.loc[keep].reset_index(drop=True), sorted(set(excluded))
+
+
 def _load_tail_pool(today):
-    """读取并验证当日观察池；两个尾盘阶段共用同一套日期与持仓门禁。"""
-    obs_path = LATEST / "observation_pool.csv"
-    meta_path = LATEST / "observation_pool_meta.json"
-    if not obs_path.exists() or not meta_path.exists():
-        raise RuntimeError("今日缺少有效的上一交易日OpenAI观察池")
-    obs_meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    if str(obs_meta.get("target_trade_date", "")) != str(today):
-        raise RuntimeError(f"观察池目标日{obs_meta.get('target_trade_date')}与今天{today}不一致")
-    expected_prev = previous_trade_day(today)
-    if expected_prev and str(obs_meta.get("generated_trade_date", "")) != str(expected_prev):
-        raise RuntimeError("观察池不是由上一交易日生成")
-    pool = pd.read_csv(obs_path, dtype={"股票代码": str})
+    """Load a date-locked, deduplicated three-trading-day rolling candidate pool."""
+    source_dates, chosen = _latest_valid_pool_sources(today)
+    frames = []
+    source_audit = []
+    newest_meta = None
+    for rank, source_date in enumerate(source_dates, start=1):
+        source = chosen.get(source_date)
+        if source is None:
+            continue
+        _, _, meta_path, pool_path, meta = source
+        frame = pd.read_csv(pool_path, dtype={"股票代码": str})
+        if frame.empty or "股票代码" not in frame:
+            continue
+        frame["股票代码"] = frame["股票代码"].map(_norm_stock_code)
+        frame = frame[frame["股票代码"] != ""].copy()
+        frame["_滚动来源日"] = str(source_date)
+        frame["_滚动来源序号"] = rank
+        frames.append(frame)
+        source_audit.append({
+            "generated_trade_date": str(source_date), "target_trade_date": str(meta.get("target_trade_date", "")),
+            "pool_count": int(len(frame)), "meta_path": str(meta_path), "pool_path": str(pool_path),
+        })
+        if rank == 1:
+            newest_meta = dict(meta)
+            if len(frame) > TAIL_POOL_CAP:
+                raise RuntimeError(f"上一交易日观察池数量{len(frame)}超过{TAIL_POOL_CAP}只")
+    if not frames or newest_meta is None:
+        raise RuntimeError("近三个交易日没有可用观察池")
+
+    combined = pd.concat(frames, ignore_index=True, sort=False)
+    rows = []
+    for code, group in combined.groupby("股票代码", sort=False):
+        group = group.sort_values("_滚动来源序号", kind="stable")
+        row = group.iloc[0].to_dict()
+        dates = group["_滚动来源日"].drop_duplicates().tolist()
+        row["滚动池来源日期"] = ",".join(dates)
+        row["滚动池来源次数"] = len(dates)
+        row["滚动池最新来源日"] = dates[0]
+        row["滚动池最早来源日"] = dates[-1]
+        row["滚动池最新来源序号"] = int(group.iloc[0]["_滚动来源序号"])
+        rows.append(row)
+    pool = pd.DataFrame(rows).drop(columns=["_滚动来源日", "_滚动来源序号"], errors="ignore")
     pool = refresh_stock_names(pool)
+    union_count = int(len(pool))
+
     pool, excluded_active_trade_codes = exclude_active_trades(pool)
+    pool, excluded_closed_trade_codes = _exclude_closed_rolling_sources(pool)
     if excluded_active_trade_codes:
         print(f"TAIL_ACTIVE_TRADE_EXCLUDED count={len(excluded_active_trade_codes)}")
+    if excluded_closed_trade_codes:
+        print(f"TAIL_CLOSED_ROLLING_SOURCE_EXCLUDED count={len(excluded_closed_trade_codes)}")
     if pool.empty:
-        raise RuntimeError("观察池中的股票均处于未关闭TRADE周期，没有新开仓候选")
-    if len(pool) > 10:
-        raise RuntimeError(f"观察池数量{len(pool)}超过10只")
-    return pool, obs_meta
+        raise RuntimeError("滚动观察池候选均因持仓、未关闭TRADE或卖出后旧信号而排除")
+
+    priority = pool.get("AI优先级", pd.Series(index=pool.index, dtype=float))
+    pool["_滚动AI优先级"] = pd.to_numeric(priority, errors="coerce").fillna(999999)
+    pool = pool.sort_values(
+        ["滚动池最新来源序号", "滚动池来源次数", "_滚动AI优先级", "股票代码"],
+        ascending=[True, False, True, True], kind="stable",
+    ).reset_index(drop=True)
+    trimmed_codes = pool.iloc[TAIL_POOL_CAP:]["股票代码"].astype(str).tolist()
+    pool = pool.head(TAIL_POOL_CAP).drop(columns=["_滚动AI优先级"], errors="ignore")
+
+    obs_meta = dict(newest_meta)
+    obs_meta.update({
+        "target_trade_date": str(today),
+        "rolling_pool_version": "three-trading-day-v1",
+        "rolling_source_days": ROLLING_TAIL_POOL_DAYS,
+        "rolling_source_dates": [str(value) for value in source_dates],
+        "rolling_available_source_dates": [item["generated_trade_date"] for item in source_audit],
+        "rolling_source_audit": source_audit,
+        "rolling_union_count_before_exclusions": union_count,
+        "rolling_excluded_active_trade_codes": excluded_active_trade_codes,
+        "rolling_excluded_closed_trade_codes": excluded_closed_trade_codes,
+        "rolling_trimmed_codes": trimmed_codes,
+        "rolling_final_candidate_count": int(len(pool)),
+        "rule": "近三个交易日观察池仅作为今日候选来源；今日14:40-14:45重新门禁，最终TRADE为0-5只",
+    })
+    return pool.reset_index(drop=True), obs_meta
 
 
 def _tail_completed_for_date(trade_date) -> bool:
@@ -1965,6 +2128,10 @@ def run_tail_precheck():
 
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
     base.mkdir(parents=True, exist_ok=True)
+    save_df(base / "rolling_observation_pool.csv", pool)
+    save_json(base / "rolling_observation_pool_meta.json", obs_meta)
+    save_df(LATEST / "rolling_observation_pool.csv", pool)
+    save_json(LATEST / "rolling_observation_pool_meta.json", obs_meta)
     # Profiles, recent fund flow, and event titles are not 14:40 tick data. Fetch
     # them during the early safe window so a slow upstream cannot consume the
     # short 14:40-to-14:45 quote window.
@@ -1978,6 +2145,9 @@ def run_tail_precheck():
         "generated_at_cn": now_cn().isoformat(),
         "target_trade_date": obs_meta.get("target_trade_date"),
         "candidate_codes": sorted(pool["股票代码"].astype(str).str.zfill(6).tolist()),
+        "rolling_pool_version": obs_meta.get("rolling_pool_version"),
+        "rolling_source_dates": obs_meta.get("rolling_source_dates", []),
+        "rolling_candidate_count": int(len(pool)),
     }
     save_json(base / "tail_precheck_meta.json", marker)
     save_json(LATEST / "tail_precheck_meta.json", marker)
