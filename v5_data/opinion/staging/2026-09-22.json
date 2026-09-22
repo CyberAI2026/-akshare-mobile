@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-22",
   "trade_date": "2026-09-22",
-  "updated_at_cn": "2026-09-22T21:14:44.325484+08:00",
+  "updated_at_cn": "2026-09-22T21:25:24.800846+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -267,6 +267,21 @@
       "body_chars": 1624,
       "body_sha256": "7a90a1eb30e07621a50ce78c2d8a82a2949abcd0bbf45ea0bc9725c578e54568",
       "published_at_cn": "2026-09-22T17:48:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "8fa231f4d20cc9b3",
+      "title": "9.22晚 明日周二策略_凡人huaxue240_淘股吧",
+      "url": "https://www.tgb.cn/a/2viWVGlLZtL",
+      "read_count": 11,
+      "body_chars": 1539,
+      "body_sha256": "8fa231f4d20cc9b3fa07c684d7ad15ebc07eefaae2111f3f9db88a841af3629b",
+      "published_at_cn": "2026-09-22T21:14:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1929,6 +1944,74 @@
       "numeric_claims": [
         "成交额2.15万亿元",
         "成交额较此前放量1056亿元"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "8fa231f4d20cc9b3",
+      "market_stance": "偏多",
+      "market_phase": [
+        "发酵"
+      ],
+      "market_summary": "作者认为缺口已修复、趋势偏多，资金仍在寻找进攻机会；建议避免追高，以高抛低吸应对轮动。",
+      "sectors": [
+        {
+          "name": "创新药",
+          "stance": "加强",
+          "evidence": "作者称创新药当日依旧强势，百花、哈药继续涨停。"
+        },
+        {
+          "name": "地产",
+          "stance": "活跃",
+          "evidence": "作者称中线仍看好地产，认为其属于中长期结构方向。"
+        },
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者认为科技此前涨幅较多，预计医药和地产回落后可能轮动回来。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "百花",
+          "sector": "创新药",
+          "role": "高关注"
+        },
+        {
+          "name": "哈药",
+          "sector": "创新药",
+          "role": "高关注"
+        },
+        {
+          "name": "近岸",
+          "sector": "创新药",
+          "role": "高关注"
+        },
+        {
+          "name": "百普",
+          "sector": "创新药",
+          "role": "高关注"
+        },
+        {
+          "name": "义翘",
+          "sector": "创新药",
+          "role": "高关注"
+        },
+        {
+          "name": "诺诚",
+          "sector": "创新药",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "创新药连续走强后的分歧与调整",
+        "地产回落后的低吸机会",
+        "科技板块是否出现轮动回归"
+      ],
+      "numeric_claims": [
+        "百花、哈药均为2连板"
       ],
       "quality_flags": [
         "广告"
