@@ -19,6 +19,21 @@ CN = ZoneInfo("Asia/Shanghai")
 
 class TailStageTests(unittest.TestCase):
     @staticmethod
+    def _write_observation_source(folder: Path, generated: str, target: str,
+                                  codes, generated_at: str = "2026-09-08T20:00:00+08:00"):
+        folder.mkdir(parents=True, exist_ok=True)
+        rows = codes if codes and isinstance(codes[0], dict) else [
+            {"股票代码": code, "股票名称": f"测试{code}", "AI优先级": rank}
+            for rank, code in enumerate(codes, start=1)
+        ]
+        pd.DataFrame(rows).to_csv(folder / "observation_pool.csv", index=False, encoding="utf-8-sig")
+        (folder / "observation_pool_meta.json").write_text(json.dumps({
+            "status": "valid", "generated_trade_date": generated,
+            "target_trade_date": target, "generated_at_cn": generated_at,
+            "observation_count": len(rows),
+        }), encoding="utf-8")
+
+    @staticmethod
     def _write_history(cache: Path, code: str, breakout: bool = False):
         dates = pd.date_range("2026-09-10", periods=8, freq="D")
         highs = [10.00, 10.10, 9.90, 10.00, 10.05, 10.00, 10.00, 10.00]
@@ -194,7 +209,9 @@ class TailStageTests(unittest.TestCase):
 
     def test_load_pool_enforces_target_date_and_trade_lock(self):
         with tempfile.TemporaryDirectory() as td:
-            latest = Path(td)
+            root = Path(td)
+            latest = root / "latest"
+            latest.mkdir()
             pd.DataFrame([
                 {"股票代码": "600801", "股票名称": "华新建材"},
                 {"股票代码": "603318", "股票名称": "水发燃气"},
@@ -202,13 +219,86 @@ class TailStageTests(unittest.TestCase):
             (latest / "observation_pool_meta.json").write_text(json.dumps({
                 "target_trade_date": "2026-09-07", "generated_trade_date": "2026-09-04"
             }), encoding="utf-8")
-            with patch.object(cli, "LATEST", latest), \
-                 patch.object(cli, "previous_trade_day", return_value=date(2026, 9, 4)), \
+            previous = {date(2026, 9, 7): date(2026, 9, 4),
+                        date(2026, 9, 4): date(2026, 9, 3),
+                        date(2026, 9, 3): date(2026, 9, 2)}
+            with patch.object(cli, "ROOT", root), patch.object(cli, "LATEST", latest), \
+                 patch.object(cli, "RECOMMENDATION_REGISTRY", root / "missing.csv"), \
+                 patch.object(cli, "previous_trade_day", side_effect=lambda value: previous.get(value)), \
                  patch.object(cli, "refresh_stock_names", side_effect=lambda frame: frame), \
                  patch.object(cli, "exclude_active_trades", side_effect=lambda frame: (frame.iloc[[1]].copy(), {"600801"})):
                 pool, meta = cli._load_tail_pool(date(2026, 9, 7))
             self.assertEqual(pool["股票代码"].tolist(), ["603318"])
             self.assertEqual(meta["target_trade_date"], "2026-09-07")
+
+    def test_load_pool_rolls_three_trade_dates_deduplicates_and_caps(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "v5_data"
+            latest = root / "latest"
+            self._write_observation_source(
+                latest, "2026-09-08", "2026-09-09", [f"00000{i}" for i in range(1, 5)]
+            )
+            self._write_observation_source(
+                root / "runs" / "day2" / "ai", "2026-09-07", "2026-09-08",
+                ["000004", "000005", "000006", "000007", "000008", "000009"],
+                "2026-09-07T20:00:00+08:00",
+            )
+            self._write_observation_source(
+                root / "runs" / "day2_old" / "ai", "2026-09-07", "2026-09-08",
+                ["999999"], "2026-09-07T19:00:00+08:00",
+            )
+            self._write_observation_source(
+                root / "runs" / "day3" / "ai", "2026-09-04", "2026-09-07",
+                ["000009", "000010", "000011", "000012", "000013", "000014"],
+                "2026-09-04T20:00:00+08:00",
+            )
+            previous = {date(2026, 9, 9): date(2026, 9, 8),
+                        date(2026, 9, 8): date(2026, 9, 7),
+                        date(2026, 9, 7): date(2026, 9, 4)}
+            with patch.object(cli, "ROOT", root), patch.object(cli, "LATEST", latest), \
+                 patch.object(cli, "RECOMMENDATION_REGISTRY", root / "missing.csv"), \
+                 patch.object(cli, "previous_trade_day", side_effect=lambda value: previous.get(value)), \
+                 patch.object(cli, "refresh_stock_names", side_effect=lambda frame: frame), \
+                 patch.object(cli, "exclude_active_trades", side_effect=lambda frame: (frame, [])):
+                pool, meta = cli._load_tail_pool(date(2026, 9, 9))
+            self.assertEqual(len(pool), 10)
+            self.assertTrue(set(["000001", "000002", "000003", "000004"]).issubset(set(pool["股票代码"])))
+            repeated = pool[pool["股票代码"] == "000004"].iloc[0]
+            self.assertEqual(repeated["滚动池来源次数"], 2)
+            self.assertEqual(meta["rolling_union_count_before_exclusions"], 14)
+            self.assertEqual(len(meta["rolling_trimmed_codes"]), 4)
+            self.assertEqual(meta["rolling_source_dates"], ["2026-09-08", "2026-09-07", "2026-09-04"])
+            self.assertNotIn("999999", set(pool["股票代码"]))
+
+    def test_load_pool_excludes_active_and_sold_old_sources(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td) / "v5_data"
+            latest = root / "latest"
+            registry = root / "feedback" / "recommendations.csv"
+            self._write_observation_source(
+                latest, "2026-09-08", "2026-09-09", ["600801", "603011", "000001", "600802"]
+            )
+            registry.parent.mkdir(parents=True)
+            pd.DataFrame([
+                {"股票代码": "600801", "决策": "TRADE", "真实交易状态": "已清仓",
+                 "实际卖出日期": "2026-09-08", "数据状态": "实盘已卖出"},
+                {"股票代码": "600802", "决策": "TRADE", "真实交易状态": "已清仓",
+                 "实际卖出日期": "2026-09-07", "数据状态": "实盘已卖出"},
+            ]).to_csv(registry, index=False)
+            previous = {date(2026, 9, 9): date(2026, 9, 8),
+                        date(2026, 9, 8): date(2026, 9, 7),
+                        date(2026, 9, 7): date(2026, 9, 4)}
+            def exclude_active(frame):
+                return frame[frame["股票代码"] != "603011"].reset_index(drop=True), ["603011"]
+            with patch.object(cli, "ROOT", root), patch.object(cli, "LATEST", latest), \
+                 patch.object(cli, "RECOMMENDATION_REGISTRY", registry), \
+                 patch.object(cli, "previous_trade_day", side_effect=lambda value: previous.get(value)), \
+                 patch.object(cli, "refresh_stock_names", side_effect=lambda frame: frame), \
+                 patch.object(cli, "exclude_active_trades", side_effect=exclude_active):
+                pool, meta = cli._load_tail_pool(date(2026, 9, 9))
+            self.assertEqual(pool["股票代码"].tolist(), ["000001", "600802"])
+            self.assertEqual(meta["rolling_excluded_active_trade_codes"], ["603011"])
+            self.assertEqual(meta["rolling_excluded_closed_trade_codes"], ["600801"])
 
     def test_completed_tail_run_is_idempotent(self):
         with tempfile.TemporaryDirectory() as td:
