@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-23",
   "trade_date": "2026-09-23",
-  "updated_at_cn": "2026-09-23T20:35:13.975203+08:00",
+  "updated_at_cn": "2026-09-23T21:05:04.850600+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -230,6 +230,21 @@
       ]
     },
     {
+      "article_id": "b57fe7e7c6a23101",
+      "title": "9.23复盘_洛遇_淘股吧",
+      "url": "https://www.tgb.cn/a/2vkg85Kx6os",
+      "read_count": 73,
+      "body_chars": 3073,
+      "body_sha256": "b57fe7e7c6a2310136aa33e2c7ee6119766bf7ee7416181d04d3a48f1892f8b1",
+      "published_at_cn": "2026-09-23T16:10:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "be8a4261032325d2",
       "title": "9月23日早盘预判与操作预案_唐主任稳盘_淘股吧",
       "url": "https://www.tgb.cn/a/2vjFGLr30iv",
@@ -252,6 +267,21 @@
       "body_chars": 3973,
       "body_sha256": "c820ee133eef3014ebf78773c422b34127a558a928194150f8abb4b1752931fc",
       "published_at_cn": "2026-09-23T16:36:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ccf0d7f0ca275cdc",
+      "title": "空，空，空！_青锋问道_淘股吧",
+      "url": "https://www.tgb.cn/a/2vko6pkbRWl",
+      "read_count": 1,
+      "body_chars": 2474,
+      "body_sha256": "ccf0d7f0ca275cdc8381eab58d142dce9feb4f3d16d7b1386daf753c51b7a3a8",
+      "published_at_cn": "2026-09-23T18:02:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -312,6 +342,21 @@
       "body_chars": 3412,
       "body_sha256": "e8b40fb6b39d2d70b73d420a1b2599862168f11a295c2a35632b00579a4a7fa3",
       "published_at_cn": "2026-09-23T16:17:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "e934a154cc94c8ee",
+      "title": "20260923复盘：高标退潮，算力硬件轮动_harry0755_淘股吧",
+      "url": "https://www.tgb.cn/a/2vkA2OMkEJx",
+      "read_count": 18,
+      "body_chars": 4257,
+      "body_sha256": "e934a154cc94c8ee8ad0c0235f25bc5fdc5e45e4479bc0f14596faded0a042b3",
+      "published_at_cn": "2026-09-23T20:49:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1640,6 +1685,101 @@
       ]
     },
     {
+      "article_id": "b57fe7e7c6a23101",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为大盘双金叉但成交缩量，节前资金观望、热点轮动，追高风险较大，宜轻仓等待放量和硬科技主线明确。",
+      "sectors": [
+        {
+          "name": "PET铜箔",
+          "stance": "活跃",
+          "evidence": "作者称其领涨，但认为是缩量下消息刺激的一日游热点。"
+        },
+        {
+          "name": "玻璃基板",
+          "stance": "活跃",
+          "evidence": "作者称其领涨，逻辑为半导体先进封装延伸。"
+        },
+        {
+          "name": "培育钻石",
+          "stance": "活跃",
+          "evidence": "作者称其领涨，但判断主要是超跌反抽。"
+        },
+        {
+          "name": "先进封装",
+          "stance": "活跃",
+          "evidence": "作者将玻璃基板上涨归因于先进封装题材延伸。"
+        },
+        {
+          "name": "小红书",
+          "stance": "退潮",
+          "evidence": "作者称昨天大涨后，今天小红书已歇菜。"
+        },
+        {
+          "name": "光热储能",
+          "stance": "不明确",
+          "evidence": "作者以西子洁能为例，认为其处于底部缩量横盘。"
+        },
+        {
+          "name": "环保",
+          "stance": "不明确",
+          "evidence": "作者将高能环境列入冷门低位观察方向。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "西子洁能",
+          "sector": "光热储能",
+          "role": "龙头"
+        },
+        {
+          "name": "郑中设计",
+          "sector": "室内设计",
+          "role": "龙头"
+        },
+        {
+          "name": "引力传媒",
+          "sector": "数字营销",
+          "role": "高关注"
+        },
+        {
+          "name": "狮头股份",
+          "sector": "水泥及建材",
+          "role": "龙头"
+        },
+        {
+          "name": "立霸股份",
+          "sector": "家电用复合材料",
+          "role": "龙头"
+        },
+        {
+          "name": "高能环境",
+          "sector": "危废处理及环境修复",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "成交量能否放大至2.5万亿元以上",
+        "日线MACD金叉是否确认",
+        "硬科技主线能否明确走出"
+      ],
+      "numeric_claims": [
+        "成交额缩至1.7万亿元，较前日少4000多亿元",
+        "1年期LPR为3.0%，5年期以上LPR为3.5%",
+        "沪深两市超过200家公司披露中期分红方案，合计超3000亿元",
+        "美联储9月加息25个基点",
+        "10年期美债收益率在5%附近震荡",
+        "国际油价从110美元高位回落至95美元附近",
+        "作者称追热点胜率不到一成",
+        "作者设定成交量放大至2.5万亿元以上作为观察信号"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
       "article_id": "be8a4261032325d2",
       "market_stance": "谨慎",
       "market_phase": [
@@ -1829,6 +1969,82 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "ccf0d7f0ca275cdc",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为节前缩量效应明显，昨日数据较差，市场高度有限，医药也未形成明显板块效应。",
+      "sectors": [
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者称市场尚有“大科技的PCB方向”。"
+        },
+        {
+          "name": "地产",
+          "stance": "活跃",
+          "evidence": "作者将地产列为市场仅存方向之一。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "作者称冲高回落未引发大恐慌，但已无明显板块效应。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "华瓷股份",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "大亚圣象",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "澳弘电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "高关注"
+        },
+        {
+          "name": "哈药股份",
+          "sector": "医药",
+          "role": "风险"
+        },
+        {
+          "name": "欧林生物",
+          "sector": "医药",
+          "role": "跟随"
+        },
+        {
+          "name": "浩欧博",
+          "sector": "医药",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "大亚圣象的表现",
+        "澳弘电子的表现",
+        "超声电子前几次炸板后的次日表现"
+      ],
+      "numeric_claims": [
+        "作者称市场缩量3700亿",
+        "作者称大亚圣象为4板",
+        "作者称医药方向仅剩2个涨停",
+        "作者称超声电子已第4次炸板"
+      ],
+      "quality_flags": [
+        "明显情绪化"
       ]
     },
     {
@@ -2140,6 +2356,91 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "e934a154cc94c8ee",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为高标集体断板、短线情绪降温，资金转向算力半导体硬件，但其延续性受外盘表现制约。",
+      "sectors": [
+        {
+          "name": "算力",
+          "stance": "加强",
+          "evidence": "作者定性为当日绝对主线，称出现批量集群爆发。"
+        },
+        {
+          "name": "半导体硬件",
+          "stance": "加强",
+          "evidence": "作者称其梯队完整，但认为连板溢价偏弱。"
+        },
+        {
+          "name": "地产基建",
+          "stance": "分化",
+          "evidence": "作者认为其绑定高位情绪，涨停少、分歧大。"
+        },
+        {
+          "name": "化工新材料",
+          "stance": "不明确",
+          "evidence": "作者称个股零散、缺乏板块集群效应。"
+        },
+        {
+          "name": "医药消费",
+          "stance": "退潮",
+          "evidence": "作者定义为防御性零星小票，博弈价值较低。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "大亚圣象",
+          "sector": "MLCC",
+          "role": "高关注"
+        },
+        {
+          "name": "澳弘电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "地产",
+          "role": "高关注"
+        },
+        {
+          "name": "安洁科技",
+          "sector": "算力硬件",
+          "role": "核心"
+        },
+        {
+          "name": "华瓷股份",
+          "sector": "氧化锆",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒封单及华字题材情绪",
+        "澳弘电子溢价对PCB方向的确认",
+        "隔夜海外半导体走势对算力硬件的影响"
+      ],
+      "numeric_claims": [
+        "超3500只个股收跌",
+        "华瓷股份收盘上涨6.95%",
+        "市场最高连板高度压缩至4板",
+        "全场连板标的共12只",
+        "新华传媒封单超480万手，封单金额近百亿元",
+        "作者给出的三种情景概率为45%、30%和25%"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
       ]
     },
     {
