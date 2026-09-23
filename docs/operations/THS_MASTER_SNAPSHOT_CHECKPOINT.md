@@ -19,9 +19,17 @@
 - Verification: Python compilation passed; six focused tests passed; full
   deterministic suite passed 157/157. No production upload, workflow, OpenAI,
   PushPlus, screening, trade, holding, stop-loss, or take-profit action occurred.
-- Latest reliable checkpoint: implementation and offline validation complete.
-  Local commit before remote transport adjustment: `299abcd96cd4c00dad6bd50954574fa823924771`.
-  Exact next unit: publish the bounded diff to the already-created feature
-  branch, open/merge the engineering PR after CI, then verify the live page.
+- Engineering PR `#29` passed all three checks: THS public-sector data test
+  `35862211351`, official-market-count test `35862211379`, and after-close
+  validation `35862211662`. It was squash-merged to production as
+  `b50e887e692cb575df8741fcb73d341ce3e0d324`.
+- Production main was read back after merge and contains both independent UI
+  controls. The separate natural after-close run `20260923_202109` remained
+  `running:initialized` with `master_before_screen=810`; this engineering rollout
+  did not restart, cancel, replay, or otherwise mutate that run.
+- Latest reliable checkpoint: the download/upload entry is live in production.
+  The operation lock is closed. Next functional unit, after the first full-master
+  snapshot is uploaded, is shadow analysis only; do not promote THS factors to
+  hard screening rules before longitudinal validation.
 
-Updated: 2026-09-23 20:45 Asia/Shanghai
+Updated: 2026-09-23 21:00 Asia/Shanghai
