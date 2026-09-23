@@ -1,9 +1,24 @@
 {
   "source_date": "2026-09-23",
   "trade_date": "2026-09-23",
-  "updated_at_cn": "2026-09-23T21:34:54.549208+08:00",
+  "updated_at_cn": "2026-09-23T21:45:11.780586+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
+    {
+      "article_id": "041766be956cf208",
+      "title": "2026.9.23复盘_安暮云_淘股吧",
+      "url": "https://www.tgb.cn/a/2vkCYO21PeK",
+      "read_count": 2,
+      "body_chars": 1717,
+      "body_sha256": "041766be956cf20828fcd1ffb07e53398761de86da9d2fabfcafa268500a09f6",
+      "published_at_cn": "2026-09-23T21:30:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
     {
       "article_id": "0731f0948939d71e",
       "title": "260922（周二复盘｜沪指微涨0.06%冲高回落，成交额放量1055亿，华瓷股份6连板一字加速，两只新股狂飙超6.8倍_邵柳智_淘股吧",
@@ -245,6 +260,21 @@
       ]
     },
     {
+      "article_id": "ab9e9fc10b0d50f4",
+      "title": "9.23 今天分歧释放不充分，明天不要急！_青锋问道_淘股吧",
+      "url": "https://www.tgb.cn/a/2vkDjKSds1E",
+      "read_count": 3,
+      "body_chars": 2299,
+      "body_sha256": "ab9e9fc10b0d50f418d2a1511ebdc19419b2f547a5d9ed6367bec77abd849c90",
+      "published_at_cn": "2026-09-23T21:35:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "b3da604bd58b2063",
       "title": "20260923复盘丨出金日缩量等待节后变盘_山风细雨_淘股吧",
       "url": "https://www.tgb.cn/a/2vkiB9dRmYv",
@@ -426,6 +456,105 @@
     }
   ],
   "article_mining": [
+    {
+      "article_id": "041766be956cf208",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为大盘回调、情绪减弱，高位连板承接走弱；PCB、玻璃基板和铜箔表现较好，端侧AI出现分歧。",
+      "sectors": [
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者称PCB为当日表现良好的方向。"
+        },
+        {
+          "name": "玻璃基板",
+          "stance": "活跃",
+          "evidence": "作者称玻璃基板当日表现良好。"
+        },
+        {
+          "name": "铜箔",
+          "stance": "活跃",
+          "evidence": "作者称铜箔当日表现良好。"
+        },
+        {
+          "name": "端侧AI",
+          "stance": "分化",
+          "evidence": "作者认为板块有分歧预期，博通集成出现负反馈。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华文轩",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "大连圣象",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "华瓷",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "康强电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "核心"
+        },
+        {
+          "name": "沃格光电",
+          "sector": "玻璃基板",
+          "role": "核心"
+        },
+        {
+          "name": "中一科技",
+          "sector": "铜箔",
+          "role": "高关注"
+        },
+        {
+          "name": "梦天家居",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "智度股份",
+          "sector": "端侧AI",
+          "role": "风险"
+        },
+        {
+          "name": "博通集成",
+          "sector": "端侧AI",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "康强电子、沃格光电的一进二表现",
+        "其他一进二标的的跳空转强及图形",
+        "端侧AI分歧后的板块效应"
+      ],
+      "numeric_claims": [
+        "大盘3936点",
+        "量能17833亿元",
+        "较前日缩量3705亿元",
+        "华瓷冲击七板失败",
+        "五板和六板断层",
+        "博通集成此前三连板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
     {
       "article_id": "0731f0948939d71e",
       "market_stance": "谨慎",
@@ -1835,6 +1964,84 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "ab9e9fc10b0d50f4",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数受大科技趋势支撑但预期震荡，情绪分歧释放不足，次日或进一步分歧，暂缺合适低位切换方向。",
+      "sectors": [
+        {
+          "name": "大科技",
+          "stance": "加强",
+          "evidence": "作者称大科技仍在持续，且为当前阻力最小的方向。"
+        },
+        {
+          "name": "元件",
+          "stance": "活跃",
+          "evidence": "作者称元件、PCB逼近新高。"
+        },
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者称元件、PCB逼近新高。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "华瓷股份",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "近岸蛋白",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "闽东电力",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "澳弘电子",
+          "sector": "大科技",
+          "role": "高关注"
+        },
+        {
+          "name": "超声电子",
+          "sector": "大科技",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "情绪端分歧是否进一步释放",
+        "大科技、元件及PCB能否延续逼近新高的走势",
+        "高位抱团个股的横盘与异动监管影响"
+      ],
+      "numeric_claims": [
+        "闽东电力竞价9:20之前一字跌停",
+        "部分个股未出现低开7至8个点后缩量跌停",
+        "闽东电力事件使原有分歧增加约10%",
+        "作者称华字辈统一市场约1.5个月",
+        "作者称若参与低位方向只能考虑一进二"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
       ]
     },
     {
