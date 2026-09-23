@@ -1,0 +1,100 @@
+{
+  "status": "valid",
+  "generated_trade_date": "2026-09-22",
+  "target_trade_date": "2026-09-23",
+  "generated_at_cn": "2026-09-22T20:27:29.644365+08:00",
+  "source_candidate_count": 12,
+  "ai_candidate_count_after_active_trade_exclusion": 12,
+  "excluded_active_trade_count": 0,
+  "observation_count": 3,
+  "model": "gpt-5.6-terra",
+  "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
+  "source_run": "v5_data/runs/20260922_201345",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "计算事实：当日上涨2374家、下跌3029家，净上涨-655，较前一日显著转弱；全市场成交额较前日增加5.15%。研究判断：指数近5日仍偏强但广度回落，强势股次日需防分化。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "当日文化传媒、IT服务、软件开发、生物制品等走强，医药、半导体近3至5日亦有强度；但候选多数仅有行业映射、缺少同期个股概念共振核验，不将板块表现替代个股确认。"
+  },
+  "opinion_assessment": {
+    "status": "未启用",
+    "summary": "公开复盘正文挖掘数据状态为stale，来源日期与当前行情日期不一致，未用于本次候选判断。"
+  },
+  "opinion_context": {
+    "status": "stale",
+    "source_trade_date": "2026-09-21",
+    "reason": "观点日期与行情日期不一致"
+  },
+  "portfolio_note": "程序板块证据门禁后，正式观察池共3只（301151、001210、002708）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：301151、001210、002708。",
+  "second_start_evidence_version": "effective_breakout_v1.0",
+  "market_pool_policy": {
+    "market_regime": "一般或偏弱",
+    "minimum": 0,
+    "maximum": 5,
+    "上涨比例": 0.4265181458857348,
+    "成交额较前一日变化率": 0.05151859457139207,
+    "rule": "上涨比例>=60%且全市场成交额较前日放大>=5%时为较好/活跃，否则为一般或偏弱"
+  },
+  "pool_minimum_shortfall": 0,
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "301151",
+    "001210",
+    "002708"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "301151": 1.0,
+    "001210": 1.0,
+    "002708": 1.0
+  },
+  "rule": "近三个交易日观察池仅作为今日候选来源；今日14:40-14:45重新门禁，最终TRADE为0-5只",
+  "rolling_pool_version": "three-trading-day-v1",
+  "rolling_source_days": 3,
+  "rolling_source_dates": [
+    "2026-09-22",
+    "2026-09-21",
+    "2026-09-18"
+  ],
+  "rolling_available_source_dates": [
+    "2026-09-22",
+    "2026-09-21",
+    "2026-09-18"
+  ],
+  "rolling_source_audit": [
+    {
+      "generated_trade_date": "2026-09-22",
+      "target_trade_date": "2026-09-23",
+      "pool_count": 3,
+      "meta_path": "v5_data/runs/20260922_201345/ai/observation_pool_meta.json",
+      "pool_path": "v5_data/runs/20260922_201345/ai/observation_pool.csv"
+    },
+    {
+      "generated_trade_date": "2026-09-21",
+      "target_trade_date": "2026-09-22",
+      "pool_count": 6,
+      "meta_path": "v5_data/runs/20260921_effective_breakout_v1/ai/observation_pool_meta.json",
+      "pool_path": "v5_data/runs/20260921_effective_breakout_v1/ai/observation_pool.csv"
+    },
+    {
+      "generated_trade_date": "2026-09-18",
+      "target_trade_date": "2026-09-21",
+      "pool_count": 6,
+      "meta_path": "v5_data/runs/20260919_181957/ai/observation_pool_meta.json",
+      "pool_path": "v5_data/runs/20260919_181957/ai/observation_pool.csv"
+    }
+  ],
+  "rolling_union_count_before_exclusions": 12,
+  "rolling_excluded_active_trade_codes": [],
+  "rolling_excluded_closed_trade_codes": [],
+  "rolling_trimmed_codes": [
+    "600378",
+    "300142"
+  ],
+  "rolling_final_candidate_count": 10
+}
