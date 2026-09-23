@@ -18,6 +18,12 @@ from research.private_trade_ledger import (
     normalize_code,
     normalize_transactions,
 )
+from research.ths_master_snapshot import (
+    master_code_text,
+    prepare_snapshot,
+    snapshot_gzip,
+    snapshot_path,
+)
 
 AFTER_CLOSE_WORKFLOW = "v5_after_close.yml"
 TAIL_WORKFLOW = "v5_tail_confirmation.yml"
@@ -155,7 +161,75 @@ with t2:
             st.info("尚未生成V5盘后结果。")
         if not master.empty:
             st.markdown(f"#### 当前云端主池（{len(master)}只）")
+            download_name = f"同花顺主池代码_{datetime.now(CN_TZ):%Y%m%d}_{len(master)}只.txt"
+            st.download_button(
+                f"一键下载 {len(master)} 只股票代码（TXT）",
+                data=master_code_text(master),
+                file_name=download_name,
+                mime="text/plain",
+                use_container_width=True,
+            )
+            st.caption("文件每行一个六位代码，可全选复制并直接粘贴到同花顺。")
             st.dataframe(master, use_container_width=True, height=330, hide_index=True)
+
+            st.markdown("#### 上传同花顺主池补充数据")
+            st.info(
+                "这是独立的因子快照入口：只保存行业、概念、人气、资金、股性、龙虎榜等补充字段；"
+                "不新增/复活主池股票，不改变最近提交日期，不启动盘后研究、OpenAI或推送。"
+            )
+            ths_upload = st.file_uploader(
+                "上传同花顺导出的全主池数据",
+                type=["xlsx", "xls", "csv", "txt", "tsv"],
+                key="ths_master_snapshot",
+            )
+            prepared_snapshot = None
+            snapshot_report = None
+            if ths_upload is not None:
+                try:
+                    prepared_snapshot, snapshot_report = prepare_snapshot(
+                        ths_upload.name,
+                        ths_upload.getvalue(),
+                        master,
+                    )
+                    m1, m2, m3, m4 = st.columns(4)
+                    m1.metric("文件股票", snapshot_report["uploaded_rows"])
+                    m2.metric("匹配主池", snapshot_report["matched_rows"])
+                    m3.metric("主池缺失", snapshot_report["missing_master_rows"])
+                    m4.metric("保留字段", snapshot_report["field_count"])
+                    if snapshot_report["unmatched_rows"]:
+                        st.warning(
+                            f"有 {snapshot_report['unmatched_rows']} 只不在当前云端主池中；快照会保留并标记，但不会把它们加入主池。"
+                        )
+                    if snapshot_report["missing_master_rows"]:
+                        st.warning(
+                            f"当前主池还有 {snapshot_report['missing_master_rows']} 只没有出现在该文件中，可以保存为部分快照，但建议先在同花顺核对导入数量。"
+                        )
+                    with st.expander("查看识别结果和缺失代码"):
+                        st.dataframe(prepared_snapshot.head(100), use_container_width=True, hide_index=True)
+                        if snapshot_report["missing_codes"]:
+                            st.code("\n".join(snapshot_report["missing_codes"]), language=None)
+                except Exception as exc:
+                    st.error(f"同花顺补充数据识别失败：{exc}")
+
+            if st.button(
+                "保存同花顺补充数据（不启动研究）",
+                disabled=prepared_snapshot is None,
+                use_container_width=True,
+            ):
+                try:
+                    path = snapshot_path(snapshot_report["snapshot_date"])
+                    gh_put_bytes(
+                        c,
+                        path,
+                        snapshot_gzip(prepared_snapshot),
+                        f"V5 THS master factor snapshot {snapshot_report['snapshot_date']}",
+                    )
+                    st.success(
+                        f"已保存 {snapshot_report['matched_rows']} 只主池股票的同花顺补充数据。"
+                        "本次没有启动盘后任务、OpenAI或PushPlus。"
+                    )
+                except Exception as exc:
+                    st.error(f"保存同花顺补充数据失败：{exc}")
         if not pool30.empty:
             st.markdown(f"#### 最新AI研究输入池（{len(pool30)}只）")
             st.caption("这30–40只是OpenAI研究输入，不是买入名单。")
