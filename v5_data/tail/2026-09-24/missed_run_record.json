@@ -1,0 +1,35 @@
+{
+  "status": "missed",
+  "trade_date": "2026-09-24",
+  "recorded_at_cn": "2026-09-24T14:51:44+08:00",
+  "watchdog_stage": "post-14:44-precheck-failure",
+  "main_sha_before_record": "ef0c51922f7eb000be089ea91b6c42d969bbe87c",
+  "workflow_run": {
+    "id": 35964479454,
+    "url": "https://github.com/CyberAI2026/-akshare-mobile/actions/runs/35964479454",
+    "conclusion": "failure",
+    "precheck": "failure",
+    "finalize": "skipped"
+  },
+  "failure": {
+    "occurred_at_cn": "2026-09-24T14:32:01+08:00",
+    "exception": "RuntimeError: 今日缺少有效的上一交易日OpenAI观察池，禁止仅用更旧观察池替代",
+    "stage": "Capture 14:40 candidate data"
+  },
+  "source_state": {
+    "latest_observation_pool_target_trade_date": "2026-09-23",
+    "required_target_trade_date": "2026-09-24",
+    "same_day_tail_artifacts_present": false
+  },
+  "side_effect_audit": {
+    "same_day_tail_openai_call": false,
+    "normal_tail_pushplus_request": false,
+    "failure_alert_pushplus_request": true,
+    "failure_alert_pushplus_code": 200,
+    "final_recommendation_generated": false
+  },
+  "recovery_policy": {
+    "retriggered": false,
+    "reason": "A same-day PushPlus failure alert had already been sent, so recovery eligibility was not satisfied; after 14:44 retriggering is prohibited and close data must not be used to fabricate a tail signal."
+  }
+}
