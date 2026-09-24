@@ -1,0 +1,33 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+000710,贝瑞基因,成功,26,sina,sina,deep-backfill,26.0,
+000850,华茂股份,成功,26,sina,sina,deep-backfill,26.0,
+002119,康强电子,成功,26,sina,sina,deep-backfill,26.0,
+002164,宁波东力,成功,26,sina,sina,deep-backfill,26.0,
+002205,国统股份,成功,26,sina,sina,deep-backfill,26.0,
+002238,天威视讯,成功,26,sina,sina,deep-backfill,26.0,
+002819,东方中科,成功,26,sina,sina,deep-backfill,26.0,
+002849,威星智能,成功,26,sina,sina,deep-backfill,26.0,
+300300,海峡创新,成功,26,sina,sina,deep-backfill,26.0,
+301689,电科思仪,成功,11,sina,sina,deep-backfill,11.0,
+600802,福建水泥,成功,26,sina,sina,deep-backfill,26.0,
+600843,上工申贝,成功,26,sina,sina,deep-backfill,26.0,
+601123,马矿股份,成功,18,sina,sina,deep-backfill,18.0,
+603373,安邦护卫集团股份,成功,26,sina,sina,deep-backfill,26.0,
+603400,华之杰,成功,26,global-cache+sina,global-cache,per-stock-incremental,11.0,
+603949,雪龙集团,成功,26,sina,sina,deep-backfill,26.0,
+688056,莱伯泰科仪器,成功,26,sina,sina,deep-backfill,26.0,
+688337,普源精电,成功,26,sina,sina,deep-backfill,26.0,
+688512,慧智微电子,成功,26,sina,sina,deep-backfill,26.0,
+688628,优利德科技,成功,26,sina,sina,deep-backfill,26.0,
+688682,霍莱沃技术,成功,26,sina,sina,deep-backfill,26.0,
+688835,高凯技术,成功,23,sina,sina,deep-backfill,23.0,
+920006,晟楠科技,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,26.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920021,流金科技,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,26.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920128,胜业电气,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,26.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920176,维琪科技,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,8.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920212,智新电子,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,26.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920427,华维设计,失败,0,,,full-fetch-failed,,"sina/qfq/1:KeyError:'date' | sina/qfq/2:KeyError:'date' | eastmoney/qfq/1:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | eastmoney/qfq/2:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | retry-1:sina/qfq/1:KeyError:'date' | sina/qfq/2:KeyError:'date' | eastmoney/qfq/1:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | eastmoney/qfq/2:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920478,峆一药业,失败,0,,,full-fetch-failed,,"sina/qfq/1:KeyError:'date' | sina/qfq/2:KeyError:'date' | eastmoney/qfq/1:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | eastmoney/qfq/2:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | retry-1:sina/qfq/1:KeyError:'date' | sina/qfq/2:KeyError:'date' | eastmoney/qfq/1:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) | eastmoney/qfq/2:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920592,华信永道,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,26.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920855,浙江大农,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,26.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+920895,花溪科技,成功,26,global-cache(stale-fetch-failed),global-cache,stale-fallback,8.0,"incremental/sina:KeyError:'date' | incremental/eastmoney:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
