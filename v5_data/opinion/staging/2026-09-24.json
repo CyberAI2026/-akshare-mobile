@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-24",
   "trade_date": "2026-09-24",
-  "updated_at_cn": "2026-09-24T21:54:46.247125+08:00",
+  "updated_at_cn": "2026-09-24T22:04:39.015251+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -177,6 +177,21 @@
       "body_chars": 5257,
       "body_sha256": "6ddd2a758d38c1c4a97521b05549783e1b81dca6c04f702f44c86c48ead3eb6c",
       "published_at_cn": "2026-09-24T19:07:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "77d8d3cc8f80f4fd",
+      "title": "9.24投机还会有修复_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2vlruJBQt2w",
+      "read_count": 76,
+      "body_chars": 1716,
+      "body_sha256": "77d8d3cc8f80f4fd8e5d5435ee5315655063fc85c84483ca523f6dccf35c65a3",
+      "published_at_cn": "2026-09-24T09:17:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1311,6 +1326,71 @@
         "成交额16691亿元，较昨日减少1140亿元",
         "上涨1120家、下跌4306家；52家涨停、15家跌停",
         "截至8月底全国风电装机6.93亿千瓦，同比增长19.6%"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "77d8d3cc8f80f4fd",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为节前科技轮动持续性存疑，投机方向的医药、传媒调整后或有反抽，关注反核及首板机会。",
+      "sectors": [
+        {
+          "name": "科技（玻基、PCB）",
+          "stance": "分化",
+          "evidence": "作者称节前轮动表现，但持续性“要打问号”。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者认为该方向暂时还没走完，调整后还会有反抽。"
+        },
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者认为该方向暂时还没走完，调整后还会有反抽。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "华C",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "闽D",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "金J",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "澳H",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "博H",
+          "sector": "不明确",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技轮动中小票的持续性",
+        "医药、传媒调整后的反抽",
+        "首板及部分反核机会"
+      ],
+      "numeric_claims": [
+        "网传半导体12英寸硅片部分涨幅或超50%",
+        "作者提及金J、博H明牌卡至28号"
       ],
       "quality_flags": [
         "广告"
