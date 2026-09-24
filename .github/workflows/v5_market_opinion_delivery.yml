@@ -48,7 +48,9 @@ jobs:
           import json
           import os
           import subprocess
+          from datetime import datetime, time
           from pathlib import Path
+          from zoneinfo import ZoneInfo
           from research.market_opinion_mining import (
               delivery_already_accepted,
               delivery_source_date,
@@ -88,6 +90,14 @@ jobs:
                       f"quality_articles={staging_count} minimum=15 reason=minimum_not_met"
                   )
                   raise SystemExit(0)
+
+          now_cn = datetime.now(ZoneInfo("Asia/Shanghai"))
+          if today == now_cn.date().isoformat() and now_cn.time() < time(22, 0):
+              print(
+                  f"OPINION_DELIVERY_PENDING source_date={today} "
+                  f"current_time={now_cn.strftime('%H:%M:%S')} reason=before_final_deadline"
+              )
+              raise SystemExit(0)
 
           raise RuntimeError(
               f"当天正式观点报告缺失且没有可核验的低样本staging: "
