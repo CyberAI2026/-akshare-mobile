@@ -1123,7 +1123,10 @@ def run_aggregate_stage(key: str, stage_root: Path) -> None:
         print(f"OPINION_AI_QUALITY_REJECTED count={len(rejected)}",flush=True)
     sources,mined=merge_staged_quality_pool(source_day,trade_day,sources,mined)
     if not sources:
-        raise RuntimeError("所有文章均未通过正文规则与OpenAI二次质量复核")
+        print(
+            f"OPINION_WAIT_FOR_MORE source_date={source_day} quality_articles=0 "
+            f"minimum={MIN_ARTICLE_COUNT} reason=minimum_not_met", flush=True,
+        )
     current_urls={str(item.get("url") or "") for item in sources if item.get("url")}
     if previous_urls and current_urls==previous_urls:
         print(
