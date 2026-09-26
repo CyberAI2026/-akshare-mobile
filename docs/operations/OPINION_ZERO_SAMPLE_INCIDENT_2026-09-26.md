@@ -47,9 +47,16 @@
 - Production baseline: `2d5b53df0bedec50cbff6140c01ff6fd1d3ae3a7`.
 - No production opinion rerun, OpenAI request, PushPlus request, or historical
   resend is authorized for this completion unit.
-- Latest reliable checkpoint: incident diagnosis, production evidence,
-  regression implementation, and offline verification are complete. Next
-  action: publish the regression-only branch, verify validation-only CI, merge,
-  then close the lock. Do not run the production opinion pipeline.
+- PR `#30` passed all cloud checks: after-close validation run `36258628161`,
+  official-market-count run `36258627974`, and THS public-sector run
+  `36258627992`. It was squash-merged as
+  `66d19e4e0bf1269c79b846f181f6b9b270fb8b62`.
+- All cloud checks were validation/data-source checks only. No production
+  opinion pipeline, aggregate OpenAI request, PushPlus request, or historical
+  resend was triggered by this completion unit.
+- Latest reliable checkpoint: the hotfix and its regression are live on
+  production main. Operation lock
+  `LOCK-20260927-opinion-zero-sample-regression` is closed. The next acceptance
+  point is the next natural opinion cycle; do not replay September 26.
 
-Updated: 2026-09-27 01:30 Asia/Shanghai
+Updated: 2026-09-27 01:35 Asia/Shanghai
