@@ -1,0 +1,16 @@
+{
+  "source_date": "2026-09-26",
+  "trade_date": "2026-09-26",
+  "updated_at_cn": "2026-09-26T22:16:42.994+08:00",
+  "method": "incremental AI-verified quality pool; raw article bodies not persisted",
+  "sources": [],
+  "article_mining": [],
+  "quality_pool_status": "minimum_quality_articles_not_met",
+  "finalization": {
+    "reason": "minimum_quality_articles_not_met",
+    "quality_article_count": 0,
+    "minimum_quality_articles": 15,
+    "finalized_at_cn": "2026-09-26T22:16:42.994+08:00",
+    "ai_quality_rejected_count": 1
+  }
+}
