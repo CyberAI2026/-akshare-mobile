@@ -19,9 +19,20 @@ sys.modules.setdefault("openai",MagicMock())
 import v5_core as core
 import v5_cli as cli
 from research import market_opinion_mining as opinion
+from research.daily_batch_submission import daily_batch_identity
 
 
 class StockPoolUploadTests(unittest.TestCase):
+    def test_daily_batch_identity_is_stable_for_same_day_and_code_set(self):
+        first=pd.DataFrame({"股票代码":["000001","600000"],"股票名称":["平安银行","浦发银行"]})
+        reordered=pd.DataFrame({"股票代码":["600000","000001"],"股票名称":["浦发","平安"]})
+        identity=daily_batch_identity(first,"2026-09-23")
+        self.assertEqual(identity,daily_batch_identity(reordered,"2026-09-23"))
+        self.assertTrue(identity.startswith("20260923_"))
+        self.assertNotEqual(identity,daily_batch_identity(first,"2026-09-24"))
+        changed=pd.concat([first,pd.DataFrame([{"股票代码":"300001","股票名称":"特锐德"}])],ignore_index=True)
+        self.assertNotEqual(identity,daily_batch_identity(changed,"2026-09-23"))
+
     def test_name_only_xlsx_resolves_registered_old_name_without_network(self):
         source = pd.DataFrame({"    名称": ["贵州三力", "剑桥科技"]})
         buf = io.BytesIO()
