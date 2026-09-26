@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from v5_core import GithubConfig, gh_dispatch, gh_get_bytes, gh_put_bytes, pool_from_text, pool_from_upload, split_stock_and_indices
+from research.daily_batch_submission import daily_batch_identity
 from research.private_trade_ledger import (
     TRANSACTION_COLUMNS,
     append_transactions,
@@ -113,12 +114,17 @@ with t1:
         if not c: st.error("尚未配置 GITHUB_PAT。")
         else:
             try:
-                stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                path = f"v5_data/inbox/daily_{stamp}.csv"
-                data = stocks.to_csv(index=False).encode("utf-8-sig")
-                gh_put_bytes(c, path, data, f"V5 daily strong batch {stamp}")
-                gh_put_bytes(c, "v5_data/inbox/latest_daily_batch.csv", data, f"V5 latest daily batch {stamp}")
-                st.success("已提交。可以关闭Safari；后台会维护主池、生成30–40只研究包，并调用OpenAI形成0–10只次日观察池。")
+                now = datetime.now(CN_TZ)
+                canonical_stocks = stocks.sort_values("股票代码").reset_index(drop=True)
+                batch_id = daily_batch_identity(canonical_stocks, now.date())
+                path = f"v5_data/inbox/daily_{batch_id}.csv"
+                data = canonical_stocks.to_csv(index=False).encode("utf-8-sig")
+                if gh_get_file(c, path) is not None:
+                    st.info("今天完全相同的股票代码集合已经提交，本次没有重复创建盘后任务。")
+                else:
+                    gh_put_bytes(c, path, data, f"V5 daily strong batch {batch_id}")
+                    gh_put_bytes(c, "v5_data/inbox/latest_daily_batch.csv", data, f"V5 latest daily batch {batch_id}")
+                    st.success("已提交。可以关闭Safari；后台会维护主池、生成30–40只研究包，并调用OpenAI形成0–10只次日观察池。")
                 st.link_button("查看盘后任务", actions_url(c, AFTER_CLOSE_WORKFLOW), use_container_width=True)
             except Exception as e: st.error(f"提交失败：{e}")
 
