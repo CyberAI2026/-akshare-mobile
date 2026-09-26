@@ -36,7 +36,16 @@
   tests passed; the complete deterministic suite passed 159/159. No workflow,
   OpenAI request, PushPlus request, or production data write occurred.
 - Latest reliable checkpoint: implementation and offline verification are
-  complete. Next unit: publish a bounded PR, validate, merge, and close the
-  lock.
+  complete.
+- PR `#31` passed after-close validation run `36259155367`, THS public-sector
+  run `36259155243`, and official-market-count run `36259155261`. It was
+  squash-merged as `452072c02586468085fd7cf5ee950c86c330a53d`.
+- All cloud checks were validation/data-source checks only. No daily batch,
+  after-close production run, OpenAI request, PushPlus request, or stale-date
+  replay occurred.
+- Operation lock `LOCK-20260927-daily-batch-idempotency` is closed. The next
+  acceptance point is the next natural user submission; an identical second
+  click on the same business date must produce only the on-page duplicate
+  notice.
 
-Updated: 2026-09-27 01:55 Asia/Shanghai
+Updated: 2026-09-27 02:05 Asia/Shanghai
