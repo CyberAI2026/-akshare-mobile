@@ -112,6 +112,39 @@ class OpinionSectorGroupingTests(unittest.TestCase):
             self.assertEqual(len(saved["sources"]),2)
             self.assertNotIn("body",saved)
 
+    def test_all_quality_rejected_is_valid_shortage_not_pipeline_failure(self):
+        source_day="2026-09-26"
+        trade_day="2026-09-28"
+        sources=[{
+            "article_id":"rejected-1",
+            "title":"单股持仓记录",
+            "url":"https://www.tgb.cn/a/rejected-1",
+        }]
+        mined=[{
+            "article_id":"rejected-1",
+            "quality_flags":["单股为主","缺少板块"],
+        }]
+        current=datetime(2026,9,26,22,16,tzinfo=ZoneInfo("Asia/Shanghai"))
+        with tempfile.TemporaryDirectory() as td, \
+             patch.object(opinion,"ROOT",Path(td)), \
+             patch.object(opinion,"now_cn",return_value=current), \
+             patch.object(opinion,"load_batch_stages",return_value=(sources,mined,source_day,trade_day)), \
+             patch.object(opinion,"commit") as commit, \
+             patch.object(opinion,"build_client") as build_client, \
+             patch.object(opinion,"aggregate") as aggregate, \
+             patch.object(opinion,"deliver_data") as deliver:
+            opinion.run_aggregate_stage("unused-key",Path(td)/"stage")
+            saved=opinion.json.loads(
+                (Path(td)/"staging"/f"{source_day}.json").read_text(encoding="utf-8")
+            )
+        self.assertEqual(saved["sources"],[])
+        self.assertEqual(saved["article_mining"],[])
+        self.assertEqual(saved["trade_date"],trade_day)
+        commit.assert_called_once_with(f"Update market opinion quality pool {source_day}")
+        build_client.assert_not_called()
+        aggregate.assert_not_called()
+        deliver.assert_not_called()
+
     def test_pushplus_acceptance_keeps_shortcode_without_claiming_delivery(self):
         response=MagicMock(status_code=200,text='{"code":200}')
         response.json.return_value={"code":200,"msg":"执行成功","data":"short-code-1"}
