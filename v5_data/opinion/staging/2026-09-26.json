@@ -1,16 +1,109 @@
 {
   "source_date": "2026-09-26",
-  "trade_date": "2026-09-26",
-  "updated_at_cn": "2026-09-26T22:16:42.994+08:00",
+  "trade_date": "2026-09-28",
+  "updated_at_cn": "2026-09-27T00:38:58.853707+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
-  "sources": [],
-  "article_mining": [],
-  "quality_pool_status": "minimum_quality_articles_not_met",
-  "finalization": {
-    "reason": "minimum_quality_articles_not_met",
-    "quality_article_count": 0,
-    "minimum_quality_articles": 15,
-    "finalized_at_cn": "2026-09-26T22:16:42.994+08:00",
-    "ai_quality_rejected_count": 1
-  }
+  "sources": [
+    {
+      "article_id": "3a1b125b08a73b55",
+      "title": "9.21-9.24周评：节前砸盘真相，节后怎么走_唐主任稳盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2vpFdaXXneB",
+      "read_count": 16,
+      "body_chars": 3091,
+      "body_sha256": "3a1b125b08a73b55eb8e19e96eeda3eadb37be3036b71781dd5ba3d644bdafbc",
+      "published_at_cn": "2026-09-26T22:19:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    }
+  ],
+  "article_mining": [
+    {
+      "article_id": "3a1b125b08a73b55",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为节前资金避险与前期龙头破位导致阴跌，市场缺乏主线且轮动持续性差；节后或有修复，但反转需观察量能。",
+      "sectors": [
+        {
+          "name": "商业航天",
+          "stance": "分化",
+          "evidence": "作者称其多为当天拉升当天回落，持续性不足。"
+        },
+        {
+          "name": "机器人",
+          "stance": "分化",
+          "evidence": "作者称该方向属于一日游行情，追高易被套。"
+        },
+        {
+          "name": "华字辈",
+          "stance": "分化",
+          "evidence": "作者认为该类概念拉升后回落，缺乏持续性。"
+        },
+        {
+          "name": "海峡概念",
+          "stance": "活跃",
+          "evidence": "作者提到周三该概念曾突然拉升，但认为只是资金找题材。"
+        },
+        {
+          "name": "PCB",
+          "stance": "退潮",
+          "evidence": "作者称PCB等老赛道龙头接连跌破60日线。"
+        },
+        {
+          "name": "AI",
+          "stance": "退潮",
+          "evidence": "作者认为AI等老主线若反抽不放量，应警惕持续性。"
+        },
+        {
+          "name": "低空经济",
+          "stance": "分化",
+          "evidence": "作者认为该方向业绩尚未落地，主要由情绪和故事支撑。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "云南锗业",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "天孚通信",
+          "sector": "AI",
+          "role": "风险"
+        },
+        {
+          "name": "宏和科技",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "天齐锂业",
+          "sector": "锂电",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "节后反弹能否出现及其持续性",
+        "两市量能能否回到2万亿元以上",
+        "AI、科技等老主线反抽是否放量"
+      ],
+      "numeric_claims": [
+        "作者称3900点在周四被跌破。",
+        "作者称前期核心股及PCB龙头接连跌破60日线。",
+        "作者认为节后两市量能若回不到2万亿元以上，反弹或为假反弹。",
+        "作者预期修复时可能出现4000多家上涨。",
+        "作者称宏和科技利润不到40亿元、市值仍有1300多亿元。"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    }
+  ]
 }
