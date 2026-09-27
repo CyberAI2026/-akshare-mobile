@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-27",
   "trade_date": "2026-09-28",
-  "updated_at_cn": "2026-09-27T21:55:10.183644+08:00",
+  "updated_at_cn": "2026-09-28T01:13:38.446666+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -42,6 +42,21 @@
       "body_chars": 2187,
       "body_sha256": "4b35b75a4863d79d6e344980d71a9a1417e2210ce5b61df9f91385376d6e71c6",
       "published_at_cn": "2026-09-27T11:11:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "88209b181aa1c1b8",
+      "title": "9.24：缩量普跌，次新、福建板块逆势_会飞的外星人_淘股吧",
+      "url": "https://www.tgb.cn/a/2vrj70HaD3v",
+      "read_count": 103,
+      "body_chars": 1287,
+      "body_sha256": "88209b181aa1c1b8558f9d58702b0d84bce00c96a842a5f661db5c46ad90d15c",
+      "published_at_cn": "2026-09-27T22:05:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -362,6 +377,42 @@
         "作者称金健米业盘中跌至15.95以下可关注",
         "作者称金健米业涉及绕200%异动"
       ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "88209b181aa1c1b8",
+      "market_stance": "偏空",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者称指数低开分歧后单边回落，午后持续走弱，市场呈缩量普跌；次新与福建板块逆势走强。",
+      "sectors": [
+        {
+          "name": "商业航天",
+          "stance": "活跃",
+          "evidence": "作者称早盘商业航天板块脉冲拉升。"
+        },
+        {
+          "name": "机器人",
+          "stance": "活跃",
+          "evidence": "作者称早盘机器人板块脉冲拉升。"
+        },
+        {
+          "name": "次新",
+          "stance": "加强",
+          "evidence": "作者称市场普跌中次新方向逆势走强。"
+        },
+        {
+          "name": "福建",
+          "stance": "加强",
+          "evidence": "作者称尾盘福建板块拉升冲高并批量涨停。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [],
+      "numeric_claims": [],
       "quality_flags": [
         "广告"
       ]
