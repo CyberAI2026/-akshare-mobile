@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-28",
   "trade_date": "2026-09-28",
-  "updated_at_cn": "2026-09-28T21:55:49.780617+08:00",
+  "updated_at_cn": "2026-09-28T22:05:29.724127+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -387,6 +387,21 @@
       "body_chars": 2674,
       "body_sha256": "75ac6ceec5a089be2f3fbaec584290931abd627236848a2b5aee37e54d8cc586",
       "published_at_cn": "2026-09-28T15:37:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ae56069eb70ab988",
+      "title": "9.28复盘及隔日预案_人生得失_淘股吧",
+      "url": "https://www.tgb.cn/a/2vsTcvHyMFK",
+      "read_count": 2,
+      "body_chars": 1768,
+      "body_sha256": "ae56069eb70ab9884ea35144da96e51a3394fd1cbbd3c75a6fd08d11065feeb7",
+      "published_at_cn": "2026-09-28T20:58:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -2786,6 +2801,112 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ae56069eb70ab988",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮"
+      ],
+      "market_summary": "作者认为老周期核心股批量跌停，高位情绪尚未出清；即使出现修复也更偏卖点，新一轮行情暂难确认。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "不明确",
+          "evidence": "作者称仅新华文轩相对可看，并以新华传媒封单是否低于70亿作为观察条件。"
+        },
+        {
+          "name": "绕异动",
+          "stance": "退潮",
+          "evidence": "澳弘绕异动后跌停，作者称华瓷虽为活口，但该方向暂时不看。"
+        },
+        {
+          "name": "福建",
+          "stance": "活跃",
+          "evidence": "作者认为福建水泥是当日3板中气质最佳，关注后排是否高举高打。"
+        },
+        {
+          "name": "机器人",
+          "stance": "不明确",
+          "evidence": "作者提出需锚定大业股份及九阳、泰尔等后排表现，再观察襄阳。"
+        },
+        {
+          "name": "科技",
+          "stance": "退潮",
+          "evidence": "作者主观上暂先放弃科技，即使有连板也只考虑等待分歧。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "哈药",
+          "sector": "老周期",
+          "role": "风险"
+        },
+        {
+          "name": "金健",
+          "sector": "老周期",
+          "role": "核心"
+        },
+        {
+          "name": "国芳",
+          "sector": "老周期",
+          "role": "高关注"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "澳弘",
+          "sector": "绕异动",
+          "role": "风险"
+        },
+        {
+          "name": "华瓷",
+          "sector": "绕异动",
+          "role": "高关注"
+        },
+        {
+          "name": "福建水泥",
+          "sector": "福建",
+          "role": "核心"
+        },
+        {
+          "name": "大业股份",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "襄阳",
+          "sector": "机器人",
+          "role": "核心"
+        },
+        {
+          "name": "雪龙集团",
+          "sector": "机器人",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "金健是否地板开，以判断情绪是否存在修复预期",
+        "新华传媒封单强度，尤其是否低于70亿",
+        "福建后排及机器人后排能否高举高打"
+      ],
+      "numeric_claims": [
+        "新华传媒9月28日最大封单为99.94亿",
+        "作者以传媒封单70亿作为观察阈值",
+        "内蒙和新华文轩均在5板时被发函",
+        "福建水泥为当日3板股"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
