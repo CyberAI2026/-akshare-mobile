@@ -1,0 +1,39 @@
+{
+  "trade_date": "2026-09-29",
+  "recorded_at_cn": "2026-09-29T14:32:55+08:00",
+  "status": "missed",
+  "workflow": {
+    "name": "V5 Tail Confirmation",
+    "run_id": 36531103723,
+    "run_url": "https://github.com/CyberAI2026/-akshare-mobile/actions/runs/36531103723",
+    "trigger_event": "workflow_dispatch",
+    "head_sha": "e5933e660010354fb1a5a9d06d9e53f2112a8c8d",
+    "conclusion": "failure",
+    "failed_stage": "precheck-1440 / Capture 14:40 candidate data",
+    "failure_reason": "今日缺少有效的上一交易日OpenAI观察池，禁止仅用更旧观察池替代"
+  },
+  "observation_pool_meta": {
+    "status": "valid",
+    "generated_trade_date": "2026-09-24",
+    "target_trade_date": "2026-09-28",
+    "generated_at_cn": "2026-09-24T20:25:17.074337+08:00"
+  },
+  "side_effects": {
+    "tail_candidate_snapshot_created": false,
+    "tail_openai_call_occurred": false,
+    "normal_tail_pushplus_request_occurred": false,
+    "failure_alert_pushplus_request_occurred": true,
+    "failure_alert_pushplus_code": 200
+  },
+  "recovery": {
+    "allowed": false,
+    "reason": "A same-day failed run already produced a PushPlus request; recovery trigger is forbidden by watchdog rules.",
+    "fallback_trigger_written": false,
+    "duplicate_run_started": false
+  },
+  "integrity": {
+    "close_data_used_to_fabricate_tail_signal": false,
+    "final_recommendation_available": false,
+    "note": "This is a genuine missed tail run. No recommendation, including an empty recommendation, may be inferred."
+  }
+}
