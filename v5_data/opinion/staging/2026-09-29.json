@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-29",
   "trade_date": "2026-09-29",
-  "updated_at_cn": "2026-09-29T21:45:42.125306+08:00",
+  "updated_at_cn": "2026-09-29T21:59:12.293107+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -372,6 +372,21 @@
       "body_chars": 2808,
       "body_sha256": "e2187458f582b00e941e7579d4dd93c326f8b0c34224dd705c01eb4ce9c0d98e",
       "published_at_cn": "2026-09-29T16:34:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "eba2294bba7d4cad",
+      "title": "每日复盘：20260929 地板量修复_公式般欢笑_淘股吧",
+      "url": "https://www.tgb.cn/a/2vuBFc49SOh",
+      "read_count": 4,
+      "body_chars": 2545,
+      "body_sha256": "eba2294bba7d4cad3d2d4b6b2d54887c265bf11b7db5b3d0eeba4ab7d7889912",
+      "published_at_cn": "2026-09-29T21:48:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -2600,6 +2615,160 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "eba2294bba7d4cad",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为昨日杀跌后市场情绪有所修复，但1.4万亿地量下资金仍在重新选择方向，节前最后一天宜观察。",
+      "sectors": [
+        {
+          "name": "固态电池",
+          "stance": "加强",
+          "evidence": "作者称其是唯一具备市场强度、产业资本和政策三重共振的方向。"
+        },
+        {
+          "name": "房地产",
+          "stance": "活跃",
+          "evidence": "作者认为住房销售制度改革带来真实政策催化，相关个股集体走强。"
+        },
+        {
+          "name": "机器人",
+          "stance": "活跃",
+          "evidence": "作者称机器人继续走强，雪龙集团4板、襄阳轴承3板，短线梯队完整。"
+        },
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者称科技内部修复至PCB，多只个股集体涨停，关注需求及涨价传导。"
+        },
+        {
+          "name": "CPO",
+          "stance": "分化",
+          "evidence": "作者称光通信前日跌幅最明显，逻辑未消失但需等待龙头止跌和机构承接。"
+        },
+        {
+          "name": "传媒",
+          "stance": "不明确",
+          "evidence": "作者仅称传媒板块仍属于重组驱动的情绪。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "尚水智能",
+          "sector": "固态电池",
+          "role": "不明确"
+        },
+        {
+          "name": "武汉蓝电",
+          "sector": "固态电池",
+          "role": "不明确"
+        },
+        {
+          "name": "国轩高科",
+          "sector": "固态电池",
+          "role": "高关注"
+        },
+        {
+          "name": "上海洗霸",
+          "sector": "固态电池",
+          "role": "不明确"
+        },
+        {
+          "name": "金龙羽",
+          "sector": "固态电池",
+          "role": "不明确"
+        },
+        {
+          "name": "万科A",
+          "sector": "房地产",
+          "role": "不明确"
+        },
+        {
+          "name": "信达地产",
+          "sector": "房地产",
+          "role": "不明确"
+        },
+        {
+          "name": "深物业A",
+          "sector": "房地产",
+          "role": "不明确"
+        },
+        {
+          "name": "华联控股",
+          "sector": "房地产",
+          "role": "不明确"
+        },
+        {
+          "name": "雪龙集团",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "襄阳轴承",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "拓普",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "三花",
+          "sector": "机器人",
+          "role": "高关注"
+        },
+        {
+          "name": "依顿电子",
+          "sector": "PCB",
+          "role": "不明确"
+        },
+        {
+          "name": "奥士康",
+          "sector": "PCB",
+          "role": "不明确"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "不明确"
+        },
+        {
+          "name": "迅捷兴",
+          "sector": "PCB",
+          "role": "不明确"
+        },
+        {
+          "name": "沪电股份",
+          "sector": "PCB",
+          "role": "高关注"
+        },
+        {
+          "name": "胜宏科技",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "固态电池从实验室至中试、产线的落地能力",
+        "PCB企业AI服务器产能、客户订单及毛利兑现",
+        "CPO龙头是否止跌及机构承接是否回归"
+      ],
+      "numeric_claims": [
+        "两市成交额为1.4万亿元",
+        "成交额创2025年7月以来新低",
+        "规划提出到2030年全固态电池初步实现规模化应用",
+        "尚水智能20CM涨停",
+        "武汉蓝电30CM涨停",
+        "雪龙集团4板",
+        "襄阳轴承3板"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     }
   ]
