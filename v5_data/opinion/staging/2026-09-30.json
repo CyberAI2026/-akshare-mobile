@@ -1,7 +1,7 @@
 {
   "source_date": "2026-09-30",
   "trade_date": "2026-09-30",
-  "updated_at_cn": "2026-09-30T21:25:26.335390+08:00",
+  "updated_at_cn": "2026-09-30T21:35:37.020402+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -252,6 +252,21 @@
       "body_chars": 6920,
       "body_sha256": "f1b2fd8ea264a9ee2a2695544f66fd45a5e9d145ec0391b7594d4ed655a7f29d",
       "published_at_cn": "2026-09-30T19:25:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "f340aca856e988d8",
+      "title": "9.30修复_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2vvozKRdr3k",
+      "read_count": 61,
+      "body_chars": 1820,
+      "body_sha256": "f340aca856e988d8858de9a29f204554d07d3d6dc773b854d083924d59c133d4",
+      "published_at_cn": "2026-09-30T09:12:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1731,6 +1746,43 @@
       ],
       "quality_flags": [
         "无"
+      ]
+    },
+    {
+      "article_id": "f340aca856e988d8",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者预期市场修复，但认为假期消息发酵存在不确定性，建议观察旧题材反核及新题材持续性。",
+      "sectors": [
+        {
+          "name": "地产",
+          "stance": "活跃",
+          "evidence": "作者称地产近期走势不错，但认为贷款贴息利好力度偏小，需观察高开后的承接。"
+        },
+        {
+          "name": "机器人",
+          "stance": "不明确",
+          "evidence": "作者仅列为其他观察方向，未给出明确强弱判断。"
+        },
+        {
+          "name": "AI安全",
+          "stance": "不明确",
+          "evidence": "作者仅表示可观察AI安全方向，未说明趋势判断。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "地产板块高开后是兑现还是延续上行",
+        "旧辨识度个股反核及联动情况",
+        "机器人和AI安全题材持续性"
+      ],
+      "numeric_claims": [
+        "2026金融街论坛年会将于10月19日在北京开幕"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     }
   ]
