@@ -1,0 +1,136 @@
+{
+  "status": "completed",
+  "stage": "completed",
+  "engine": "V5.3-auditable-market-sector-layer",
+  "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
+  "started_cn": "2026-09-24T20:12:31.622213+08:00",
+  "stamp": "20260924_201231",
+  "folder": "v5_data/runs/20260924_201231",
+  "batch_path": "v5_data/inbox/daily_20260924_121049.csv",
+  "batch_count": 92,
+  "master_before_screen": 811,
+  "bootstrapped_from_v4": false,
+  "cache_seed": {
+    "seeded": 0,
+    "scanned": 772,
+    "available": 535
+  },
+  "cache_refresh": {
+    "asof_trade_date": "2026-09-24",
+    "source": "sina-spot",
+    "pool_count": 811,
+    "already_current": 0,
+    "bulk_appended": 782,
+    "needs_history_fallback": 29,
+    "missing_cache": 20,
+    "corporate_action_guard": 0,
+    "errors": [
+      "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+    ]
+  },
+  "cache_asof_trade_date": "2026-09-24",
+  "cache_deep_ready_count": 649,
+  "cache_current_count": 782,
+  "cache_fallback_count": 29,
+  "isolated_index_count": 0,
+  "stage1": 219,
+  "qa25": {
+    "命中或增量": 797,
+    "总数": 811,
+    "成功": 797
+  },
+  "cache25_refresh_requested": 32,
+  "cache25_current_ranked": 797,
+  "cache25_stale_deferred": 14,
+  "completed_120d_shards": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "shard_count_120d": 4,
+  "stage2_research_pool": 23,
+  "qa120": {
+    "命中或增量": 216,
+    "总数": 219,
+    "成功": 219
+  },
+  "generated_trade_date": "2026-09-24",
+  "master_count": 811,
+  "eliminated_count": 2,
+  "daily_new_count": 18,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 2,
+  "cooling_count": 405,
+  "qa250": {
+    "命中或增量": 23,
+    "总数": 23,
+    "成功": 23
+  },
+  "stage3_lifecycle_qualified": 18,
+  "pre_ai_alignment_eliminated": 9,
+  "pre_ai_capacity_eliminated": 0,
+  "stage3_research_pool": 9,
+  "openai_candidate_cap": 50,
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "holding_review_summary": {
+    "position_count": 0,
+    "hold_count": 0,
+    "exit_count": 0,
+    "reduce_count": 0,
+    "data_error_count": 0
+  },
+  "completed_cn": "2026-09-24T20:25:17.079855+08:00",
+  "elapsed_minutes": 12.76,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 797,
+      "总数": 811,
+      "成功": 797
+    },
+    "120日": {
+      "命中或增量": 216,
+      "总数": 219,
+      "成功": 219
+    },
+    "250日": {
+      "命中或增量": 23,
+      "总数": 23,
+      "成功": 23
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 3,
+  "target_trade_date": "2026-09-28",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "市场档位一般或偏弱；当日上涨1120家、下跌4305家，净上涨-3185，成交额较前日下降22.50%，指数中期表现偏弱。市场数据仅用于降低观察池进攻性，不作个股一票否决。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 797,
+  "stock_qa_120_success": 219,
+  "stock_qa_250_success": 23,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
+}
