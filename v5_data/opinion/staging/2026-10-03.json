@@ -1,8 +1,84 @@
 {
   "source_date": "2026-10-03",
   "trade_date": "2026-10-08",
-  "updated_at_cn": "2026-10-03T21:44:23.132233+08:00",
+  "updated_at_cn": "2026-10-03T21:54:35.432031+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
-  "sources": [],
-  "article_mining": []
+  "sources": [
+    {
+      "article_id": "4c6bab8bf3f9758d",
+      "title": "2026.9复盘_我和眉间尺_淘股吧",
+      "url": "https://www.tgb.cn/a/2vAr4WlwWYU",
+      "read_count": 247,
+      "body_chars": 4173,
+      "body_sha256": "4c6bab8bf3f9758d977bdb5afc0b54ec5d16e861513e77075eae8384a92dceec",
+      "published_at_cn": "2026-10-03T10:05:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    }
+  ],
+  "article_mining": [
+    {
+      "article_id": "4c6bab8bf3f9758d",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为9月大盘震荡且多方偏弱，应减少交易；当前判断大盘接近箱底，房地产或仍有进一步发酵空间。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者认为科技走强需建立在大盘上行基础上，当时市场不具备该条件。"
+        },
+        {
+          "name": "房地产",
+          "stance": "活跃",
+          "evidence": "作者认为房地产有利好发酵，万科A分歧买入后，10月可能还能走一波。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "风华高科",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "561980",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "万科A",
+          "sector": "房地产",
+          "role": "高关注"
+        },
+        {
+          "name": "哈药股份",
+          "sector": "",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "大盘是否保持箱底附近的修复趋势",
+        "561980是否跌破0.608",
+        "房地产板块利好能否继续发酵"
+      ],
+      "numeric_claims": [
+        "9月共进行了4笔交易",
+        "作者称9月4日大盘位于3940附近箱顶",
+        "561980于9月11日以0.631买入，文中提及更低价格0.617",
+        "561980于9月16日以0.661卖出，文中提及0.68价格",
+        "作者称9月29日大盘下跌至3750附近",
+        "作者称561980买入价为0.646，并关注0.608支撑",
+        "作者称万科A交易获利约15个点"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    }
+  ]
 }
