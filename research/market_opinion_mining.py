@@ -900,8 +900,9 @@ def run_discover_stage(stage_root: Path) -> None:
     """Discover once so parallel batch jobs do not simultaneously hammer the source site."""
     wait_until_cn("OPINION_COLLECT_NOT_BEFORE_CN")
     discovered=discover_articles()
-    if not discovered:
-        raise RuntimeError("没有发现当日淘股吧复盘文章")
+    # Zero discoveries is a valid low-sample outcome (for example during a
+    # market holiday).  Persist the empty checkpoint so downstream batches can
+    # write an empty staging pool without OpenAI calls or PushPlus delivery.
     stage_root.mkdir(parents=True,exist_ok=True)
     payload={"source_date":source_date().isoformat(),"discovered":discovered}
     (stage_root/"discovery.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8")
