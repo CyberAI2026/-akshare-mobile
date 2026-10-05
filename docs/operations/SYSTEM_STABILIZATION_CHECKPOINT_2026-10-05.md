@@ -54,16 +54,20 @@
 - Verification: Python compilation passed; 100 focused deterministic tests
   passed, including the new schedule and stale-pool cases; YAML parse and
   `git diff --check` passed.
-- No remote branch/PR has been created yet; no code is deployed.
+- Candidate is on branch `codex/system-stabilization-20261005`, commit
+  `e02d4ccc7a4edb85ad37d3cf149cdf92f9052305`, and PR #32 is open against the
+  unchanged `main` baseline. Three existing PR validation workflows were
+  queued and then started; no production deployment or merge has occurred.
+- A read-only daily stability review has been scheduled at 22:30 Asia/Shanghai
+  for 14 days beginning 2026-10-06. It is explicitly prohibited from rerunning
+  workflows or making API, push, trading-ledger, or repository writes.
 
 ## Next exact actions
 
 1. Review this diff and run the broader offline regression suite.
-2. Commit on a new branch based on the current production SHA, push the branch,
-   and let the existing validation-only push trigger run. Confirm no production
-   jobs, OpenAI requests, or PushPlus sends occurred.
-3. Open a PR and merge only after GitHub checks pass. Verify the production SHA
-   and that schedule configuration/precheck are present on `main`.
+2. Wait for PR #32's three checks. If any fail, diagnose and patch on the same
+   branch; do not rerun production workflows. Merge only after checks pass.
+   Verify the production SHA and schedule config/precheck after merge.
 4. Check live Streamlit deployment/rendering and expose a clear load-error state
    if the THS download/upload controls are hidden because the master CSV is empty.
 5. Observe natural production runs for 1–2 weeks using Actions, saved outputs,
