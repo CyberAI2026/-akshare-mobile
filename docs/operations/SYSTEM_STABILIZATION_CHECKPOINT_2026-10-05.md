@@ -37,6 +37,13 @@
 - The 2026-10-04 opinion retries initially failed to discover same-day articles;
   after the low-sample staging correction, eligible quality sample remained 0,
   below the confirmed 15-article minimum. No formal report/push was expected.
+- A pull-request verification on the 2026-10-05 exchange holiday showed both
+  Eastmoney and Sina full-market spot endpoints unavailable. Public limit-up/
+  down pools and THS tests succeeded; the market-count workflow failed only
+  because it incorrectly demanded live spot data on a closed day. The test now
+  explicitly skips market snapshots on non-trading days and remains strict on
+  trading days; this does not suppress or downgrade a trading-day production
+  check.
 
 ## Completed in this unit
 
@@ -54,31 +61,26 @@
 - Verification: Python compilation passed; 100 focused deterministic tests
   passed, including the new schedule and stale-pool cases; YAML parse and
   `git diff --check` passed.
-- Candidate is on branch `codex/system-stabilization-20261005`, commit
-  `e02d4ccc7a4edb85ad37d3cf149cdf92f9052305`, and PR #32 is open against the
-  unchanged `main` baseline. Three existing PR validation workflows were
-  queued and then started; no production deployment or merge has occurred.
+- PR #32 passed the After-Close validation, calendar-aware market-count check,
+  and THS sector-data check, then was squash-merged. Production `main` is now at
+  `32ac899041dbb92fafa9aa91c44b7587283e0414`. Merge only caused the existing
+  validation/scope workflows; no after-close production analysis, OpenAI call,
+  PushPlus send, or live tail decision was dispatched.
 - A read-only daily stability review has been scheduled at 22:30 Asia/Shanghai
   for 14 days beginning 2026-10-06. It is explicitly prohibited from rerunning
   workflows or making API, push, trading-ledger, or repository writes.
 
 ## Next exact actions
 
-1. Review this diff and run the broader offline regression suite.
-2. Wait for PR #32's three checks. If any fail, diagnose and patch on the same
-   branch; do not rerun production workflows. Merge only after checks pass.
-   Verify the production SHA and schedule config/precheck after merge.
-4. Check live Streamlit deployment/rendering and expose a clear load-error state
+1. Check live Streamlit deployment/rendering and expose a clear load-error state
    if the THS download/upload controls are hidden because the master CSV is empty.
-5. Observe natural production runs for 1–2 weeks using Actions, saved outputs,
+2. Observe natural production runs for 1–2 weeks using Actions, saved outputs,
    OpenAI audit records, and PushPlus receipts. Do not call a holiday skip or a
    confirmed low-sample opinion no-send a system failure.
-6. Handoff to Trae only after the agreed stability window has no unresolved
+3. Handoff to Trae only after the agreed stability window has no unresolved
    production-impacting defect, with a fresh checkpoint and exact main SHA.
 
 ## Rollback
 
-- Current `main` is unchanged. If the patch fails validation, close the PR and
-  leave `main` untouched; preserve the existing production scheduler behavior.
-- After a successful merge, revert only the stabilization commit if production
-  behavior is unsafe. Do not reset or force-update `main`.
+- If a production regression is confirmed, revert only the stabilization merge
+  commit; do not reset or force-update `main`.
