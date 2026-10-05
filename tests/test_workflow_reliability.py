@@ -65,6 +65,20 @@ class WorkflowReliabilityTests(unittest.TestCase):
         self.assertLessEqual(alert["timeout-minutes"], 5)
         self.assertIn("ai-finalize", alert["needs"])
 
+    def test_after_close_has_idempotent_weekday_pool_maintenance_schedule(self):
+        workflow = load_workflow("v5_after_close.yml")
+        triggers = workflow.get("on", workflow.get(True, {}))
+        self.assertEqual(
+            [item["cron"] for item in triggers["schedule"]],
+            ["32 9 * * 1-5", "2 10 * * 1-5"],
+        )
+        validate_text = "\n".join(
+            workflow["jobs"]["validate"]["steps"][-1]["run"].splitlines()
+        )
+        self.assertIn("schedule-precheck", validate_text)
+        self.assertIn("github.event_name == 'schedule' && 'main'", str(workflow))
+        self.assertIn("github.event_name != 'pull_request'", workflow["jobs"]["failure-alert"]["if"])
+
     def test_long_run_watchdog_checks_every_thirty_minutes(self):
         workflow = load_workflow("v5_workflow_watchdog.yml")
         triggers = workflow.get("on", workflow.get(True, {}))

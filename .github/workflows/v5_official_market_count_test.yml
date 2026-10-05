@@ -41,6 +41,9 @@ jobs:
           import v5_core as core
           import v5_cli as cli
           out=Path("market_count_test"); out.mkdir(exist_ok=True)
+          if not cli.is_trade_day(cli.now_cn().date()):
+              print("OFFICIAL_MARKET_COUNT_TEST_SKIP reason=non_trading_day")
+              raise SystemExit(0)
           idx, breadth, qa = core.fetch_market_review(180)
           breadth.to_csv(out/"market_breadth.csv", index=False, encoding="utf-8-sig")
           qa.to_csv(out/"market_qa.csv", index=False, encoding="utf-8-sig")

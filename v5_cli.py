@@ -59,6 +59,10 @@ ROLLING_TAIL_POOL_DAYS = 3
 TAIL_POOL_CAP = 10
 
 
+class TailObservationPoolUnavailable(RuntimeError):
+    """No valid, date-locked candidate pool is available for this trade date."""
+
+
 def now_cn() -> datetime:
     return datetime.now(TZ)
 
@@ -466,7 +470,14 @@ def notify_tail_success(final_df: pd.DataFrame, meta: dict, holding_exits: pd.Da
                                f"技术：{_esc(r.get('技术面理由',''))}<br>资金：{_esc(r.get('资金面理由',''))}<br>基本面/事件：{_esc(r.get('基本面理由',''))} {_esc(r.get('事件面理由',''))}<br>板块：{_esc(r.get('板块理由',''))}<br>主要风险：{_esc(r.get('主要风险',''))}")
         lines.append(_section("可下单标的", "<hr style='border:0;border-top:1px solid #e2e8f0'>".join(trade_lines), "#dc2626"))
     else:
-        lines.append(_section("交易结论", "14:45没有符合条件的交易标的（0只）。", "#64748b"))
+        if meta.get("decision_state") == "no_fresh_observation_pool":
+            no_pool = (
+                "没有找到覆盖本交易日的有效观察池，本次无法评估新开仓候选；"
+                "新开仓决策为0只。这不是模型对个股的否定，也没有使用过期观察池。"
+            )
+            lines.append(_section("交易结论", no_pool, "#b45309"))
+        else:
+            lines.append(_section("交易结论", "14:45没有符合条件的交易标的（0只）。", "#64748b"))
     if final_df is not None and not final_df.empty:
         others=final_df[~final_df["股票代码"].astype(str).str.zfill(6).isin(selected)]
         if not others.empty:
@@ -1935,7 +1946,7 @@ def _latest_valid_pool_sources(today) -> tuple[list, dict]:
         if candidates[source_date]:
             chosen[source_date] = max(candidates[source_date], key=lambda item: (item[0], item[1]))
     if source_dates and source_dates[0] not in chosen:
-        raise RuntimeError("今日缺少有效的上一交易日OpenAI观察池，禁止仅用更旧观察池替代")
+        raise TailObservationPoolUnavailable("缺少覆盖今日的上一交易日观察池；禁止仅用更旧观察池替代")
     return source_dates, chosen
 
 
@@ -2014,7 +2025,7 @@ def _load_tail_pool(today):
             if len(frame) > TAIL_POOL_CAP:
                 raise RuntimeError(f"上一交易日观察池数量{len(frame)}超过{TAIL_POOL_CAP}只")
     if not frames or newest_meta is None:
-        raise RuntimeError("近三个交易日没有可用观察池")
+        raise TailObservationPoolUnavailable("近三个交易日没有可用观察池")
 
     combined = pd.concat(frames, ignore_index=True, sort=False)
     rows = []
@@ -2039,7 +2050,7 @@ def _load_tail_pool(today):
     if excluded_closed_trade_codes:
         print(f"TAIL_CLOSED_ROLLING_SOURCE_EXCLUDED count={len(excluded_closed_trade_codes)}")
     if pool.empty:
-        raise RuntimeError("滚动观察池候选均因持仓、未关闭TRADE或卖出后旧信号而排除")
+        raise TailObservationPoolUnavailable("滚动观察池候选均因持仓、未关闭TRADE或卖出后旧信号而排除")
 
     priority = pool.get("AI优先级", pd.Series(index=pool.index, dtype=float))
     pool["_滚动AI优先级"] = pd.to_numeric(priority, errors="coerce").fillna(999999)
@@ -2066,6 +2077,23 @@ def _load_tail_pool(today):
         "rule": "近三个交易日观察池仅作为今日候选来源；今日14:40-14:45重新门禁，最终TRADE为0-5只",
     })
     return pool.reset_index(drop=True), obs_meta
+
+
+def _load_tail_pool_or_empty(today):
+    """Return an explicit empty pool only when no valid date-locked source exists."""
+    try:
+        return _load_tail_pool(today)
+    except TailObservationPoolUnavailable as exc:
+        print(f"TAIL_POOL_UNAVAILABLE trade_date={today} reason={exc}")
+        return pd.DataFrame(columns=["股票代码", "股票名称"]), {
+            "target_trade_date": str(today),
+            "rolling_pool_version": "three-trading-day-v1",
+            "rolling_source_days": ROLLING_TAIL_POOL_DAYS,
+            "rolling_source_dates": [],
+            "rolling_final_candidate_count": 0,
+            "pool_available": False,
+            "pool_unavailable_reason": str(exc),
+        }
 
 
 def _tail_completed_for_date(trade_date) -> bool:
@@ -2124,7 +2152,7 @@ def run_tail_precheck():
     today = _enforce_tail_stage_window("precheck")
     if today is None:
         return
-    pool, obs_meta = _load_tail_pool(today)
+    pool, obs_meta = _load_tail_pool_or_empty(today)
 
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
     base.mkdir(parents=True, exist_ok=True)
@@ -2135,13 +2163,20 @@ def run_tail_precheck():
     # Profiles, recent fund flow, and event titles are not 14:40 tick data. Fetch
     # them during the early safe window so a slow upstream cannot consume the
     # short 14:40-to-14:45 quote window.
-    candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
+    if pool.empty:
+        candidate_context, candidate_context_qa = {}, pd.DataFrame()
+    else:
+        candidate_context, candidate_context_qa = fetch_candidate_decision_context(pool)
     save_bytes(base / "candidate_decision_context.xlsx", to_excel_bytes({**candidate_context,"数据质量":candidate_context_qa}))
     wait_until_cn(14, 40)
-    snap40, min40, qa40 = fetch_realtime_package(pool)
+    if pool.empty:
+        snap40, min40, qa40 = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    else:
+        snap40, min40, qa40 = fetch_realtime_package(pool)
     save_bytes(base / "1440_precheck.xlsx", to_excel_bytes({"14点40实时快照": snap40, "当日5分钟K线": min40, "数据质量": qa40}))
     marker = {
-        "status": "precheck_completed", "trade_date": str(today),
+        "status": "precheck_no_eligible_pool" if pool.empty else "precheck_completed",
+        "trade_date": str(today),
         "generated_at_cn": now_cn().isoformat(),
         "target_trade_date": obs_meta.get("target_trade_date"),
         "candidate_codes": sorted(pool["股票代码"].astype(str).str.zfill(6).tolist()),
@@ -2164,14 +2199,14 @@ def run_tail_finalize():
     today = _enforce_tail_stage_window("finalize")
     if today is None:
         return
-    pool, obs_meta = _load_tail_pool(today)
+    pool, obs_meta = _load_tail_pool_or_empty(today)
     base = ROOT / "tail" / today.strftime("%Y-%m-%d")
     marker_path = base / "tail_precheck_meta.json"
     if not marker_path.exists():
         raise RuntimeError("缺少当日14:40预采样标记，禁止直接执行14:45决策")
     marker = json.loads(marker_path.read_text(encoding="utf-8"))
     expected_codes = sorted(pool["股票代码"].astype(str).str.zfill(6).tolist())
-    if marker.get("status") != "precheck_completed" or str(marker.get("trade_date")) != str(today):
+    if marker.get("status") not in {"precheck_completed", "precheck_no_eligible_pool"} or str(marker.get("trade_date")) != str(today):
         raise RuntimeError("14:40预采样标记状态或日期无效")
     if sorted(marker.get("candidate_codes", [])) != expected_codes:
         raise RuntimeError("14:40预采样候选与14:45观察池不一致")
@@ -2187,7 +2222,10 @@ def run_tail_finalize():
     universe = pd.concat([pool[["股票代码", "股票名称"]], holding_universe], ignore_index=True)
     universe["股票代码"] = universe["股票代码"].astype(str).str.zfill(6)
     universe = universe.drop_duplicates("股票代码", keep="first").reset_index(drop=True)
-    snap45, min45, qa45 = fetch_realtime_package(universe)
+    if universe.empty:
+        snap45, min45, qa45 = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    else:
+        snap45, min45, qa45 = fetch_realtime_package(universe)
     conf = confirmation_metrics(snap45, min45)
     holding_exits = evaluate_holding_exits(
         positions, snap45, min45, CACHE, saved_structure_stops(RECOMMENDATION_REGISTRY)
@@ -2212,26 +2250,54 @@ def run_tail_finalize():
             "市场历史180":market_history,"市场滚动上下文":market_context,"指数180日":idx,
             "数据质量":public_qa45,"市场质量":market_qa,"板块质量":sector_qa,**sector_tables}
     save_bytes(base / f"1445_confirmation_{stamp}.xlsx", to_excel_bytes(sheets))
+    no_fresh_pool = pool.empty
     payload = {
         "data_time_cn": now_cn().isoformat(), "trade_date": str(today), "pool_count": len(pool),
         "confirmation": public_conf.to_dict("records"), "market": breadth.to_dict("records"),
         "market_context": market_context.to_dict("records"), "sector_validation": sector_validation,
-        "status": "data_ready_before_ai",
+        "status": "data_ready_no_fresh_pool" if no_fresh_pool else "data_ready_before_ai",
+        "decision_state": "no_fresh_observation_pool" if no_fresh_pool else "evaluated",
+        "pool_unavailable_reason": obs_meta.get("pool_unavailable_reason", "") if no_fresh_pool else "",
     }
     save_json(base / "tail_payload.json", payload)
     save_json(LATEST / "last_tail_payload.json", payload)
     try:
-        final_decisions, final_meta = run_openai_tail(
-            pool,snap40,snap45,min45,conf,idx,breadth,market_history,market_context,
-            obs_meta,base,sector_tables_for_ai,sector_validation,candidate_context,candidate_context_qa
-        )
+        if no_fresh_pool:
+            final_decisions = pd.DataFrame()
+            final_meta = {
+                "status": "no_fresh_observation_pool",
+                "decision_state": "no_fresh_observation_pool",
+                "trade_date": str(today),
+                "selected_codes": [],
+                "selected_count": 0,
+                "market_assessment": {
+                    "overall_score_0_100": "—",
+                    "trade_suitability": "无法评估新开仓",
+                    "risk_level": "未评估",
+                    "overall_new_position_cap_pct": 0,
+                    "summary": "没有本交易日有效观察池；不对新开仓候选调用模型或生成建议。",
+                },
+                "sector_validation": sector_validation,
+                "sector_assessment": {"summary": "没有有效观察池，未评估候选股板块。"},
+                "portfolio_note": "若存在已登记持仓，仍按下方实时行情和结构止损记录单独扫描。",
+            }
+            payload["feedback_registration"] = {
+                "registered": 0,
+                "reason": "no_fresh_observation_pool",
+            }
+        else:
+            final_decisions, final_meta = run_openai_tail(
+                pool,snap40,snap45,min45,conf,idx,breadth,market_history,market_context,
+                obs_meta,base,sector_tables_for_ai,sector_validation,candidate_context,candidate_context_qa
+            )
         # 尾盘一旦产生TRADE即写入独立推荐登记簿。14:45价格仅作参考，
         # 推荐日正式收盘价由15:35反馈任务回填，避免把未收盘价格冒充锚点。
         from research.recommendation_feedback import register_tail_recommendations
-        feedback_registration = register_tail_recommendations(
-            final_decisions, final_meta, snap45=snap45, obs_meta=obs_meta
-        )
-        payload["feedback_registration"] = feedback_registration
+        if not no_fresh_pool:
+            feedback_registration = register_tail_recommendations(
+                final_decisions, final_meta, snap45=snap45, obs_meta=obs_meta
+            )
+            payload["feedback_registration"] = feedback_registration
         payload["final_selected_count"]=final_meta.get("selected_count",0); payload["final_selected_codes"]=final_meta.get("selected_codes",[])
         final_meta["market_snapshot"] = _json_clean(breadth.iloc[0].to_dict()) if not breadth.empty else {}
         final_meta["holding_exit_summary"] = {

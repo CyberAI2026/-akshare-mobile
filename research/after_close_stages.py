@@ -201,6 +201,57 @@ def run_init(batch_path: str | None) -> None:
     print(f"AFTER_CLOSE_STAGE_OK stage=init folder={base} stocks={len(active_input)}")
 
 
+def scheduled_run_due(
+    now=None,
+    latest_path: Path | None = None,
+    state_path: Path | None = None,
+) -> bool:
+    """Skip known holidays and avoid a second same-day scheduled analysis.
+
+    Upload-triggered research remains independent: this guard is used only by
+    the weekday maintenance schedule, which reuses the current master pool.
+    A current-day partial/failed state is deliberately not replayed here; the
+    existing failure alert and checkpoint-based recovery path own that case.
+    """
+    current = now or cli.now_cn()
+    if not cli.is_trade_day(current.date()):
+        print(f"AFTER_CLOSE_SCHEDULE_SKIP reason=non_trading_day date={current.date()}")
+        return False
+
+    trade_date = str(expected_latest_trade_date(current))
+    latest_file = latest_path or (cli.LATEST / "latest_after_close.json")
+    state_file = state_path or STATE
+
+    def has_current_date(path: Path) -> bool:
+        if not path.exists():
+            return False
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            return False
+        candidate = data.get("generated_trade_date") or data.get("cache_asof_trade_date")
+        return str(candidate or "") == trade_date
+
+    if has_current_date(latest_file):
+        print(f"AFTER_CLOSE_SCHEDULE_SKIP reason=latest_has_trade_date date={trade_date}")
+        return False
+    if has_current_date(state_file):
+        print(f"AFTER_CLOSE_SCHEDULE_SKIP reason=run_state_has_trade_date date={trade_date}")
+        return False
+    if state_file.exists():
+        try:
+            state = json.loads(state_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            state = {}
+        started = str(state.get("started_cn", ""))[:10]
+        if state.get("status") == "running" and started == trade_date:
+            print(f"AFTER_CLOSE_SCHEDULE_SKIP reason=same_day_run_in_progress date={trade_date}")
+            return False
+
+    print(f"AFTER_CLOSE_SCHEDULE_RUN date={trade_date}")
+    return True
+
+
 def run_25d() -> None:
     state, base = _load_state("initialized")
     active_input = _read_csv(base / "stages" / "active_input.csv")
@@ -635,9 +686,12 @@ def run_ai() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("stage", choices=["init", "25d", "120d", "120d-shard-0", "120d-shard-1", "120d-shard-2", "120d-shard-3", "120d-aggregate", "250d", "market", "ai"])
+    parser.add_argument("stage", choices=["schedule-precheck", "init", "25d", "120d", "120d-shard-0", "120d-shard-1", "120d-shard-2", "120d-shard-3", "120d-aggregate", "250d", "market", "ai"])
     parser.add_argument("--batch", default="")
     args = parser.parse_args()
+    if args.stage == "schedule-precheck":
+        print("RUN" if scheduled_run_due() else "SKIP")
+        return
     actions = {
         "init": lambda: run_init(args.batch or None),
         "25d": run_25d,
