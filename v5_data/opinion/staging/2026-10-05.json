@@ -1,9 +1,24 @@
 {
   "source_date": "2026-10-05",
   "trade_date": "2026-10-08",
-  "updated_at_cn": "2026-10-05T21:24:40.510283+08:00",
+  "updated_at_cn": "2026-10-05T21:35:20.370753+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
+    {
+      "article_id": "141209ed34bdba47",
+      "title": "[红包]国庆超干货：职业游资全景深度拆解十大核心要求+全周期实战体系！经典龙回头！_主升龙头空空龙_淘股吧",
+      "url": "https://www.tgb.cn/a/2vE6NLQESEF",
+      "read_count": 2298,
+      "body_chars": 21958,
+      "body_sha256": "141209ed34bdba47c3d58f4aaf2b15774eb3b33b627053e40da539eefc1dbfe3",
+      "published_at_cn": "2026-10-05T15:12:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
     {
       "article_id": "577b8e146d06fd63",
       "title": "10.5日全市场深度复盘：港股附A股龙虎榜与两融暗线推演_一手一手玩_淘股吧",
@@ -51,6 +66,37 @@
     }
   ],
   "article_mining": [
+    {
+      "article_id": "141209ed34bdba47",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "混沌"
+      ],
+      "market_summary": "作者认为节前资金收敛、热点轮动杂乱且持续性偏弱，处于试盘和筹码交换阶段；预计节后若资金回流、情绪确认回暖，市场或进入修复窗口。",
+      "sectors": [
+        {
+          "name": "地产",
+          "stance": "活跃",
+          "evidence": "作者称地产盘中出现异动，但与其他热点一样轮动较快。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者称消费出现脉冲表现，但市场热点散乱、持续性偏弱。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "节后增量资金是否回流",
+        "市场情绪能否确认回暖",
+        "低位主线及情绪修复方向的持续性"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
     {
       "article_id": "577b8e146d06fd63",
       "market_stance": "谨慎",
