@@ -312,6 +312,87 @@ class TailStageTests(unittest.TestCase):
                 self.assertTrue(cli._tail_completed_for_date(date(2026, 9, 7)))
                 self.assertFalse(cli._tail_completed_for_date(date(2026, 9, 8)))
 
+    def test_unavailable_tail_pool_becomes_explicit_empty_pool(self):
+        with patch.object(cli, "_load_tail_pool", side_effect=cli.TailObservationPoolUnavailable("stale source")):
+            pool, meta = cli._load_tail_pool_or_empty(date(2026, 10, 8))
+        self.assertTrue(pool.empty)
+        self.assertFalse(meta["pool_available"])
+        self.assertEqual(meta["target_trade_date"], "2026-10-08")
+        self.assertIn("stale source", meta["pool_unavailable_reason"])
+
+    def test_empty_pool_tail_message_is_not_presented_as_model_rejection(self):
+        meta = {
+            "trade_date": "2026-10-08", "selected_codes": [], "selected_count": 0,
+            "decision_state": "no_fresh_observation_pool",
+            "market_assessment": {"summary": "未评估", "overall_new_position_cap_pct": 0},
+        }
+        with patch.object(cli, "pushplus_notify", return_value=True) as notify:
+            self.assertTrue(cli.notify_tail_success(pd.DataFrame(), meta))
+        self.assertIn("不是模型对个股的否定", notify.call_args.args[1])
+        self.assertIn("没有找到覆盖本交易日的有效观察池", notify.call_args.args[1])
+
+    def test_precheck_persists_no_candidate_status_without_market_model_calls(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            empty = pd.DataFrame()
+            with patch.object(cli, "ROOT", root), patch.object(cli, "LATEST", root / "latest"), \
+                 patch.object(cli, "_enforce_tail_stage_window", return_value=date(2026, 10, 8)), \
+                 patch.object(cli, "_load_tail_pool", side_effect=cli.TailObservationPoolUnavailable("stale source")), \
+                 patch.object(cli, "fetch_candidate_decision_context") as fetch_context, \
+                 patch.object(cli, "fetch_realtime_package") as fetch_realtime, \
+                 patch.object(cli, "wait_until_cn"), patch.object(cli, "git_commit"), \
+                 patch.object(cli, "now_cn", return_value=datetime(2026, 10, 8, 14, 41, tzinfo=CN)):
+                cli.run_tail_precheck()
+            marker = json.loads((root / "latest" / "tail_precheck_meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(marker["status"], "precheck_no_eligible_pool")
+            self.assertEqual(marker["candidate_codes"], [])
+            fetch_context.assert_not_called()
+            fetch_realtime.assert_not_called()
+
+    def test_finalize_notifies_zero_trade_without_openai_when_pool_is_stale(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            latest = root / "latest"
+            day = root / "tail" / "2026-10-08"
+            day.mkdir(parents=True)
+            latest.mkdir()
+            (day / "tail_precheck_meta.json").write_text(json.dumps({
+                "status": "precheck_no_eligible_pool", "trade_date": "2026-10-08",
+                "candidate_codes": [],
+            }), encoding="utf-8")
+            (day / "1440_precheck.xlsx").write_bytes(cli.to_excel_bytes({
+                "14点40实时快照": pd.DataFrame(), "当日5分钟K线": pd.DataFrame(), "数据质量": pd.DataFrame(),
+            }))
+            (day / "candidate_decision_context.xlsx").write_bytes(cli.to_excel_bytes({"数据质量": pd.DataFrame()}))
+            empty = pd.DataFrame()
+            now = datetime(2026, 10, 8, 14, 45, tzinfo=CN)
+            with patch.object(cli, "ROOT", root), patch.object(cli, "LATEST", latest), \
+                 patch.object(cli, "_enforce_tail_stage_window", return_value=date(2026, 10, 8)), \
+                 patch.object(cli, "_load_tail_pool", side_effect=cli.TailObservationPoolUnavailable("stale source")), \
+                 patch.object(cli, "now_cn", return_value=now), \
+                 patch.object(cli, "load_active_positions_for_exit", return_value=empty), \
+                 patch.object(cli, "confirmation_metrics", return_value=empty), \
+                 patch.object(cli, "evaluate_holding_exits", return_value=empty), \
+                 patch.object(cli, "saved_structure_stops", return_value={}), \
+                 patch.object(cli, "fetch_realtime_package") as fetch_realtime, \
+                 patch.object(cli, "fetch_market_review", return_value=(empty, empty, empty)), \
+                 patch.object(cli, "fetch_public_sector_flow", return_value=({}, empty)), \
+                 patch.object(cli, "_sector_readiness", return_value=({}, {"status": "unavailable"})), \
+                 patch.object(cli, "update_market_history", return_value=(empty, empty)), \
+                 patch.object(cli, "run_openai_tail") as openai, \
+                 patch.object(cli, "save_private_exit_decisions"), \
+                 patch.object(cli, "notify_tail_success", return_value=True) as notify, \
+                 patch.object(cli, "git_commit"):
+                cli.run_tail_finalize()
+            summary = json.loads((latest / "last_tail_summary.json").read_text(encoding="utf-8"))
+            self.assertEqual(summary["status"], "completed")
+            self.assertEqual(summary["decision_state"], "no_fresh_observation_pool")
+            self.assertEqual(summary["final_selected_count"], 0)
+            self.assertTrue(summary["pushplus_delivery_ok"])
+            fetch_realtime.assert_not_called()
+            openai.assert_not_called()
+            self.assertEqual(notify.call_args.args[1]["decision_state"], "no_fresh_observation_pool")
+
     def test_completed_close_audit_is_idempotent(self):
         with tempfile.TemporaryDirectory() as td:
             latest=Path(td)

@@ -15,6 +15,11 @@ on:
         required: false
         default: true
         type: boolean
+  schedule:
+    # 17:32 and 18:02 Beijing time. The second cron is an idempotent safety
+    # net if GitHub delays or drops the first scheduled event.
+    - cron: '32 9 * * 1-5'
+    - cron: '2 10 * * 1-5'
   push:
     branches: [main]
     paths:
@@ -46,6 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'schedule' && 'main' || github.ref }}
           fetch-depth: 2
       - uses: actions/setup-python@v5
         with:
@@ -65,6 +71,12 @@ jobs:
             RUN_PIPELINE=true
           elif git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep -q '^v5_data/inbox/daily_.*\.csv$'; then
             RUN_PIPELINE=true
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            DECISION=$(python -m research.after_close_stages schedule-precheck | tail -1)
+            echo "scheduled_decision=$DECISION"
+            if [ "$DECISION" = "RUN" ]; then
+              RUN_PIPELINE=true
+            fi
           fi
           echo "run_pipeline=$RUN_PIPELINE" >> "$GITHUB_OUTPUT"
           echo "RUN_PIPELINE=$RUN_PIPELINE"
@@ -80,6 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -216,7 +229,7 @@ jobs:
 
   failure-alert:
     needs: [validate, initialize, screen-25d, screen-120d-shard-0, screen-120d-shard-1, screen-120d-shard-2, screen-120d-shard-3, screen-120d-aggregate, lifecycle-250d, market-context, ai-finalize, feedback-refresh]
-    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.notify) && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+    if: ${{ always() && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.notify) && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

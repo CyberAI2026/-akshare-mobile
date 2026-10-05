@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 import unittest
+from datetime import date, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -15,6 +16,44 @@ from research import after_close_stages as stages
 
 
 class AfterCloseStageTests(unittest.TestCase):
+    def test_scheduled_research_skips_non_trading_day(self):
+        with patch.object(stages.cli, "is_trade_day", return_value=False) as is_trade_day:
+            self.assertFalse(stages.scheduled_run_due(datetime(2026, 10, 5, 17, 32)))
+        is_trade_day.assert_called_once_with(date(2026, 10, 5))
+
+    def test_scheduled_research_skips_when_current_trade_date_is_completed(self):
+        with tempfile.TemporaryDirectory() as td:
+            latest = Path(td) / "latest.json"
+            latest.write_text(json.dumps({"status": "completed", "generated_trade_date": "2026-10-08"}), encoding="utf-8")
+            with patch.object(stages.cli, "is_trade_day", return_value=True), \
+                 patch.object(stages, "expected_latest_trade_date", return_value=date(2026, 10, 8)):
+                self.assertFalse(stages.scheduled_run_due(
+                    datetime(2026, 10, 8, 17, 32), latest_path=latest,
+                    state_path=Path(td) / "missing-state.json",
+                ))
+
+    def test_scheduled_research_skips_when_same_day_run_is_in_progress(self):
+        with tempfile.TemporaryDirectory() as td:
+            state = Path(td) / "state.json"
+            state.write_text(json.dumps({"status": "running", "started_cn": "2026-10-08T17:10:00+08:00"}), encoding="utf-8")
+            with patch.object(stages.cli, "is_trade_day", return_value=True), \
+                 patch.object(stages, "expected_latest_trade_date", return_value=date(2026, 10, 8)):
+                self.assertFalse(stages.scheduled_run_due(
+                    datetime(2026, 10, 8, 18, 2), latest_path=Path(td) / "missing-latest.json",
+                    state_path=state,
+                ))
+
+    def test_scheduled_research_runs_from_old_latest_checkpoint(self):
+        with tempfile.TemporaryDirectory() as td:
+            latest = Path(td) / "latest.json"
+            latest.write_text(json.dumps({"status": "completed", "generated_trade_date": "2026-09-24"}), encoding="utf-8")
+            with patch.object(stages.cli, "is_trade_day", return_value=True), \
+                 patch.object(stages, "expected_latest_trade_date", return_value=date(2026, 10, 8)):
+                self.assertTrue(stages.scheduled_run_due(
+                    datetime(2026, 10, 8, 17, 32), latest_path=latest,
+                    state_path=Path(td) / "missing-state.json",
+                ))
+
     def test_empty_csv_is_recoverable(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "empty.csv"
