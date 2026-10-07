@@ -1,0 +1,13 @@
+{
+  "asof_trade_date": "2026-09-30",
+  "source": "sina-spot",
+  "pool_count": 811,
+  "already_current": 801,
+  "bulk_appended": 0,
+  "needs_history_fallback": 10,
+  "missing_cache": 2,
+  "corporate_action_guard": 0,
+  "errors": [
+    "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+  ]
+}
