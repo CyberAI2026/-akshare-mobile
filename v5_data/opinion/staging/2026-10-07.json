@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-07",
   "trade_date": "2026-10-08",
-  "updated_at_cn": "2026-10-07T21:44:33.136148+08:00",
+  "updated_at_cn": "2026-10-07T21:54:41.402087+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -12,6 +12,21 @@
       "body_chars": 1887,
       "body_sha256": "020146c1a010c3836a678ab6c42d742ff4d709e6daa167f8b5884d419375daef",
       "published_at_cn": "2026-10-07T15:38:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "07d299def1d166dd",
+      "title": "9.30：指数护盘，地产反核，高位抱团止跌_会飞的外星人_淘股吧",
+      "url": "https://www.tgb.cn/a/2vHSNnzEJOF",
+      "read_count": 0,
+      "body_chars": 1528,
+      "body_sha256": "07d299def1d166dd5b373470bc8154058ca9337f69647085782c4d24addb1bb5",
+      "published_at_cn": "2026-10-07T21:46:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -183,6 +198,87 @@
       ],
       "quality_flags": [
         "无"
+      ]
+    },
+    {
+      "article_id": "07d299def1d166dd",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为指数受护盘支撑，地产板块反核强化，高位抱团止跌；但板块分歧及兑现仍明显，提示防守与控制仓位。",
+      "sectors": [
+        {
+          "name": "地产",
+          "stance": "加强",
+          "evidence": "早盘兑现后，以万科A为首逆势反核，午后继续强化，深物业A完成地天板。"
+        },
+        {
+          "name": "汽车零部件",
+          "stance": "活跃",
+          "evidence": "盘中襄阳轴承被水下捞起并封板，后随指数回落。"
+        },
+        {
+          "name": "整车",
+          "stance": "活跃",
+          "evidence": "江淮汽车盘中被水下捞起封板，随后跟随指数回落。"
+        },
+        {
+          "name": "科技硬件",
+          "stance": "分化",
+          "evidence": "早盘高开后出现分歧，并跟随指数跳水回落。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者称午后消费板块走强。"
+        },
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "作者称午后农业板块走强。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "万科A",
+          "sector": "地产",
+          "role": "核心"
+        },
+        {
+          "name": "深物业A",
+          "sector": "地产",
+          "role": "高关注"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "地产",
+          "role": "风险"
+        },
+        {
+          "name": "襄阳轴承",
+          "sector": "汽车零部件",
+          "role": "核心"
+        },
+        {
+          "name": "江淮汽车",
+          "sector": "整车",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "地产板块反核强化后的强弱持续性",
+        "汽车板块核心股表现",
+        "指数护盘力度及高位抱团能否继续止跌"
+      ],
+      "numeric_claims": [
+        "襄阳轴承龙虎榜：知春路净买入8200万元",
+        "襄阳轴承龙虎榜：国新北京分净买入3112万元",
+        "襄阳轴承龙虎榜：上海江苏路净卖出1400万元"
+      ],
+      "quality_flags": [
+        "明显情绪化"
       ]
     },
     {
