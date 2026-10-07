@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "initialized",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
   "started_cn": "2026-10-08T02:02:50.611540+08:00",
@@ -32,5 +32,101 @@
   "cache_deep_ready_count": 668,
   "cache_current_count": 801,
   "cache_fallback_count": 10,
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 66,
+  "qa25": {
+    "命中或增量": 802,
+    "总数": 811,
+    "成功": 802
+  },
+  "cache25_refresh_requested": 12,
+  "cache25_current_ranked": 802,
+  "cache25_stale_deferred": 9,
+  "completed_120d_shards": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "shard_count_120d": 4,
+  "stage2_research_pool": 1,
+  "qa120": {
+    "命中或增量": 64,
+    "总数": 66,
+    "成功": 66
+  },
+  "generated_trade_date": "2026-09-30",
+  "master_count": 811,
+  "eliminated_count": 2,
+  "daily_new_count": 0,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 1,
+  "cooling_count": 675,
+  "qa250": {
+    "命中或增量": 1,
+    "总数": 1,
+    "成功": 1
+  },
+  "stage3_lifecycle_qualified": 0,
+  "pre_ai_alignment_eliminated": 0,
+  "pre_ai_capacity_eliminated": 0,
+  "stage3_research_pool": 0,
+  "openai_candidate_cap": 50,
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "holding_review_summary": {
+    "position_count": 0,
+    "hold_count": 0,
+    "exit_count": 0,
+    "reduce_count": 0,
+    "data_error_count": 0
+  },
+  "completed_cn": "2026-10-08T02:15:27.621630+08:00",
+  "elapsed_minutes": 12.62,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 802,
+      "总数": 811,
+      "成功": 802
+    },
+    "120日": {
+      "命中或增量": 64,
+      "总数": 66,
+      "成功": 66
+    },
+    "250日": {
+      "命中或增量": 1,
+      "总数": 1,
+      "成功": 1
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 0,
+  "target_trade_date": "2026-10-08",
+  "openai_model": "not_called_no_stage3_candidates",
+  "market_assessment": {},
+  "high_attention_sector_market": {
+    "status": "unavailable",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [],
+      "高关注但行情未核验": []
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 802,
+  "stock_qa_120_success": 66,
+  "stock_qa_250_success": 1,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": null,
+  "pushplus_delivery_status": "suppressed_strategy_replay"
 }
