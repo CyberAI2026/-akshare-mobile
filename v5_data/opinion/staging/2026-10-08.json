@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-08",
   "trade_date": "2026-10-08",
-  "updated_at_cn": "2026-10-08T21:25:21.705819+08:00",
+  "updated_at_cn": "2026-10-08T21:35:11.442189+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -170,6 +170,21 @@
       ]
     },
     {
+      "article_id": "51f1d4538d93f394",
+      "title": "审势择时—20261008（指数破位）_lazybread_淘股吧",
+      "url": "https://www.tgb.cn/a/2vJhcGrIrFp",
+      "read_count": 124,
+      "body_chars": 2470,
+      "body_sha256": "51f1d4538d93f39464efef698e57ea3504d5511f4321bf6a90670881472f6315",
+      "published_at_cn": "2026-10-08T17:56:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "63e82062c268bbd6",
       "title": "不管风云变幻，依然熊霸天下！附10.9明日市场核心策略_连板龙头作手_淘股吧",
       "url": "https://www.tgb.cn/a/2vJmC28K0Fb",
@@ -192,6 +207,21 @@
       "body_chars": 3053,
       "body_sha256": "6b1f7bfbe7782321288a1b62ae25badd38b44f4994a7deb20c6b310de9deb0e8",
       "published_at_cn": "2026-10-08T16:25:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "6cd9b759c019f580",
+      "title": "2026.10.08复盘_黑絔丶_淘股吧",
+      "url": "https://www.tgb.cn/a/2vJw7baHaq7",
+      "read_count": 18,
+      "body_chars": 2197,
+      "body_sha256": "6cd9b759c019f580d4066d9c6709fe59c676fe0c6ac94d57d820ec3b3e9e40e9",
+      "published_at_cn": "2026-10-08T21:24:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1349,6 +1379,84 @@
       ]
     },
     {
+      "article_id": "51f1d4538d93f394",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数破位，连板高标出现断板、炸板和大面，AI应用分歧；固态电池、机器人等题材仍有局部活跃。",
+      "sectors": [
+        {
+          "name": "固态电池/锂电池",
+          "stance": "活跃",
+          "evidence": "紫竹高科、传艺科技、上海洗霸及时代万恒等形成梯队。"
+        },
+        {
+          "name": "机器人",
+          "stance": "分化",
+          "evidence": "九阳股份4板，但其助攻股达安基因、贝瑞基因全部炸板。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "分化",
+          "evidence": "作者称新华传媒一字最大单小于昨日，AI应用分歧。"
+        },
+        {
+          "name": "房地产",
+          "stance": "分化",
+          "evidence": "陆家嘴试图带动深物业，但作者称深物业未能跟随。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "紫竹高科",
+          "sector": "固态电池",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "机器人",
+          "role": "风险"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "锂电池",
+          "role": "风险"
+        },
+        {
+          "name": "园林股份",
+          "sector": "重组芯片",
+          "role": "核心"
+        },
+        {
+          "name": "传艺科技",
+          "sector": "固态电池",
+          "role": "跟随"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒高位表现及AI应用分歧是否缓解",
+        "固态电池梯队能否维持并带动时代万恒",
+        "机器人方向炸板个股的修复情况"
+      ],
+      "numeric_claims": [
+        "新华传媒为8板",
+        "华瓷为2连跌停",
+        "九阳股份为4板",
+        "时代万恒为4板",
+        "紫竹高科、园林股份、传艺科技、上海洗霸为3板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
       "article_id": "63e82062c268bbd6",
       "market_stance": "偏空",
       "market_phase": [
@@ -1531,6 +1639,124 @@
       ],
       "quality_flags": [
         "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "6cd9b759c019f580",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为科技拖累市场下跌，电池较强但次日或分歧；地产若回流或可带动指数回暖。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "退潮",
+          "evidence": "作者称科创板大跌，CPO、芯片、PCB为主跌方向。"
+        },
+        {
+          "name": "电池",
+          "stance": "加强",
+          "evidence": "作者称全天强劲、梯队完整，但预计次日去弱留强。"
+        },
+        {
+          "name": "地产",
+          "stance": "分化",
+          "evidence": "早盘冲高回落，仅陆家嘴二板存活，作者博弈次日回流。"
+        },
+        {
+          "name": "油气及能源",
+          "stance": "活跃",
+          "evidence": "作者称受中东地缘局势及原油期货行情刺激走高，但确定性不高。"
+        },
+        {
+          "name": "航运",
+          "stance": "活跃",
+          "evidence": "作者认为霍尔木兹海峡封锁消息对航运构成刺激。"
+        },
+        {
+          "name": "服装家纺",
+          "stance": "活跃",
+          "evidence": "多股涨停，作者认为属季节需求和政策支撑下的低位轮动补涨。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "作者称鼠疫消息相关个股高开后迅速走弱，仅华北制药留下。"
+        },
+        {
+          "name": "电网",
+          "stance": "活跃",
+          "evidence": "作者称亚联反包一度带动电网板块。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "时代万恒",
+          "sector": "电池",
+          "role": "龙头"
+        },
+        {
+          "name": "紫竹高科",
+          "sector": "电池",
+          "role": "跟随"
+        },
+        {
+          "name": "传艺科技",
+          "sector": "电池",
+          "role": "跟随"
+        },
+        {
+          "name": "上海洗霸",
+          "sector": "电池",
+          "role": "跟随"
+        },
+        {
+          "name": "龙蟠科技",
+          "sector": "电池",
+          "role": "跟随"
+        },
+        {
+          "name": "陆家嘴",
+          "sector": "地产",
+          "role": "高关注"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "风险"
+        },
+        {
+          "name": "昭衍新药",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "九阳",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "中国武夷",
+          "sector": "地产",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "电池板块分歧后的去弱留强情况",
+        "陆家嘴及地产高标反馈、地产是否回流",
+        "地产能否带动指数回暖"
+      ],
+      "numeric_claims": [
+        "时代万恒为四板",
+        "紫竹高科、传艺科技、上海洗霸为三板",
+        "龙蟠科技为二板",
+        "陆家嘴为地产板块唯一二板存活个股",
+        "作者称此前提到的3只鼠疫相关个股均大幅高开后走弱"
+      ],
+      "quality_flags": [
         "明显情绪化"
       ]
     },
