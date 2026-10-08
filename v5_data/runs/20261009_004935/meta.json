@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "initialized",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
   "started_cn": "2026-10-09T00:49:35.069269+08:00",
@@ -32,5 +32,148 @@
   "cache_deep_ready_count": 669,
   "cache_current_count": 803,
   "cache_fallback_count": 8,
-  "isolated_index_count": 0
+  "isolated_index_count": 0,
+  "stage1": 58,
+  "qa25": {
+    "命中或增量": 805,
+    "总数": 811,
+    "成功": 805
+  },
+  "cache25_refresh_requested": 10,
+  "cache25_current_ranked": 805,
+  "cache25_stale_deferred": 6,
+  "completed_120d_shards": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "shard_count_120d": 4,
+  "stage2_research_pool": 2,
+  "qa120": {
+    "命中或增量": 57,
+    "总数": 58,
+    "成功": 58
+  },
+  "generated_trade_date": "2026-10-08",
+  "master_count": 811,
+  "eliminated_count": 2,
+  "daily_new_count": 0,
+  "daily_reactivated_count": 0,
+  "daily_eliminated_count": 1,
+  "cooling_count": 753,
+  "qa250": {
+    "命中或增量": 2,
+    "总数": 2,
+    "成功": 2
+  },
+  "stage3_lifecycle_qualified": 1,
+  "pre_ai_alignment_eliminated": 0,
+  "pre_ai_capacity_eliminated": 0,
+  "stage3_research_pool": 1,
+  "openai_candidate_cap": 50,
+  "sector_validation": {
+    "status": "正式可用",
+    "table_count": 10,
+    "failure_count": 0,
+    "warning_count": 0,
+    "ai_enabled": true,
+    "concept_table_count": 5,
+    "industry_table_count": 5,
+    "scope_note": ""
+  },
+  "holding_review_summary": {
+    "position_count": 0,
+    "hold_count": 0,
+    "exit_count": 0,
+    "reduce_count": 0,
+    "data_error_count": 0
+  },
+  "completed_cn": "2026-10-09T01:03:09.594773+08:00",
+  "elapsed_minutes": 13.58,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 805,
+      "总数": 811,
+      "成功": 805
+    },
+    "120日": {
+      "命中或增量": 57,
+      "总数": 58,
+      "成功": 58
+    },
+    "250日": {
+      "命中或增量": 2,
+      "总数": 2,
+      "成功": 2
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 1,
+  "target_trade_date": "2026-10-09",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "市场档位为一般或偏弱；当日上涨比例30.48%、净上涨家数-2049，主要指数近5日均回落，风险偏好仍偏谨慎。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [
+        {
+          "板块": "房地产",
+          "文章提及数": 17,
+          "观点状态": "分化",
+          "板块类型": "行业",
+          "当日涨跌幅%": -1.26,
+          "当日涨幅排名": 59,
+          "同类板块数": 90,
+          "净额亿元": -14.27
+        }
+      ],
+      "高关注且观点退潮": [
+        {
+          "板块": "科技硬件/半导体/CPO/光通信/算力",
+          "文章提及数": 26,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "电池/锂电池/固态电池/储能",
+          "文章提及数": 31,
+          "观点状态": "加强"
+        },
+        {
+          "板块": "油气/航运/传统能源",
+          "文章提及数": 19,
+          "观点状态": "活跃"
+        },
+        {
+          "板块": "医药/创新药/CRO",
+          "文章提及数": 18,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "并购重组/传媒/AI应用",
+          "文章提及数": 10,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "银行/高股息防御",
+          "文章提及数": 8,
+          "观点状态": "活跃"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 805,
+  "stock_qa_120_success": 58,
+  "stock_qa_250_success": 2,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
