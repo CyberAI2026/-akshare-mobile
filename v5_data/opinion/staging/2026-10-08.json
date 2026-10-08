@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-08",
   "trade_date": "2026-10-08",
-  "updated_at_cn": "2026-10-08T21:35:11.442189+08:00",
+  "updated_at_cn": "2026-10-08T21:55:17.142630+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -440,6 +440,21 @@
       ]
     },
     {
+      "article_id": "c338262e5752aadb",
+      "title": "10.8复盘及隔日预案_人生得失_淘股吧",
+      "url": "https://www.tgb.cn/a/2vJwQoHVjVj",
+      "read_count": 1,
+      "body_chars": 1533,
+      "body_sha256": "c338262e5752aadb4d3b31bff065069421a4cdffcd8b70c0007f6f08aaea8624",
+      "published_at_cn": "2026-10-08T21:34:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "dd339aaf92009ca6",
       "title": "林曜连板复盘【10.08】_林曜01_淘股吧",
       "url": "https://www.tgb.cn/a/2vJmLDDc6Cz",
@@ -447,6 +462,21 @@
       "body_chars": 2079,
       "body_sha256": "dd339aaf92009ca6c999bda3fa53b3dbdf2d7adc940e1e5cec5d4e71d813bd3b",
       "published_at_cn": "2026-10-08T19:13:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ea0bbe519490c50e",
+      "title": "10月8日主题复盘 | 电子树脂、航运、生物柴油逆势大涨，固态电池再度活跃_风胡子2023_淘股吧",
+      "url": "https://www.tgb.cn/a/2vJxGMBCNG2",
+      "read_count": 3,
+      "body_chars": 2776,
+      "body_sha256": "ea0bbe519490c50e234ea82466ab1d703cf0581832db80a107840a3e446aac34",
+      "published_at_cn": "2026-10-08T21:46:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -2998,6 +3028,77 @@
       ]
     },
     {
+      "article_id": "c338262e5752aadb",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为外围下跌及光通信利空带动科技走弱；锂电池是盘中最强方向但受指数拖累分歧，预计仍可能反复。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "退潮",
+          "evidence": "作者称受外围及光通信利空影响，科技方向大跌。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "作者认为假期利好已被预期，贝瑞、蔚蓝一字板缺少预期差。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "分化",
+          "evidence": "作者称其为最强方向，但盘中受指数拖累出现分歧。"
+        },
+        {
+          "name": "房地产",
+          "stance": "分化",
+          "evidence": "作者预期深物业A、世联行低开，并关注是否超预期平开。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "尚水智能",
+          "sector": "锂电池",
+          "role": "高关注"
+        },
+        {
+          "name": "金龙羽",
+          "sector": "锂电池",
+          "role": "高关注"
+        },
+        {
+          "name": "国轩高科",
+          "sector": "锂电池",
+          "role": "高关注"
+        },
+        {
+          "name": "深物业A",
+          "sector": "房地产",
+          "role": "高关注"
+        },
+        {
+          "name": "世联行",
+          "sector": "房地产",
+          "role": "高关注"
+        },
+        {
+          "name": "陆家嘴",
+          "sector": "房地产",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "锂电池板块分歧后的承接情况及前排加速表现",
+        "国轩高科在锂电池整体分歧时的表现",
+        "深物业A、世联行能否超预期平开，以及陆家嘴强弱"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
       "article_id": "dd339aaf92009ca6",
       "market_stance": "偏空",
       "market_phase": [
@@ -3077,6 +3178,101 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ea0bbe519490c50e",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者称市场全天震荡调整、三大指数下挫，个股跌多涨少；油气、电池、航运及银行逆势走强，CPO概念明显回落。",
+      "sectors": [
+        {
+          "name": "电子树脂",
+          "stance": "加强",
+          "evidence": "作者称板块2股大涨，兴业股份2天2板、世名科技等涨停。"
+        },
+        {
+          "name": "航运",
+          "stance": "加强",
+          "evidence": "作者称板块走高，中远海能、招商南油涨停。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "加强",
+          "evidence": "作者称板块14股大涨，时代万恒4天4板，多股涨停。"
+        },
+        {
+          "name": "生物柴油/生物航煤",
+          "stance": "加强",
+          "evidence": "作者称板块2股大涨，卓越新能等涨停。"
+        },
+        {
+          "name": "CPO",
+          "stance": "退潮",
+          "evidence": "作者称CPO概念股下挫，源杰科技、长光华芯20cm跌停。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称银行板块走强，中国银行、工商银行、杭州银行创新高。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "时代万恒",
+          "sector": "锂电池",
+          "role": "龙头"
+        },
+        {
+          "name": "紫竹高科",
+          "sector": "锂电池",
+          "role": "核心"
+        },
+        {
+          "name": "中远海能",
+          "sector": "航运",
+          "role": "核心"
+        },
+        {
+          "name": "招商南油",
+          "sector": "航运",
+          "role": "核心"
+        },
+        {
+          "name": "兴业股份",
+          "sector": "电子树脂",
+          "role": "核心"
+        },
+        {
+          "name": "源杰科技",
+          "sector": "CPO",
+          "role": "风险"
+        },
+        {
+          "name": "长光华芯",
+          "sector": "CPO",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [],
+      "numeric_claims": [
+        "科创50跌近5%",
+        "沪深京三市近3800股飘绿",
+        "成交1.69万亿",
+        "沪指跌0.79%",
+        "深成指跌2.07%",
+        "创业板指跌3.15%",
+        "碳氢树脂2026年需求同比增长约42%",
+        "锂电池板块14股大涨",
+        "尚水智能涨20.0%",
+        "金银河涨17.6%",
+        "理奇智能涨13.1%",
+        "长寿命锂电池循环寿命目标15000次"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
