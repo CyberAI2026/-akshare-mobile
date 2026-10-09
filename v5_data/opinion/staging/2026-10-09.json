@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-09",
   "trade_date": "2026-10-09",
-  "updated_at_cn": "2026-10-09T21:14:39.270640+08:00",
+  "updated_at_cn": "2026-10-09T21:24:43.583111+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -252,6 +252,21 @@
       "body_chars": 1455,
       "body_sha256": "ca03bb93ae75bfd4b03f07fb61e85aacbcb7e5502b0661d1392e505fd9504373",
       "published_at_cn": "2026-10-09T17:01:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "de9dacce2599a0cc",
+      "title": "20261009复盘（持仓天娱数科、襄阳轴承）_善解人意1992_淘股吧",
+      "url": "https://www.tgb.cn/a/2vL0wnZblWq",
+      "read_count": 5,
+      "body_chars": 1405,
+      "body_sha256": "de9dacce2599a0cce01cc038c0d620752bcd3021e63dae8dfce28db91ed51371",
+      "published_at_cn": "2026-10-09T18:57:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1740,6 +1755,72 @@
         "早盘一度不足1000只股票上涨",
         "成交量接近2万亿元"
       ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "de9dacce2599a0cc",
+      "market_stance": "中性",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为大盘低开高走、尾盘回升，整体有惊无险；下周关注新华传媒连板情况及电池是否接力。",
+      "sectors": [
+        {
+          "name": "电池",
+          "stance": "活跃",
+          "evidence": "作者列为当日主线，并认为新华传媒断板后或由电池接力。"
+        },
+        {
+          "name": "出版",
+          "stance": "活跃",
+          "evidence": "作者将出版列为当日主线之一。"
+        },
+        {
+          "name": "影视",
+          "stance": "活跃",
+          "evidence": "作者将影视列为当日主线之一。"
+        },
+        {
+          "name": "大消费",
+          "stance": "活跃",
+          "evidence": "作者将大消费列为当日主线之一。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "出版",
+          "role": "高关注"
+        },
+        {
+          "name": "天赐材料",
+          "sector": "电池",
+          "role": "高关注"
+        },
+        {
+          "name": "天娱数科",
+          "sector": "影视",
+          "role": "高关注"
+        },
+        {
+          "name": "襄阳轴承",
+          "sector": "",
+          "role": "不明确"
+        },
+        {
+          "name": "我爱我家",
+          "sector": "",
+          "role": "不明确"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒能否继续连板",
+        "电池能否接力走强",
+        "天赐材料、天娱数科表现"
+      ],
+      "numeric_claims": [],
       "quality_flags": [
         "广告"
       ]
