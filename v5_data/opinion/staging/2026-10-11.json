@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-11",
   "trade_date": "2026-10-12",
-  "updated_at_cn": "2026-10-11T21:14:34.689592+08:00",
+  "updated_at_cn": "2026-10-11T21:24:05.165392+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -117,6 +117,21 @@
       "body_chars": 3775,
       "body_sha256": "b8717ff24a6f69b802a03f8b84e0c4883052e04e1937ef4885c35470daa252a2",
       "published_at_cn": "2026-10-11T20:46:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "f62e798324ccd0a3",
+      "title": "2026年10月11日星期日，不见兔子不撒鹰，不见放量承接不轻易进场！_爱吃鸡的小韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2vOlnIiN3YH",
+      "read_count": 8,
+      "body_chars": 2459,
+      "body_sha256": "f62e798324ccd0a39e484f36fbd45f29066534673a7b3ae81b9db420778768e0",
+      "published_at_cn": "2026-10-11T19:12:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -933,6 +948,37 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "f62e798324ccd0a3",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为市场整体承压且波动加大，短线关键看次日是否放量修复并由科技领涨；若无量则应继续降低预期与仓位。",
+      "sectors": [
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称持有科技者普遍承压，并认为若科技带头放量修复，市场短期仍有可看性。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "市场能否放量修复",
+        "科技能否带头走强",
+        "高开后的承接力度及是否高开低走"
+      ],
+      "numeric_claims": [
+        "作者称9月曾连续3天出现4000家下跌",
+        "作者称指数被维持在3800附近",
+        "作者关注指数3700附近的表现",
+        "作者提及10月14日和10月15日将公布CPI、PPI数据"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     }
   ]
