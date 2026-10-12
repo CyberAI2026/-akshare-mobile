@@ -1,0 +1,87 @@
+{
+  "source_date": "2026-10-13",
+  "trade_date": "2026-10-13",
+  "updated_at_cn": "2026-10-13T06:05:29.875118+08:00",
+  "method": "incremental AI-verified quality pool; raw article bodies not persisted",
+  "sources": [
+    {
+      "article_id": "d417ce9978e3747b",
+      "title": "10.12 开启二次反弹_八进八出瓢子龙_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQmhaqJ1NI",
+      "read_count": 318,
+      "body_chars": 1866,
+      "body_sha256": "d417ce9978e3747b09ba3558e4d722b387b7c0619b9d4f3fe2d3acfce8011bde",
+      "published_at_cn": "2026-10-13T00:20:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    }
+  ],
+  "article_mining": [
+    {
+      "article_id": "d417ce9978e3747b",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为当日普跌属反弹中的去弱留强，预期次日偏强；但中期更倾向AI硬件拥挤后仍需出清，后续核心或转向非机构重仓股。",
+      "sectors": [
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称银行趋势继续走强，已连续四天。"
+        },
+        {
+          "name": "AI硬件",
+          "stance": "分化",
+          "evidence": "作者认为其仍可能为核心，但更倾向其拥挤后需出清。"
+        },
+        {
+          "name": "AI硬科技",
+          "stance": "不明确",
+          "evidence": "作者认为可能到此为止，也引述观点称非机构重仓股仍有行情。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "时代万恒",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "新华传媒",
+          "sector": "",
+          "role": "风险"
+        },
+        {
+          "name": "桂林旅游",
+          "sector": "",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "大盘高开高走及回踩是否跌破当日低点",
+        "九阳股份涨停后是否触及100%偏离",
+        "高标中是否有个股试探监管"
+      ],
+      "numeric_claims": [
+        "当日有4000多家下跌",
+        "作者给出的趋势风格指数为50",
+        "银行趋势走强已连续4天",
+        "若4bC浪不能创新高，4c浪极限点位或跌破3674.40",
+        "九阳股份次日涨停将达到100%偏离"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    }
+  ]
+}
