@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-12",
   "trade_date": "2026-10-12",
-  "updated_at_cn": "2026-10-12T21:14:42.816171+08:00",
+  "updated_at_cn": "2026-10-12T21:24:35.176078+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -200,6 +200,21 @@
       ]
     },
     {
+      "article_id": "70e3809c3b909cf1",
+      "title": "26.10.12围绕新华补涨做2板布局假想_人人一724_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPKEay6ysb",
+      "read_count": 1635,
+      "body_chars": 8784,
+      "body_sha256": "70e3809c3b909cf1163cd13a7af11e65b7fb2eb80f3137d237fd4e3f6a77d797",
+      "published_at_cn": "2026-10-12T15:33:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "749406ac7764b684",
       "title": "261012复盘：能申请未成年人退款么？_流一刀丶_淘股吧",
       "url": "https://www.tgb.cn/a/2vPRwrYyRyY",
@@ -387,6 +402,21 @@
       "body_chars": 8337,
       "body_sha256": "b43058da6a0e9d3e0b168f84f3285f4798fb96b9e21fd7bbda6d6fec0792116d",
       "published_at_cn": "2026-10-12T20:21:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "bee056ddf5cbfcd1",
+      "title": "2026年10月12日A股复盘：等待磨底_五事本源_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ8XooO4yL",
+      "read_count": 2,
+      "body_chars": 1839,
+      "body_sha256": "bee056ddf5cbfcd1061f78a2a852a678ce15040bd9989347061d4a9ddd1aff7a",
+      "published_at_cn": "2026-10-12T21:13:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1669,6 +1699,69 @@
       ]
     },
     {
+      "article_id": "70e3809c3b909cf1",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "发酵",
+        "分歧"
+      ],
+      "market_summary": "作者认为大盘触底反弹与新华传媒高位表现催生补涨，但传媒二板拥挤，补涨持续性及后排套利风险需警惕。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "加强",
+          "evidence": "作者称14只二板中有11只传媒，传媒二板呈一家独大格局。"
+        },
+        {
+          "name": "上海地域",
+          "stance": "分化",
+          "evidence": "作者认为上海股仍需重视，但称其涨停数量及布局较此前更弱。"
+        },
+        {
+          "name": "电商及化妆品",
+          "stance": "不明确",
+          "evidence": "作者称相关细分未见跟随发酵，对比传媒显得势单力薄。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "新亚强",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "慈文传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒是否因监管停牌及其对情绪的影响",
+        "传媒二板晋级率及核心股竞争结果",
+        "上海非传媒补涨能否出现板块发酵"
+      ],
+      "numeric_claims": [
+        "今日一进二晋级率20%+",
+        "今日有十几个二板",
+        "新华传媒此前为9板，今日为10板且缩量",
+        "作者暂给本批二板5板预期",
+        "14只二板中有11个传媒",
+        "作者预计传媒明日晋级率50%已属不错",
+        "新华都924首板约7亿元成交额",
+        "文中称相关应用个股成交量超过10亿元",
+        "作者举例隔夜操作曾当日亏损12%、次日跌停卖出"
+      ],
+      "quality_flags": [
+        "明显情绪化",
+        "广告"
+      ]
+    },
+    {
       "article_id": "749406ac7764b684",
       "market_stance": "谨慎",
       "market_phase": [
@@ -2697,6 +2790,84 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "bee056ddf5cbfcd1",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "冰点"
+      ],
+      "market_summary": "作者认为市场买盘不足、轮动缩圈，科技硬件领跌；在指数到3700或成交额缩至1万亿元以下前，不宜激进。",
+      "sectors": [
+        {
+          "name": "科技硬件",
+          "stance": "退潮",
+          "evidence": "作者称其为下跌主力，受外部压力影响。"
+        },
+        {
+          "name": "电源",
+          "stance": "退潮",
+          "evidence": "作者认为337调查影响较大，该环节跌幅最重。"
+        },
+        {
+          "name": "代工",
+          "stance": "退潮",
+          "evidence": "作者称337调查对代工厂影响大，不宜急于抄底。"
+        },
+        {
+          "name": "传媒影视",
+          "stance": "活跃",
+          "evidence": "作者称传媒影视独自撑场且仍有强度，但已活跃两天。"
+        },
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者认为前一日较好的农业方向当日缺乏持续性。"
+        },
+        {
+          "name": "黄金",
+          "stance": "分化",
+          "evidence": "作者认为黄金当日无持续性，不宜追逐。"
+        },
+        {
+          "name": "能源",
+          "stance": "退潮",
+          "evidence": "作者称科技、能源、周期共同下跌。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "分化",
+          "evidence": "作者认为煤炭当日无持续性。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "工业富联",
+          "sector": "代工",
+          "role": "风险"
+        },
+        {
+          "name": "贵州茅台",
+          "sector": "传统消费",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数是否下探至3700关键位置",
+        "成交额是否进一步缩至1万亿元以下",
+        "科技硬件及电源、代工方向的止跌情况"
+      ],
+      "numeric_claims": [
+        "个股下跌4000余家",
+        "成交额1.54万亿元",
+        "成交额较上日下降19.1%",
+        "关注指数3700位置",
+        "关注成交额缩至1万亿元以下"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
