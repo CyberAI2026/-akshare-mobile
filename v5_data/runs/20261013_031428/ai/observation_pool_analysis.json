@@ -1,0 +1,57 @@
+{
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "输入市场宽度快照显示上涨1111家、下跌4036家，净上涨-2925；主要指数近5日至60日多数走弱，市场环境偏弱。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "sector_assessment": {
+    "status": "正式可用",
+    "summary": "农林牧渔仅有行业映射，候选股同期概念行情未匹配，板块共振未核验；公开板块数据中农业/种业观点偏退潮，需防范负反馈。"
+  },
+  "opinion_assessment": {
+    "status": "可用",
+    "summary": "公开复盘聚合观点为谨慎偏空、分歧退潮，农业/种业多数观点偏兑现；该信息为观点汇总，不是行情事实。"
+  },
+  "selected_codes": [
+    "603151"
+  ],
+  "decisions": [
+    {
+      "股票代码": "603151",
+      "股票名称": "邦基科技",
+      "decision": "SELECT",
+      "priority": 1,
+      "confidence_level": "低",
+      "evidence": "整理收敛支持3/3：振幅收敛比0.755、成交量收敛比0.756、换手收敛比0.786；MA5三日斜率-0.0038而MA10三日斜率0.0269，短期下行停止证据为真；中期上升趋势延续，收盘距稳健5日上沿-3.07%。",
+      "risk": "突破后尚在确认窗，平台上沿18.76未重新站稳，回踩守位为否且重新缓慢走强为否；市场偏弱，农业板块同期共振未核验。；缺少同期板块客观行情，保留为条件观察，待14:40-14:45核验",
+      "next_day_watch": "14:40-14:45核验能否重新站稳并接近/突破18.76，回踩是否守位、量能是否较整理期适度恢复且不出现放量走弱。",
+      "structure_assessment": "中期上升趋势延续；5日整理且收敛较充分，MA5下行趋停、MA10上行；距稳健5日上沿-3.07%，但突破后回踩尚未守位。",
+      "volume_assessment": "近5日平均成交量3186755，较前10日4213977.7收敛，收敛比0.756。",
+      "amplitude_assessment": "近5日振幅11.48%，相对前10日区间振幅15.19%收敛，收敛比0.755。",
+      "turnover_assessment": "近5日平均换手率1.93%，较前10日2.46%收敛，收敛比0.786。",
+      "sector_resonance": "未核验：仅农林牧渔行业映射，未提供该股同期可匹配概念行情；公开复盘观点对农业/种业偏退潮。"
+    }
+  ],
+  "nonselected": [],
+  "portfolio_note": "程序板块证据门禁后，正式观察池共1只（603151）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：603151。",
+  "model_portfolio_note_before_sector_gate": "仅纳入低置信度次日验证观察，不构成14:45买点确认；弱市下以确认突破后的承接质量为先，未完成守位与重新走强验证则不升级。",
+  "sector_retreat_downgraded_codes": [],
+  "sector_unverified_downgraded_codes": [],
+  "sector_unverified_conditional_codes": [
+    "603151"
+  ],
+  "sector_divergence_conditional_codes": [],
+  "pool_cap_trimmed_codes": [],
+  "pool_ranking_scores_70_30": {
+    "603151": 1.0
+  },
+  "market_pool_policy": {
+    "market_regime": "一般或偏弱",
+    "minimum": 0,
+    "maximum": 5,
+    "上涨比例": 0.2131619339984651,
+    "成交额较前一日变化率": 0.2315999689176349,
+    "rule": "上涨比例>=60%且全市场成交额较前日放大>=5%时为较好/活跃，否则为一般或偏弱"
+  },
+  "pool_minimum_shortfall": 0
+}
