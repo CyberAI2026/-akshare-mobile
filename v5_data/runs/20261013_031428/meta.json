@@ -1,0 +1,36 @@
+{
+  "status": "running",
+  "stage": "initialized",
+  "engine": "V5.3-auditable-market-sector-layer",
+  "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
+  "started_cn": "2026-10-13T03:14:28.686902+08:00",
+  "stamp": "20261013_031428",
+  "folder": "v5_data/runs/20261013_031428",
+  "batch_path": "",
+  "batch_count": 0,
+  "master_before_screen": 811,
+  "bootstrapped_from_v4": false,
+  "cache_seed": {
+    "seeded": 0,
+    "scanned": 772,
+    "available": 535
+  },
+  "cache_refresh": {
+    "asof_trade_date": "2026-10-12",
+    "source": "sina-spot",
+    "pool_count": 811,
+    "already_current": 0,
+    "bulk_appended": 0,
+    "needs_history_fallback": 811,
+    "missing_cache": 0,
+    "corporate_action_guard": 0,
+    "errors": [
+      "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+    ]
+  },
+  "cache_asof_trade_date": "2026-10-12",
+  "cache_deep_ready_count": 670,
+  "cache_current_count": 0,
+  "cache_fallback_count": 811,
+  "isolated_index_count": 0
+}
