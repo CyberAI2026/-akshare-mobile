@@ -1,0 +1,10 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+002349,精华制药,成功,120,global-cache,global-cache,local-cache,105,
+600551,时代出版,成功,120,global-cache,global-cache,local-cache,105,
+603626,科森科技,成功,120,global-cache,global-cache,local-cache,105,
+000980,众泰汽车,成功,120,global-cache,global-cache,local-cache,105,
+600192,长城电工,成功,120,global-cache,global-cache,local-cache,105,
+603980,吉华集团,成功,120,global-cache,global-cache,local-cache,105,
+600059,古越龙山,成功,120,global-cache,global-cache,local-cache,105,
+603721,中广天择,成功,120,global-cache,global-cache,local-cache,105,
+002815,崇达技术,成功,120,global-cache,global-cache,local-cache,105,
