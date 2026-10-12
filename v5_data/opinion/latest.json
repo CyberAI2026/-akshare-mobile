@@ -1,7 +1,7 @@
 {
-  "trade_date": "2026-10-09",
-  "source_date": "2026-10-09",
-  "generated_at_cn": "2026-10-09T22:05:45.638536+08:00",
+  "trade_date": "2026-10-12",
+  "source_date": "2026-10-12",
+  "generated_at_cn": "2026-10-12T22:07:55.950835+08:00",
   "method": "full-text transient mining; raw article bodies not persisted",
   "selection_standard": {
     "publication_date": "文章页面可核验的发表日期必须等于采集日",
@@ -12,13 +12,13 @@
   },
   "sources": [
     {
-      "article_id": "067a099920b330bd",
-      "title": "2026.10.09复盘_黑絔丶_淘股吧",
-      "url": "https://www.tgb.cn/a/2vLctA8693x",
-      "read_count": 4,
-      "body_chars": 2727,
-      "body_sha256": "067a099920b330bd1154ad04b2320b4c20fdf9858f1d7f382fd9575394143673",
-      "published_at_cn": "2026-10-09T21:45:00+08:00",
+      "article_id": "045dd05bb833882d",
+      "title": "10月12日周一数据复盘_唐僧不吃糖_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQatdMkXCE",
+      "read_count": 6,
+      "body_chars": 5029,
+      "body_sha256": "045dd05bb833882d59c5260c7cc18238cb75075d27c7b11552b9538348ed3211",
+      "published_at_cn": "2026-10-12T21:35:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -27,13 +27,13 @@
       ]
     },
     {
-      "article_id": "1829b8a1d70f7886",
-      "title": "10.8 从不让人失望_八进八出瓢子龙_淘股吧",
-      "url": "https://www.tgb.cn/a/2vJJfe5FEJA",
-      "read_count": 624,
-      "body_chars": 2035,
-      "body_sha256": "1829b8a1d70f7886d197cca11663cb2cf409473708eeb17f67364dddb9b971a5",
-      "published_at_cn": "2026-10-09T00:28:00+08:00",
+      "article_id": "1b34d15dd9505146",
+      "title": "2026.10.12操作复盘_杠杆梭哈_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPKu4snZBX",
+      "read_count": 62,
+      "body_chars": 7447,
+      "body_sha256": "1b34d15dd9505146141423b862b3fd654c9ab88fd4101395a9ab6be43593c7c8",
+      "published_at_cn": "2026-10-12T15:31:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -42,13 +42,13 @@
       ]
     },
     {
-      "article_id": "1c6f2eb040575d62",
-      "title": "[红包]10.9完美预判—低开下杀再修复，盘中抄了一点ETF_青锋问道_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKSkPZXuKx",
-      "read_count": 267,
-      "body_chars": 6500,
-      "body_sha256": "1c6f2eb040575d62d43c88bf94bc537c814909a8d2cc029bed909c1671dfaa13",
-      "published_at_cn": "2026-10-09T17:03:00+08:00",
+      "article_id": "24128b2c627e8f25",
+      "title": "261012（周一）盘后复盘｜双创指数缩量跌超2%，传媒AI短剧独领风骚，硬科技全线溃退_邵柳智_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQa0G0dlar",
+      "read_count": 6,
+      "body_chars": 7818,
+      "body_sha256": "24128b2c627e8f25ffb86fada8779b0ed29a99d2a505856dd4f96fbea03010a2",
+      "published_at_cn": "2026-10-12T21:28:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -57,13 +57,13 @@
       ]
     },
     {
-      "article_id": "24230df56bd82c5f",
-      "title": "10.9复盘｜3800失而复得，百股涨停V型反攻，AI视频+固态电池双主线_风云AI赛事_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKTaI9HZGE",
-      "read_count": 83,
-      "body_chars": 3665,
-      "body_sha256": "24230df56bd82c5f41527798c99e9c23c18273b8860bc3ed5600bf2a2503f2e6",
-      "published_at_cn": "2026-10-09T17:14:00+08:00",
+      "article_id": "2476d2a5e163bda2",
+      "title": "海龙复盘｜10.12A股复盘：量价观察案例，竞价提示观察次阳，阿莱德今日封板_海龙看盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPOxDawWpl",
+      "read_count": 45,
+      "body_chars": 2887,
+      "body_sha256": "2476d2a5e163bda2caa32d0f4752157cc171d84bef8eac128a7cb5d88bea72bc",
+      "published_at_cn": "2026-10-12T16:28:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -72,13 +72,13 @@
       ]
     },
     {
-      "article_id": "34c0ca40a0a6d892",
-      "title": "2026年10月9日 复盘记录_超短臭袜攻击_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKVY08opr4",
-      "read_count": 15,
-      "body_chars": 2104,
-      "body_sha256": "34c0ca40a0a6d8920ca4ea250a0f17478a1defd50ab3e511c1151c1f512cb6df",
-      "published_at_cn": "2026-10-09T17:54:00+08:00",
+      "article_id": "2e2c8f54549fd1a3",
+      "title": "HAPPY复盘-2026-10-12_Happy360_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPKWzdaKIN",
+      "read_count": 70,
+      "body_chars": 2387,
+      "body_sha256": "2e2c8f54549fd1a3507b26229b31769c526ccc047d12dd0cb3233a03cde82800",
+      "published_at_cn": "2026-10-12T15:37:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -87,13 +87,13 @@
       ]
     },
     {
-      "article_id": "3aecf963d3c4cf6a",
-      "title": "2026.10.9复盘_股界华英雄1995_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKKKt4Ebu1",
-      "read_count": 66,
-      "body_chars": 1587,
-      "body_sha256": "3aecf963d3c4cf6a75993d1f747e88290a084452eae91e8adabfd9831b7637df",
-      "published_at_cn": "2026-10-09T15:17:00+08:00",
+      "article_id": "2f1282f48ce10eb2",
+      "title": "美债5.24%压顶，港股却逆势走强！今天A股跟谁走？两大预案+盯盘清单｜10月12日·盘前观察_一手一手玩_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPg3lozj9t",
+      "read_count": 110,
+      "body_chars": 3731,
+      "body_sha256": "2f1282f48ce10eb20922ee14a2c743262c97f054feba7cd0aea2438af23ce01f",
+      "published_at_cn": "2026-10-12T08:25:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -102,13 +102,13 @@
       ]
     },
     {
-      "article_id": "3bc7dee50efc4312",
-      "title": "碳酸锂硬核拆解 02｜跌破12万，为什么锂电股不跟跌？（收盘验证版）_一手一手玩_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKOeGCzkhb",
-      "read_count": 39,
-      "body_chars": 3206,
-      "body_sha256": "3bc7dee50efc43122e7ba33b3b2e4306bf322ffaae8d9474739219e637d02292",
-      "published_at_cn": "2026-10-09T16:05:00+08:00",
+      "article_id": "3b453919c3c11b7f",
+      "title": "《10月12日A股收盘复盘：指数和个股表现分化，传媒方向继续活跃》_机智的量化交易员_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPNxMrqqOL",
+      "read_count": 68,
+      "body_chars": 3258,
+      "body_sha256": "3b453919c3c11b7fa8ca445189668d2863a59e3a70a83c0507bb9eec6d3e669b",
+      "published_at_cn": "2026-10-12T16:14:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -117,13 +117,13 @@
       ]
     },
     {
-      "article_id": "4341ff7f5c1ce952",
-      "title": "2026.10.9复盘_杠杆梭哈_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKKBUwW5eC",
-      "read_count": 127,
-      "body_chars": 6530,
-      "body_sha256": "4341ff7f5c1ce9522266fd4dfc88631b57ff93272a859e1c2ef0ccdaec3b0fdc",
-      "published_at_cn": "2026-10-09T15:15:00+08:00",
+      "article_id": "3bebb21989f02b38",
+      "title": "2026.10.12复盘_股界华英雄1995_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPLQsxT4vq",
+      "read_count": 71,
+      "body_chars": 1525,
+      "body_sha256": "3bebb21989f02b38ac55ae7eb105cd0fd1b807066f0496e56e31cf8c3a3223e0",
+      "published_at_cn": "2026-10-12T15:50:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -132,13 +132,13 @@
       ]
     },
     {
-      "article_id": "44a2618412e7a01b",
-      "title": "漂亮的大长腿！它来了！_陌尘青羽_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKNhuqzSfc",
-      "read_count": 51,
-      "body_chars": 2015,
-      "body_sha256": "44a2618412e7a01b94af30b077be0282fee9b4b89371644f66ca45488e6f7553",
-      "published_at_cn": "2026-10-09T15:52:00+08:00",
+      "article_id": "400ebc83cae4a7d3",
+      "title": "2026年10月12日复盘记录_超短臭袜攻击_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPWzTxvNP0",
+      "read_count": 2,
+      "body_chars": 2145,
+      "body_sha256": "400ebc83cae4a7d3496343d340b048fa05dfa99bb87b4b383aeb3e00ce93c5ba",
+      "published_at_cn": "2026-10-12T18:20:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -147,13 +147,13 @@
       ]
     },
     {
-      "article_id": "5c58a0d40784d104",
-      "title": "早盘杀到-5%，午后全拉回：1.9万亿，钱换了方向_风云赛事战报官_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKSVnikeSz",
-      "read_count": 83,
-      "body_chars": 2114,
-      "body_sha256": "5c58a0d40784d104042e497df2b709a65560ca662374ccdb2701c827adb5b34b",
-      "published_at_cn": "2026-10-09T17:11:00+08:00",
+      "article_id": "4099e99f26404984",
+      "title": "10月12日超越技术分析复盘：冰火两重天情绪退潮期_超越技术分析_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPUuWdwfVP",
+      "read_count": 12,
+      "body_chars": 3363,
+      "body_sha256": "4099e99f264049841e057245797ee96a9f83ec4617660e733e9397276eaa0e86",
+      "published_at_cn": "2026-10-12T17:51:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -162,13 +162,13 @@
       ]
     },
     {
-      "article_id": "8399932bdfe5e5bd",
-      "title": "10月9日复盘｜AI硬件被抽血，锂电与实物资产逆势吸金_一手一手玩_淘股吧",
-      "url": "https://www.tgb.cn/a/2vL4PUU99We",
-      "read_count": 3,
-      "body_chars": 5786,
-      "body_sha256": "8399932bdfe5e5bdf6c2167134f50e88012ac75035a8d551a136841b7dbabc9b",
-      "published_at_cn": "2026-10-09T19:58:00+08:00",
+      "article_id": "4d5080431904c31e",
+      "title": "盘中复盘——修复没延续，午后这信号得清楚_TaMMy01_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPGCIEubdG",
+      "read_count": 73,
+      "body_chars": 5372,
+      "body_sha256": "4d5080431904c31ebe64785ff853b0ee43121b8b250b64c1a804e7d876587d64",
+      "published_at_cn": "2026-10-12T14:37:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -177,133 +177,13 @@
       ]
     },
     {
-      "article_id": "8bbb7fc117044a8c",
-      "title": "《10月9日收盘复盘：早盘一度跌懵了，下午却来了个大反转！》_机智的量化交易员_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKNs3wvi6I",
-      "read_count": 41,
-      "body_chars": 3759,
-      "body_sha256": "8bbb7fc117044a8c9708c833f5d0fb2ec2f073b813372dc4abe0eabe3b6e9b64",
-      "published_at_cn": "2026-10-09T15:54:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "9649c8353b5910c3",
-      "title": "10月9日周五复盘--探底回升 分化格局_唐僧不吃糖_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKNofCqcQf",
-      "read_count": 58,
-      "body_chars": 5332,
-      "body_sha256": "9649c8353b5910c3d349d356699a214e7308ca7d121ec02d109a5b007e0beba5",
-      "published_at_cn": "2026-10-09T15:54:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "a72daadf6a30d0e8",
-      "title": "20261009复盘丨探底，放量深 V_山风细雨_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKUn5FP98F",
-      "read_count": 9,
-      "body_chars": 4162,
-      "body_sha256": "a72daadf6a30d0e852155457c40074de415ac591a3f38fd892827a30d659bf4a",
-      "published_at_cn": "2026-10-09T17:31:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "b96f105345b2a16e",
-      "title": "科创重挫4%，恒生科技逆涨1.39%！资金在逃还是在换仓_一手一手玩_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKrstiehid",
-      "read_count": 64,
-      "body_chars": 6408,
-      "body_sha256": "b96f105345b2a16e4c887713cbf3f1a463a6cb5c6c85b906007cd081e180069e",
-      "published_at_cn": "2026-10-09T10:47:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "c15c5f1e390e5b20",
-      "title": "10.9复盘：指数深V反弹有望见底，应用午后暴动量化平铺_子语观市_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKQsuMg4xT",
-      "read_count": 408,
-      "body_chars": 3036,
-      "body_sha256": "c15c5f1e390e5b20cc89c3b8a0044b5ff8f33eeec7f16573e9b2acc79c6042c9",
-      "published_at_cn": "2026-10-09T16:36:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "c5dce28bdcf0d3f8",
-      "title": "10.9A股复盘｜指数下跌趋势没改，9板新华传媒穿越，反弹只是修复，别当成反转_xxaxaxax_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKNZcGj0xt",
-      "read_count": 52,
-      "body_chars": 2589,
-      "body_sha256": "c5dce28bdcf0d3f8994fb02a61d06971f4c0bc1ba895bac4892d744c0d0e6cc2",
-      "published_at_cn": "2026-10-09T16:02:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "ca03bb93ae75bfd4",
-      "title": "2026年10月9日复盘_Honeyzzz_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKScnnyJkl",
-      "read_count": 59,
-      "body_chars": 1455,
-      "body_sha256": "ca03bb93ae75bfd4b03f07fb61e85aacbcb7e5502b0661d1392e505fd9504373",
-      "published_at_cn": "2026-10-09T17:01:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "dcac80509ca39934",
-      "title": "10月9日主题复盘 | 指数V型反转，大消费早盘活跃，影视、黄金、网络安全午后强势拉升_风胡子2023_淘股吧",
-      "url": "https://www.tgb.cn/a/2vLbIbRmo8P",
-      "read_count": 3,
-      "body_chars": 2838,
-      "body_sha256": "dcac80509ca3993426f8b56ed3cdc3672d451fcef1b708076a33aace74313761",
-      "published_at_cn": "2026-10-09T21:34:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "de9dacce2599a0cc",
-      "title": "20261009复盘（持仓天娱数科、襄阳轴承）_善解人意1992_淘股吧",
-      "url": "https://www.tgb.cn/a/2vL0wnZblWq",
+      "article_id": "512795d2f255200e",
+      "title": "20261012复盘：新华官宣停牌，总龙缺位，高位抱团与避险博弈_harry0755_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ9CEmb7sI",
       "read_count": 5,
-      "body_chars": 1405,
-      "body_sha256": "de9dacce2599a0cce01cc038c0d620752bcd3021e63dae8dfce28db91ed51371",
-      "published_at_cn": "2026-10-09T18:57:00+08:00",
+      "body_chars": 5074,
+      "body_sha256": "512795d2f255200e6458472e3743dcfed8a27eb14463d97c866cf60ad2378d44",
+      "published_at_cn": "2026-10-12T21:23:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -312,13 +192,388 @@
       ]
     },
     {
-      "article_id": "e19ac192ea9b4e6e",
-      "title": "261009（周五）盘后复盘｜深V逆转！科创50一度跌超4%，传媒固态电池双线爆发，新华传媒9连板_邵柳智_淘股吧",
-      "url": "https://www.tgb.cn/a/2vLbDg9WTpP",
+      "article_id": "57a0f5084db78508",
+      "title": "指数全线走弱！成交缩量超3600亿，两融余额却增加67亿谁在偷偷抄底？｜10月12日·深度复盘_一手一手玩_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ7Yo2Hsma",
+      "read_count": 4,
+      "body_chars": 3020,
+      "body_sha256": "57a0f5084db78508171e0021e3102543fe18eea1397cf65e29d7bf871171bd23",
+      "published_at_cn": "2026-10-12T21:00:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "5b429838cb047ca8",
+      "title": "2026.10.12复盘_玉衡辰星_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPZKPkLwcP",
+      "read_count": 2,
+      "body_chars": 7939,
+      "body_sha256": "5b429838cb047ca8ff98ec32af322798d5158dcd1463439d396e1dfd80a1beb1",
+      "published_at_cn": "2026-10-12T19:05:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "63ae9bfc6283cbd9",
+      "title": "2026.10.12 只复盘，不荐股_北漂囚徒_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPSjr8eEW2",
+      "read_count": 90,
+      "body_chars": 4057,
+      "body_sha256": "63ae9bfc6283cbd92cc1e62b6e553f44db153d95898f826c07f60cd2af38615f",
+      "published_at_cn": "2026-10-12T17:20:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "6bbbeb4dc30ccf47",
+      "title": "10月12日主题复盘：短剧、传媒继续强势，银行股逆势走强，风电板块冲高回落_风胡子2023_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ3Ft615Hs",
+      "read_count": 1,
+      "body_chars": 2862,
+      "body_sha256": "6bbbeb4dc30ccf479b8500a52ed6baea268af3ee7bcfee5c4bce3f941c221e7a",
+      "published_at_cn": "2026-10-12T19:59:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "70e3809c3b909cf1",
+      "title": "26.10.12围绕新华补涨做2板布局假想_人人一724_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPKEay6ysb",
+      "read_count": 1635,
+      "body_chars": 8784,
+      "body_sha256": "70e3809c3b909cf1163cd13a7af11e65b7fb2eb80f3137d237fd4e3f6a77d797",
+      "published_at_cn": "2026-10-12T15:33:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "749406ac7764b684",
+      "title": "261012复盘：能申请未成年人退款么？_流一刀丶_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPRwrYyRyY",
+      "read_count": 57,
+      "body_chars": 4186,
+      "body_sha256": "749406ac7764b68444e5e30ecd5f9570ef242986132c66d04ce2d50b9d48ebea",
+      "published_at_cn": "2026-10-12T17:09:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "7c58be35528ac7bc",
+      "title": "海龙复盘｜10.12A股复盘：量价观察案例，竞价提示观察次阳，阿莱德今日封板_海龙看盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPMTcp0ERa",
+      "read_count": 38,
+      "body_chars": 2892,
+      "body_sha256": "7c58be35528ac7bca33d91293bac5826fb3d8d96fc9662501947a0aee9f9cfa2",
+      "published_at_cn": "2026-10-12T16:05:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "9407fdc51d0d3ac4",
+      "title": "1012复盘_嘎嘎嘎阿_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ2vWO8h1H",
+      "read_count": 2,
+      "body_chars": 2319,
+      "body_sha256": "9407fdc51d0d3ac4e0d1e65b3c4e7049ac503afe184836ad848689a9d23dae53",
+      "published_at_cn": "2026-10-12T19:43:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "96fc2f8a8bab7f3d",
+      "title": "海龙复盘｜10.12A股复盘：量价观察案例，竞价提示观察次阳，阿莱德今日封板_海龙看盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPNvdHGkVt",
+      "read_count": 56,
+      "body_chars": 2887,
+      "body_sha256": "96fc2f8a8bab7f3d418bfc9ab508c628a833e53ee41bdfbdce25908d5932d678",
+      "published_at_cn": "2026-10-12T16:13:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a0842aecafcf27f9",
+      "title": "10.12复盘：大盘缩量科技继续压制指数，传媒分化回流题材结构演绎_子语观市_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPO9tDqg7p",
+      "read_count": 409,
+      "body_chars": 2888,
+      "body_sha256": "a0842aecafcf27f9520e5215089a34482447c659977446d290ae3d65c66e8ff0",
+      "published_at_cn": "2026-10-12T16:22:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a159c3348152a62a",
+      "title": "1012复盘丨极致抱团的真相：新华传媒 10 板飞天，4300 只票集体躺平杀跌_观浪生_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPSBc5rryZ",
+      "read_count": 471,
+      "body_chars": 12578,
+      "body_sha256": "a159c3348152a62a33d6d099130f99c7ea0cfe1c280c494f6e57a868c8b78948",
+      "published_at_cn": "2026-10-12T17:24:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a24be254b6cc16d5",
+      "title": "A股盘中快讯：缩量分化，板块呈现结构性资金分化特征_一手一手玩_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPrtuHoPmT",
+      "read_count": 70,
+      "body_chars": 2851,
+      "body_sha256": "a24be254b6cc16d5d8c4203fd03101fb8a3bb0b2d5c6a4f76dfb1e031f008843",
+      "published_at_cn": "2026-10-12T11:05:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a7e69fb72a0ab989",
+      "title": "盘面出现明显撕裂！银行持续新高，科技硬件大幅走弱｜10月12日盘中深度观察_一手一手玩_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPHG4WPv9r",
+      "read_count": 57,
+      "body_chars": 3091,
+      "body_sha256": "a7e69fb72a0ab989d5485f9d1ab68b6738d29185c6e5978f21e5fcc01a1d9c11",
+      "published_at_cn": "2026-10-12T14:52:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "a9dc96ad5847f68e",
+      "title": "10·12 复盘_伍哥玩股_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPYXc9VAnE",
+      "read_count": 1,
+      "body_chars": 2119,
+      "body_sha256": "a9dc96ad5847f68ea1e9dbd03666493d6c50c8cdee1b40418c4d2fa19c9f5936",
+      "published_at_cn": "2026-10-12T18:53:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "ae027ebaa20a3d9f",
+      "title": "坚持复盘100天 第四天 10月12日 今天亏嘛了_UK小程_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPLmG7v8o4",
+      "read_count": 69,
+      "body_chars": 2234,
+      "body_sha256": "ae027ebaa20a3d9fbe223696cb4b330959bcfff3a4ffef8f6007bd6467d9a5e7",
+      "published_at_cn": "2026-10-12T15:43:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "b0a56dd4109f854f",
+      "title": "庐州渔夫 | 2026年10月12日复盘_笃亿_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPL0veOeJz",
+      "read_count": 67,
+      "body_chars": 1780,
+      "body_sha256": "b0a56dd4109f854fb54391589b55c0a4768b408c6f6d13b6efeec6f769a98763",
+      "published_at_cn": "2026-10-12T15:38:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "b27bcd565b359ed3",
+      "title": "[红包]10.12 九阳股份，难道你要9连板不成？_青锋问道_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPUFlDo3kD",
+      "read_count": 23,
+      "body_chars": 9545,
+      "body_sha256": "b27bcd565b359ed357d354de17417863787e88a532be88bf45df6159f4b76836",
+      "published_at_cn": "2026-10-12T17:53:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "b43058da6a0e9d3e",
+      "title": "10-12盘后复盘：大退潮！54股断板血洗，传媒15涨停独舞_沉默的少数_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ5eI1P3G0",
+      "read_count": 8,
+      "body_chars": 8337,
+      "body_sha256": "b43058da6a0e9d3e0b168f84f3285f4798fb96b9e21fd7bbda6d6fec0792116d",
+      "published_at_cn": "2026-10-12T20:21:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "bee056ddf5cbfcd1",
+      "title": "2026年10月12日A股复盘：等待磨底_五事本源_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ8XooO4yL",
+      "read_count": 2,
+      "body_chars": 1839,
+      "body_sha256": "bee056ddf5cbfcd1061f78a2a852a678ce15040bd9989347061d4a9ddd1aff7a",
+      "published_at_cn": "2026-10-12T21:13:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "c25c81523a45ded6",
+      "title": "10.12复盘_洛遇_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPVeSmTOuD",
+      "read_count": 80,
+      "body_chars": 3126,
+      "body_sha256": "c25c81523a45ded64c761e7aa5cfde3d1f162a9e578c90c08c3b99f706d3f89b",
+      "published_at_cn": "2026-10-12T18:01:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "c5397932069c982e",
+      "title": "10.12轮动左侧低吸_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPjfsJUUb2",
+      "read_count": 77,
+      "body_chars": 1898,
+      "body_sha256": "c5397932069c982ed26c6fb1659dd4c18a9236fd470499e31de6e4af0f046690",
+      "published_at_cn": "2026-10-12T09:10:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "cd53f0f64fc0462c",
+      "title": "20261012复盘丨地量地价，越来越难_山风细雨_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPMrRdpRxC",
+      "read_count": 45,
+      "body_chars": 4231,
+      "body_sha256": "cd53f0f64fc0462c87b7c4ac27c52e865b2ed2aaee9b9c247f1cb320c71f85de",
+      "published_at_cn": "2026-10-12T15:58:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "d1d469b782619d0d",
+      "title": "2026.10.12复盘_黑絔丶_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQcga9U4as",
+      "read_count": 16,
+      "body_chars": 2660,
+      "body_sha256": "d1d469b782619d0dc467d2fbe89317ec06704ffdbce73ed14446d152862531ee",
+      "published_at_cn": "2026-10-12T22:00:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "d758bb31f5d113fa",
+      "title": "10.12复盘：银行撑指数，传媒延续，旧强股亏钱加重_黄小利_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ71M1qH2y",
+      "read_count": 7,
+      "body_chars": 8103,
+      "body_sha256": "d758bb31f5d113fa279b2addd615c8bc11a8ae4601156e4076d02e11ce0dd9b5",
+      "published_at_cn": "2026-10-12T20:46:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "d7d942387040b99d",
+      "title": "锁仓九阳股份，当下聚焦赚钱效益，连板接力pk老登二波，继续规避科技。_光神涅槃_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPdX5l7E3x",
+      "read_count": 425,
+      "body_chars": 5044,
+      "body_sha256": "d7d942387040b99de117bf8c856353700b94f41f4bcd9d96748597d5001d777c",
+      "published_at_cn": "2026-10-12T07:56:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "edc89adb74a8c6f9",
+      "title": "龙头被按了暂停键，钱在传媒桌上没散——10月12日复盘_唐主任稳盘_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQb3VI6hpX",
       "read_count": 3,
-      "body_chars": 8151,
-      "body_sha256": "e19ac192ea9b4e6ed49e695906a11ab4022b4ecdd19e598852d8390f273e5dc0",
-      "published_at_cn": "2026-10-09T21:33:00+08:00",
+      "body_chars": 4162,
+      "body_sha256": "edc89adb74a8c6f91a19aaca7ed63656dff8b736911b25585c3877316697abdc",
+      "published_at_cn": "2026-10-12T21:43:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -327,13 +582,13 @@
       ]
     },
     {
-      "article_id": "e6aebaf02ef35f28",
-      "title": "碳酸锂硬核拆解 01｜从51万跌到12万，钱到底被谁赚走了？_一手一手玩_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKxMClcm8K",
-      "read_count": 107,
-      "body_chars": 5501,
-      "body_sha256": "e6aebaf02ef35f2865081f3a441d8e72077a87286fec4cbe5a88560346cc6010",
-      "published_at_cn": "2026-10-09T12:15:00+08:00",
+      "article_id": "ee0beca407263d44",
+      "title": "10.11 调整未必到位_八进八出瓢子龙_淘股吧",
+      "url": "https://www.tgb.cn/a/2vOHOO70HT1",
+      "read_count": 575,
+      "body_chars": 1800,
+      "body_sha256": "ee0beca407263d44b6a4fe3e6403e69a091f9c6e1b95ce2520de63434c203abc",
+      "published_at_cn": "2026-10-12T00:26:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -342,13 +597,13 @@
       ]
     },
     {
-      "article_id": "eae2ae82f30962db",
-      "title": "非农崩了美债却飙上5.3%！期货变盘前夜：能化强势与贵金属承压的终极推演_一手一手玩_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKlfXMZWLi",
-      "read_count": 91,
-      "body_chars": 6428,
-      "body_sha256": "eae2ae82f30962dbacf2230d7e2c326abd43e2ccd257430a75188f119be26f1d",
-      "published_at_cn": "2026-10-09T09:20:00+08:00",
+      "article_id": "eed78bdb3e7f94d1",
+      "title": "持有新华传媒，九阳股份！附10.13明日市场核心策略_连板龙头作手_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ01dtSNmU",
+      "read_count": 17,
+      "body_chars": 7748,
+      "body_sha256": "eed78bdb3e7f94d17c96f459aafc3ae66ab97b587a118fbb2fec0106daad17ec",
+      "published_at_cn": "2026-10-12T19:08:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -357,13 +612,13 @@
       ]
     },
     {
-      "article_id": "ed6769811c058ecd",
-      "title": "庐州渔夫 | 2026年10月9日复盘_笃亿_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKZScYSdek",
+      "article_id": "ef8ec7687d824412",
+      "title": "2026.10.12 周一复盘 涨停板拆解_孤舟来客_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQ7oJtNCKG",
       "read_count": 11,
-      "body_chars": 2673,
-      "body_sha256": "ed6769811c058ecd6aa6d17f8da8311892ea417551ef3c44a58ad0be0bbb8204",
-      "published_at_cn": "2026-10-09T18:48:00+08:00",
+      "body_chars": 1990,
+      "body_sha256": "ef8ec7687d8244122026d0adda524011d9ac38cb60544cdb62ea79ab392f8e84",
+      "published_at_cn": "2026-10-12T20:52:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -372,13 +627,13 @@
       ]
     },
     {
-      "article_id": "f00f85d8c9e877ac",
-      "title": "非农崩了，美债却飙上5.3%！这是全球最危险的背离_一手一手玩_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKjlFM8hfe",
-      "read_count": 76,
-      "body_chars": 4955,
-      "body_sha256": "f00f85d8c9e877ac313fd12716ca08c85a7e6e414cb890fcd2960272a642e6c4",
-      "published_at_cn": "2026-10-09T08:53:00+08:00",
+      "article_id": "f020e438948f73b3",
+      "title": "261009复盘：神秘资金介入，反转还是反弹？_流一刀丶_淘股吧",
+      "url": "https://www.tgb.cn/a/2vOKsN8QssL",
+      "read_count": 58,
+      "body_chars": 5612,
+      "body_sha256": "f020e438948f73b38688fe532950b4273f371b8bcc87443424769d72f49385bc",
+      "published_at_cn": "2026-10-12T01:03:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -387,28 +642,13 @@
       ]
     },
     {
-      "article_id": "fd03e159871fa998",
-      "title": "放量修复：1.9万亿成交69股涨停，新华传媒9板刷新纪录，电池链成最强主线_选手故事集_淘股吧",
-      "url": "https://www.tgb.cn/a/2vKTw0PADOk",
-      "read_count": 91,
-      "body_chars": 3105,
-      "body_sha256": "fd03e159871fa998cd11d8458e6e04e77310cc8ac7e633d8fcd8704d5db1a65a",
-      "published_at_cn": "2026-10-09T17:19:00+08:00",
-      "quality_checks": [
-        "当天发表时间已核验",
-        "正文不少于600字",
-        "覆盖市场维度",
-        "覆盖板块/周期维度"
-      ]
-    },
-    {
-      "article_id": "fff660d7c7443690",
-      "title": "20261009复盘：深 V 反转，传媒井喷，高标停牌风险高悬_harry0755_淘股吧",
-      "url": "https://www.tgb.cn/a/2vL2hsypobR",
-      "read_count": 15,
-      "body_chars": 6501,
-      "body_sha256": "fff660d7c744369082b314a3adda37c1d6778372c0718c0c41f7f42e51324ca8",
-      "published_at_cn": "2026-10-09T19:22:00+08:00",
+      "article_id": "f2af7e11f3b2f30a",
+      "title": "10.13前瞻:冰火两重天！高潮次日退潮，低频是唯一解！_庄哥说股_淘股吧",
+      "url": "https://www.tgb.cn/a/2vPPkcmKJMi",
+      "read_count": 1867,
+      "body_chars": 18658,
+      "body_sha256": "f2af7e11f3b2f30a252a0e82e75f6663512b467dbfe4b4988b1e715c163ff000",
+      "published_at_cn": "2026-10-12T16:39:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -419,46 +659,493 @@
   ],
   "article_mining": [
     {
-      "article_id": "067a099920b330bd",
+      "article_id": "045dd05bb833882d",
       "market_stance": "谨慎",
       "market_phase": [
-        "修复",
-        "分歧"
+        "分歧",
+        "退潮"
       ],
-      "market_summary": "作者认为大盘午后修复、短期下跌动能衰竭，情绪趋稳；但底部未明，后续或横盘或二次探底。",
+      "market_summary": "作者认为市场缩量探底、跌停扩容，科技硬件及固态电池退潮；传媒/AI短剧逆势形成主线，银行走强体现避险抱团，属结构性切换而非全面退潮。",
       "sectors": [
         {
-          "name": "电池",
+          "name": "传媒/AI短剧/AI漫剧",
           "stance": "加强",
-          "evidence": "作者称其为当日最强方向，多只个股快速上板。"
+          "evidence": "作者称其为唯一有持续性的主线，超10股涨停，二板梯队高度集中。"
         },
         {
-          "name": "地产",
-          "stance": "分化",
-          "evidence": "早盘修复冲高后遭抛压，跟随大盘下杀后修复。"
-        },
-        {
-          "name": "医药",
+          "name": "银行",
           "stance": "活跃",
-          "evidence": "华北制药抱团晋级二板，并带动多只医药股上板。"
+          "evidence": "作者称多只银行股续创历史新高，认为是避险资金抱团。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "退潮",
+          "evidence": "作者称板块低迷、跌1.35%，主力资金净流出29.97亿元。"
+        },
+        {
+          "name": "硬科技/光通信",
+          "stance": "退潮",
+          "evidence": "作者称光通信测试仪器走弱，存储芯片及CPO同步回调。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者称贵金属集体调整，相关个股纷纷下挫。"
         },
         {
           "name": "农业",
-          "stance": "加强",
-          "evidence": "作者称农业强修复，前期高辨识度个股带动板块。"
+          "stance": "退潮",
+          "evidence": "作者将农业列为当日领跌方向。"
         },
         {
-          "name": "AI应用",
-          "stance": "活跃",
-          "evidence": "午后资金选择AI方向，传媒、AI应用等出现批量涨停。"
-        },
-        {
-          "name": "科技",
-          "stance": "修复",
-          "evidence": "早盘继续杀跌，午后缓慢爬升，但作者认为修复力度不强。"
+          "name": "消费电子",
+          "stance": "退潮",
+          "evidence": "作者将消费电子列为当日领跌方向。"
         }
       ],
       "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒/并购重组",
+          "role": "龙头"
+        },
+        {
+          "name": "果麦文化",
+          "sector": "AI漫剧/传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒/并购重组",
+          "role": "跟随"
+        },
+        {
+          "name": "内蒙新华",
+          "sector": "传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "德才股份",
+          "sector": "AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "掌阅科技",
+          "sector": "AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "欢瑞世纪",
+          "sector": "AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "中国银行",
+          "sector": "银行",
+          "role": "龙头"
+        },
+        {
+          "name": "工商银行",
+          "sector": "银行",
+          "role": "龙头"
+        },
+        {
+          "name": "华正新材",
+          "sector": "固态电池",
+          "role": "风险"
+        },
+        {
+          "name": "联讯仪器",
+          "sector": "光通信测试仪器",
+          "role": "风险"
+        },
+        {
+          "name": "会稽山",
+          "sector": "前期人气股",
+          "role": "风险"
+        },
+        {
+          "name": "世联行",
+          "sector": "前期人气股",
+          "role": "风险"
+        },
+        {
+          "name": "国芳集团",
+          "sector": "前期人气股",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "传媒/AI短剧分歧后的承接及前排梯队延续",
+        "市场情绪能否企稳，重点观察缩量与跌停扩容变化",
+        "科技股是否企稳，以及银行抱团资金是否松动"
+      ],
+      "numeric_claims": [
+        "沪指跌0.43%，报3797.24点",
+        "深成指跌2.03%，创业板指跌2.61%",
+        "全市场下跌4325家、上涨1167家",
+        "成交额1.54万亿元，较前一交易日缩量3627亿元",
+        "涨停46家，跌停22家，封板率65%",
+        "一进二晋级率约25%（14/57）",
+        "2进3晋级率13%（1/8）",
+        "连板股整体晋级率33.33%（4/12）",
+        "新华传媒10连板，封单14.45亿元",
+        "固态电池板块跌1.35%，主力资金净流出29.97亿元",
+        "联讯仪器收盘跌8%",
+        "传媒板块超10股涨停"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "1b34d15dd9505146",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为上周五修复未延续，市场再度分歧，资金抱团高辨识度股；明日按弱市结构性机会处理，先看修复确认。",
+      "sectors": [
+        {
+          "name": "AI传媒",
+          "stance": "加强",
+          "evidence": "作者称其为当前少数兼具板块强度和连板梯队的方向。"
+        },
+        {
+          "name": "短剧游戏",
+          "stance": "活跃",
+          "evidence": "作者认为短剧、AI影视方向表现较强，具备梯队延续。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "早盘主动进攻且行业广度较好，但作者认为次日仍需观察持续性。"
+        },
+        {
+          "name": "电网设备",
+          "stance": "分化",
+          "evidence": "部分个股封板，但行业收盘翻绿，作者称需重新确认。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称银行为指数稳定器，反映防御性配置需求。"
+        },
+        {
+          "name": "电池",
+          "stance": "退潮",
+          "evidence": "作者将电池列为前期题材中承压方向。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业出现严重分歧和大幅负反馈。"
+        },
+        {
+          "name": "煤炭开采加工",
+          "stance": "退潮",
+          "evidence": "作者列为当日风险集中释放的方向。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "天顺风能",
+          "sector": "风电",
+          "role": "核心"
+        },
+        {
+          "name": "长城电工",
+          "sector": "电网设备",
+          "role": "跟随"
+        },
+        {
+          "name": "众业达",
+          "sector": "电网设备",
+          "role": "跟随"
+        },
+        {
+          "name": "天融信",
+          "sector": "网络安全",
+          "role": "高关注"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "三柏硕",
+          "sector": "不明确",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "高位核心股能否向普通首板扩散",
+        "AI传媒前排的分歧承接",
+        "风电前排1进2及电网设备能否转强"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，跌0.43%",
+        "深证成指12384.87点，跌2.03%",
+        "创业板指2963.82点，跌2.61%",
+        "科创50约跌2.10%",
+        "沪深两市成交额1.538万亿元，较上周五缩量约19.1%",
+        "涨停46只、炸板25只、跌停17只",
+        "封板成功率约64.8%",
+        "上涨约1167只、下跌约4325只",
+        "风电设备涨2.34%，电网设备跌0.17%",
+        "影视院线涨3.67%，文化传媒涨2.37%，短剧游戏涨1.86%",
+        "银行行业涨1.99%",
+        "电池跌2.28%，煤炭开采加工跌3.00%，元件跌3.75%，种植业与林业跌4.62%，贵金属跌4.71%",
+        "新华传媒10板",
+        "九阳股份、时代万恒6板",
+        "2板股14只，首板28只",
+        "1进2成功14/57，约24.6%",
+        "2进3成功1/8，12.5%",
+        "三柏硕跌约9.89%，金健米业跌约8.43%",
+        "金健米业换手率58.23%"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "24128b2c627e8f25",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "高潮",
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场缩量探底，传媒AI短剧逆势高潮，但硬科技退潮、跌停增多及接力走弱，整体风险大于机会。",
+      "sectors": [
+        {
+          "name": "AI短剧/传媒",
+          "stance": "加强",
+          "evidence": "作者称其为唯一具完整连板梯队的进攻方向，超10股涨停。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者认为中期分红催化银行逆势走强，多只银行股创历史新高。"
+        },
+        {
+          "name": "智能电网",
+          "stance": "活跃",
+          "evidence": "作者称板块受政策催化走强，远程股份2连板。"
+        },
+        {
+          "name": "CPO/光通信/半导体/算力硬件",
+          "stance": "退潮",
+          "evidence": "作者称该方向全线溃退，机构对星网锐捷净卖出2.8亿元。"
+        },
+        {
+          "name": "高位人气股",
+          "stance": "退潮",
+          "evidence": "作者以三柏硕天地板、会稽山及国芳集团跌停说明高位风险。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI短剧/传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "AI短剧/传媒",
+          "role": "核心"
+        },
+        {
+          "name": "内蒙新华",
+          "sector": "AI短剧/传媒",
+          "role": "核心"
+        },
+        {
+          "name": "德才股份",
+          "sector": "AI短剧/传媒",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI短剧/传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "远程股份",
+          "sector": "智能电网",
+          "role": "核心"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "CPO/光通信",
+          "role": "风险"
+        },
+        {
+          "name": "星网锐捷",
+          "sector": "算力硬件",
+          "role": "风险"
+        },
+        {
+          "name": "三柏硕",
+          "sector": "高位人气股",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒能否晋级11连板，以及AI短剧/传媒能否延续强势。",
+        "中际旭创、星网锐捷等CPO和算力硬件是否继续下跌或缩量企稳。",
+        "成交额能否回升、跌停家数能否降至10只以下。"
+      ],
+      "numeric_claims": [
+        "沪指收报3797.24点，跌0.43%。",
+        "深证成指跌2.03%，创业板指跌2.61%，科创50跌2.10%。",
+        "沪深两市成交额1.55万亿元，较上一交易日缩量3659亿元。",
+        "内资主力净卖出354亿元。",
+        "全市场超4300只个股下跌，48股涨停，25股炸板，22只跌停。",
+        "封板率65%，连板晋级率33.33%。",
+        "新华传媒10连板，封单超102万手，文中称其复牌以来累计涨幅近160%。",
+        "传媒板块超10股涨停。",
+        "机构合计净卖出6.27亿元，净买入11只、净卖出21只。",
+        "机构对星网锐捷净卖出2.8亿元。"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "2476d2a5e163bda2",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数缩量回落、多数个股走弱，资金抱团传媒和银行；赛道及资源板块承压，主线持续性存疑。",
+      "sectors": [
+        {
+          "name": "文化传媒",
+          "stance": "加强",
+          "evidence": "作者称传媒逆势走强、多股涨停，是少数热点。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称资金持续回流，属于避险抱团的防守方向。"
+        },
+        {
+          "name": "风电设备",
+          "stance": "活跃",
+          "evidence": "作者称资金低位试错流入，持续性待后续确认。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者称主力大幅流出，前期炒作资金集中兑现。"
+        },
+        {
+          "name": "能源金属/油气开采",
+          "stance": "退潮",
+          "evidence": "作者称资金持续减仓，板块整体承压。"
+        },
+        {
+          "name": "通信/光模块/CPO",
+          "stance": "分化",
+          "evidence": "作者称热门标的回调、筹码松动，处于兑现阶段。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "阿莱德",
+          "sector": "不明确",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "上证指数3807、3797、3791三线位置",
+        "传媒和银行资金持续性",
+        "风电设备修复能否获得确认"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，下跌0.43%",
+        "深证成指12384.87点，下跌2.03%",
+        "创业板指2963.82点，下跌2.61%",
+        "科创50报1426.72点，下跌2.10%",
+        "两市成交约1.55万亿",
+        "全市场1167家上涨、4317家下跌",
+        "上证盘前三线为3807、3797、3791"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "2e2c8f54549fd1a3",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "冰点",
+        "分歧",
+        "修复"
+      ],
+      "market_summary": "作者认为指数已入下跌趋势且市场冰点，但前排题材未灭；关注AI应用与电池能否延续或修复。",
+      "sectors": [
+        {
+          "name": "AI应用",
+          "stance": "加强",
+          "evidence": "作者称竞价超预期，新华传媒带动板块批量涨停。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者称仅时代万恒回封，板块午后修复但资金仍犹豫。"
+        },
+        {
+          "name": "大消费",
+          "stance": "分化",
+          "evidence": "作者认为九阳股份对消费带动不强，更多是抱团。"
+        },
+        {
+          "name": "医药",
+          "stance": "退潮",
+          "evidence": "作者称哈药跌停带崩医药，龙头陨落进入退潮。"
+        },
+        {
+          "name": "硬科技",
+          "stance": "退潮",
+          "evidence": "作者认为PCB与CPO处于下跌趋势，反弹仍有抛压。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "AI应用",
+          "role": "核心"
+        },
         {
           "name": "时代万恒",
           "sector": "电池",
@@ -470,135 +1157,118 @@
           "role": "跟随"
         },
         {
-          "name": "新华",
-          "sector": "不明确",
-          "role": "龙头"
-        },
-        {
-          "name": "华北制药",
-          "sector": "医药",
-          "role": "核心"
-        },
-        {
-          "name": "深物业",
-          "sector": "地产",
-          "role": "核心"
-        },
-        {
-          "name": "世联行",
-          "sector": "地产",
-          "role": "核心"
+          "name": "上海洗霸",
+          "sector": "电池",
+          "role": "跟随"
         },
         {
           "name": "金健米业",
           "sector": "农业",
-          "role": "龙头"
-        },
-        {
-          "name": "万向德农",
-          "sector": "农业",
-          "role": "龙头"
-        },
-        {
-          "name": "九阳",
-          "sector": "消费",
           "role": "风险"
         }
       ],
       "tomorrow_watch": [
-        "科技方向能否暂时止跌",
-        "地产修复后能否形成持续走势",
-        "AI方向午后修复的持续性"
+        "新华传媒与德才股份、龙版传媒的竞价强弱",
+        "时代万恒能否弱转强并带动电池回流",
+        "AI应用高潮后的分歧承接"
       ],
       "numeric_claims": [
-        "新华继续拉出九板",
-        "世联行竞价被抢到2个多点开",
-        "作者提及其所持个股竞价金额仅5万元"
-      ],
-      "quality_flags": [
-        "广告"
-      ]
-    },
-    {
-      "article_id": "1829b8a1d70f7886",
-      "market_stance": "偏空",
-      "market_phase": [
-        "退潮",
-        "分歧"
-      ],
-      "market_summary": "作者认为大盘跌破前低后虽可能反弹，但仍可能再探低点；更倾向AI硬件拥挤出清、后续不再作为核心的情景。",
-      "sectors": [
-        {
-          "name": "AI硬件",
-          "stance": "退潮",
-          "evidence": "作者认为该方向持仓拥挤，倾向其不再是后续炒作核心。"
-        },
-        {
-          "name": "电池",
-          "stance": "活跃",
-          "evidence": "作者称当日短线聚焦电池。"
-        },
-        {
-          "name": "银行",
-          "stance": "活跃",
-          "evidence": "作者称趋势方向中银行继续有所表现。"
-        },
-        {
-          "name": "医药",
-          "stance": "活跃",
-          "evidence": "作者称趋势方向中医药继续有所表现。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "襄阳轴承",
-          "sector": "短线接力",
-          "role": "高关注"
-        },
-        {
-          "name": "深物业",
-          "sector": "房地产",
-          "role": "高关注"
-        }
-      ],
-      "tomorrow_watch": [
-        "大盘反弹力度及是否仍有后续低点",
-        "AI硬件拥挤筹码是否继续出清",
-        "短线风格是切换高位还是低位"
-      ],
-      "numeric_claims": [
-        "早盘一度有4000多只个股上涨",
-        "趋势风格指数为60",
-        "作者提及关键点位3674.40",
-        "作者当前持有桂林旅游半仓"
+        "两市成交约1.55万亿元",
+        "下跌4324家",
+        "涨停46家，跌停19家",
+        "新华传媒10连板",
+        "九阳股份6连板"
       ],
       "quality_flags": [
         "明显情绪化"
       ]
     },
     {
-      "article_id": "1c6f2eb040575d62",
-      "market_stance": "谨慎",
+      "article_id": "2f1282f48ce10eb2",
+      "market_stance": "中性",
       "market_phase": [
-        "修复",
+        "发酵",
         "分歧"
       ],
-      "market_summary": "作者认为指数与情绪双双止跌修复，但电池处于加速风险段，AI应用能否开启新周期待观察。",
+      "market_summary": "作者盘前认为外部环境对中国资产情绪有支撑，但美债高位仍压制成长估值，关注传媒与固态电池的资金确认。",
       "sectors": [
         {
-          "name": "电池",
-          "stance": "分化",
-          "evidence": "作者称电池整体加速、节奏错配，预计后续可能分化或分歧。"
-        },
-        {
-          "name": "大消费",
-          "stance": "分化",
-          "evidence": "作者认为消费爆量，九阳股份爆量20亿后转强难度较大。"
-        },
-        {
-          "name": "AI应用",
+          "name": "AI应用/传媒",
           "stance": "活跃",
-          "evidence": "作者称AI应用午后爆发，但暂视作强回流，能否开新周期待验证。"
+          "evidence": "作者认为其为核心主线，但高开过强或炸板率上升将转为分歧。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "活跃",
+          "evidence": "作者认为板块资金刚进入、赔率较高，需竞价放量确认。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "吉林化纤",
+          "sector": "新材料",
+          "role": "高关注"
+        },
+        {
+          "name": "东岳硅材",
+          "sector": "新材料",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "AI应用/传媒和固态电池的竞价量比",
+        "主线板块红盘家数及开盘后炸板情况",
+        "港股能否维持强势并带动A股情绪"
+      ],
+      "numeric_claims": [
+        "美国10年期国债收益率为5.24%，30年期为5.60%",
+        "恒生指数上涨1.79%，恒生期货上涨1.74%，金龙指数上涨2.69%",
+        "道指上涨0.83%，纳指上涨0.64%，标普500上涨0.59%",
+        "AI视频上涨5.48%，短剧游戏上涨5.42%，AI语料上涨4.84%",
+        "10年期美债收益率破5.45%转防御，回落至4.70%下方加成长"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "3b453919c3c11b7f",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为传媒、短剧等仍活跃而科技硬件承压，热点集中且内部强弱分化，整体赚钱效应是否改善仍需观察。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者称传媒仍是市场焦点之一，新华传媒维持高位强势。"
+        },
+        {
+          "name": "短剧",
+          "stance": "活跃",
+          "evidence": "作者称短剧相关方向有多只活跃个股和连板表现。"
+        },
+        {
+          "name": "影视内容",
+          "stance": "活跃",
+          "evidence": "作者认为影视内容方向仍具较强存在感。"
+        },
+        {
+          "name": "PCB",
+          "stance": "退潮",
+          "evidence": "作者称PCB等部分科技硬件方向当日偏弱。"
+        },
+        {
+          "name": "光通信",
+          "stance": "退潮",
+          "evidence": "作者称光通信等科技硬件方向持续承压。"
+        },
+        {
+          "name": "半导体",
+          "stance": "退潮",
+          "evidence": "作者称半导体等科技硬件方向表现偏弱。"
         }
       ],
       "stocks": [
@@ -606,880 +1276,241 @@
           "name": "新华传媒",
           "sector": "传媒",
           "role": "龙头"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "电池",
-          "role": "核心"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "电池",
-          "role": "核心"
-        },
-        {
-          "name": "九阳股份",
-          "sector": "大消费",
-          "role": "核心"
-        },
-        {
-          "name": "绿盟科技",
-          "sector": "AI应用",
-          "role": "高关注"
         }
       ],
       "tomorrow_watch": [
-        "AI应用竞价表现及是否存在套利机会",
-        "电池分歧程度及其与AI影视的强弱对比",
-        "美股表现及指数修复动能是否被透支"
+        "传媒高位股承接及板块内部梯队",
+        "科技硬件核心股是否企稳并形成同步修复",
+        "上涨下跌家数、涨停炸板及强势股次日表现"
       ],
-      "numeric_claims": [
-        "上证指数盘中下杀至3755点",
-        "创业板指跌穿3000点",
-        "盘中下跌家数一度超过4500家",
-        "新华传媒为8连板个股",
-        "善水科技再度大涨11.31%",
-        "九阳股份爆量20亿元"
-      ],
+      "numeric_claims": [],
       "quality_flags": [
-        "广告",
-        "明显情绪化"
+        "无"
       ]
     },
     {
-      "article_id": "24230df56bd82c5f",
+      "article_id": "3bebb21989f02b38",
       "market_stance": "谨慎",
       "market_phase": [
-        "修复",
-        "分歧"
+        "冰点",
+        "修复"
       ],
-      "market_summary": "作者认为午后资金推动市场V型修复、短线情绪回暖，但硬件负反馈未完，反抽能否转强仍待下周放量确认。",
+      "market_summary": "作者认为市场情绪较差、断板及反包表现偏弱，但判断电池或有趋势及分歧转修复机会，并维持十月底开启大周期的预期。",
       "sectors": [
         {
-          "name": "AI视频/传媒",
-          "stance": "加强",
-          "evidence": "作者称其为今日最强风口，AI应用与内容出海逻辑驱动集体修复。"
+          "name": "电池",
+          "stance": "修复",
+          "evidence": "作者称电池有分歧转修复预期，并怀疑其可能走趋势。"
         },
         {
           "name": "固态电池",
-          "stance": "加强",
-          "evidence": "作者称板块由情绪脉冲切换至梯队接力，具备主线特征。"
+          "stance": "分化",
+          "evidence": "作者因时代万恒辟谣没有固态电池而未选择该股。"
         },
         {
-          "name": "农业",
-          "stance": "活跃",
-          "evidence": "厄尔尼诺预期催化，多只种业股涨停。"
-        },
-        {
-          "name": "大消费",
-          "stance": "活跃",
-          "evidence": "服务消费数据催化，国芳集团等涨停。"
-        },
-        {
-          "name": "券商",
-          "stance": "活跃",
-          "evidence": "作者称券商午后直线拉升，带动指数反攻。"
-        },
-        {
-          "name": "AI硬件",
-          "stance": "退潮",
-          "evidence": "MLCC、PCB、CPO及存储芯片延续弱势，科技高标未现修复。"
-        },
-        {
-          "name": "风电设备",
-          "stance": "退潮",
-          "evidence": "作者称风电设备震荡下挫，大金重工跌停。"
+          "name": "传媒",
+          "stance": "不明确",
+          "evidence": "作者买入博纳影业，博弈新华传媒停牌。"
         }
       ],
       "stocks": [
         {
-          "name": "新华传媒",
-          "sector": "文化传媒",
-          "role": "龙头"
+          "name": "传艺",
+          "sector": "电池",
+          "role": "高关注"
         },
         {
-          "name": "中文在线",
-          "sector": "AI视频/传媒",
-          "role": "核心"
+          "name": "洗霸",
+          "sector": "电池",
+          "role": "高关注"
         },
         {
-          "name": "芒果超媒",
-          "sector": "AI视频/传媒",
-          "role": "核心"
+          "name": "天赐材料",
+          "sector": "电池",
+          "role": "高关注"
         },
         {
           "name": "时代万恒",
           "sector": "固态电池",
-          "role": "龙头"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "固态电池",
-          "role": "核心"
-        },
-        {
-          "name": "宁德时代",
-          "sector": "固态电池",
-          "role": "核心"
-        },
-        {
-          "name": "金安国纪",
-          "sector": "AI硬件",
           "role": "风险"
         },
         {
-          "name": "大金重工",
-          "sector": "风电设备",
-          "role": "风险"
+          "name": "九阳股份",
+          "sector": "",
+          "role": "高关注"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "高关注"
         }
       ],
       "tomorrow_watch": [
-        "下周一市场能否继续放量确认修复",
-        "AI视频/传媒与固态电池主线持续性",
-        "硬件高标负反馈是否结束"
+        "电池板块能否由分歧转修复",
+        "九阳股份的7板高度与涨幅监管压力",
+        "新华传媒停牌博弈对博纳影业的影响"
       ],
       "numeric_claims": [
-        "涨停69家，跌停8家",
-        "涨幅超10%的个股约100只",
-        "上涨3296家，下跌2145家",
-        "沪深两市成交1.92万亿元，较昨日放量2224亿元",
-        "沪指收3813.79点，上涨0.05%，盘中最低3754.14点",
-        "深成指收12641.86点，上涨0.17%",
-        "创业板指收3043.33点，上涨0.22%",
-        "科创50收1457.27点，上涨0.06%",
-        "北证50上涨2.49%",
-        "新华传媒9天9板",
-        "传媒娱乐板块上涨6.01%"
+        "成交量1.5万亿",
+        "跌停19家",
+        "九阳股份面临7板高度压制",
+        "九阳股份接近100%涨幅监管红线",
+        "作者称异动战法连续盈利6个月、连续亏损3个月"
       ],
       "quality_flags": [
-        "广告"
+        "明显情绪化"
       ]
     },
     {
-      "article_id": "34c0ca40a0a6d892",
+      "article_id": "400ebc83cae4a7d3",
       "market_stance": "谨慎",
       "market_phase": [
-        "修复",
-        "混沌"
+        "分歧",
+        "退潮"
       ],
-      "market_summary": "作者认为午后深V带动情绪回暖，但题材轮动较快；下周需观察量能及科技能否企稳，再判断进攻方向。",
+      "market_summary": "作者认为指数震荡回落、量能萎缩且亏钱效应增加，短线资金抱团少数高位股；风险偏好回落，关注低估值价值板块。",
       "sectors": [
         {
-          "name": "AI应用（影视、游戏）",
+          "name": "传媒",
           "stance": "加强",
-          "evidence": "作者称AI影视、游戏概念爆发，多股涨停。"
+          "evidence": "作者列为涨幅居前板块，短剧及AI影视全天强势。"
         },
         {
-          "name": "农业、种业",
+          "name": "银行",
           "stance": "活跃",
-          "evidence": "作者称农业、种业走强，敦煌种业、万向德农涨停。"
+          "evidence": "作者称银行股走强、板块全线飘红。"
         },
         {
-          "name": "固态电池",
-          "stance": "加强",
-          "evidence": "作者称固态电池延续强势，时代万恒5连板。"
-        },
-        {
-          "name": "网络安全、信创",
+          "name": "风电设备",
           "stance": "活跃",
-          "evidence": "作者称网络安全、信创板块拉升。"
+          "evidence": "作者称风电设备集体拉升，天顺风能封板。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者称贵金属震荡走低并位居跌幅前列。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业、林业种业走弱，多股跌逾7%。"
         },
         {
           "name": "算力硬件",
           "stance": "退潮",
-          "evidence": "作者称算力硬件股领跌，但午后跌幅收窄。"
+          "evidence": "作者称光模块、PCB等算力硬件持续走弱。"
         },
         {
-          "name": "半导体产业链",
-          "stance": "退潮",
-          "evidence": "作者称光刻机、存储芯片等半导体产业链集体走低。"
+          "name": "价值板块",
+          "stance": "不明确",
+          "evidence": "作者认为风险偏好回落后，后续需关注低估值且有安全边际的价值板块。"
         }
       ],
       "stocks": [
         {
-          "name": "九阳股份",
-          "sector": "大消费",
-          "role": "核心"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "固态电池",
-          "role": "核心"
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
         },
         {
           "name": "新华文轩",
-          "sector": "AI应用（影视传媒）",
-          "role": "高关注"
+          "sector": "传媒",
+          "role": "核心"
         },
         {
-          "name": "澳弘电子",
+          "name": "内蒙新华",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
           "sector": "不明确",
           "role": "高关注"
         },
         {
-          "name": "中新赛克",
-          "sector": "网络安全",
+          "name": "时代万恒",
+          "sector": "不明确",
           "role": "高关注"
         },
         {
-          "name": "万向德农",
-          "sector": "农业、种业",
-          "role": "高关注"
+          "name": "天顺风能",
+          "sector": "风电设备",
+          "role": "核心"
+        },
+        {
+          "name": "三柏硕",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "世联行",
+          "sector": "房地产",
+          "role": "风险"
         }
       ],
       "tomorrow_watch": [
-        "市场量能变化",
-        "科技方向能否企稳",
-        "当前盘面的进攻方向"
+        "少数高位抱团股的分化反馈",
+        "市场风险偏好是否继续回落",
+        "低估值价值板块能否获得关注"
       ],
       "numeric_claims": [
-        "沪指涨0.05%",
-        "深成指涨0.17%",
-        "创业板指涨0.22%",
-        "成交额1.9万亿，较上个交易日放量2184亿",
-        "2989只上涨，2108只下跌",
-        "69只涨停，12只连板",
-        "14只封板未遂，封板率83%",
+        "沪指跌0.43%",
+        "深成指跌2.03%",
+        "创业板指跌2.61%",
+        "成交额1.54万亿，较上个交易日缩量3627亿",
+        "1111只上涨，4036只下跌",
+        "46只涨停，18只连板，25只封板未遂",
+        "封板率65%",
         "三连板及以上个股4只",
-        "上一交易日共10只连板，连板晋级率40%",
-        "全市场超3200只个股上涨",
-        "九阳股份、时代万恒晋级5连板",
-        "紫竹高科4连板",
-        "领湃科技、雄韬股份、丰元股份2连板",
-        "力王股份再度涨超20%"
+        "上一交易日共12只连板",
+        "连板晋级率33.33%",
+        "全市场超4300只个股下跌",
+        "新华传媒10连板",
+        "新华文轩11天8板",
+        "内蒙新华13天7板",
+        "九阳股份、时代万恒晋级6连板"
       ],
       "quality_flags": [
         "广告"
       ]
     },
     {
-      "article_id": "3aecf963d3c4cf6a",
-      "market_stance": "谨慎",
+      "article_id": "4099e99f26404984",
+      "market_stance": "偏空",
       "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者认为情绪先于指数修复、断板负反馈较轻，但环境未反转，锂电和消费穿越能力待验证。",
-      "sectors": [
-        {
-          "name": "锂电池",
-          "stance": "活跃",
-          "evidence": "作者认为锂电作为逆指数板块走强，但能否放量与指数共振仍存疑。"
-        },
-        {
-          "name": "大消费",
-          "stance": "活跃",
-          "evidence": "九阳股份及老消费股表现较强，作者仍质疑其与指数共振穿越的能力。"
-        },
-        {
-          "name": "AI软件",
-          "stance": "活跃",
-          "evidence": "作者称午后AI软件共振强度最高，但不确定是一日游还是可持续。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "传媒",
-          "role": "龙头"
-        },
-        {
-          "name": "九阳股份",
-          "sector": "大消费",
-          "role": "核心"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "江淮汽车",
-          "sector": "汽车",
-          "role": "高关注"
-        }
-      ],
-      "tomorrow_watch": [
-        "断板股是否继续缺少严重负反馈",
-        "锂电池和消费能否放量共振指数",
-        "AI软件能否证明并非一日游"
-      ],
-      "numeric_claims": [
-        "成交量回到1.91万亿元",
-        "跌停家数8家",
-        "新华传媒继续晋级",
-        "九阳股份和时代万恒突破5板高度"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "3bc7dee50efc4312",
-      "market_stance": "偏多",
-      "market_phase": [
-        "修复"
-      ],
-      "market_summary": "作者认为市场尾盘资金回流、指数修复；碳酸锂弱势未传导至锂电中下游，利润或向低成本及一体化龙头集中。",
-      "sectors": [
-        {
-          "name": "锂电池",
-          "stance": "加强",
-          "evidence": "作者称锂电中下游未随锂价下跌，并受成本红利及需求承接支撑。"
-        },
-        {
-          "name": "碳酸锂",
-          "stance": "退潮",
-          "evidence": "作者称期货跌破12万元、增仓下行，反映供给过剩预期。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "作者称贵金属全线走强，黄金受货币信用重定价驱动。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "天齐锂业",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "盐湖股份",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "天赐材料",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "恩捷股份",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "璞泰来",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "宁德时代",
-          "sector": "锂电池",
-          "role": "龙头"
-        }
-      ],
-      "tomorrow_watch": [
-        "碳酸锂价格及高成本产能减停产情况",
-        "锂电产业链库存去化与下游排产",
-        "锂电中下游利润修复是否延续"
-      ],
-      "numeric_claims": [
-        "碳酸锂主力合约跌3.74%，收于117000元/吨",
-        "碳酸锂盘中最高121500元/吨、最低115400元/吨",
-        "碳酸锂主力合约增仓1.2万手",
-        "9月碳酸锂产量10.65万吨，环比增长5.24%，产能利用率62.98%",
-        "碳酸锂前20席位多单308024手、空单334425手，多空比0.92",
-        "前一交易日前20席位净流入空单2.64万手",
-        "10月电池企业排产同比增长57%",
-        "宁德时代毛利率23.93%、净利率16.98%、产能利用率94.86%"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "4341ff7f5c1ce952",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者认为市场午后完成恐慌分歧后的放量修复，但能否转强仍需下周一持续性验证。",
-      "sectors": [
-        {
-          "name": "锂电池",
-          "stance": "加强",
-          "evidence": "作者称其具备连续性和高度梯队，但天赐材料冲板回落显示内部已有分歧。"
-        },
-        {
-          "name": "AI应用、传媒",
-          "stance": "活跃",
-          "evidence": "作者认为其为午后最强新增进攻方向，但担忧次日一致高开兑现。"
-        },
-        {
-          "name": "消费、农业",
-          "stance": "活跃",
-          "evidence": "作者认为消费、农业作为相对抗跌方向得到延续，仍需观察扩散质量。"
-        },
-        {
-          "name": "煤炭",
-          "stance": "分化",
-          "evidence": "作者称安泰集团表现强势，但煤炭涨停梯队不够丰富，持续性受约束。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "传媒",
-          "role": "龙头"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "安泰集团",
-          "sector": "煤炭",
-          "role": "高关注"
-        }
-      ],
-      "tomorrow_watch": [
-        "上证能否维持3800上方并突破3824.7附近",
-        "锂电池与传媒前排能否避免大面积高开低走",
-        "AI应用、传媒分歧后的承接及涨停股溢价"
-      ],
-      "numeric_claims": [
-        "上证指数收涨0.05%，深证成指涨0.17%，创业板指涨0.22%，科创50涨0.07%",
-        "沪深两市成交额约1.901万亿元",
-        "涨停69只、炸板14只、跌停8只",
-        "上证盘中最低3754.14点，创业板盘中最低2932.80点",
-        "影视院线涨7.28%，文化传媒涨5.77%，软件开发涨3.96%",
-        "电池行业涨2.13%，种植业与林业涨4.85%，零售涨3.15%",
-        "安泰集团收盘3.78元，换手率20.91%，成交额7.50亿元"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "44a2618412e7a01b",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "分歧",
-        "修复"
-      ],
-      "market_summary": "作者认为V型反转提振情绪，但尚不能确认底部，仍需防二次探底；传媒爆发的持续性及高位连板PK是后续重点。",
-      "sectors": [
-        {
-          "name": "AI影视传媒",
-          "stance": "活跃",
-          "evidence": "作者称午后异动领涨，板块大涨7.23%，但持续性仍待确认。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "国芳集团",
-          "sector": "大消费",
-          "role": "核心"
-        },
-        {
-          "name": "金健米业",
-          "sector": "农业、种业",
-          "role": "核心"
-        },
-        {
-          "name": "九阳股份",
-          "sector": "大消费",
-          "role": "高关注"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "固态电池",
-          "role": "高关注"
-        },
-        {
-          "name": "新华文轩",
-          "sector": "AI影视传媒",
-          "role": "高关注"
-        },
-        {
-          "name": "新华传媒",
-          "sector": "AI影视传媒",
-          "role": "龙头"
-        }
-      ],
-      "tomorrow_watch": [
-        "大盘是否二次回踩确认底部",
-        "AI影视传媒能否走出持续性",
-        "九阳股份与时代万恒的晋级博弈"
-      ],
-      "numeric_claims": [
-        "作者称3744至3760区间有资金护盘",
-        "AI影视传媒板块大涨7.23%",
-        "新华文轩从水下3个多点拉至涨停",
-        "九阳股份、时代万恒均晋级5板"
-      ],
-      "quality_flags": [
-        "广告",
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "5c58a0d40784d104",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者认为午后放量修复显示资金从AI硬件转向AI应用和传媒，但高位硬件抛压未消化，轮动能否持续仍需观察。",
-      "sectors": [
-        {
-          "name": "AI应用",
-          "stance": "加强",
-          "evidence": "作者称主力净流入AI应用47.84亿，资金正从硬件向软件迁移。"
-        },
-        {
-          "name": "传媒",
-          "stance": "加强",
-          "evidence": "作者称传媒AI应用午后点火，近20股涨停或涨超10%。"
-        },
-        {
-          "name": "网络安全",
-          "stance": "活跃",
-          "evidence": "作者称网络安全与贵金属、证券、固态电池全线跟涨。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "作者称贵金属跟涨，西部黄金涨停。"
-        },
-        {
-          "name": "证券",
-          "stance": "活跃",
-          "evidence": "作者称券商午后先动，证券板块跟涨。"
-        },
-        {
-          "name": "AI硬件",
-          "stance": "退潮",
-          "evidence": "作者称MLCC、PCB、CPO持续被砸，高位硬件抛压未消化。"
-        },
-        {
-          "name": "银行",
-          "stance": "退潮",
-          "evidence": "作者称此前护盘的银行午后集体跳水。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "华鑫股份",
-          "sector": "证券",
-          "role": "高关注"
-        },
-        {
-          "name": "中文在线",
-          "sector": "AI应用",
-          "role": "高关注"
-        },
-        {
-          "name": "芒果超媒",
-          "sector": "传媒",
-          "role": "跟随"
-        },
-        {
-          "name": "吉视传媒",
-          "sector": "传媒",
-          "role": "跟随"
-        },
-        {
-          "name": "上海电影",
-          "sector": "传媒",
-          "role": "跟随"
-        },
-        {
-          "name": "绿盟科技",
-          "sector": "网络安全",
-          "role": "高关注"
-        },
-        {
-          "name": "麒麟信安",
-          "sector": "网络安全",
-          "role": "高关注"
-        },
-        {
-          "name": "西部黄金",
-          "sector": "贵金属",
-          "role": "高关注"
-        },
-        {
-          "name": "新华传媒",
-          "sector": "传媒",
-          "role": "龙头"
-        },
-        {
-          "name": "九阳股份",
-          "sector": "消费",
-          "role": "核心"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "电池",
-          "role": "核心"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "不明确",
-          "role": "高关注"
-        },
-        {
-          "name": "金安国纪",
-          "sector": "AI硬件",
-          "role": "风险"
-        },
-        {
-          "name": "大金重工",
-          "sector": "不明确",
-          "role": "风险"
-        },
-        {
-          "name": "风华高科",
-          "sector": "AI硬件",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "AI应用和传媒能否持续放量而非一日游",
-        "AI硬件三季报能否提供业绩支撑",
-        "高位硬件抛压及市场轮动强度"
-      ],
-      "numeric_claims": [
-        "沪指盘中最低3754点，收于3813.79点并涨0.05%",
-        "创业板盘中最多跌3.4%，收涨0.22%",
-        "科创50盘中一度跌4.5%",
-        "科创综指盘中逼近跌5%",
-        "早盘涨跌比一度为1075比4370",
-        "北证50上涨2.49%",
-        "两市成交1.90万亿元，较前日放量2185亿元",
-        "收盘3296只上涨、2145只下跌",
-        "涨停69家、跌停7家",
-        "AI应用主力净流入47.84亿元",
-        "新华传媒9连板，九阳股份和时代万恒5连板，紫竹高科4连板",
-        "现货黄金重回4200美元"
-      ],
-      "quality_flags": [
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "8399932bdfe5e5bd",
-      "market_stance": "中性",
-      "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者认为V型反转反映资金从AI硬件切向AI应用、锂电和实物资产，但高利率及AI应用中期资金偏弱限制趋势反转判断。",
-      "sectors": [
-        {
-          "name": "AI硬件",
-          "stance": "退潮",
-          "evidence": "作者称电子、通信遭显著资金流出，受海外光通信板块下跌拖累。"
-        },
-        {
-          "name": "AI应用",
-          "stance": "活跃",
-          "evidence": "作者称其获机构主导买入，但判断单日流入更偏短期情绪脉冲。"
-        },
-        {
-          "name": "锂电中游",
-          "stance": "加强",
-          "evidence": "作者认为机构资金逆势承接，成本下降或带来中游利润修复。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "作者认为全球资金正重估实物资产，黄金及多种基本金属走强。"
-        },
-        {
-          "name": "电力设备",
-          "stance": "加强",
-          "evidence": "作者列为当日资金净流入居前方向，并称获配置型承接。"
-        },
-        {
-          "name": "传媒",
-          "stance": "活跃",
-          "evidence": "作者称其获资金流入，但资金属性偏短线题材博弈。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "传媒",
-          "role": "龙头"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "锂电",
-          "role": "核心"
-        },
-        {
-          "name": "九阳股份",
-          "sector": "小家电",
-          "role": "核心"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "锂电",
-          "role": "核心"
-        }
-      ],
-      "tomorrow_watch": [
-        "AI应用连板梯队及高标是否炸板",
-        "AI应用DDX能否连续3日、5日转正",
-        "10年期美债收益率是否继续上行"
-      ],
-      "numeric_claims": [
-        "上证指数收3813.79点，上涨0.05%",
-        "成交额约1.9万亿元",
-        "电子、通信单日净流出超160亿元",
-        "10年期美债收益率为5.22%",
-        "两市主力资金净流出126.22亿元",
-        "北向成交总额2967.35亿元",
-        "全市场上涨3297家，下跌2145家",
-        "涨停72家，封板率83.1%",
-        "电力设备净流入31.35亿元",
-        "传媒净流入30.67亿元",
-        "有色金属净流入25.38亿元",
-        "电子净流出119.23亿元",
-        "通信净流出40.73亿元",
-        "AI应用主力资金净流入29.91亿元",
-        "新华传媒9连板，时代万恒及九阳股份5连板，紫竹高科4连板"
-      ],
-      "quality_flags": [
-        "广告",
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "8bbb7fc117044a8c",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者认为午后探底回升仅表明盘中存在修复和承接，科技硬件仍承压；传媒、贵金属和农业活跃，但调整是否结束仍待验证。",
-      "sectors": [
-        {
-          "name": "影视传媒",
-          "stance": "加强",
-          "evidence": "作者称该方向当日最亮眼，后续重点看活跃度与扩散性。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "作者将贵金属列为当日较活跃方向，西部黄金涨停。"
-        },
-        {
-          "name": "农业",
-          "stance": "活跃",
-          "evidence": "作者称农业表现活跃，敦煌种业、金健米业涨停。"
-        },
-        {
-          "name": "AI硬件",
-          "stance": "退潮",
-          "evidence": "作者称PCB、CPO、MLCC及算力硬件继续承压。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "中文在线",
-          "sector": "影视传媒",
-          "role": "高关注"
-        },
-        {
-          "name": "上海电影",
-          "sector": "影视传媒",
-          "role": "跟随"
-        },
-        {
-          "name": "西部黄金",
-          "sector": "贵金属",
-          "role": "高关注"
-        },
-        {
-          "name": "敦煌种业",
-          "sector": "农业",
-          "role": "高关注"
-        },
-        {
-          "name": "金健米业",
-          "sector": "农业",
-          "role": "高关注"
-        },
-        {
-          "name": "金安国纪",
-          "sector": "AI硬件",
-          "role": "风险"
-        },
-        {
-          "name": "国瓷材料",
-          "sector": "AI硬件",
-          "role": "风险"
-        },
-        {
-          "name": "风华高科",
-          "sector": "AI硬件",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "指数反弹能否延续并企稳",
-        "影视传媒能否保持活跃并扩散",
-        "PCB、CPO、MLCC等算力硬件能否止跌"
-      ],
-      "numeric_claims": [
-        "上证指数3813.79点，涨0.05%",
-        "深证成指12641.86点，涨0.17%",
-        "创业板指3043.33点，涨0.22%",
-        "创业板盘中一度跌超3%并跌破3000点",
-        "科创50盘中一度跌超4%",
-        "全天超过3200只个股上涨",
-        "《三星堆：未来往事》定档10月23日上映"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "9649c8353b5910c3",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "分歧",
         "退潮"
       ],
-      "market_summary": "作者认为指数探底回升但高位接力亏钱显著，资金由科技硬件切向传媒和电池，属于结构性修复而非全面转强。",
+      "market_summary": "作者将市场定性为退潮加速期：银行护盘掩盖个股普跌，传媒AI应用抱团独强，科技硬件撤离；认为量能放大前单极化格局或延续。",
       "sectors": [
         {
           "name": "传媒/AI应用",
           "stance": "加强",
-          "evidence": "作者称传媒15股封板、梯队最完整，受新华传媒高标和AI应用催化。"
+          "evidence": "作者称其为唯一具持续性的主线，但提示退潮期存在加速分歧风险。"
         },
         {
-          "name": "电池/固态电池",
-          "stance": "加强",
-          "evidence": "作者认为政策催化叠加梯队厚度和资金流入，成为第二主线。"
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称银行为护盘性质，反映风险偏好降低，并非情绪驱动。"
         },
         {
-          "name": "PCB/覆铜板",
+          "name": "科技硬件",
           "stance": "退潮",
-          "evidence": "作者称该方向受传闻影响系统性重挫，多股跌停或大跌。"
+          "evidence": "作者称科技硬件系统性撤离，核心标的跌幅超过6%。"
         },
         {
-          "name": "MLCC/光通信",
+          "name": "PCB",
           "stance": "退潮",
-          "evidence": "作者称风华高科、康强电子跌停，相关算力硬件延续弱势。"
+          "evidence": "作者称金安国纪二连跌停，压制海外链情绪。"
         },
         {
-          "name": "汽车",
-          "stance": "退潮",
-          "evidence": "作者称江淮汽车再度跌停，事件影响仍在发酵。"
+          "name": "风电设备",
+          "stance": "分化",
+          "evidence": "作者称其偏事件驱动个股表现，未形成持续板块合力。"
         }
       ],
       "stocks": [
@@ -1489,1199 +1520,91 @@
           "role": "龙头"
         },
         {
-          "name": "中文在线",
+          "name": "新华文轩",
           "sector": "传媒/AI应用",
           "role": "核心"
         },
         {
-          "name": "芒果超媒",
-          "sector": "传媒/AI应用",
-          "role": "核心"
+          "name": "九阳股份",
+          "sector": "家电/机器人概念",
+          "role": "风险"
         },
         {
           "name": "时代万恒",
-          "sector": "电池/固态电池",
-          "role": "龙头"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "电池/固态电池",
-          "role": "龙头"
-        },
-        {
-          "name": "领湃科技",
-          "sector": "电池/固态电池",
-          "role": "核心"
-        },
-        {
-          "name": "楚环科技",
-          "sector": "环保设备",
-          "role": "高关注"
-        },
-        {
-          "name": "华正新材",
-          "sector": "PCB/覆铜板",
+          "sector": "锂电池",
           "role": "风险"
         },
         {
-          "name": "风华高科",
-          "sector": "MLCC/光通信",
+          "name": "三柏硕",
+          "sector": "不明确",
           "role": "风险"
-        },
-        {
-          "name": "江淮汽车",
-          "sector": "汽车",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "新华传媒是否停牌核查及其对传媒情绪的影响",
-        "固态电池二板梯队能否延续",
-        "PCB、MLCC、光通信的补跌是否止住"
-      ],
-      "numeric_claims": [
-        "沪指收3813.79点，涨0.05%",
-        "成交额1.92万亿元，较前日放量2224亿元",
-        "全市场近3300只个股上涨",
-        "涨停逾70家，跌停8家",
-        "炸板率约47%",
-        "昨日涨停股今日平均跌幅为-3.12%",
-        "一进二晋级率约13%（5/40）",
-        "2进3晋级率为0%",
-        "电池行业主力资金净流入50.44亿元"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "a72daadf6a30d0e8",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者将午后翻红定义为放量深V修复，但认为硬件链尚未普遍止跌，后续需观察指数站稳均线及前排承接。",
-      "sectors": [
-        {
-          "name": "影视传媒",
-          "stance": "加强",
-          "evidence": "AI视频和影视院线午后大涨，多股涨停。"
-        },
-        {
-          "name": "电池",
-          "stance": "活跃",
-          "evidence": "电池板块反复活跃，宁德时代上涨但部分个股炸板回落。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "国际金价反弹带动贵金属午后走高。"
-        },
-        {
-          "name": "证券",
-          "stance": "活跃",
-          "evidence": "午后券商拉升，与指数翻红同向。"
-        },
-        {
-          "name": "算力硬件",
-          "stance": "退潮",
-          "evidence": "MLCC、PCB、CPO等延续弱势，作者称硬件链未同步转强。"
-        },
-        {
-          "name": "风电设备",
-          "stance": "退潮",
-          "evidence": "作者称风电设备表现不佳，部分个股跌停或跌幅靠前。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "中文在线",
-          "sector": "AI视频",
-          "role": "高关注"
-        },
-        {
-          "name": "芒果超媒",
-          "sector": "AI视频",
-          "role": "高关注"
-        },
-        {
-          "name": "西部黄金",
-          "sector": "贵金属",
-          "role": "高关注"
-        },
-        {
-          "name": "华鑫股份",
-          "sector": "证券",
-          "role": "高关注"
         },
         {
           "name": "金安国纪",
           "sector": "PCB",
           "role": "风险"
-        },
-        {
-          "name": "大金重工",
-          "sector": "风电设备",
-          "role": "风险"
         }
       ],
       "tomorrow_watch": [
-        "AI硬件能否止跌",
-        "传媒与电池前排开板后的承接",
-        "沪指和创业板能否重新站稳MA5"
+        "两市量能能否有效放大",
+        "传媒AI应用抱团能否延续或转向分歧",
+        "科技硬件核心股能否止跌"
       ],
       "numeric_claims": [
-        "上证综指3813.79点，涨0.05%",
-        "深证成指12641.86点，涨0.17%",
-        "创业板指3043.33点，涨0.22%",
-        "科创50为1457.27点，涨0.07%",
-        "成交额19166亿元，较昨日增加2224亿元",
-        "上涨3297家、涨停72家；下跌2145家、跌停10家",
-        "数字媒体上涨8.00%，出版上涨7.20%，影视院线上涨7.16%",
-        "电池行业上涨2.10%",
-        "修复观察区间：沪指3754至3825点，创业板2933至3100点"
+        "涨停家数从69家降至不足50家",
+        "跌停家数接近20家",
+        "涨跌中位数为-1.68%",
+        "沪指跌0.43%",
+        "炸板率为32%至35%",
+        "封板率由83.72%降至60%至70%",
+        "连板晋级率约一成",
+        "新华传媒10连板，新华文轩11天8板，内蒙新华13天7板",
+        "传媒行业主力资金净流入23.65亿元，申万传媒获逾57亿元净流入",
+        "银行行业日涨幅2.32%，主力资金净流入8.72亿元"
       ],
       "quality_flags": [
-        "无"
+        "广告",
+        "明显情绪化"
       ]
     },
     {
-      "article_id": "b96f105345b2a16e",
-      "market_stance": "偏空",
+      "article_id": "4d5080431904c31e",
+      "market_stance": "谨慎",
       "market_phase": [
         "分歧",
         "退潮"
       ],
-      "market_summary": "作者盘中判断高估值科技遭估值压制，资金向资源红利及港股防御配置切换，A股偏弱震荡。",
+      "market_summary": "作者认为修复未延续，市场缩量普跌、资金面偏谨慎；传媒与银行红利是少数亮点，科技硬件承压。",
       "sectors": [
         {
-          "name": "半导体",
-          "stance": "退潮",
-          "evidence": "作者称半导体等科技成长遭系统性估值压力，资金流出明显。"
-        },
-        {
-          "name": "消费电子",
-          "stance": "退潮",
-          "evidence": "作者将消费电子列为科技成长回落方向，认为应规避高估值科技。"
-        },
-        {
-          "name": "煤炭",
+          "name": "传媒影视/AI应用",
           "stance": "加强",
-          "evidence": "作者认为煤炭属资源红利防御配置方向，午后持续性是观察重点。"
+          "evidence": "作者称方向延续强势，果麦文化涨停、新华传媒10连板。"
         },
         {
-          "name": "航运",
+          "name": "银行红利",
           "stance": "加强",
-          "evidence": "作者认为航运受运价和供需因素催化，是资源防御方向之一。"
+          "evidence": "作者称银行为另一主线，工农中建等盘中创新高。"
         },
         {
-          "name": "种植业",
+          "name": "风电设备",
           "stance": "活跃",
-          "evidence": "作者称粮食安全概念获得阶段性关注，种植业盘中上涨。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "金健米业",
-          "sector": "种植业",
-          "role": "高关注"
-        },
-        {
-          "name": "领湃科技",
-          "sector": "不明确",
-          "role": "高关注"
-        }
-      ],
-      "tomorrow_watch": [
-        "上证3750附近能否缩量企稳",
-        "煤炭、航运等资源板块能否维持强势",
-        "港股与A股走势背离能否收敛"
-      ],
-      "numeric_claims": [
-        "10:31科创综指跌4.32%，创业板指跌3.30%",
-        "上证指数报3763.80点、跌1.26%",
-        "恒生指数涨1.06%，恒生科技指数涨1.39%",
-        "A股实时成交额8385亿元，较上一日同时放量145亿元",
-        "A股上涨925家、下跌4529家",
-        "盘中涨停24家、跌停12家",
-        "两市融资余额2.41万亿元，9月累计减少950.35亿元",
-        "种植业涨3.06%，煤炭开采涨1.70%，航运涨4.78%"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "c15c5f1e390e5b20",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "混沌"
-      ],
-      "market_summary": "作者认为指数午后在金融护盘下止跌，但整体弱势未改，后续或反复筑底；题材仍以轮动和分化为主。",
-      "sectors": [
-        {
-          "name": "大金融",
-          "stance": "活跃",
-          "evidence": "午后推动指数迅速拉起，沪深指数小幅收红。"
-        },
-        {
-          "name": "锂电池",
-          "stance": "分化",
-          "evidence": "冲高回落后回流加强但午后再回落，仅前排集中。"
-        },
-        {
-          "name": "应用",
-          "stance": "活跃",
-          "evidence": "午后与指数共振走强，全天20只涨停且均为首板。"
-        },
-        {
-          "name": "地产",
-          "stance": "退潮",
-          "evidence": "作者称地产继续调整、预期降低，认为应撤退。"
-        },
-        {
-          "name": "医药",
-          "stance": "退潮",
-          "evidence": "作者称医药继续调整，且此前行情已结束。"
-        },
-        {
-          "name": "科技",
-          "stance": "退潮",
-          "evidence": "作者认为科技继续走弱，非科技相对活跃。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "近岸",
-          "sector": "高位题材股",
-          "role": "龙头"
-        },
-        {
-          "name": "澳弘",
-          "sector": "高位题材股",
-          "role": "高关注"
-        },
-        {
-          "name": "贝瑞",
-          "sector": "高位题材股",
-          "role": "高关注"
-        },
-        {
-          "name": "中新",
-          "sector": "应用",
-          "role": "高关注"
-        },
-        {
-          "name": "文轩",
-          "sector": "应用",
-          "role": "高关注"
-        },
-        {
-          "name": "龙版",
-          "sector": "应用",
-          "role": "高关注"
-        }
-      ],
-      "tomorrow_watch": [
-        "指数止跌后的反弹力度及上方压力",
-        "应用板块在量化卖压后的承接",
-        "锂电池下周能否修复"
-      ],
-      "numeric_claims": [
-        "全天成交量增加2200亿元，恢复至约1.9万亿元",
-        "锂电池板块全天7只涨停",
-        "应用板块全天20只涨停",
-        "早盘跌停股一度达到两位数",
-        "作者称世联行收盘浮亏不足2个百分点"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "c5dce28bdcf0d3f8",
-      "market_stance": "偏空",
-      "market_phase": [
-        "修复",
-        "分歧",
-        "退潮"
-      ],
-      "market_summary": "作者认为指数仍在下跌趋势，午后回升只是超跌修复；传媒和锂电更多是套利，指数未企稳前需防题材退潮。",
-      "sectors": [
-        {
-          "name": "文化传媒",
-          "stance": "活跃",
-          "evidence": "资金围绕新华传媒发散至短剧、AI应用等，但作者认为偏补涨博弈。"
-        },
-        {
-          "name": "锂电",
-          "stance": "分化",
-          "evidence": "早盘有资金尝试，但午后资金切换，作者称其为过渡套利题材。"
-        },
-        {
-          "name": "PCB",
-          "stance": "退潮",
-          "evidence": "作者认为前日尾盘拉高属诱多，今日继续补跌。"
-        },
-        {
-          "name": "农业",
-          "stance": "分化",
-          "evidence": "金健米业涨停炸板，作者据此认为资金未形成极端避险。"
-        },
-        {
-          "name": "创新药",
-          "stance": "不明确",
-          "evidence": "作者称创新药、黄金、预制菜仅零星涨停，缺乏板块共振。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "文化传媒",
-          "role": "龙头"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "锂电",
-          "role": "核心"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "锂电",
-          "role": "核心"
-        },
-        {
-          "name": "园林股份",
-          "sector": "不明确",
-          "role": "风险"
-        },
-        {
-          "name": "新华文轩",
-          "sector": "文化传媒",
-          "role": "高关注"
-        },
-        {
-          "name": "金健米业",
-          "sector": "农业",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "指数反弹能否持续并站上压力位",
-        "传媒发散能否脱离新华传媒独立持续",
-        "指数再走弱后题材是否快速退潮"
-      ],
-      "numeric_claims": [
-        "新华传媒9板",
-        "时代万恒5板",
-        "紫竹高科4板",
-        "二进三全军覆没"
-      ],
-      "quality_flags": [
-        "广告",
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "ca03bb93ae75bfd4",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复"
-      ],
-      "market_summary": "作者认为午后普涨和三指数收红更多属于修复，机构未明显参与、新主线尚未出现，认为当前不宜追高。",
-      "sectors": [
-        {
-          "name": "传媒影视",
-          "stance": "活跃",
-          "evidence": "作者称午后回升节奏由传媒和影视带动。"
-        }
-      ],
-      "stocks": [],
-      "tomorrow_watch": [
-        "下周能否出现新主线",
-        "机构资金是否入场",
-        "追高个股的承接与回落风险"
-      ],
-      "numeric_claims": [
-        "早盘一度不足1000只股票上涨",
-        "成交量接近2万亿元"
-      ],
-      "quality_flags": [
-        "广告"
-      ]
-    },
-    {
-      "article_id": "dcac80509ca39934",
-      "market_stance": "中性",
-      "market_phase": [
-        "修复"
-      ],
-      "market_summary": "作者称市场探底回升、三大指数小涨，个股涨多跌少；影视、黄金、网络安全午后走强，算力硬件延续调整。",
-      "sectors": [
-        {
-          "name": "影视",
-          "stance": "加强",
-          "evidence": "作者称影视股午后集体爆发，板块17股大涨，多股涨停。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "作者称贵金属板块拉升，西部黄金涨停。"
-        },
-        {
-          "name": "网络安全",
-          "stance": "加强",
-          "evidence": "作者称网络安全概念异动，板块9股大涨，多股涨停。"
-        },
-        {
-          "name": "大消费",
-          "stance": "活跃",
-          "evidence": "作者称大消费早盘活跃，板块11股大涨。"
-        },
-        {
-          "name": "券商等金融",
-          "stance": "活跃",
-          "evidence": "作者称券商等金融股走强，华鑫股份、大智慧涨停。"
-        },
-        {
-          "name": "算力硬件",
-          "stance": "退潮",
-          "evidence": "作者称算力硬件股延续调整，金安国纪跌停。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "九阳股份",
-          "sector": "大消费",
-          "role": "高关注"
-        },
-        {
-          "name": "中新赛克",
-          "sector": "网络安全",
-          "role": "高关注"
-        },
-        {
-          "name": "掌阅科技",
-          "sector": "影视",
-          "role": "高关注"
-        },
-        {
-          "name": "德才股份",
-          "sector": "影视",
-          "role": "高关注"
-        },
-        {
-          "name": "龙版传媒",
-          "sector": "影视",
-          "role": "高关注"
-        },
-        {
-          "name": "金安国纪",
-          "sector": "算力硬件",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "影视板块爆发后的持续性",
-        "网络安全概念的活跃度",
-        "算力硬件调整是否延续"
-      ],
-      "numeric_claims": [
-        "沪深京三市约3300股飘红",
-        "当日成交1.92万亿元",
-        "沪指上涨0.05%",
-        "深成指上涨0.17%",
-        "创业板指上涨0.22%",
-        "影视板块17股大涨",
-        "掌阅科技4天2板",
-        "德才股份3天2板",
-        "龙版传媒3天2板",
-        "无线传媒上涨13.0%",
-        "华是科技上涨11.4%",
-        "捷成股份上涨11.0%",
-        "现货黄金站上4200美元/盎司，日内上涨1.61%",
-        "网络安全板块9股大涨",
-        "中新赛克16天8板",
-        "永信至诚上涨16.2%",
-        "奇安信上涨11.2%",
-        "亚信安全上涨10.8%",
-        "大消费板块11股大涨",
-        "九阳股份5天5板",
-        "三柏硕2天2板",
-        "红豆股份2天2板",
-        "截至2026年6月30日，申万食品饮料指数滚动市盈率18.6倍"
-      ],
-      "quality_flags": [
-        "广告"
-      ]
-    },
-    {
-      "article_id": "de9dacce2599a0cc",
-      "market_stance": "中性",
-      "market_phase": [
-        "修复"
-      ],
-      "market_summary": "作者认为大盘低开高走、尾盘回升，整体有惊无险；下周关注新华传媒连板情况及电池是否接力。",
-      "sectors": [
-        {
-          "name": "电池",
-          "stance": "活跃",
-          "evidence": "作者列为当日主线，并认为新华传媒断板后或由电池接力。"
-        },
-        {
-          "name": "出版",
-          "stance": "活跃",
-          "evidence": "作者将出版列为当日主线之一。"
-        },
-        {
-          "name": "影视",
-          "stance": "活跃",
-          "evidence": "作者将影视列为当日主线之一。"
-        },
-        {
-          "name": "大消费",
-          "stance": "活跃",
-          "evidence": "作者将大消费列为当日主线之一。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "出版",
-          "role": "高关注"
-        },
-        {
-          "name": "天赐材料",
-          "sector": "电池",
-          "role": "高关注"
-        },
-        {
-          "name": "天娱数科",
-          "sector": "影视",
-          "role": "高关注"
-        },
-        {
-          "name": "襄阳轴承",
-          "sector": "",
-          "role": "不明确"
-        },
-        {
-          "name": "我爱我家",
-          "sector": "",
-          "role": "不明确"
-        }
-      ],
-      "tomorrow_watch": [
-        "新华传媒能否继续连板",
-        "电池能否接力走强",
-        "天赐材料、天娱数科表现"
-      ],
-      "numeric_claims": [],
-      "quality_flags": [
-        "广告"
-      ]
-    },
-    {
-      "article_id": "e19ac192ea9b4e6e",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "分歧",
-        "修复"
-      ],
-      "market_summary": "作者认为市场深V翻红，传媒与固态电池带动修复，但科技硬件退潮、连板晋级率回落，仍需防范分歧。",
-      "sectors": [
-        {
-          "name": "传媒/影视院线",
-          "stance": "加强",
-          "evidence": "作者称午后掀涨停潮，是指数探底回升核心引擎。"
-        },
-        {
-          "name": "固态电池/锂电池",
-          "stance": "加强",
-          "evidence": "作者称政策催化持续，形成4至5板连板梯队。"
-        },
-        {
-          "name": "农业",
-          "stance": "活跃",
-          "evidence": "作者称农业板块逆势走强，金健米业等涨停。"
-        },
-        {
-          "name": "大消费",
-          "stance": "活跃",
-          "evidence": "作者称大消费板块活跃，国芳集团等涨停。"
-        },
-        {
-          "name": "有机硅",
-          "stance": "活跃",
-          "evidence": "东岳硅材业绩预增后20CM涨停，作者称有业绩驱动。"
-        },
-        {
-          "name": "CPO/PCB/半导体",
-          "stance": "退潮",
-          "evidence": "作者称该方向继续被抛售，为市场最大重灾区。"
-        },
-        {
-          "name": "汽车整车",
-          "stance": "退潮",
-          "evidence": "作者称江淮汽车连续两日跌停，舆情冲击未消。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "传媒/影视院线",
-          "role": "龙头"
-        },
-        {
-          "name": "中文在线",
-          "sector": "传媒/影视院线",
-          "role": "核心"
-        },
-        {
-          "name": "芒果超媒",
-          "sector": "传媒/影视院线",
-          "role": "核心"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "固态电池/锂电池",
-          "role": "龙头"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "固态电池/锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "东岳硅材",
-          "sector": "有机硅",
-          "role": "龙头"
-        },
-        {
-          "name": "中际旭创",
-          "sector": "CPO",
-          "role": "风险"
-        },
-        {
-          "name": "江淮汽车",
-          "sector": "汽车整车",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "新华传媒能否晋级10连板及传媒板块延续性",
-        "时代万恒、紫竹高科所在固态电池板块能否延续",
-        "中际旭创、金安国纪等能否止跌，以及成交额能否继续放大"
-      ],
-      "numeric_claims": [
-        "沪指涨0.05%报3813.79点",
-        "深证成指涨0.17%报12641.86点",
-        "创业板指涨0.22%报3043.33点",
-        "科创50涨0.07%，盘中一度跌超3.78%",
-        "沪深京三市成交额1.92万亿元，较上一交易日放量2224亿元",
-        "全市场近3300只个股上涨，72股涨停、10股跌停",
-        "封板率84%，连板晋级率40%",
-        "新华传媒9连板，封单14.21亿元",
-        "东岳硅材预计前三季度净利润同比增长19050%至19750%",
-        "N奥美森上市首日上涨349.86%，换手率84.14%"
-      ],
-      "quality_flags": [
-        "广告",
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "e6aebaf02ef35f28",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "分歧"
-      ],
-      "market_summary": "作者认为锂电上涨是科技高估值资金撤出后的阶段轮动，产业链利润呈结构分化，尚不足以确认基本面趋势反转。",
-      "sectors": [
-        {
-          "name": "锂电池",
-          "stance": "加强",
-          "evidence": "作者称排产超预期、盈利修复与资金外溢共振带动板块。"
-        },
-        {
-          "name": "半导体",
-          "stance": "退潮",
-          "evidence": "作者称科技板块全线失血，半导体早盘大跌。"
-        },
-        {
-          "name": "消费电子",
-          "stance": "退潮",
-          "evidence": "作者称消费电子随科技高估值方向走弱。"
-        },
-        {
-          "name": "储能",
-          "stance": "活跃",
-          "evidence": "作者认为储能是锂电第二增长曲线，但受项目经济性约束。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "时代万恒",
-          "sector": "锂电池",
-          "role": "龙头"
-        },
-        {
-          "name": "天赐材料",
-          "sector": "锂电池",
-          "role": "核心"
-        },
-        {
-          "name": "宁德时代",
-          "sector": "动力电池",
-          "role": "核心"
-        },
-        {
-          "name": "天齐锂业",
-          "sector": "锂矿",
-          "role": "核心"
-        },
-        {
-          "name": "盐湖股份",
-          "sector": "锂矿",
-          "role": "核心"
-        }
-      ],
-      "tomorrow_watch": [
-        "碳酸锂期货能否企稳反弹",
-        "新能源车销量及动力电池装机数据",
-        "锂矿和盐湖新增产能落地进度"
-      ],
-      "numeric_claims": [
-        "科创综指下跌4.32%，半导体下跌4.56%，消费电子下跌4.29%",
-        "碳酸锂从约51万元/吨跌至12.25至12.74万元/吨，最大回撤约75%",
-        "宁德时代2026年上半年营收2769.17亿元、归母净利润432.84亿元、毛利率23.93%",
-        "2026年1至8月国内动力电池累计装机489.1GWh，同比增长17.0%",
-        "2026年上半年全球储能电池出货461.3GWh，同比增长71%",
-        "SMM碳酸锂总库存139517吨，环比减少9260吨",
-        "6家电池样本企业10月计划排产214.6GWh，同比增长57%",
-        "中证电池主题指数PE为20.26倍，处于近一年1.19%分位"
-      ],
-      "quality_flags": [
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "eae2ae82f30962db",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "分歧",
-        "混沌"
-      ],
-      "market_summary": "作者认为长端美债高企压制A股高估值科技，资金转向资源红利、航运及部分低位防守方向；若放量跌破3750点，独立主线也可能受拖累。",
-      "sectors": [
-        {
-          "name": "科技",
-          "stance": "退潮",
-          "evidence": "作者称A股科技整体承压，半导体、消费电子明显下跌。"
-        },
-        {
-          "name": "半导体",
-          "stance": "退潮",
-          "evidence": "作者称半导体跌4.56%，资金从高估值成长撤出。"
-        },
-        {
-          "name": "消费电子",
-          "stance": "退潮",
-          "evidence": "作者称消费电子跌4.29%，受高估值科技承压影响。"
-        },
-        {
-          "name": "农业（种植业）",
-          "stance": "活跃",
-          "evidence": "作者称种植业涨3.06%，但定位为情绪短线博弈。"
-        },
-        {
-          "name": "电池",
-          "stance": "分化",
-          "evidence": "作者称电池处于缩量抱团，尚非最硬绝对主线。"
-        },
-        {
-          "name": "航运",
-          "stance": "加强",
-          "evidence": "作者称航运涨4.78%，为避险资金绝对主攻方向。"
-        },
-        {
-          "name": "创新药",
-          "stance": "退潮",
-          "evidence": "作者称创新药跌1.70%，医药内部资金偏向低估值方向。"
-        },
-        {
-          "name": "医疗器械",
-          "stance": "退潮",
-          "evidence": "作者称医疗器械跌0.75%。"
-        },
-        {
-          "name": "中药",
-          "stance": "活跃",
-          "evidence": "作者称中药涨1.29%，反映资金寻找低估值、高股息安全垫。"
-        },
-        {
-          "name": "煤炭",
-          "stance": "加强",
-          "evidence": "作者将煤炭列为资源红利和避险资金配置方向。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "加强",
-          "evidence": "作者将贵金属列为资源红利和避险资金配置方向。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "中远海能",
-          "sector": "航运",
-          "role": "龙头"
-        }
-      ],
-      "tomorrow_watch": [
-        "上证指数3750点附近的量能与支撑情况",
-        "航运、电池、农业方向能否获得增量资金接力",
-        "科技承压下资源红利及防守方向的持续性"
-      ],
-      "numeric_claims": [
-        "美国9月非农新增2.9万人",
-        "10年期美债收益率升至5.365%",
-        "美元指数收报106.82",
-        "燃油日盘涨18.35%",
-        "甲醇日盘涨9.02%",
-        "沪银日盘跌3.46%",
-        "铁矿石日盘跌3.12%",
-        "半导体跌4.56%",
-        "消费电子跌4.29%",
-        "种植业涨3.06%",
-        "航运涨4.78%",
-        "创新药跌1.70%",
-        "医疗器械跌0.75%",
-        "中药涨1.29%",
-        "VIX为15.41",
-        "原油期权隐含波动率为88%至90%"
-      ],
-      "quality_flags": [
-        "广告",
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "ed6769811c058ecd",
-      "market_stance": "偏多",
-      "market_phase": [
-        "修复",
-        "发酵"
-      ],
-      "market_summary": "作者认为放量探底回升使亏钱效应收敛，文化传媒和软件开发为增量资金主线，固态电池及风电电网则面临退潮风险。",
-      "sectors": [
-        {
-          "name": "文化传媒",
-          "stance": "加强",
-          "evidence": "作者认定其与指数、增量资金共振，为明确主线。"
-        },
-        {
-          "name": "软件开发",
-          "stance": "加强",
-          "evidence": "作者称其为增量资金主攻方向，具备波段反转潜力。"
-        },
-        {
-          "name": "医药",
-          "stance": "活跃",
-          "evidence": "作者将医药列为筹码结构较优、稳定性较强的防守支线。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "活跃",
-          "evidence": "作者认为受周末国际金价消息发酵，存在持续炒作预期。"
-        },
-        {
-          "name": "种业",
-          "stance": "活跃",
-          "evidence": "作者称其受厄尔尼诺天气影响，出现阶段性异动反弹。"
-        },
-        {
-          "name": "固态电池",
-          "stance": "分化",
-          "evidence": "作者称尾盘筹码松动、资金分歧加大，存在回调风险。"
-        },
-        {
-          "name": "风电",
-          "stance": "退潮",
-          "evidence": "作者称该方向资金兑现离场，短期进入退潮。"
+          "evidence": "作者称风电设备在上周五下跌后反弹。"
         },
         {
           "name": "电网设备",
+          "stance": "活跃",
+          "evidence": "金冠电气、长城电工等涨停，作者称板块活跃。"
+        },
+        {
+          "name": "科技硬件/通信/PCB",
           "stance": "退潮",
-          "evidence": "作者称该方向资金兑现离场，短期难有反弹行情。"
-        },
-        {
-          "name": "房地产",
-          "stance": "退潮",
-          "evidence": "作者称房地产资金兑现离场，短期大概率弱势震荡。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "时代WH",
-          "sector": "固态电池",
-          "role": "风险"
-        },
-        {
-          "name": "九阳GF",
-          "sector": "大消费",
-          "role": "核心"
-        }
-      ],
-      "tomorrow_watch": [
-        "消费、券商和贵金属板块持续性",
-        "文化传媒及软件开发主线的资金延续",
-        "九阳GF能否晋级6连板并带动消费回流"
-      ],
-      "numeric_claims": [
-        "全场涨停69只",
-        "封板率84%",
-        "炸板率16%",
-        "大跌个股缩减至44家",
-        "市场连板高度突破至5板",
-        "九阳GF若周一晋级将达6连板"
-      ],
-      "quality_flags": [
-        "广告",
-        "明显情绪化"
-      ]
-    },
-    {
-      "article_id": "f00f85d8c9e877ac",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "分歧",
-        "混沌"
-      ],
-      "market_summary": "作者认为美债长端利率上行压制全球风险资产，A股情绪或偏弱；能源和红利相对占优，成长估值面临压力。",
-      "sectors": [
-        {
-          "name": "能源",
-          "stance": "加强",
-          "evidence": "作者认为受能化期货和美股能源映射，具备较强表现逻辑。"
-        },
-        {
-          "name": "红利",
-          "stance": "加强",
-          "evidence": "作者认为高利率环境下资金向实物资产和高股息方向迁徙。"
-        },
-        {
-          "name": "基础化工",
-          "stance": "活跃",
-          "evidence": "作者将其列为受能化期货映射的主要方向。"
-        },
-        {
-          "name": "煤炭",
-          "stance": "活跃",
-          "evidence": "作者将煤炭列入能源与红利的相对占优方向。"
-        },
-        {
-          "name": "有色金属",
-          "stance": "退潮",
-          "evidence": "作者认为受高美债利率和强美元压制，面临获利了结压力。"
-        },
-        {
-          "name": "贵金属",
-          "stance": "退潮",
-          "evidence": "作者认为其受美债利率高企与美元走强压制。"
-        },
-        {
-          "name": "房地产",
-          "stance": "活跃",
-          "evidence": "作者认为北向节前加仓叠加稳增长预期，具阶段性防守属性。"
-        },
-        {
-          "name": "半导体",
-          "stance": "分化",
-          "evidence": "作者认为基本面强劲，但高估值对利率敏感、承受压力。"
-        }
-      ],
-      "stocks": [],
-      "tomorrow_watch": [
-        "10年期美债收益率能否维持高位或突破5.5%",
-        "A股低开后的量能及能源红利板块承接",
-        "美元、油价与全球风险资产的联动"
-      ],
-      "numeric_claims": [
-        "美国9月非农新增2.9万人，预期为9万人，失业率4.2%",
-        "10年期美债收益率5.365%，30年期美债收益率5.70%",
-        "MOVE指数突破100，VIX指数为15.41",
-        "道琼斯指数收51231.64点，涨0.10%",
-        "纳斯达克指数收27193.34点，跌1.25%",
-        "标普500收7765.36点，跌0.47%",
-        "费城半导体指数跌3.39%",
-        "WTI原油涨3.64%至91.18美元，布伦特原油涨4.07%至104.1美元",
-        "燃油日盘涨18.35%，沥青涨9.15%，甲醇涨9.02%",
-        "上证指数收3842.19点，涨0.31%",
-        "A股全市场成交额约1.45万亿元",
-        "作者给出的基准、上行、下行情景概率分别为60%、25%、15%"
-      ],
-      "quality_flags": [
-        "无"
-      ]
-    },
-    {
-      "article_id": "fd03e159871fa998",
-      "market_stance": "中性",
-      "market_phase": [
-        "修复",
-        "分歧"
-      ],
-      "market_summary": "作者认为情绪在补跌后放量修复，电池链是最强主线、新华传媒抱团支撑高度，但中位股断层使高标和低位补涨均存分化风险。",
-      "sectors": [
-        {
-          "name": "电池链",
-          "stance": "加强",
-          "evidence": "作者称其具备5-4-2完整梯队，是日内最强主线。"
-        },
-        {
-          "name": "出版传媒",
-          "stance": "活跃",
-          "evidence": "新华传媒9板带来高标抱团溢出，多只出版股首板补涨。"
-        },
-        {
-          "name": "软件开发/网络安全",
-          "stance": "分化",
-          "evidence": "多只首板涨停，但缺乏连板高标，持续性待观察。"
-        },
-        {
-          "name": "影视院线",
-          "stance": "分化",
-          "evidence": "作者认为板块均为首板，次日存在分化压力。"
-        },
-        {
-          "name": "农业/种植业",
-          "stance": "活跃",
-          "evidence": "作者称其具防御属性，但容量有限、难成为主线。"
-        },
-        {
-          "name": "元件",
-          "stance": "退潮",
-          "evidence": "金安国纪跌停，作者归因于高位补跌。"
-        },
-        {
-          "name": "风电",
-          "stance": "退潮",
-          "evidence": "大金重工跌停，作者称制造业高位股遭遇获利盘兑现。"
-        }
-      ],
-      "stocks": [
-        {
-          "name": "新华传媒",
-          "sector": "出版传媒",
-          "role": "龙头"
-        },
-        {
-          "name": "时代万恒",
-          "sector": "电池链",
-          "role": "龙头"
-        },
-        {
-          "name": "紫竹高科",
-          "sector": "电池链",
-          "role": "核心"
-        },
-        {
-          "name": "雄韬股份",
-          "sector": "电池链",
-          "role": "跟随"
-        },
-        {
-          "name": "丰元股份",
-          "sector": "电池链",
-          "role": "跟随"
-        },
-        {
-          "name": "领湃科技",
-          "sector": "电池链",
-          "role": "跟随"
-        },
-        {
-          "name": "金安国纪",
-          "sector": "元件",
-          "role": "风险"
-        },
-        {
-          "name": "大金重工",
-          "sector": "风电",
-          "role": "风险"
-        }
-      ],
-      "tomorrow_watch": [
-        "新华传媒放量分歧对中位股的影响",
-        "时代万恒与紫竹高科能否继续晋级",
-        "电池链、软件开发及零售首板能否走出2板"
-      ],
-      "numeric_claims": [
-        "上证指数收3813.79点，上涨0.05%",
-        "深证成指收12641.86点，上涨0.17%",
-        "创业板指收3043.33点，上涨0.22%",
-        "科创50收1457.27点，上涨0.07%",
-        "两市成交约1.90万亿元，较昨日放量约2184亿元",
-        "上涨3270家，下跌2123家，平盘127家",
-        "涨停69家，跌停7家",
-        "新华传媒9板",
-        "时代万恒5板",
-        "九阳股份5板",
-        "紫竹高科4板",
-        "三板以上仅4只",
-        "二板以上合计12只",
-        "今日57只首板"
-      ],
-      "quality_flags": [
-        "广告"
-      ]
-    },
-    {
-      "article_id": "fff660d7c7443690",
-      "market_stance": "谨慎",
-      "market_phase": [
-        "修复",
-        "分歧",
-        "混沌"
-      ],
-      "market_summary": "作者认为指数深V修复，但连板分歧未消、题材聚合不足；传媒受高标停牌风险约束，算力仍在补跌，市场或转向轮动。",
-      "sectors": [
-        {
-          "name": "传媒影视",
-          "stance": "活跃",
-          "evidence": "作者称午后批量涨停，但多数为新华传媒分歧引发的补涨，持续性待验证。"
-        },
-        {
-          "name": "锂电池/固态电池",
-          "stance": "分化",
-          "evidence": "作者认为政策逻辑存在，但时代万恒相关业务被澄清，板块正宗标的稀缺。"
-        },
-        {
-          "name": "有机硅",
-          "stance": "活跃",
-          "evidence": "作者认为业绩预增构成基本面硬锚，但板块容量较小且持续性依赖东岳硅材。"
-        },
-        {
-          "name": "大金融",
-          "stance": "活跃",
-          "evidence": "作者认为午后券商金融发力，是指数完成深V反转的核心推手。"
+          "evidence": "作者称其为主要拖累，通信跌超2%，多只个股调整。"
         },
         {
           "name": "农业",
           "stance": "分化",
-          "evidence": "作者认为气象事件带来刺激，但题材反复炒作，以老股轮动为主，持续性存疑。"
-        },
-        {
-          "name": "消费零售",
-          "stance": "分化",
-          "evidence": "作者称板块由题材情绪带动，尚未出现独立龙头，发酵不足。"
-        },
-        {
-          "name": "算力产业链",
-          "stance": "退潮",
-          "evidence": "作者判断算力硬件仍在补跌通道，暂未出现系统性机会。"
+          "evidence": "作者称农业冲高后大幅回落，金健米业炸板。"
         }
       ],
       "stocks": [
@@ -2691,271 +1614,3199 @@
           "role": "龙头"
         },
         {
+          "name": "果麦文化",
+          "sector": "传媒影视",
+          "role": "核心"
+        },
+        {
+          "name": "工商银行",
+          "sector": "银行红利",
+          "role": "核心"
+        },
+        {
+          "name": "天顺风能",
+          "sector": "风电设备",
+          "role": "核心"
+        },
+        {
+          "name": "景旺电子",
+          "sector": "业绩兑现",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "沪指能否收复3800点及创业板指能否重回3000点",
+        "成交额能否达到作者设定的1.8万亿信号线",
+        "传媒影视与银行红利的延续和扩散情况"
+      ],
+      "numeric_claims": [
+        "沪指午后最低3791点",
+        "创业板指午后报2980点、跌约2%",
+        "沪深京三市半日成交1.01万亿，较前一交易日缩量1552亿",
+        "预计全天成交约1.5至1.6万亿",
+        "全市场超4200只个股下跌",
+        "截至14点约44只涨停、约11只跌停",
+        "主力资金净流出约195亿",
+        "北向资金半日净流出61.07亿",
+        "融资余额减少145.81亿",
+        "央行单日净回笼2500亿"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "512795d2f255200e",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为市场缩量分化、红利集中传媒；新华传媒停牌抽离情绪锚，高位兑现压力增大，或转向避险低位轮动。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "分化",
+          "evidence": "作者称其为唯一主线，但新华传媒停牌后补涨承接和首板容错率下降。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者将医药定性为指数走弱下的避险脉冲，但认为持续性偏弱。"
+        },
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者称农业为避险支线，但金健米业走弱带来明显负反馈。"
+        },
+        {
+          "name": "电网",
+          "stance": "活跃",
+          "evidence": "作者认为电网处于试盘阶段，需观察竞价资金表态。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "作者将风电归为新能源护盘及试盘方向。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "分化",
+          "evidence": "作者认为其进攻主动性较弱，属于易一日游的产业链轮动。"
+        },
+        {
+          "name": "算力",
+          "stance": "退潮",
+          "evidence": "作者称算力权重持续走弱，整体疲态，尚未出现主升信号。"
+        },
+        {
+          "name": "化工",
+          "stance": "分化",
+          "evidence": "作者认为化工未走出独立逻辑，现阶段倾向观望。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒、AI应用",
+          "role": "龙头"
+        },
+        {
           "name": "时代万恒",
-          "sector": "锂电池/固态电池",
+          "sector": "固态电池",
           "role": "风险"
         },
         {
           "name": "九阳股份",
-          "sector": "小家电/机器人",
+          "sector": "消费、机器人",
           "role": "风险"
         },
         {
-          "name": "紫竹高科",
-          "sector": "锂电池/固态电池",
-          "role": "风险"
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "核心"
         },
         {
-          "name": "楚环科技",
-          "sector": "环保设备",
+          "name": "慈文传媒",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "新经典",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "远程股份",
+          "sector": "电网",
           "role": "高关注"
         },
         {
-          "name": "东岳硅材",
-          "sector": "有机硅",
+          "name": "百洋股份",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "金冠电气",
+          "sector": "电网",
+          "role": "高关注"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "丽人丽妆",
+          "sector": "AI应用、电商",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "时代万恒、九阳股份的竞价溢价与高位承接",
+        "慈文传媒、新经典、龙版传媒的竞价强度及传媒补涨承接",
+        "金冠电气封单及医药、农业、电网等避险方向表现"
+      ],
+      "numeric_claims": [
+        "沪指收3797.24点，下跌0.43%",
+        "深成指下跌2.03%",
+        "创业板指下跌2.61%",
+        "科创50下跌2.10%",
+        "沪深京三市成交1.55万亿，较前一交易日缩量3659亿",
+        "全市场4300余只个股收跌，1167只个股飘红",
+        "48家涨停，18只连板股，封板率60%",
+        "新华传媒盘中封单超102万手",
+        "新华传媒区间累计涨幅159.51%",
+        "新华传媒滚动市盈率306.79倍，行业市盈率18.81倍",
+        "情景推演概率：中位卡位35%、高低切45%、混沌轮动20%"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "57a0f5084db78508",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为市场缩量走弱，资金由成长赛道转向防守及低位方向，炸板率上升令短线追高难度加大。",
+      "sectors": [
+        {
+          "name": "通信设备",
+          "stance": "退潮",
+          "evidence": "作者称该板块主力净流出26.68亿元。"
+        },
+        {
+          "name": "数字芯片设计",
+          "stance": "退潮",
+          "evidence": "作者称该方向主力净流出21.73亿元。"
+        },
+        {
+          "name": "半导体",
+          "stance": "退潮",
+          "evidence": "作者称半导体资金流出，并列入成长方向失血。"
+        },
+        {
+          "name": "电池",
+          "stance": "退潮",
+          "evidence": "作者称电池资金流出，成长方向整体承压。"
+        },
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者称资金流向传媒等防守和低位方向。"
+        },
+        {
+          "name": "影视院线",
+          "stance": "活跃",
+          "evidence": "作者列为当日涨幅居前方向，上涨3.67%。"
+        },
+        {
+          "name": "风电零部件",
+          "stance": "活跃",
+          "evidence": "作者列为当日涨幅居前方向，上涨2.92%。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者认为资金转向银行等防守方向，关注其强势延续。"
+        },
+        {
+          "name": "地产",
+          "stance": "分化",
+          "evidence": "作者称机构布局部分地产标的，板块内部存在分化。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "作者称机构布局部分医药标的，板块内部存在分化。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "阿莱德",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "世联行",
+          "sector": "地产",
+          "role": "高关注"
+        },
+        {
+          "name": "金安国纪",
+          "sector": "化工",
+          "role": "高关注"
+        },
+        {
+          "name": "丰元股份",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "襄阳轴承",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "星网锐捷",
+          "sector": "科技",
+          "role": "风险"
+        },
+        {
+          "name": "百奥赛图",
+          "sector": "医药",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "成交额能否回补",
+        "成长方向资金流出能否收窄",
+        "银行和传媒等防守方向能否维持强势"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，跌0.43%",
+        "深证成指12384.87点，跌2.03%",
+        "创业板指2963.82点，跌2.61%",
+        "全市场下跌4325家、上涨1167家",
+        "两市成交额15507亿元，较上一交易日缩量3659亿元",
+        "两融余额16248.05亿元，增加67.03亿元",
+        "融资余额15369.01亿元，增加41.23亿元",
+        "炸板率35.14%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "5b429838cb047ca8",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场在反弹后缩量二次调整，普跌且高位兑现；AI应用传媒前排仍强但后排分化，固态电池和机器人退潮，短期偏防御。",
+      "sectors": [
+        {
+          "name": "AI应用/传媒",
+          "stance": "分化",
+          "evidence": "作者称前排延续强势，但后排多数回落、共振减弱。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "退潮",
+          "evidence": "作者称高位标的兑现，仅有低位标的零星补涨。"
+        },
+        {
+          "name": "机器人概念",
+          "stance": "退潮",
+          "evidence": "作者称板块走弱、仅零星个股表现，襄阳轴承跌停。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称其为防御性轮动，华北制药3连板，梯队完整。"
+        },
+        {
+          "name": "化工/有机硅",
+          "stance": "分化",
+          "evidence": "作者称机构加持部分个股，但板块共振较弱。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "作者称通达动力、天顺风能涨停，属超跌反弹。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "文化传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "机器人概念",
           "role": "核心"
         },
         {
-          "name": "华鑫股份",
-          "sector": "大金融",
+          "name": "时代万恒",
+          "sector": "锂电池",
           "role": "核心"
         },
         {
-          "name": "绿盟科技",
-          "sector": "网络安全/信创",
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "龙头"
+        },
+        {
+          "name": "新华都",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "果麦文化",
+          "sector": "AI应用/短剧",
+          "role": "核心"
+        },
+        {
+          "name": "襄阳轴承",
+          "sector": "机器人概念",
+          "role": "风险"
+        },
+        {
+          "name": "金安国纪",
+          "sector": "覆铜板/通信",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "AI应用传媒前排能否延续并带动板块共振",
+        "新华传媒能否冲击11板",
+        "成交额能否回到1.6万亿元以上及跌停数量能否收窄"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，下跌0.43%",
+        "两市成交额15509.66亿元，较前一交易日缩量3659亿元，降幅19.09%",
+        "上涨1167家，下跌4324家",
+        "涨停48家、跌停22家；过滤ST后实际跌停19家",
+        "实际涨停46家、实际跌停19家",
+        "涨停数较昨日69家减少23家，跌停数较昨日8家增加11家",
+        "封板率65%，较昨日83%回落18个百分点",
+        "连板晋级率33%，较昨日40%回落7个百分点",
+        "新华传媒10天10板，九阳股份和时代万恒均6天6板",
+        "新华都营业部净买入1.18亿元，果麦文化机构净买入2559万元"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "63ae9bfc6283cbd9",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "混沌"
+      ],
+      "market_summary": "作者认为市场缩量普跌、亏钱效应仍在释放，处于退潮末期的混沌观望阶段；传媒局部抱团但尚未确认新周期主线。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "加强",
+          "evidence": "作者称传媒是唯一有资金、梯队和持续性的方向。"
+        },
+        {
+          "name": "AI短剧",
+          "stance": "活跃",
+          "evidence": "作者称短剧方向多股晋级，梯队完整度较好。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称银行逆势走强，但定位为防御方向。"
+        },
+        {
+          "name": "电子",
+          "stance": "退潮",
+          "evidence": "作者称资金继续从AI硬件端系统性撤离。"
+        },
+        {
+          "name": "通信",
+          "stance": "退潮",
+          "evidence": "作者称通信板块继续系统性失血。"
+        },
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称龙虎榜资金在医药方向集中进攻，但存在分歧。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "内蒙新华",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "AI机器人",
+          "role": "风险"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "锂电池",
+          "role": "高关注"
+        },
+        {
+          "name": "莱美药业",
+          "sector": "医药",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒开板后的走势",
+        "短剧及AI应用方向持续性",
+        "传媒能否由局部抱团升级为新周期主线"
+      ],
+      "numeric_claims": [
+        "沪指收3809.08点，跌0.43%",
+        "深成指跌2.03%，创业板指跌2.61%",
+        "全市场1167只上涨、4325只下跌",
+        "48只涨停、22只跌停",
+        "成交额1.54万亿元，较前一日缩量3627亿元",
+        "主力资金净流出263.38亿元，连续4个交易日净流出",
+        "传媒净流入23.65亿元，成交量较前日放大23.60%",
+        "银行净流入8.72亿元，涨2.32%",
+        "电子净流出81.68亿元，通信净流出55.69亿元",
+        "连板股总数18只，晋级率33.33%",
+        "2进3晋级率13%，1进2晋级率25%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "6bbbeb4dc30ccf47",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者复盘称市场震荡调整、个股普跌，但短剧传媒与银行逆势活跃，风电光伏冲高，算力硬件调整。",
+      "sectors": [
+        {
+          "name": "短剧/互动影游",
+          "stance": "加强",
+          "evidence": "作者称板块12股大涨，受短剧应用下载数据等消息催化。"
+        },
+        {
+          "name": "传媒",
+          "stance": "加强",
+          "evidence": "作者称新华传媒10连板，出版传媒股持续活跃。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称银行逆势走强，多只国有及股份行股价创新高。"
+        },
+        {
+          "name": "风电",
+          "stance": "分化",
+          "evidence": "作者称板块盘中拉升但冲高回落。"
+        },
+        {
+          "name": "算力硬件",
+          "stance": "退潮",
+          "evidence": "作者称算力硬件调整，金安国纪、华正新材等跌停。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "短剧/互动影游",
+          "role": "跟随"
+        },
+        {
+          "name": "掌阅科技",
+          "sector": "短剧/互动影游",
+          "role": "核心"
+        },
+        {
+          "name": "天顺风能",
+          "sector": "风电",
+          "role": "核心"
+        },
+        {
+          "name": "金安国纪",
+          "sector": "算力硬件",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "短剧和传媒股的持续性",
+        "风电板块冲高回落后的承接",
+        "算力硬件调整是否止跌"
+      ],
+      "numeric_claims": [
+        "沪深京三市超4300股飘绿",
+        "成交1.55万亿元",
+        "沪指下跌0.43%，深成指下跌2.03%，创业板指下跌2.61%",
+        "PineDrama累计下载量突破1亿，日活约700万",
+        "新华传媒10连板"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "70e3809c3b909cf1",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "发酵",
+        "分歧"
+      ],
+      "market_summary": "作者认为大盘触底反弹与新华传媒高位表现催生补涨，但传媒二板拥挤，补涨持续性及后排套利风险需警惕。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "加强",
+          "evidence": "作者称14只二板中有11只传媒，传媒二板呈一家独大格局。"
+        },
+        {
+          "name": "上海地域",
+          "stance": "分化",
+          "evidence": "作者认为上海股仍需重视，但称其涨停数量及布局较此前更弱。"
+        },
+        {
+          "name": "电商及化妆品",
+          "stance": "不明确",
+          "evidence": "作者称相关细分未见跟随发酵，对比传媒显得势单力薄。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "新亚强",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "慈文传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒是否因监管停牌及其对情绪的影响",
+        "传媒二板晋级率及核心股竞争结果",
+        "上海非传媒补涨能否出现板块发酵"
+      ],
+      "numeric_claims": [
+        "今日一进二晋级率20%+",
+        "今日有十几个二板",
+        "新华传媒此前为9板，今日为10板且缩量",
+        "作者暂给本批二板5板预期",
+        "14只二板中有11个传媒",
+        "作者预计传媒明日晋级率50%已属不错",
+        "新华都924首板约7亿元成交额",
+        "文中称相关应用个股成交量超过10亿元",
+        "作者举例隔夜操作曾当日亏损12%、次日跌停卖出"
+      ],
+      "quality_flags": [
+        "明显情绪化",
+        "广告"
+      ]
+    },
+    {
+      "article_id": "749406ac7764b684",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为宽度与量能不支持全面进攻，市场呈传媒单线抱团、电池独苗续命及银行防御的割裂格局。",
+      "sectors": [
+        {
+          "name": "传媒/出版/AI短剧",
+          "stance": "加强",
+          "evidence": "作者定义为全场唯一主线，仍处扩散阶段。"
+        },
+        {
+          "name": "电池链",
+          "stance": "分化",
+          "evidence": "作者认为板块大分歧，仅时代万恒封住涨停。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称银行红利护盘，是避险迁移而非超短主线。"
+        },
+        {
+          "name": "风电/电网/储能",
+          "stance": "活跃",
+          "evidence": "作者定性为政策驱动的轮动补涨，持续性待验证。"
+        },
+        {
+          "name": "农业/种业",
+          "stance": "退潮",
+          "evidence": "作者称金健米业炸板，农业板块全线反杀。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒/出版/AI短剧",
+          "role": "龙头"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒/出版/AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "传媒/出版/AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池链",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "大消费",
+          "role": "核心"
+        },
+        {
+          "name": "天顺风能",
+          "sector": "风电",
+          "role": "核心"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
           "role": "核心"
         }
       ],
       "tomorrow_watch": [
-        "新华传媒开板承接及停牌核查公告",
-        "时代万恒和紫竹高科竞价表现对固态电池情绪的影响",
-        "大金融能否延续及算力硬件补跌是否结束"
+        "传媒2板群能否至少晋级3只3板",
+        "新华传媒停牌对传媒链高度锚的影响",
+        "时代万恒能否弱转强带动电池反包"
       ],
       "numeric_claims": [
-        "沪指收3813.79点，涨0.05%",
-        "深成指涨0.17%，创业板指涨0.22%",
-        "沪深两市成交额1.92万亿元，较前日放量2223亿元",
-        "全市场超3297只个股上涨",
-        "全天72股涨停、14股炸板",
-        "封板率为78.26%",
-        "午盘涨停27家，封板率64%",
-        "全市场连板晋级率26.67%",
-        "新华传媒9连板，9月21日至10月8日累计涨幅偏离值117.06%"
+        "沪指3797.24点，下跌0.43%",
+        "深成指下跌2.03%，创业板指下跌2.61%",
+        "两市成交15378.31亿元，缩量3627亿元、缩幅19%",
+        "上涨1167家，下跌4325家",
+        "涨停48家，跌停23家",
+        "银行上涨2.32%，主力净流入9.55亿元",
+        "新华传媒10板"
       ],
       "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "7c58be35528ac7bc",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者认为市场缩量回落、多数个股走弱，资金抱团传媒和银行；赛道资源方向兑现，主线持续性偏弱。",
+      "sectors": [
+        {
+          "name": "文化传媒",
+          "stance": "活跃",
+          "evidence": "作者称其逆势走强、多股涨停，但内部存在分化。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者认为资金回流低估值蓝筹避险，稳定性强但爆发有限。"
+        },
+        {
+          "name": "风电设备",
+          "stance": "活跃",
+          "evidence": "作者称资金低位试错流入，属于需后续确认的轮动机会。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者称前期资金集中兑现，板块重心下移。"
+        },
+        {
+          "name": "通信、CPO",
+          "stance": "退潮",
+          "evidence": "作者认为热门股回调、筹码松动，处于资金兑现阶段。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "阿莱德",
+          "sector": "不明确",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "上证3791至3807点盘前三线",
+        "传媒板块内部量价结构",
+        "风电设备资金持续性"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，下跌0.43%",
+        "深证成指12384.87点，下跌2.03%",
+        "创业板指2963.82点，下跌2.61%",
+        "科创50为1426.72点，下跌2.10%",
+        "两市成交约1.55万亿元",
+        "上涨1167家，下跌4317家"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "9407fdc51d0d3ac4",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "启动",
+        "分歧"
+      ],
+      "market_summary": "作者认为指数震荡下行、地板股增多且科技趋势性走弱；新华传媒带动传媒突围，并判断哈药周期结束、新周期开启。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者称AI应用、AI视频传媒是盘中相对活口。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "作者称午间仅AI应用等方向相对突围。"
+        },
+        {
+          "name": "风电",
+          "stance": "分化",
+          "evidence": "作者称风电早盘拉升后冲高回落。"
+        },
+        {
+          "name": "电网设备",
+          "stance": "分化",
+          "evidence": "作者称电网设备早盘拉升后冲高回落。"
+        },
+        {
+          "name": "PCB",
+          "stance": "退潮",
+          "evidence": "作者称PCB、光模块拉升后均炸板回落。"
+        },
+        {
+          "name": "光模块",
+          "stance": "退潮",
+          "evidence": "作者称光模块代表股拉升后炸板回落。"
+        },
+        {
+          "name": "地产",
+          "stance": "退潮",
+          "evidence": "作者明确判断地产方向已经结束。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "分化",
+          "evidence": "作者称中位股加速，次日重点看分歧。"
+        },
+        {
+          "name": "消费",
+          "stance": "分化",
+          "evidence": "作者称消费中位股加速，认为不宜追高。"
+        },
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者称午后农业轮动，意在博弈次日修复预期。"
+        },
+        {
+          "name": "科技",
+          "stance": "退潮",
+          "evidence": "作者判断资金仍从科技撤离，非短期调整而是趋势下行。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "善水科技",
+          "sector": "不明确",
+          "role": "核心"
+        },
+        {
+          "name": "慈文传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "掌阅科技",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "金建",
+          "sector": "农业",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒停牌后的补涨表现",
+        "时代万恒、九阳股份和新华文轩的分歧表现",
+        "华北制药、丽人丽妆及20cm核心股反馈"
+      ],
+      "numeric_claims": [
+        "作者初始统计周五成交量15507亿元，缩量3659亿元",
+        "作者初始统计涨停34家、跌停20家",
+        "作者随后更正当日涨停48家、跌停22家",
+        "作者预期指数或回踩3741附近",
+        "新华传媒为10连板"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "96fc2f8a8bab7f3d",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为缩量回调、超四千股下跌，资金抱团传媒和银行，赛道资源承压，热点持续性偏弱。",
+      "sectors": [
+        {
+          "name": "文化传媒",
+          "stance": "活跃",
+          "evidence": "作者称传媒逆势走强、多股涨停，是盘面少数热点但内部有分化。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称资金持续回流银行，属于大盘回调时的防守避险抱团。"
+        },
+        {
+          "name": "风电设备",
+          "stance": "活跃",
+          "evidence": "作者称资金低位试错流入，定义为修复轮动机会，持续性待确认。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者称主力大幅流出、前期炒作资金兑现，短期抛压集中。"
+        },
+        {
+          "name": "能源金属/油气开采",
+          "stance": "退潮",
+          "evidence": "作者称资金持续减仓，板块整体走弱且内部标的分化。"
+        },
+        {
+          "name": "通信",
+          "stance": "退潮",
+          "evidence": "作者称光模块、CPO遭资金分歧抛售，处于兑现阶段。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "阿莱德",
+          "sector": "",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "上证3807、3797、3791三条盘前线",
+        "传媒与银行的资金承接",
+        "风电设备修复行情的持续性"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，下跌0.43%",
+        "深证成指12384.87点，下跌2.03%；创业板指2963.82点，下跌2.61%",
+        "科创50为1426.72点，下跌2.10%",
+        "两市成交约1.55万亿元",
+        "全市场1167家上涨、4317家收跌"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "a0842aecafcf27f9",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为科技下行压制指数，缩量下市场或弱势磨底；传媒虽回流但周期偏短，整体宜观望。",
+      "sectors": [
+        {
+          "name": "通信与芯片",
+          "stance": "退潮",
+          "evidence": "作者称通信与芯片未止跌，空头趋势明显并持续压制指数。"
+        },
+        {
+          "name": "影视传媒",
+          "stance": "活跃",
+          "evidence": "作者称其接替炒作、承载情绪，日内强势回流，但预期不宜过高。"
+        },
+        {
+          "name": "电网",
+          "stance": "不明确",
+          "evidence": "作者称日内有局部轮动，但力度较弱。"
+        },
+        {
+          "name": "地产",
+          "stance": "退潮",
+          "evidence": "作者认为地产继续退下，且其个人因开盘不及预期清仓。"
+        },
+        {
+          "name": "生物制品",
+          "stance": "退潮",
+          "evidence": "作者称生物制品继续退下。"
+        },
+        {
+          "name": "电池",
+          "stance": "退潮",
+          "evidence": "作者称电池运行两天后结束。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华",
+          "sector": "影视传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "文轩",
+          "sector": "影视传媒",
+          "role": "核心"
+        },
+        {
+          "name": "德才",
+          "sector": "影视传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "龙版",
+          "sector": "影视传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "近岸蛋白",
+          "sector": "生物制品",
+          "role": "风险"
+        },
+        {
+          "name": "金健",
+          "sector": "",
+          "role": "风险"
+        },
+        {
+          "name": "三柏硕",
+          "sector": "",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "传媒2板区间淘汰赛及前排能否决胜",
+        "传媒能否抗住分歧并再次加强",
+        "指数能否转向稳定"
+      ],
+      "numeric_claims": [
+        "全天成交额缩量超3600亿元，量能回落至1.5万亿元",
+        "通信板块跌停股由上周五3只增至4只",
+        "影视传媒全天14只涨停",
+        "新华晋级11板，文轩11天8板，德才与龙版4天3板",
+        "电网板块6只涨停"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "a159c3348152a62a",
+      "market_stance": "偏空",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场缩量普跌、承接不足，极致抱团导致中后排补跌，处于退潮加速阶段，防守优先。",
+      "sectors": [
+        {
+          "name": "传媒/AI应用",
+          "stance": "活跃",
+          "evidence": "作者称其为唯一有板块效应和抱团主线，低位补涨扩散。"
+        },
+        {
+          "name": "锂电池",
+          "stance": "退潮",
+          "evidence": "作者认为主线恶性散架，仅时代万恒独苗抱团。"
+        },
+        {
+          "name": "房地产",
+          "stance": "退潮",
+          "evidence": "作者称地产利好兑现，世联行跌停、板块缺乏持续性。"
+        },
+        {
+          "name": "科技/半导体/CPO",
+          "stance": "退潮",
+          "evidence": "作者认为科技股杀跌未完，中军亦出现补跌。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒/AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "锂电池",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "大消费",
+          "role": "核心"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "核心"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒停牌后传媒补涨股的承接",
+        "上证3820点压力和3770点支撑",
+        "成交额是否继续缩至1.4万亿至1.5万亿"
+      ],
+      "numeric_claims": [
+        "上证指数收于3797.24点，下跌0.43%",
+        "深证成指下跌2.03%，创业板指下跌2.61%",
+        "上涨1167家，下跌4324家",
+        "涨停46家，跌停19家，炸板率35.2%",
+        "两市成交1.54万亿元，较上周五缩量3627亿元、缩幅19.1%",
+        "新华传媒10连板"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "a24be254b6cc16d5",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "混沌"
+      ],
+      "market_summary": "作者认为市场缩量且成长方向资金流出，红利权重与部分AI应用活跃，但局部走强不等于整体转强。",
+      "sectors": [
+        {
+          "name": "高股息",
+          "stance": "加强",
+          "evidence": "作者称高股息、证金持股和中特估获得资金净流入。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "活跃",
+          "evidence": "作者称AI应用获净流入，是成长方向少数亮点，但内部存在分化。"
+        },
+        {
+          "name": "短剧游戏",
+          "stance": "活跃",
+          "evidence": "作者列示短剧游戏上涨1.73%，为相对走强细分。"
+        },
+        {
+          "name": "AI视频",
+          "stance": "活跃",
+          "evidence": "作者列示AI视频上涨1.54%。"
+        },
+        {
+          "name": "芯片概念",
+          "stance": "退潮",
+          "evidence": "作者称芯片概念净流出41.34亿元，属科技流出靠前方向。"
+        },
+        {
+          "name": "传媒",
+          "stance": "分化",
+          "evidence": "作者认为部分AI传媒细分走强，但宽泛传媒涨幅有限。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "AI应用板块量比是否回落",
+        "芯片概念净流出是否收窄",
+        "两市成交额是否持续低位"
+      ],
+      "numeric_claims": [
+        "10:55上证指数3811.99点，跌0.05%",
+        "深证成指12504.34点，跌1.09%；创业板指3000.30点，跌1.41%",
+        "全市场下跌4178家、上涨1290家",
+        "实时成交额9138亿元，较上一交易日同时段减少971亿元",
+        "高股息精选净流入24.82亿元，跨境支付净流入18.89亿元",
+        "芯片概念净流出41.34亿元，沪深股通合计净流出61.07亿元",
+        "短剧游戏涨1.73%，AI视频涨1.54%，知识产权保护涨1.29%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "a7e69fb72a0ab989",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为市场缩量撕裂，资金由科技硬件和杠杆盘转向银行、传媒等防守与低位方向，风险偏好下行。",
+      "sectors": [
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称银行逆势走强，多家银行盘中续创历史新高。"
+        },
+        {
+          "name": "文化传媒/影视院线",
+          "stance": "加强",
+          "evidence": "作者称传媒影视延续强势，新华传媒10连板。"
+        },
+        {
+          "name": "电力设备/风电/逆变器",
+          "stance": "活跃",
+          "evidence": "作者称电力设备获资金净流入，风电与逆变器上涨。"
+        },
+        {
+          "name": "通信/电子",
+          "stance": "退潮",
+          "evidence": "作者称通信电子链大幅回调，是盘面失血最严重方向。"
+        },
+        {
+          "name": "有色金属",
+          "stance": "退潮",
+          "evidence": "作者列为资金净流出方向。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "文化传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "工商银行",
+          "sector": "银行",
+          "role": "核心"
+        },
+        {
+          "name": "中国银行",
+          "sector": "银行",
+          "role": "核心"
+        },
+        {
+          "name": "建设银行",
+          "sector": "银行",
+          "role": "核心"
+        },
+        {
+          "name": "中信银行",
+          "sector": "银行",
+          "role": "核心"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "通信",
+          "role": "风险"
+        },
+        {
+          "name": "东山精密",
+          "sector": "电子",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "两市成交额是否回补",
+        "电子与通信资金净流出能否收窄",
+        "银行和传媒资金流入能否持续"
+      ],
+      "numeric_claims": [
+        "14:41上证指数3793.67点，跌0.53%",
+        "深证成指12379.32点，跌2.08%",
+        "创业板指2963.34点，跌2.63%",
+        "全市场4366家下跌、1116家上涨",
+        "两市成交额14072亿，较前一交易日同期减少3713亿",
+        "主力资金净流出325.58亿",
+        "涨停51家、跌停21家",
+        "电力设备主力净流入21.14亿",
+        "电子主力净流出53.58亿",
+        "融资融券资金净流出85.05亿",
+        "通信设备跌4.85%，被动元件跌5.30%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "a9dc96ad5847f68e",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者判断市场处于退潮中后段，高标抱团而中位断层；传媒为唯一完整主线，但建议防守并观察龙头开板风险。",
+      "sectors": [
+        {
+          "name": "出版传媒、AI漫剧、短剧",
+          "stance": "加强",
+          "evidence": "作者称其为唯一完整梯队主线，资金共识最高。"
+        },
+        {
+          "name": "电网设备",
+          "stance": "活跃",
+          "evidence": "作者认为仅属支线试盘，暂无高标带队。"
+        },
+        {
+          "name": "化学制药",
+          "stance": "活跃",
+          "evidence": "作者认为仅属支线试盘，暂无高标带队。"
+        },
+        {
+          "name": "算力芯片",
+          "stance": "退潮",
+          "evidence": "作者称其遭资金集体抛售。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "出版传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "小家电、机器人",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "锂电池",
+          "role": "风险"
+        },
+        {
+          "name": "欢瑞世纪",
+          "sector": "影视院线",
+          "role": "高关注"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "影视院线",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒是否放量开板",
+        "影视院线2进3表现",
+        "中位断层股与6板高标的承接"
+      ],
+      "numeric_claims": [
+        "两市成交约1.55万亿元",
+        "上证指数跌0.43%，报3797点",
+        "深成指下跌2.03%",
+        "创业板指下跌2.61%",
+        "全市场超4300只个股下跌",
+        "涨停46家，跌停22家，炸板25家",
+        "连板晋级率33.33%",
+        "传媒板块获57亿元主力净流入"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ae027ebaa20a3d9f",
+      "market_stance": "中性",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数仍处震荡，AIGC竞价胜出并修复，消费较弱；电池冲高后预期分歧，指数回抽5日线概率较大。",
+      "sectors": [
+        {
+          "name": "AIGC",
+          "stance": "加强",
+          "evidence": "竞价战胜消费，早盘分歧后短线直接拉起。"
+        },
+        {
+          "name": "文化传媒",
+          "stance": "活跃",
+          "evidence": "龙版传媒一字未炸板，作者称早盘存在买点。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者认为早盘冲高是卖点，时代万恒回封但次日预期低。"
+        },
+        {
+          "name": "消费",
+          "stance": "分化",
+          "evidence": "竞价偏弱，汇嘉时代上板被砸；作者仍认为后续有机会。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "文化传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "文化传媒",
+          "role": "核心"
+        },
+        {
+          "name": "掌阅科技",
+          "sector": "AIGC",
+          "role": "高关注"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "AIGC最终走出的龙头及非龙头冲高表现",
+        "电池板块分歧后能否回流、是否出现2板",
+        "文化传媒与消费的强弱切换"
+      ],
+      "numeric_claims": [
+        "作者称从3个月视角看指数仍为震荡",
+        "作者预判指数即使继续下跌也会回抽5日线",
+        "作者称次日为2进3节点"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "b0a56dd4109f854f",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "冰点",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场缩量普跌、避险情绪上升，高位抱团瓦解；娱乐传媒是唯一具持续性的方向，后续看6板标的能否晋级。",
+      "sectors": [
+        {
+          "name": "娱乐传媒",
+          "stance": "加强",
+          "evidence": "作者称梯队完整，是当下唯一具备持续性的板块。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "作者称风电有所发酵，列为观察支线。"
+        },
+        {
+          "name": "医药",
+          "stance": "退潮",
+          "evidence": "作者称受哈药影响，医药板块情绪崩塌。"
+        },
+        {
+          "name": "种业",
+          "stance": "退潮",
+          "evidence": "作者称种业仅保留少量活口。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "退潮",
+          "evidence": "作者称炸板股大量出现在固态电池方向。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "6板高标能否晋级7板",
+        "大盘能否放量",
+        "娱乐传媒持续性及风电、医药、种业强度"
+      ],
+      "numeric_claims": [
+        "全天成交额1.55万亿元，较前一日缩量3659亿元",
+        "上涨1167家，下跌4325家",
+        "封板率65%，炸板率35%",
+        "市场高度为6板"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "b27bcd565b359ed3",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者将高位股视为过渡期抱团，认为电池和消费强分歧，AI应用偏一波流，等待高位分歧后新载体出现。",
+      "sectors": [
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者称时代万恒爆量回封但紫竹高科断板，板块仅3只涨停。"
+        },
+        {
+          "name": "大消费",
+          "stance": "分化",
+          "evidence": "作者称九阳股份爆量回封，而三柏硕天地板。"
+        },
+        {
+          "name": "AI应用",
+          "stance": "分化",
+          "evidence": "作者称板块加速后可能一波流，预期次日整体力度转弱。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者认为金健米业、万向德农被兑现，属于老龙退出。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "大消费",
+          "role": "核心"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "AI应用",
+          "role": "核心"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒、时代万恒、九阳股份等高位股的分歧表现",
+        "AI应用前排能否承接分歧",
+        "消费、电池、AI应用、医药、电力五方向的新启动信号"
+      ],
+      "numeric_claims": [
+        "市场4300多家下跌",
+        "市场量能约1.55万亿元",
+        "善水科技10天涨幅160%",
+        "新华传媒10连板",
+        "九阳股份与时代万恒均为6连板",
+        "电池板块仅3个涨停"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "b43058da6a0e9d3e",
+      "market_stance": "偏空",
+      "market_phase": [
+        "退潮",
+        "冰点",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场缩量阴跌、个股普跌，处于指数冰点与传媒高热抱团的割裂格局，警惕龙头停牌引发退潮。",
+      "sectors": [
+        {
+          "name": "AI漫剧、短剧传媒",
+          "stance": "加强",
+          "evidence": "作者称其为唯一确定性主线，机构与游资合流，但高位抱团风险上升。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者定义为高股息防御方向和避险资金去处。"
+        },
+        {
+          "name": "风电设备",
+          "stance": "活跃",
+          "evidence": "作者称其为缩量市中局部活跃的机构突围方向。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "退潮",
+          "evidence": "作者认为机构连续撤退，仅高标独扛，处于最后博弈阶段。"
+        },
+        {
+          "name": "农业种业",
+          "stance": "退潮",
+          "evidence": "作者称厄尔尼诺叙事被资金抛弃，高位股大幅回调。"
+        },
+        {
+          "name": "通信、PCB",
+          "stance": "退潮",
+          "evidence": "作者认为高位科技资金出逃未止，多股跌停。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "出版传媒、AI内容",
+          "role": "龙头"
+        },
+        {
+          "name": "内蒙新华",
+          "sector": "出版传媒",
+          "role": "核心"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "出版传媒",
+          "role": "核心"
+        },
+        {
+          "name": "博纳影业",
+          "sector": "影视院线",
+          "role": "核心"
+        },
+        {
+          "name": "掌阅科技",
+          "sector": "数字媒体",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "固态电池",
+          "role": "风险"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "小家电、机器人",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒停牌或开板对抱团情绪的影响",
+        "传媒中军能否继续晋级",
+        "创业板能否收复3000点"
+      ],
+      "numeric_claims": [
+        "上证指数3797.24点，-0.43%",
+        "深证成指12384.87点，-2.03%",
+        "创业板指2963.82点，-2.61%",
+        "两市成交1.54万亿元，较前一日缩量3627亿元",
+        "上涨1167家，下跌4325家",
+        "涨停46家，跌停19家，封板率65%",
+        "传媒行业主力净流入23.65亿元",
+        "全天主力净流出263.38亿元"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "bee056ddf5cbfcd1",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "冰点"
+      ],
+      "market_summary": "作者认为市场买盘不足、轮动缩圈，科技硬件领跌；在指数到3700或成交额缩至1万亿元以下前，不宜激进。",
+      "sectors": [
+        {
+          "name": "科技硬件",
+          "stance": "退潮",
+          "evidence": "作者称其为下跌主力，受外部压力影响。"
+        },
+        {
+          "name": "电源",
+          "stance": "退潮",
+          "evidence": "作者认为337调查影响较大，该环节跌幅最重。"
+        },
+        {
+          "name": "代工",
+          "stance": "退潮",
+          "evidence": "作者称337调查对代工厂影响大，不宜急于抄底。"
+        },
+        {
+          "name": "传媒影视",
+          "stance": "活跃",
+          "evidence": "作者称传媒影视独自撑场且仍有强度，但已活跃两天。"
+        },
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者认为前一日较好的农业方向当日缺乏持续性。"
+        },
+        {
+          "name": "黄金",
+          "stance": "分化",
+          "evidence": "作者认为黄金当日无持续性，不宜追逐。"
+        },
+        {
+          "name": "能源",
+          "stance": "退潮",
+          "evidence": "作者称科技、能源、周期共同下跌。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "分化",
+          "evidence": "作者认为煤炭当日无持续性。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "工业富联",
+          "sector": "代工",
+          "role": "风险"
+        },
+        {
+          "name": "贵州茅台",
+          "sector": "传统消费",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数是否下探至3700关键位置",
+        "成交额是否进一步缩至1万亿元以下",
+        "科技硬件及电源、代工方向的止跌情况"
+      ],
+      "numeric_claims": [
+        "个股下跌4000余家",
+        "成交额1.54万亿元",
+        "成交额较上日下降19.1%",
+        "关注指数3700位置",
+        "关注成交额缩至1万亿元以下"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "c25c81523a45ded6",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为大盘双死叉且量能萎缩，政策未带来增量资金；题材仅为存量抱团，建议等待放量和主线确认。",
+      "sectors": [
+        {
+          "name": "AI视频",
+          "stance": "分化",
+          "evidence": "作者称其领涨但处于极低量能下，认为高潮后次日将分化。"
+        },
+        {
+          "name": "短剧游戏",
+          "stance": "分化",
+          "evidence": "作者认为属于存量资金抱团，追高可能面临兑现压力。"
+        },
+        {
+          "name": "人工智能",
+          "stance": "不明确",
+          "evidence": "作者称政策持续催化，但除AI视频、短剧外盘面响应有限。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者将高股息高速和刚需消费视为弱市中的防御方向。"
+        },
+        {
+          "name": "轨道交通",
+          "stance": "不明确",
+          "evidence": "作者将其描述为冷门、低位且有铁路投资逻辑的方向。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "大豪科技",
+          "sector": "缝制机械电控",
+          "role": "龙头"
+        },
+        {
+          "name": "风语筑",
+          "sector": "数字展示及AI文旅",
+          "role": "龙头"
+        },
+        {
+          "name": "祥和实业",
+          "sector": "轨道交通",
+          "role": "龙头"
+        },
+        {
+          "name": "粤高速A",
+          "sector": "高速公路",
+          "role": "高关注"
+        },
+        {
+          "name": "涪陵榨菜",
+          "sector": "消费",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "成交量能否放大至2万亿元以上",
+        "日线MACD能否形成金叉确认",
+        "新质生产力方向能否走出持续性主线"
+      ],
+      "numeric_claims": [
+        "作者称成交额缩至1.5万亿元，较前一日减少4000亿元",
+        "作者称关注成交量能否重回2万亿元",
+        "文中称10年期美债收益率在5.2%-5.3%高位震荡",
+        "文中称美元指数持稳于102上方",
+        "文中称10月加息概率约22%",
+        "文中称12月累计加息25个基点的概率为68.7%"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "c5397932069c982e",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者预期药、农业、短剧、电池和消费题材仍将轮动，认为接力难度存在，关注高低切换、传媒监管风险及电池分歧转一致。",
+      "sectors": [
+        {
+          "name": "医药",
+          "stance": "活跃",
+          "evidence": "作者称医药核心股仍可继续关注，但需看利空反馈。"
+        },
+        {
+          "name": "农业",
+          "stance": "活跃",
+          "evidence": "作者判断农业等投机题材还会反复轮动。"
+        },
+        {
+          "name": "短剧",
+          "stance": "分化",
+          "evidence": "作者称短剧会轮动，但传媒有利空及监管加码担忧。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者认为电池需要一次分歧转一致的介入机会。"
+        },
+        {
+          "name": "消费",
+          "stance": "活跃",
+          "evidence": "作者判断消费等投机题材仍可能反复轮动。"
+        },
+        {
+          "name": "光刻机",
+          "stance": "不明确",
+          "evidence": "作者仅整理ASML零部件报价上调的消息。"
+        },
+        {
+          "name": "光通信",
+          "stance": "不明确",
+          "evidence": "作者仅整理光学元件产能售罄相关消息。"
+        },
+        {
+          "name": "折叠屏",
+          "stance": "不明确",
+          "evidence": "作者仅整理苹果折叠屏加单相关消息。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "九阳",
+          "sector": "消费",
+          "role": "高关注"
+        },
+        {
+          "name": "时代",
+          "sector": "电池",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "传媒高位股及新华封单能否维持强度",
+        "医药核心股及华北制药的预期反馈",
+        "电池能否完成分歧转一致，以及九阳的卡位表现"
+      ],
+      "numeric_claims": [
+        "ASML在韩零部件报价上调10%的消息",
+        "Lumentum称光学元件产能已售罄至2029年初",
+        "苹果iPhone Duo加单30%的消息"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "cd53f0f64fc0462c",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者认为市场重回风险防守，银行抗跌但未带动普涨；传媒AI应用相对强，算力硬件确认负反馈，修复需指数、量能和光通信共振。",
+      "sectors": [
+        {
+          "name": "影视传媒/AI应用",
+          "stance": "活跃",
+          "evidence": "作者称其强在相对收益，前排表现突出但尚非普涨。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者认为银行具防御属性且抗跌，但未带动多数个股翻红。"
+        },
+        {
+          "name": "风电设备",
+          "stance": "活跃",
+          "evidence": "作者称风电设备表现积极，天顺风能封板。"
+        },
+        {
+          "name": "算力硬件/CPO",
+          "stance": "退潮",
+          "evidence": "作者明确称该方向确认负反馈，核心股跌约6%至7%。"
+        },
+        {
+          "name": "PCB/电子材料",
+          "stance": "退潮",
+          "evidence": "作者称华正新材、金安国纪跌停，材料端风险延续。"
+        },
+        {
+          "name": "新能源",
+          "stance": "分化",
+          "evidence": "作者称电池、逆变器、整车并行但逻辑不同，电池并未齐涨。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "果麦文化",
+          "sector": "影视传媒/AI应用",
+          "role": "高关注"
+        },
+        {
+          "name": "天顺风能",
+          "sector": "风电设备",
+          "role": "高关注"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "算力硬件/CPO",
+          "role": "风险"
+        },
+        {
+          "name": "新易盛",
+          "sector": "算力硬件/CPO",
+          "role": "风险"
+        },
+        {
+          "name": "金安国纪",
+          "sector": "PCB/电子材料",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "上证能否收复3819至3828区域、创业板能否重回3000",
+        "光通信核心股能否止跌及成交能否改善",
+        "上证3791与创业板2962能否守住"
+      ],
+      "numeric_claims": [
+        "上证综指3797.24点，跌0.43%",
+        "深证成指12384.87点，跌2.03%",
+        "创业板指2963.82点，跌2.61%",
+        "成交额15507亿元，较昨日减少3659亿元",
+        "上涨1167家、涨停48家；下跌4325家、跌停23家",
+        "上证50涨0.43%，沪深300跌0.68%",
+        "中际旭创、新易盛、源杰科技跌约6%至7%"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "d1d469b782619d0d",
+      "market_stance": "偏多",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数下跌主要受个股利空和基金调仓影响，预计次日指数表现较好；看好电网及科技企稳修复，但提示AI后期风险和农业退潮。",
+      "sectors": [
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称资金流向银行、保险避险。"
+        },
+        {
+          "name": "保险",
+          "stance": "活跃",
+          "evidence": "作者称资金流向银行、保险避险。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者称板块分歧，后排全面回调，预计次日回调。"
+        },
+        {
+          "name": "AI",
+          "stance": "活跃",
+          "evidence": "作者称AI继续强势、批量晋级二板，但认为后期风险增加。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "作者称早盘风电、电网相关走强，后续扩散至光伏。"
+        },
+        {
+          "name": "电网",
+          "stance": "加强",
+          "evidence": "作者称看好次日电网方向，并买入积成电子博弈。"
+        },
+        {
+          "name": "光伏",
+          "stance": "活跃",
+          "evidence": "作者称风电、电网走强后扩散到光伏。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业高标全部倒下，基本处于退潮期。"
+        },
+        {
+          "name": "汽车",
+          "stance": "活跃",
+          "evidence": "作者称汽车尾盘冲高，赛力斯相关个股涨停。"
+        },
+        {
+          "name": "科技",
+          "stance": "修复",
+          "evidence": "作者认为科技早盘已有企稳迹象，次日存在反弹修复预期。"
+        },
+        {
+          "name": "传媒",
+          "stance": "不明确",
+          "evidence": "作者称传媒龙头新华停牌核查。"
+        },
+        {
+          "name": "小家电",
+          "stance": "不明确",
+          "evidence": "作者称九阳未明显带动小家电板块。"
+        },
+        {
+          "name": "PCB",
+          "stance": "修复",
+          "evidence": "作者博弈次日PCB回暖，关注超声电子。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "九阳",
+          "sector": "小家电、消费",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池",
+          "role": "龙头"
+        },
+        {
+          "name": "德新科技",
+          "sector": "电池",
+          "role": "跟随"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "远程股份",
+          "sector": "电网",
+          "role": "龙头"
+        },
+        {
+          "name": "多伦科技",
+          "sector": "电网、AI应用",
+          "role": "跟随"
+        },
+        {
+          "name": "百洋",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "农心科技",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "宏辉果蔬",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "赛力斯",
+          "sector": "汽车",
+          "role": "高关注"
+        },
+        {
+          "name": "丽人丽妆",
+          "sector": "消费",
+          "role": "跟随"
+        },
+        {
+          "name": "积成电子",
+          "sector": "电网",
+          "role": "高关注"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数能否在基金调仓影响后企稳",
+        "时代万恒能否稳住以观察电池板块反馈",
+        "电网及科技、PCB能否出现回流修复"
+      ],
+      "numeric_claims": [
+        "沪指收跌0.43%",
+        "时代换手率达到30%多",
+        "作者以10板作为市场短期高度标记",
+        "作者提及9板、8板、7板可能成为接力高度",
+        "作者称九阳是从28号冰点走出的个股"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "d758bb31f5d113fa",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者认为银行托住指数但科技未止跌，市场局部赚钱而广泛亏钱；传媒延续领先，电池仅核心修复，旧强股及后排负反馈加重。",
+      "sectors": [
+        {
+          "name": "传媒/AI应用",
+          "stance": "加强",
+          "evidence": "出版、影视院线、文化传媒上涨，作者称群体持续性领先电池。"
+        },
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "板块约涨1.99%，作者称其支撑指数且具实际防御收益。"
+        },
+        {
+          "name": "电池/固态",
+          "stance": "分化",
+          "evidence": "板块分别跌2.28%和2.30%，仅部分核心低开修复。"
+        },
+        {
+          "name": "科技硬件",
+          "stance": "退潮",
+          "evidence": "CPO、半导体、PCB继续下跌，作者认为科技未止跌并拖累市场。"
+        },
+        {
+          "name": "医药",
+          "stance": "退潮",
+          "evidence": "生物制品、医疗服务和化学制药下跌，作者称整体亏钱效应明显。"
+        },
+        {
+          "name": "农业/消费",
+          "stance": "退潮",
+          "evidence": "旧强股反包失败，种植业林业及零售下跌，作者称负反馈明显。"
+        },
+        {
+          "name": "风电/储能",
+          "stance": "活跃",
+          "evidence": "风电设备上涨2.34%，储能主要为个股突破，作者定位为局部轮动。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒/AI应用",
+          "role": "龙头"
+        },
+        {
+          "name": "善水科技",
+          "sector": "化工",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池/固态",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "机器人/消费",
+          "role": "高关注"
+        },
+        {
+          "name": "招商银行",
+          "sector": "银行",
+          "role": "核心"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "科技硬件",
+          "role": "风险"
+        },
+        {
+          "name": "新易盛",
+          "sector": "科技硬件",
+          "role": "风险"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "哈药股份",
+          "sector": "医药",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "科技容量股能否止跌、银行能否维持稳定",
+        "传媒换手梯队及高位核心分歧后的承接",
+        "电池核心修复能否扩散，农业消费医药负反馈能否收敛"
+      ],
+      "numeric_claims": [
+        "上证收3797.24点，跌0.43%；深成指跌2.03%，创业板跌2.61%，科创50跌2.10%。",
+        "全市场上涨1167家、下跌4325家，中位涨跌幅-1.68%。",
+        "沪深北成交约1.5508万亿元，较周五减少19.09%。",
+        "跌幅至少5%的股票由166家增至471家。",
+        "涨幅至少5%的股票由325家降至123家；涨停由68只降至46只，跌停由8只增至19只。",
+        "封板率由83.95%降至64.79%。",
+        "CPO跌3.15%，半导体跌2.73%，PCB跌2.77%，银行上涨约1.99%。",
+        "新华传媒十板，成交4.87亿元；时代万恒六板，成交11.99亿元、换手约32%。",
+        "风电设备涨2.34%，储能概念跌1.26%。"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "d7d942387040b99d",
+      "market_stance": "偏多",
+      "market_phase": [
+        "启动",
+        "修复"
+      ],
+      "market_summary": "作者判断短线新周期第一阶段确立、情绪进入上升期，但认为科技承压，应重点验证指数探底有效性及新主线竞争结果。",
+      "sectors": [
+        {
+          "name": "短剧传媒",
+          "stance": "活跃",
+          "evidence": "作者称其为当周情绪活跃度最高方向，但提示监管和爆头风险。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "加强",
+          "evidence": "作者判断固态电池是最优潜力新主线，称其梯队完整。"
+        },
+        {
+          "name": "地产物业",
+          "stance": "退潮",
+          "evidence": "作者认为地产物业情绪彻底走弱，仅剩弱修复预期。"
+        },
+        {
+          "name": "消费",
+          "stance": "退潮",
+          "evidence": "作者认为消费短线缺乏持续性。"
+        },
+        {
+          "name": "种业",
+          "stance": "分化",
+          "evidence": "作者认为种业以局部套利为主。"
+        },
+        {
+          "name": "创新药",
+          "stance": "不明确",
+          "evidence": "作者称创新药消息静默、利好兑现，短期观望。"
+        },
+        {
+          "name": "科技",
+          "stance": "退潮",
+          "evidence": "作者称科技赛道短期情绪极差，当前以规避观望为主。"
+        },
+        {
+          "name": "银行",
+          "stance": "分化",
+          "evidence": "作者称资金转向银行等防御板块，但认为指数反弹后或被抛弃。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "短剧传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "固态电池",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "机器人",
+          "role": "风险"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "核心"
+        },
+        {
+          "name": "世联行",
+          "sector": "地产物业",
+          "role": "风险"
+        },
+        {
+          "name": "立讯精密",
+          "sector": "科技",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "周五缩量探底及早盘冲高回落强弱",
+        "固态电池、短剧和地产三条主线的竞争",
+        "二进三新龙头晋级及立讯精密利空扩散"
+      ],
+      "numeric_claims": [
+        "作者称新华传媒走出九板",
+        "作者称时代万恒、九阳股份走出五连板",
+        "作者称市场最低下探至3754点",
+        "作者认为3740点附近为预期低位",
+        "作者称政策文件部署19项创新举措",
+        "作者预判科技在3600点附近或有月度级别超跌反弹"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "edc89adb74a8c6f9",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "退潮"
+      ],
+      "market_summary": "作者认为权重银行护住指数，但题材与个股情绪明显转冷；资金从高位算力等方向切向传媒及业绩涨价线，短线需防传媒高标停牌后的分歧或退潮。",
+      "sectors": [
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称银行护盘并创历史新高，板块主力净流入9亿元。"
+        },
+        {
+          "name": "AI应用/传媒",
+          "stance": "活跃",
+          "evidence": "作者称其为唯一有增量资金方向，传媒主力净流入23.65亿元。"
+        },
+        {
+          "name": "AI算力硬件",
+          "stance": "退潮",
+          "evidence": "作者称高位算力硬件尾盘集体跳水，机构撤离高位科技。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业资金被闷，金健米业等个股大幅回落。"
+        },
+        {
+          "name": "贵金属",
+          "stance": "退潮",
+          "evidence": "作者将贵金属描述为前一日热门、当日转冷的情绪退潮表现。"
+        },
+        {
+          "name": "覆铜板/稀土等业绩涨价线",
+          "stance": "活跃",
+          "evidence": "作者认为三季报、涨价和订单构成次日资金可关注的硬逻辑。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI应用/传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "德才",
+          "sector": "AI应用/传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "龙版",
+          "sector": "AI应用/传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "果麦文化",
+          "sector": "AI应用/传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "中际旭创",
+          "sector": "AI算力硬件",
+          "role": "风险"
+        },
+        {
+          "name": "新易盛",
+          "sector": "AI算力硬件",
+          "role": "风险"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "超声电子",
+          "sector": "覆铜板",
+          "role": "高关注"
+        },
+        {
+          "name": "北方稀土",
+          "sector": "稀土",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒停牌核查后，传媒二板梯队能否接棒或补跌",
+        "涨停家数、封板率、晋级率及市场量能是否回升",
+        "三季报、涨价和订单驱动的覆铜板、稀土等方向表现"
+      ],
+      "numeric_claims": [
+        "沪指收于3797点，盘中一度冲至3838点，收跌0.43%",
+        "深成指跌2.03%，创业板跌2.61%",
+        "4324家下跌，涨停46家、跌停19家",
+        "封板率由83%降至65%，真实破板率35.21%",
+        "昨日破板股当日平均再亏4.17%",
+        "银行板块主力净流入9亿元，传媒板块主力净流入23.65亿元",
+        "主力全天净流出263亿元，连续第4天净流出",
+        "作者称ETF自9月28日以来净流入超700亿元"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "ee0beca407263d44",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为周五反弹不代表调整结束，短期仍有调整需求，更倾向AI硬件拥挤后继续出清的悲观情景。",
+      "sectors": [
+        {
+          "name": "AI硬件",
+          "stance": "退潮",
+          "evidence": "作者认为筹码仍拥挤，倾向其需继续出清，甚至可能不再是核心。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者称周五趋势走强的是银行。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "板块抱团加速，但作者预期次日将迎来分歧。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "紫竹高科",
+          "sector": "电池",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池",
+          "role": "核心"
+        },
+        {
+          "name": "桂林旅游",
+          "sector": "旅游",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "大盘反弹后调整是否延续",
+        "AI硬件拥挤筹码的出清情况",
+        "电池抱团分歧幅度及与大盘表现的关系"
+      ],
+      "numeric_claims": [
+        "作者列举3种中期走势可能",
+        "若4bC浪不能创新高，作者称4c浪极限点位为跌破3674.40",
+        "作者给出的趋势风格独创指数为55",
+        "作者披露当前持有桂林旅游半仓"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
+      "article_id": "eed78bdb3e7f94d1",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者将市场定性为缩量杀高位、资金转向防御与内容，传媒为唯一集中主线，硬件仍需等待资金流出收敛。",
+      "sectors": [
+        {
+          "name": "出版/传媒/AI短剧",
+          "stance": "加强",
+          "evidence": "作者判断为当日唯一集中主线，但将其后续强弱与核心股表现绑定。"
+        },
+        {
+          "name": "电池/固态/储能",
+          "stance": "分化",
+          "evidence": "作者称板块高度分裂，纯固态已退潮，风电和储能等方向存在个股分化。"
+        },
+        {
+          "name": "AI软件/网安",
+          "stance": "不明确",
+          "evidence": "作者认为仅格尔2板，整体尚未形成主线。"
+        },
+        {
+          "name": "半导体/PCB/光模块/玻璃基",
+          "stance": "退潮",
+          "evidence": "作者称该方向连续第四日大跌，电子板块资金净流出明显。"
+        },
+        {
+          "name": "机器人/人形",
+          "stance": "分化",
+          "evidence": "作者称仅九阳股份连板，纯机器人方向缺少连板支撑。"
+        },
+        {
+          "name": "医药/创新药/CRO",
+          "stance": "分化",
+          "evidence": "作者称华北制药为独苗，未形成全板块共振。"
+        },
+        {
+          "name": "银行/高股息",
+          "stance": "加强",
+          "evidence": "作者认为其承担防御护盘角色，资金流入并有创新高表现。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "出版/传媒/AI短剧",
+          "role": "龙头"
+        },
+        {
+          "name": "文轩",
+          "sector": "出版/传媒/AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "内蒙",
+          "sector": "出版/传媒/AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "龙版",
+          "sector": "出版/传媒/AI短剧",
+          "role": "核心"
+        },
+        {
+          "name": "掌阅",
+          "sector": "出版/传媒/AI短剧",
+          "role": "跟随"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "小家电/机器人",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池/储能",
+          "role": "核心"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药/创新药",
+          "role": "核心"
+        },
+        {
+          "name": "格尔",
+          "sector": "AI软件/网安",
+          "role": "核心"
+        },
+        {
+          "name": "中际",
+          "sector": "光模块",
+          "role": "风险"
+        },
+        {
+          "name": "新易盛",
+          "sector": "光模块",
+          "role": "风险"
+        },
+        {
+          "name": "兆易",
+          "sector": "半导体",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数能否守住3754至3797区间及成交能否回升至1.7万亿以上",
+        "传媒核心股及板块主力资金能否维持强势",
+        "电子、通信板块资金净流出是否明显收窄"
+      ],
+      "numeric_claims": [
+        "沪指3797.24点，跌0.43%；深成指12384.87点，跌2.03%",
+        "创业板指2963.82点，跌2.61%；科创50跌2.10%；北证50跌2.46%",
+        "沪深两市成交约1.54万亿元，较10月9日约1.9万亿元缩量约3627亿元",
+        "全市场1167涨、4325跌、69平；涨停48家、跌停22家",
+        "封板率约65%",
+        "申万传媒上涨1.47%，主力净流入23.65亿元",
+        "电子申万下跌3.20%，主力净流出81.68亿元",
+        "银行上涨2.32%，主力净流入8.72亿元"
+      ],
+      "quality_flags": [
+        "广告"
+      ]
+    },
+    {
+      "article_id": "ef8ec7687d824412",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "发酵",
+        "分歧"
+      ],
+      "market_summary": "作者认为补涨情绪火热、传媒梯队量能尚可，但高连板临近监管，空间有限，倾向关注二板预期差及竞价表现。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者称传媒补涨、反包强，梯队量能充足，但五板或触及监管。"
+        },
+        {
+          "name": "农业",
+          "stance": "分化",
+          "evidence": "作者称板块次日有修复预期，但近期表现“稀碎”。"
+        },
+        {
+          "name": "电网",
+          "stance": "活跃",
+          "evidence": "作者认为电网有发酵，存在接替锂电补涨的预期差。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "不明确",
+          "role": "风险"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "跟随"
+        },
+        {
+          "name": "德才股份",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "新经典",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "丽人丽妆",
+          "sector": "不明确",
+          "role": "跟随"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "慈文传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "百洋股份",
+          "sector": "农业",
+          "role": "高关注"
+        },
+        {
+          "name": "远程股份",
+          "sector": "电网",
+          "role": "高关注"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒",
+          "role": "核心"
+        }
+      ],
+      "tomorrow_watch": [
+        "二板股的预期差与强弱表现",
+        "新华传媒停牌后首板竞价是否出现大单一字指引",
+        "电网方向远程股份的竞价表态"
+      ],
+      "numeric_claims": [
+        "新华传媒十板",
+        "九阳股份六板",
+        "时代万恒六板",
+        "华北制药三板",
+        "文中称传媒五板发监管工作函"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "f020e438948f73b3",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "启动",
+        "分歧"
+      ],
+      "market_summary": "作者将情绪定为主升首日待确认，但认为深V主要由护盘资金推动，中位断层及尾盘封板使持续性存疑。",
+      "sectors": [
+        {
+          "name": "AI应用、传媒",
+          "stance": "加强",
+          "evidence": "作者称为第1天起爆，传媒领涨；能否形成2板群决定持续性。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "分化",
+          "evidence": "作者称题材进入第4天淘汰赛，多股炸板且公司澄清业务未落地。"
+        },
+        {
+          "name": "大消费",
+          "stance": "分化",
+          "evidence": "作者认为主要由九阳股份带动，分支杂乱，偏轮动。"
+        },
+        {
+          "name": "农业、种业",
+          "stance": "活跃",
+          "evidence": "作者称为第2天回流，但指出高位股已有资金提前离场。"
+        },
+        {
+          "name": "AI安全、软件",
+          "stance": "活跃",
+          "evidence": "作者称为起爆，但板块全是首板，尚未形成梯队。"
+        },
+        {
+          "name": "大金融",
+          "stance": "不明确",
+          "evidence": "作者定义为护盘属性，认为持续性一般。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI应用、传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "中文在线",
+          "sector": "AI应用、传媒",
+          "role": "核心"
+        },
+        {
+          "name": "芒果超媒",
+          "sector": "AI应用、传媒",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "固态电池",
+          "role": "龙头"
+        },
+        {
+          "name": "紫竹高科",
+          "sector": "固态电池",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "大消费",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业、种业",
+          "role": "龙头"
+        }
+      ],
+      "tomorrow_watch": [
+        "AI传媒能否形成2板群",
+        "固态电池前排能否承受分歧",
+        "中位股2进3能否打破零晋级"
+      ],
+      "numeric_claims": [
+        "沪指3813.79点，+0.05%",
+        "深成指12641.86点，+0.17%",
+        "创业板3043.33点，+0.22%",
+        "科创50为1457.27点，+0.07%",
+        "涨停69家，前值43家",
+        "两市成交19005.40亿元，放量2184.13亿元",
+        "全市场主力净流出126.22亿元",
+        "传媒板块+5.28%",
+        "电池板块主力净流入50.39亿元"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "f2af7e11f3b2f30a",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "退潮",
+        "分歧"
+      ],
+      "market_summary": "作者认为市场处于强分歧和退潮淘汰赛，银行护盘但个股普跌；传媒强势抱团但龙头开板风险累积，宜低频防守。",
+      "sectors": [
+        {
+          "name": "AI应用、传媒",
+          "stance": "加强",
+          "evidence": "作者称其涨停最密集、梯队最厚，但高位停牌和分化风险累积。"
+        },
+        {
+          "name": "电力、风电、电网设备",
+          "stance": "活跃",
+          "evidence": "作者认为受政策驱动启动，但需观察远程股份能否晋级。"
+        },
+        {
+          "name": "医药",
+          "stance": "分化",
+          "evidence": "作者称为事件驱动炒作，梯队单薄且基本面支撑不足。"
+        },
+        {
+          "name": "化工、大农业",
+          "stance": "分化",
+          "evidence": "作者定义为支线轮动，缺乏明确板块性驱动。"
+        },
+        {
+          "name": "通信、电子科技",
+          "stance": "退潮",
+          "evidence": "作者称科技线继续领跌，趋势向下。"
+        },
+        {
+          "name": "银行",
+          "stance": "加强",
+          "evidence": "作者认为银行护盘表明指数有人管，但增量资金仍在观望。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华传媒",
+          "sector": "AI应用、传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "小家电",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "固态电池",
+          "role": "风险"
+        },
+        {
+          "name": "远程股份",
+          "sector": "电网设备",
+          "role": "核心"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "风险"
+        },
+        {
+          "name": "金健米业",
+          "sector": "农业",
+          "role": "风险"
+        }
+      ],
+      "tomorrow_watch": [
+        "新华传媒开板后的承接与传媒梯队反应",
+        "两市量能能否明显放大",
+        "九阳股份、时代万恒冲击7板后的承接"
+      ],
+      "numeric_claims": [
+        "上涨1167家，下跌4325家",
+        "涨停48家，跌停22家",
+        "市场总成交额15510亿元，较前一日缩量3659亿元，-19.09%",
+        "主力净流入-354.31亿元",
+        "昨日涨停表现1.4%",
+        "传媒板块14只个股涨停",
+        "PineDrama上线约9个月累计下载量突破1亿，日活约700万",
+        "电网建设投资超过5万亿元"
+      ],
+      "quality_flags": [
+        "广告",
         "明显情绪化"
       ]
     }
   ],
   "daily_consensus": {
     "market_consensus": {
-      "stance": "谨慎",
+      "stance": "谨慎偏空",
       "phase": [
-        "修复",
-        "分歧"
+        "分歧",
+        "退潮"
       ],
-      "summary": "多篇观点将午后探底回升及成交放大解读为情绪和指数的阶段性修复，但普遍未将其视为趋势反转确认。多数作者认为科技硬件的补跌或高位抛压尚未完全结束，题材轮动较快，高标与中位股分化仍明显；后续修复能否延续，取决于量能、指数支撑及前排题材承接。",
+      "summary": "多数作者将当日市场描述为缩量普跌、个股亏钱效应扩散且高位接力转弱的分歧/退潮环境。共识认为资金明显向传媒AI应用和银行等少数方向集中，而科技硬件、通信电子及部分前期题材承压；市场能否修复仍取决于成交回升、跌停及炸板情况收敛，以及高位抱团股反馈。",
       "confidence": "高"
     },
     "market_disagreements": [
-      "对于市场性质存在分歧：多数观点认为是超跌后的结构性修复，少数偏多观点认为放量回升可能推动新主线发酵；偏空观点则认为指数仍处下跌或筑底阶段，仍需防范二次探底。",
-      "对于电池/固态电池，部分作者认定其具备完整梯队和主线特征，另一些作者认为其已进入加速后的分化阶段，或只是科技资金流出的轮动承接。",
-      "对于AI应用、传媒、影视，多数观点认可当日资金回流和爆发强度，但对持续性判断不一：部分视为新增主线，部分认为主要是围绕新华传媒的补涨或单日情绪脉冲。",
-      "对于资源红利、煤炭、航运、贵金属等防御方向，少数观点认为其受高利率和避险资金驱动而更具优势；但也有观点认为贵金属可能受美元及美债收益率上行压制。",
-      "对于金融板块，部分作者认为券商等午后拉升是指数修复的重要推手，但其能否形成持续进攻方向未形成共识。"
+      "对于市场所处阶段存在分歧：多数作者认为是退潮或退潮加速，也有少数作者认为已接近冰点修复，甚至处于新周期启动或主升初期。",
+      "传媒/AI应用被多数作者视为最强或唯一具备梯队的方向，但部分作者认为其已进入高位抱团、后排掉队及监管扰动阶段，持续性存在疑问。",
+      "电池/固态电池的判断分歧较大：多数观点认为板块退潮或强分化，仅剩高标抱团；少数观点预期其可能出现分歧转修复，甚至成为新主线。",
+      "科技硬件、CPO、半导体和PCB整体被多数作者判断为退潮，但少数作者认为其已出现局部企稳迹象，次日可能存在超跌修复。",
+      "风电、电网设备被部分作者视为政策驱动的活跃支线或潜在补涨方向，也有观点认为其冲高回落、缺乏板块合力，仍需确认持续性。"
     ],
     "sector_consensus": [
       {
-        "sector": "电池/锂电池/固态电池",
-        "mention_count": 25,
-        "consensus": "出现较强资金关注和连板梯队，时代万恒、紫竹高科等被多次视为核心标的；但多篇文章同时提示板块内部已出现冲高回落、筹码松动或加速后的分歧，持续性仍待验证。",
-        "stance": "加强",
-        "representative_stocks": [
-          "时代万恒",
-          "紫竹高科",
-          "宁德时代",
-          "天赐材料",
-          "领湃科技"
-        ]
-      },
-      {
-        "sector": "AI应用/传媒/影视",
-        "mention_count": 24,
-        "consensus": "午后表现活跃，是市场修复期间最受关注的进攻方向之一，影视、出版、短剧、AI视频及软件应用获得多篇文章提及。多数观点认为其持续性、扩散性及高开后的承接是后续关键。",
+        "sector": "传媒/AI应用/短剧/影视内容",
+        "mention_count": 44,
+        "consensus": "多数作者认为该方向是弱市中资金最集中的题材主线，具备相对完整的涨停及连板梯队；但高位集中抱团、龙头停牌或开板、后排分化和监管扰动被反复提示。",
         "stance": "加强",
         "representative_stocks": [
           "新华传媒",
-          "中文在线",
-          "芒果超媒",
           "新华文轩",
-          "龙版传媒"
+          "内蒙新华",
+          "龙版传媒",
+          "果麦文化",
+          "掌阅科技",
+          "博纳影业",
+          "德才股份"
         ]
       },
       {
-        "sector": "AI硬件/算力硬件/PCB/CPO/半导体",
-        "mention_count": 19,
-        "consensus": "多篇观点认为该方向仍在承压或补跌，MLCC、PCB、CPO、光通信及半导体被反复列为负反馈来源。其是否止跌被视为判断市场能否由结构修复走向更广泛企稳的重要条件。",
+        "sector": "银行/高股息/红利",
+        "mention_count": 27,
+        "consensus": "多数作者将银行上涨解读为风险偏好回落背景下的防御性资金迁移或护盘力量，认可其相对强势，但普遍不将其视为高弹性题材主线。",
+        "stance": "加强",
+        "representative_stocks": [
+          "工商银行",
+          "中国银行",
+          "建设银行",
+          "招商银行",
+          "中信银行"
+        ]
+      },
+      {
+        "sector": "科技硬件/通信/CPO/光模块/半导体/PCB",
+        "mention_count": 31,
+        "consensus": "多数作者认为该方向仍在资金流出和趋势调整阶段，是拖累成长风格及指数情绪的主要来源；后续重点在于核心股止跌、资金流出收窄和量能修复。",
         "stance": "退潮",
         "representative_stocks": [
-          "金安国纪",
-          "风华高科",
           "中际旭创",
-          "国瓷材料",
-          "华正新材"
+          "新易盛",
+          "星网锐捷",
+          "金安国纪",
+          "华正新材",
+          "东山精密"
+        ]
+      },
+      {
+        "sector": "电池/固态电池/储能",
+        "mention_count": 25,
+        "consensus": "多数观点认为该方向高位分歧显著，板块整体未形成普遍共振，主要体现为少数核心股支撑与后排走弱并存；是否能由分歧转修复仍待验证。",
+        "stance": "分化",
+        "representative_stocks": [
+          "时代万恒",
+          "紫竹高科",
+          "上海洗霸",
+          "传艺科技",
+          "天赐材料"
+        ]
+      },
+      {
+        "sector": "风电/电网设备/电力设备",
+        "mention_count": 19,
+        "consensus": "多篇文章提到风电、电网设备盘中活跃并具有政策或低位轮动属性，但对于是否形成持续主线尚未形成一致判断，整体仍以观察承接和晋级反馈为主。",
+        "stance": "活跃",
+        "representative_stocks": [
+          "天顺风能",
+          "远程股份",
+          "金冠电气",
+          "长城电工",
+          "积成电子"
         ]
       },
       {
         "sector": "农业/种业",
-        "mention_count": 15,
-        "consensus": "农业和种业被普遍视为当日较活跃的轮动或防御方向，受天气、粮食安全等叙事催化；但多数观点未将其定义为市场核心主线，认为容量和持续性仍需观察。",
-        "stance": "活跃",
+        "mention_count": 17,
+        "consensus": "多数作者认为农业及种业前期强势股出现炸板、回落或负反馈，资金兑现特征明显；仅少数观点保留短线轮动或修复预期。",
+        "stance": "退潮",
         "representative_stocks": [
           "金健米业",
-          "万向德农",
-          "敦煌种业"
+          "百洋股份",
+          "农心科技",
+          "万向德农"
         ]
       },
       {
-        "sector": "大消费/零售",
+        "sector": "医药/化学制药/创新药",
         "mention_count": 14,
-        "consensus": "消费方向保持一定活跃度，九阳股份等高标获得集中关注；但多篇观点提示高位放量、接力分歧及独立性不足，板块内部强弱差异较大。",
+        "consensus": "观点整体偏分化：部分作者将医药视作弱市避险轮动或资金试盘方向，另一些作者认为受高位股负反馈影响，板块情绪已走弱，尚未形成一致主线。",
+        "stance": "分化",
+        "representative_stocks": [
+          "华北制药",
+          "哈药股份",
+          "莱美药业",
+          "百奥赛图"
+        ]
+      },
+      {
+        "sector": "贵金属/能源金属/油气/煤炭等资源方向",
+        "mention_count": 10,
+        "consensus": "多数提及该方向的作者认为前期资金兑现、主力流出或板块重心下移，未显示出持续的防御性承接。",
+        "stance": "退潮",
+        "representative_stocks": []
+      },
+      {
+        "sector": "消费/机器人/小家电",
+        "mention_count": 12,
+        "consensus": "多数观点认为消费及机器人更多表现为个股抱团而非板块共振，高位股分歧和负反馈使其持续性存在不确定性。",
         "stance": "分化",
         "representative_stocks": [
           "九阳股份",
-          "国芳集团",
-          "三柏硕"
-        ]
-      },
-      {
-        "sector": "券商/大金融",
-        "mention_count": 8,
-        "consensus": "券商和金融被多篇文章视为午后推动指数回升的重要力量，但对其持续性及是否能够带来增量行情的判断偏谨慎。",
-        "stance": "活跃",
-        "representative_stocks": [
-          "华鑫股份",
-          "大智慧"
-        ]
-      },
-      {
-        "sector": "贵金属",
-        "mention_count": 10,
-        "consensus": "贵金属在午后修复中获得较多关注，部分观点将其归为实物资产或防御配置方向；但其后续表现受国际金价、美元和美债收益率影响较大。",
-        "stance": "活跃",
-        "representative_stocks": [
-          "西部黄金"
-        ]
-      },
-      {
-        "sector": "网络安全/信创/软件开发",
-        "mention_count": 8,
-        "consensus": "网络安全、信创及软件开发在AI应用回流中同步活跃，多数文章认可其短线强度，但认为连板梯队和持续性仍不充分。",
-        "stance": "活跃",
-        "representative_stocks": [
-          "绿盟科技",
-          "中新赛克",
-          "麒麟信安"
-        ]
-      },
-      {
-        "sector": "风电设备",
-        "mention_count": 5,
-        "consensus": "多篇观点认为风电设备处于资金兑现或高位退潮状态，个别标的下跌对制造业高位股情绪形成拖累。",
-        "stance": "退潮",
-        "representative_stocks": [
-          "大金重工"
+          "三柏硕",
+          "襄阳轴承",
+          "丽人丽妆"
         ]
       }
     ],
     "stock_attention": [
       {
-        "stock": "时代万恒",
-        "mention_count": 19,
-        "sectors": [
-          "电池",
-          "锂电池",
-          "固态电池"
-        ],
-        "roles": [
-          "龙头",
-          "核心",
-          "高标关注",
-          "分歧观察对象"
-        ]
-      },
-      {
         "stock": "新华传媒",
-        "mention_count": 18,
+        "mention_count": 40,
         "sectors": [
+          "传媒",
           "出版传媒",
-          "文化传媒",
           "AI应用",
-          "影视传媒"
+          "AI短剧"
         ],
         "roles": [
           "龙头",
-          "高标抱团核心",
-          "停牌核查观察对象"
+          "核心",
+          "高位情绪锚",
+          "监管/停牌观察对象"
         ]
       },
       {
-        "stock": "紫竹高科",
-        "mention_count": 16,
+        "stock": "时代万恒",
+        "mention_count": 23,
         "sectors": [
           "电池",
           "锂电池",
-          "固态电池"
+          "固态电池",
+          "储能"
         ],
         "roles": [
+          "龙头",
           "核心",
-          "梯队标的",
-          "高标情绪观察对象"
+          "高位分歧观察对象",
+          "风险"
         ]
       },
       {
         "stock": "九阳股份",
-        "mention_count": 13,
+        "mention_count": 21,
         "sectors": [
-          "大消费",
-          "小家电"
+          "消费",
+          "小家电",
+          "机器人"
         ],
         "roles": [
-          "核心",
-          "高标关注",
-          "晋级博弈对象"
+          "高位核心",
+          "抱团股",
+          "风险",
+          "高度观察对象"
         ]
       },
       {
-        "stock": "金安国纪",
+        "stock": "新华文轩",
+        "mention_count": 17,
+        "sectors": [
+          "传媒",
+          "出版传媒",
+          "AI应用",
+          "AI短剧"
+        ],
+        "roles": [
+          "核心",
+          "跟随",
+          "传媒梯队代表"
+        ]
+      },
+      {
+        "stock": "龙版传媒",
+        "mention_count": 15,
+        "sectors": [
+          "传媒",
+          "出版传媒",
+          "AI应用"
+        ],
+        "roles": [
+          "核心",
+          "跟随",
+          "补涨梯队观察对象"
+        ]
+      },
+      {
+        "stock": "华北制药",
+        "mention_count": 12,
+        "sectors": [
+          "医药",
+          "化学制药",
+          "创新药"
+        ],
+        "roles": [
+          "龙头",
+          "核心",
+          "高关注",
+          "医药支线代表"
+        ]
+      },
+      {
+        "stock": "天顺风能",
+        "mention_count": 10,
+        "sectors": [
+          "风电",
+          "电力设备"
+        ],
+        "roles": [
+          "核心",
+          "风电支线代表"
+        ]
+      },
+      {
+        "stock": "金健米业",
+        "mention_count": 10,
+        "sectors": [
+          "农业",
+          "种业"
+        ],
+        "roles": [
+          "风险",
+          "前期人气股",
+          "负反馈观察对象"
+        ]
+      },
+      {
+        "stock": "博纳影业",
         "mention_count": 9,
         "sectors": [
-          "AI硬件",
-          "PCB",
-          "元件"
-        ],
-        "roles": [
-          "风险标的",
-          "硬件补跌观察对象"
-        ]
-      },
-      {
-        "stock": "中文在线",
-        "mention_count": 6,
-        "sectors": [
-          "AI应用",
-          "AI视频",
-          "传媒影视"
-        ],
-        "roles": [
-          "核心",
-          "高关注"
-        ]
-      },
-      {
-        "stock": "芒果超媒",
-        "mention_count": 5,
-        "sectors": [
-          "AI视频",
-          "传媒影视"
+          "传媒",
+          "短剧",
+          "影视院线"
         ],
         "roles": [
           "核心",
@@ -2964,172 +4815,201 @@
         ]
       },
       {
-        "stock": "金健米业",
-        "mention_count": 5,
+        "stock": "果麦文化",
+        "mention_count": 7,
         "sectors": [
-          "农业",
-          "种业"
+          "传媒",
+          "AI应用",
+          "短剧"
         ],
         "roles": [
           "龙头",
           "核心",
-          "高关注",
-          "分歧观察对象"
+          "高关注"
         ]
       },
       {
-        "stock": "宁德时代",
-        "mention_count": 4,
+        "stock": "内蒙新华",
+        "mention_count": 7,
         "sectors": [
-          "锂电池",
-          "固态电池",
-          "动力电池"
+          "传媒",
+          "出版传媒",
+          "AI短剧"
         ],
         "roles": [
           "核心",
-          "产业链龙头"
+          "跟随",
+          "高关注"
         ]
       },
       {
-        "stock": "大金重工",
-        "mention_count": 5,
+        "stock": "中际旭创",
+        "mention_count": 7,
         "sectors": [
-          "风电设备"
+          "CPO",
+          "光通信",
+          "算力硬件"
         ],
         "roles": [
-          "风险标的",
-          "退潮观察对象"
+          "风险",
+          "科技止跌观察对象"
+        ]
+      },
+      {
+        "stock": "金安国纪",
+        "mention_count": 7,
+        "sectors": [
+          "PCB",
+          "覆铜板",
+          "电子材料"
+        ],
+        "roles": [
+          "风险",
+          "科技硬件负反馈代表"
+        ]
+      },
+      {
+        "stock": "远程股份",
+        "mention_count": 6,
+        "sectors": [
+          "电网设备",
+          "智能电网"
+        ],
+        "roles": [
+          "核心",
+          "高关注",
+          "电网支线观察对象"
         ]
       }
     ],
     "tomorrow_consensus_watch": [
-      "指数修复能否延续，成交额能否继续放大，以及上证指数在3750点附近支撑和3800点上方运行的稳定性。",
-      "AI硬件、PCB、CPO、MLCC、半导体等方向能否止跌，及其补跌是否继续压制整体风险偏好。",
-      "AI应用、传媒、影视在集中爆发后能否获得承接、扩散和连板延续，尤其是新华传媒高标状态及可能的停牌核查影响。",
-      "电池/固态电池前排标的及低位梯队能否延续，时代万恒、紫竹高科等高标分歧是否扩大。",
-      "高位连板股的竞价、开板承接、断板负反馈及中位股断层情况，是否继续反映短线情绪改善。",
-      "券商等大金融的午后拉升能否延续，以及其对指数修复的带动是否具有持续性。",
-      "农业、消费、贵金属、网络安全等轮动方向能否从日内活跃转化为更具持续性的行情。"
+      "观察传媒/AI应用高位梯队的承接：重点包括新华传媒停牌或开板后的情绪影响，以及新华文轩、龙版传媒、慈文传媒、德才股份等补涨和中位股能否延续。",
+      "观察市场情绪是否改善：成交额能否回升、跌停和炸板数量能否下降、连板晋级率及上涨家数能否修复。",
+      "观察科技硬件、CPO、光模块、半导体和PCB核心股能否止跌，及其资金流出是否收窄。",
+      "观察银行等防御资金是否延续，以及其是否仍仅体现护盘和避险属性。",
+      "观察电池/固态电池高位核心股的承接，判断板块是继续退潮还是出现分歧转修复。",
+      "观察风电、电网设备等轮动支线能否由个股活跃扩展为板块合力。"
     ],
     "limitations": [
-      "结论基于多篇作者观点的聚合，反映的是文章中的主观看法，不构成对市场、行业或个股的客观判断。",
-      "部分文章存在广告、情绪化表述或盘中即时判断，可信度和可验证性存在差异。",
-      "不同文章对个股简称、所属行业和角色划分不完全一致，例如“新华”与“新华传媒”、“时代WH”与“时代万恒”等存在简称或表述差异。",
-      "部分文章混合盘中、收盘及后续展望信息，且个别宏观数据或日期语境不一致，影响横向比较。",
-      "mention_count为按抽取结果进行的归并计数，同一文章内的重复描述未重复计入；行业名称已按近似主题合并，可能掩盖细分赛道差异。"
+      "样本中存在大量同质化复盘文章，可能重复引用相同盘面数据和叙事，不能等同于独立市场参与者的真实投票。",
+      "部分文章带有广告、情绪化表达或作者持仓披露，相关判断可能受到叙事偏好、交易风格和利益相关性的影响。",
+      "不同文章对涨停、跌停、封板率、指数点位及资金流数据存在细微差异，且部分内容为盘中数据、盘前预判或作者主观统计，未逐项外部核验。",
+      "行业名称已按语义合并，例如传媒、AI应用、短剧、影视内容，以及科技硬件、通信、CPO、PCB等；合并口径会影响提及次数。",
+      "文中“龙头”“核心”“风险”等角色均为文章作者的标签汇总，不代表基本面评价、客观事实或买卖建议。",
+      "本汇总反映的是给定文章对应时点的观点，不构成对后续市场走势的预测。"
     ],
-    "article_count": 27,
+    "article_count": 43,
     "source_platform": "淘股吧公开复盘",
     "sample_status": "正式样本",
     "finalization": {
       "reason": "deadline_minimum_met",
-      "quality_article_count": 27,
+      "quality_article_count": 43,
       "minimum_quality_articles": 15,
-      "finalized_at_cn": "2026-10-09T22:05:11.837550+08:00",
-      "ai_quality_rejected_count": 3
+      "finalized_at_cn": "2026-10-12T22:06:59.937418+08:00",
+      "ai_quality_rejected_count": 8
     },
     "ths_concept_index": {
       "status": "ready",
-      "asof_date": "2026-10-09",
+      "asof_date": "2026-10-12",
       "items": [
-        {
-          "concept": "锂电池概念",
-          "ths_code": "300733",
-          "asof_date": "2026-10-09",
-          "one_day_pct": 0.34,
-          "five_day_pct": -1.96,
-          "volume_ratio_5d": 1.36,
-          "state": "震荡分化",
-          "source": "同花顺概念指数（AKShare）"
-        },
-        {
-          "concept": "固态电池",
-          "ths_code": "308294",
-          "asof_date": "2026-10-09",
-          "one_day_pct": 0.4,
-          "five_day_pct": -0.54,
-          "volume_ratio_5d": 1.46,
-          "state": "震荡分化",
-          "source": "同花顺概念指数（AKShare）"
-        },
-        {
-          "concept": "钒电池",
-          "ths_code": "301174",
-          "asof_date": "2026-10-09",
-          "one_day_pct": -1.14,
-          "five_day_pct": -1.95,
-          "volume_ratio_5d": 0.69,
-          "state": "退潮走弱",
-          "source": "同花顺概念指数（AKShare）"
-        },
         {
           "concept": "AI应用",
           "ths_code": "309264",
-          "asof_date": "2026-10-09",
-          "one_day_pct": 2.85,
-          "five_day_pct": -0.5,
-          "volume_ratio_5d": 1.31,
+          "asof_date": "2026-10-12",
+          "one_day_pct": -0.38,
+          "five_day_pct": 1.28,
+          "volume_ratio_5d": 1.17,
           "state": "震荡分化",
           "source": "同花顺概念指数（AKShare）"
         },
         {
           "concept": "文化传媒概念",
           "ths_code": "300806",
-          "asof_date": "2026-10-09",
-          "one_day_pct": 0.65,
-          "five_day_pct": -1.95,
-          "volume_ratio_5d": 0.81,
+          "asof_date": "2026-10-12",
+          "one_day_pct": 1.03,
+          "five_day_pct": 4.79,
+          "volume_ratio_5d": 1.55,
+          "state": "上涨加强",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "短剧游戏",
+          "ths_code": "309093",
+          "asof_date": "2026-10-12",
+          "one_day_pct": 1.86,
+          "five_day_pct": 7.07,
+          "volume_ratio_5d": 1.67,
+          "state": "上涨加强",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "参股银行",
+          "ths_code": "301270",
+          "asof_date": "2026-10-12",
+          "one_day_pct": -1.07,
+          "five_day_pct": 0.59,
+          "volume_ratio_5d": 0.96,
           "state": "震荡分化",
+          "source": "同花顺概念指数（AKShare）"
+        },
+        {
+          "concept": "高股息精选",
+          "ths_code": "309124",
+          "asof_date": "2026-10-12",
+          "one_day_pct": 0.27,
+          "five_day_pct": 3.38,
+          "volume_ratio_5d": 1.21,
+          "state": "趋势偏强但当日分化",
           "source": "同花顺概念指数（AKShare）"
         },
         {
           "concept": "PCB概念",
           "ths_code": "308832",
-          "asof_date": "2026-10-09",
-          "one_day_pct": -2.48,
-          "five_day_pct": -10.31,
-          "volume_ratio_5d": 1.18,
+          "asof_date": "2026-10-12",
+          "one_day_pct": -2.77,
+          "five_day_pct": -7.55,
+          "volume_ratio_5d": 0.9,
           "state": "退潮走弱",
           "source": "同花顺概念指数（AKShare）"
         },
         {
           "concept": "共封装光学(CPO)",
           "ths_code": "309049",
-          "asof_date": "2026-10-09",
-          "one_day_pct": -1.87,
-          "five_day_pct": -12.56,
-          "volume_ratio_5d": 1.09,
+          "asof_date": "2026-10-12",
+          "one_day_pct": -3.15,
+          "five_day_pct": -9.37,
+          "volume_ratio_5d": 0.81,
           "state": "退潮走弱",
           "source": "同花顺概念指数（AKShare）"
         },
         {
           "concept": "第三代半导体",
           "ths_code": "308700",
-          "asof_date": "2026-10-09",
-          "one_day_pct": -1.55,
-          "five_day_pct": -10.63,
-          "volume_ratio_5d": 1.22,
+          "asof_date": "2026-10-12",
+          "one_day_pct": -2.22,
+          "five_day_pct": -8.29,
+          "volume_ratio_5d": 0.89,
           "state": "退潮走弱",
           "source": "同花顺概念指数（AKShare）"
         },
         {
-          "concept": "算力租赁",
-          "ths_code": "309068",
-          "asof_date": "2026-10-09",
-          "one_day_pct": 1.09,
-          "five_day_pct": -4.13,
-          "volume_ratio_5d": 1.28,
-          "state": "趋势偏弱但当日修复/震荡",
+          "concept": "固态电池",
+          "ths_code": "308294",
+          "asof_date": "2026-10-12",
+          "one_day_pct": -2.3,
+          "five_day_pct": 0.68,
+          "volume_ratio_5d": 1.07,
+          "state": "震荡分化",
           "source": "同花顺概念指数（AKShare）"
         },
         {
-          "concept": "农业种植",
-          "ths_code": "308016",
-          "asof_date": "2026-10-09",
-          "one_day_pct": 2.78,
-          "five_day_pct": 1.87,
-          "volume_ratio_5d": 1.6,
-          "state": "上涨加强",
+          "concept": "储能",
+          "ths_code": "306380",
+          "asof_date": "2026-10-12",
+          "one_day_pct": -1.26,
+          "five_day_pct": -1.16,
+          "volume_ratio_5d": 0.99,
+          "state": "退潮走弱",
           "source": "同花顺概念指数（AKShare）"
         }
       ],
@@ -3140,9 +5020,9 @@
   },
   "finalization": {
     "reason": "deadline_minimum_met",
-    "quality_article_count": 27,
+    "quality_article_count": 43,
     "minimum_quality_articles": 15,
-    "finalized_at_cn": "2026-10-09T22:05:11.837550+08:00",
-    "ai_quality_rejected_count": 3
+    "finalized_at_cn": "2026-10-12T22:06:59.937418+08:00",
+    "ai_quality_rejected_count": 8
   }
 }

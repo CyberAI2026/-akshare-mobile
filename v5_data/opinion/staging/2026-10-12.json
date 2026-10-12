@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-12",
   "trade_date": "2026-10-12",
-  "updated_at_cn": "2026-10-12T21:54:42.480978+08:00",
+  "updated_at_cn": "2026-10-12T22:06:26.317559+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -507,6 +507,21 @@
       "body_chars": 4231,
       "body_sha256": "cd53f0f64fc0462c87b7c4ac27c52e865b2ed2aaee9b9c247f1cb320c71f85de",
       "published_at_cn": "2026-10-12T15:58:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "d1d469b782619d0d",
+      "title": "2026.10.12复盘_黑絔丶_淘股吧",
+      "url": "https://www.tgb.cn/a/2vQcga9U4as",
+      "read_count": 16,
+      "body_chars": 2660,
+      "body_sha256": "d1d469b782619d0dc467d2fbe89317ec06704ffdbce73ed14446d152862531ee",
+      "published_at_cn": "2026-10-12T22:00:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -3573,6 +3588,168 @@
       ],
       "quality_flags": [
         "广告"
+      ]
+    },
+    {
+      "article_id": "d1d469b782619d0d",
+      "market_stance": "偏多",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为指数下跌主要受个股利空和基金调仓影响，预计次日指数表现较好；看好电网及科技企稳修复，但提示AI后期风险和农业退潮。",
+      "sectors": [
+        {
+          "name": "银行",
+          "stance": "活跃",
+          "evidence": "作者称资金流向银行、保险避险。"
+        },
+        {
+          "name": "保险",
+          "stance": "活跃",
+          "evidence": "作者称资金流向银行、保险避险。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者称板块分歧，后排全面回调，预计次日回调。"
+        },
+        {
+          "name": "AI",
+          "stance": "活跃",
+          "evidence": "作者称AI继续强势、批量晋级二板，但认为后期风险增加。"
+        },
+        {
+          "name": "风电",
+          "stance": "活跃",
+          "evidence": "作者称早盘风电、电网相关走强，后续扩散至光伏。"
+        },
+        {
+          "name": "电网",
+          "stance": "加强",
+          "evidence": "作者称看好次日电网方向，并买入积成电子博弈。"
+        },
+        {
+          "name": "光伏",
+          "stance": "活跃",
+          "evidence": "作者称风电、电网走强后扩散到光伏。"
+        },
+        {
+          "name": "农业",
+          "stance": "退潮",
+          "evidence": "作者称农业高标全部倒下，基本处于退潮期。"
+        },
+        {
+          "name": "汽车",
+          "stance": "活跃",
+          "evidence": "作者称汽车尾盘冲高，赛力斯相关个股涨停。"
+        },
+        {
+          "name": "科技",
+          "stance": "修复",
+          "evidence": "作者认为科技早盘已有企稳迹象，次日存在反弹修复预期。"
+        },
+        {
+          "name": "传媒",
+          "stance": "不明确",
+          "evidence": "作者称传媒龙头新华停牌核查。"
+        },
+        {
+          "name": "小家电",
+          "stance": "不明确",
+          "evidence": "作者称九阳未明显带动小家电板块。"
+        },
+        {
+          "name": "PCB",
+          "stance": "修复",
+          "evidence": "作者博弈次日PCB回暖，关注超声电子。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新华",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "九阳",
+          "sector": "小家电、消费",
+          "role": "核心"
+        },
+        {
+          "name": "时代万恒",
+          "sector": "电池",
+          "role": "龙头"
+        },
+        {
+          "name": "德新科技",
+          "sector": "电池",
+          "role": "跟随"
+        },
+        {
+          "name": "华北制药",
+          "sector": "医药",
+          "role": "高关注"
+        },
+        {
+          "name": "远程股份",
+          "sector": "电网",
+          "role": "龙头"
+        },
+        {
+          "name": "多伦科技",
+          "sector": "电网、AI应用",
+          "role": "跟随"
+        },
+        {
+          "name": "百洋",
+          "sector": "农业",
+          "role": "风险"
+        },
+        {
+          "name": "农心科技",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "宏辉果蔬",
+          "sector": "农业",
+          "role": "跟随"
+        },
+        {
+          "name": "赛力斯",
+          "sector": "汽车",
+          "role": "高关注"
+        },
+        {
+          "name": "丽人丽妆",
+          "sector": "消费",
+          "role": "跟随"
+        },
+        {
+          "name": "积成电子",
+          "sector": "电网",
+          "role": "高关注"
+        },
+        {
+          "name": "超声电子",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数能否在基金调仓影响后企稳",
+        "时代万恒能否稳住以观察电池板块反馈",
+        "电网及科技、PCB能否出现回流修复"
+      ],
+      "numeric_claims": [
+        "沪指收跌0.43%",
+        "时代换手率达到30%多",
+        "作者以10板作为市场短期高度标记",
+        "作者提及9板、8板、7板可能成为接力高度",
+        "作者称九阳是从28号冰点走出的个股"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
