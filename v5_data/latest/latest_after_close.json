@@ -3,9 +3,9 @@
   "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
-  "started_cn": "2026-10-13T03:14:28.686902+08:00",
-  "stamp": "20261013_031428",
-  "folder": "v5_data/runs/20261013_031428",
+  "started_cn": "2026-10-14T01:05:33.755124+08:00",
+  "stamp": "20261014_010533",
+  "folder": "v5_data/runs/20261014_010533",
   "batch_path": "",
   "batch_count": 0,
   "master_before_screen": 811,
@@ -16,32 +16,30 @@
     "available": 535
   },
   "cache_refresh": {
-    "asof_trade_date": "2026-10-12",
-    "source": "sina-spot",
+    "asof_trade_date": "2026-10-13",
+    "source": "eastmoney-spot",
     "pool_count": 811,
     "already_current": 0,
-    "bulk_appended": 0,
-    "needs_history_fallback": 811,
+    "bulk_appended": 799,
+    "needs_history_fallback": 12,
     "missing_cache": 0,
     "corporate_action_guard": 0,
-    "errors": [
-      "eastmoney-spot:ConnectionError:('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
-    ]
+    "errors": []
   },
-  "cache_asof_trade_date": "2026-10-12",
+  "cache_asof_trade_date": "2026-10-13",
   "cache_deep_ready_count": 670,
-  "cache_current_count": 0,
-  "cache_fallback_count": 811,
+  "cache_current_count": 799,
+  "cache_fallback_count": 12,
   "isolated_index_count": 0,
-  "stage1": 36,
+  "stage1": 44,
   "qa25": {
-    "命中或增量": 798,
+    "命中或增量": 807,
     "总数": 811,
-    "成功": 798
+    "成功": 807
   },
-  "cache25_refresh_requested": 811,
-  "cache25_current_ranked": 798,
-  "cache25_stale_deferred": 13,
+  "cache25_refresh_requested": 14,
+  "cache25_current_ranked": 807,
+  "cache25_stale_deferred": 4,
   "completed_120d_shards": [
     0,
     1,
@@ -49,26 +47,26 @@
     3
   ],
   "shard_count_120d": 4,
-  "stage2_research_pool": 3,
+  "stage2_research_pool": 4,
   "qa120": {
-    "命中或增量": 35,
-    "总数": 36,
-    "成功": 36
+    "命中或增量": 43,
+    "总数": 44,
+    "成功": 44
   },
-  "generated_trade_date": "2026-10-12",
+  "generated_trade_date": "2026-10-13",
   "master_count": 811,
   "eliminated_count": 2,
   "daily_new_count": 0,
   "daily_reactivated_count": 0,
   "daily_eliminated_count": 1,
-  "cooling_count": 775,
+  "cooling_count": 767,
   "qa250": {
-    "命中或增量": 3,
-    "总数": 3,
-    "成功": 3
+    "命中或增量": 4,
+    "总数": 4,
+    "成功": 4
   },
-  "stage3_lifecycle_qualified": 2,
-  "pre_ai_alignment_eliminated": 1,
+  "stage3_lifecycle_qualified": 1,
+  "pre_ai_alignment_eliminated": 0,
   "pre_ai_capacity_eliminated": 0,
   "stage3_research_pool": 1,
   "openai_candidate_cap": 50,
@@ -89,32 +87,32 @@
     "reduce_count": 0,
     "data_error_count": 0
   },
-  "completed_cn": "2026-10-13T03:31:53.416970+08:00",
-  "elapsed_minutes": 17.41,
+  "completed_cn": "2026-10-14T01:21:21.549341+08:00",
+  "elapsed_minutes": 15.8,
   "cache_summary": {
     "25日": {
-      "命中或增量": 798,
+      "命中或增量": 807,
       "总数": 811,
-      "成功": 798
+      "成功": 807
     },
     "120日": {
-      "命中或增量": 35,
-      "总数": 36,
-      "成功": 36
+      "命中或增量": 43,
+      "总数": 44,
+      "成功": 44
     },
     "250日": {
-      "命中或增量": 3,
-      "总数": 3,
-      "成功": 3
+      "命中或增量": 4,
+      "总数": 4,
+      "成功": 4
     }
   },
   "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
-  "observation_pool_count": 1,
-  "target_trade_date": "2026-10-13",
+  "observation_pool_count": 0,
+  "target_trade_date": "2026-10-14",
   "openai_model": "gpt-5.6-terra",
   "market_assessment": {
     "risk_level": "高",
-    "summary": "输入市场宽度快照显示上涨1111家、下跌4036家，净上涨-2925；主要指数近5日至60日多数走弱，市场环境偏弱。",
+    "summary": "市场宽度当日修复，上涨2909家、净上涨424家，但主要指数近5日及20日仍偏弱，且全市场成交额较前日下降5.43%；市场环境为一般或偏弱。",
     "next_day_aggressiveness": "偏防守"
   },
   "high_attention_sector_market": {
@@ -124,59 +122,49 @@
       "高关注但活跃分化": [],
       "高关注且观点退潮": [
         {
-          "板块": "科技硬件/通信/CPO/光模块/半导体/PCB",
-          "文章提及数": 31,
-          "观点状态": "退潮"
-        },
-        {
-          "板块": "农业/种业",
-          "文章提及数": 17,
-          "观点状态": "退潮"
-        },
-        {
-          "板块": "贵金属/能源金属/油气/煤炭等资源方向",
-          "文章提及数": 10,
+          "板块": "电池、固态电池、锂电及电力设备",
+          "文章提及数": 19,
           "观点状态": "退潮"
         }
       ],
       "高关注但行情未核验": [
         {
-          "板块": "传媒/AI应用/短剧/影视内容",
-          "文章提及数": 44,
+          "板块": "PCB、覆铜板、通信及算力硬件",
+          "文章提及数": 22,
           "观点状态": "加强"
         },
         {
-          "板块": "银行/高股息/红利",
-          "文章提及数": 27,
-          "观点状态": "加强"
-        },
-        {
-          "板块": "电池/固态电池/储能",
-          "文章提及数": 25,
+          "板块": "传媒、出版、短剧及AI应用",
+          "文章提及数": 21,
           "观点状态": "分化"
         },
         {
-          "板块": "风电/电网设备/电力设备",
-          "文章提及数": 19,
+          "板块": "冰雪经济、冰雪旅游及体育消费",
+          "文章提及数": 18,
           "观点状态": "活跃"
         },
         {
-          "板块": "医药/化学制药/创新药",
-          "文章提及数": 14,
-          "观点状态": "分化"
+          "板块": "军工、航空航天及国防装备",
+          "文章提及数": 11,
+          "观点状态": "活跃"
         },
         {
-          "板块": "消费/机器人/小家电",
-          "文章提及数": 12,
+          "板块": "化工、染料及涨价方向",
+          "文章提及数": 11,
+          "观点状态": "活跃"
+        },
+        {
+          "板块": "银行、石油及防御权重",
+          "文章提及数": 8,
           "观点状态": "分化"
         }
       ]
     },
     "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
   },
-  "stock_qa_25_success": 798,
-  "stock_qa_120_success": 36,
-  "stock_qa_250_success": 3,
+  "stock_qa_25_success": 807,
+  "stock_qa_120_success": 44,
+  "stock_qa_250_success": 4,
   "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
   "pushplus_delivery_ok": true,
   "pushplus_delivery_status": "request_accepted"
