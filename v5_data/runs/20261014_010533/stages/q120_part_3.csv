@@ -1,0 +1,12 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+600121,郑州煤电,成功,120,global-cache,global-cache,local-cache,105,
+603978,深圳新星,成功,120,global-cache,global-cache,local-cache,105,
+000993,闽东电力,成功,120,global-cache,global-cache,local-cache,105,
+688655,迅捷兴,成功,120,global-cache,global-cache,local-cache,105,
+002285,世联行,成功,120,global-cache,global-cache,local-cache,105,
+600192,长城电工,成功,120,global-cache,global-cache,local-cache,105,
+601595,上海电影,成功,120,global-cache,global-cache,local-cache,105,
+603216,梦天家居,成功,120,global-cache,global-cache,local-cache,105,
+605177,东亚药业,成功,120,global-cache,global-cache,local-cache,105,
+002631,德尔未来,成功,120,global-cache,global-cache,local-cache,105,
+002980,华盛昌,成功,120,global-cache,global-cache,local-cache,105,
