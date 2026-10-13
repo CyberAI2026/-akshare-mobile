@@ -1,0 +1,12 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+002172,澳洋健康,成功,120,global-cache,global-cache,local-cache,105,
+600318,新力金融,成功,120,global-cache,global-cache,local-cache,105,
+688835,高凯技术,成功,30,sina,sina,deep-backfill,30,
+600127,金健米业,成功,120,global-cache,global-cache,local-cache,105,
+000020,深华发Ａ,成功,120,global-cache,global-cache,local-cache,105,
+002564,天沃科技,成功,120,global-cache,global-cache,local-cache,105,
+600802,福建水泥,成功,120,global-cache,global-cache,local-cache,108,
+601949,中国出版,成功,120,global-cache,global-cache,local-cache,105,
+603466,风语筑,成功,120,global-cache,global-cache,local-cache,108,
+605188,国光连锁,成功,120,global-cache,global-cache,local-cache,105,
+600693,东百集团,成功,120,global-cache,global-cache,local-cache,105,

@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "screen25_complete",
+  "stage": "screen120_sharding",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
   "started_cn": "2026-10-14T01:05:33.755124+08:00",
@@ -39,5 +39,9 @@
   },
   "cache25_refresh_requested": 14,
   "cache25_current_ranked": 807,
-  "cache25_stale_deferred": 4
+  "cache25_stale_deferred": 4,
+  "completed_120d_shards": [
+    0
+  ],
+  "shard_count_120d": 4
 }
