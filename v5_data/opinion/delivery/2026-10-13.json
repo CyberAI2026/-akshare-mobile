@@ -1,0 +1,11 @@
+{
+  "status": "request_accepted",
+  "delivery_confirmation": "unverified",
+  "source_date": "2026-10-13",
+  "trade_date": "2026-10-13",
+  "accepted_at_cn": "2026-10-13T22:18:05.150049+08:00",
+  "source_set_sha256": "0d397d63422f8e701b53dbec42067115dab8fec10581f7987a0f575d674d6475",
+  "article_count": 33,
+  "pushplus_short_code": "7e1ef9df8c75421e81544dac94448ab9",
+  "pushplus_message": "执行成功"
+}
