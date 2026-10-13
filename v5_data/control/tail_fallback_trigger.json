@@ -1,6 +1,6 @@
 {
-  "triggered_at_cn": "2026-10-09T14:37:34+08:00",
-  "trade_date": "2026-10-09",
+  "triggered_at_cn": "2026-10-13T14:34:50+08:00",
+  "trade_date": "2026-10-13",
   "watchdog_stage": "14:32-main-fallback",
-  "main_sha_before_trigger": "3711ae30793410e7c8e3123538bc1b45d57ff0b4"
+  "main_sha_before_trigger": "8993bc93869e3c7ff5e18d148793892b4093d2bb"
 }
