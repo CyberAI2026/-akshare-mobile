@@ -1,0 +1,11 @@
+{
+  "asof_trade_date": "2026-10-13",
+  "source": "eastmoney-spot",
+  "pool_count": 811,
+  "already_current": 0,
+  "bulk_appended": 799,
+  "needs_history_fallback": 12,
+  "missing_cache": 0,
+  "corporate_action_guard": 0,
+  "errors": []
+}
