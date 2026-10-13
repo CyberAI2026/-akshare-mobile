@@ -1,0 +1,17 @@
+{
+  "done": 14,
+  "total": 14,
+  "code": "920895",
+  "updated_cn": "2026-10-14T01:09:27.686951+08:00",
+  "last": {
+    "股票代码": "920895",
+    "股票名称": "花溪科技",
+    "状态": "成功",
+    "交易日数": 26,
+    "前复权源": "global-cache+eastmoney",
+    "未复权源": "global-cache",
+    "缓存模式": "per-stock-incremental",
+    "未复权匹配日": 2,
+    "错误": "incremental/sina:KeyError:'date'"
+  }
+}

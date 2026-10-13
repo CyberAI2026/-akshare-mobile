@@ -1,0 +1,15 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+002388,新亚制程,成功,26,global-cache+sina,global-cache,per-stock-incremental,15,
+301689,电科思仪,成功,18,sina,sina,deep-backfill,18,
+600825,新华传媒,成功,26,global-cache+sina,global-cache,per-stock-incremental,18,
+601123,马矿股份,成功,25,sina,sina,deep-backfill,25,
+920006,晟楠科技,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,8,incremental/sina:KeyError:'date'
+920021,流金科技,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,10,incremental/sina:KeyError:'date'
+920128,胜业电气,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,7,incremental/sina:KeyError:'date'
+920176,维琪科技,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,2,incremental/sina:KeyError:'date'
+920212,智新电子,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,7,incremental/sina:KeyError:'date'
+920427,华维设计,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,21,incremental/sina:KeyError:'date'
+920478,峆一药业,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,0,incremental/sina:KeyError:'date'
+920592,华信永道,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,7,incremental/sina:KeyError:'date'
+920855,浙江大农,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,7,incremental/sina:KeyError:'date'
+920895,花溪科技,成功,26,global-cache+eastmoney,global-cache,per-stock-incremental,2,incremental/sina:KeyError:'date'
