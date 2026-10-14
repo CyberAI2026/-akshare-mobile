@@ -1,0 +1,9 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+002172,澳洋健康,成功,120,global-cache,global-cache,local-cache,105,
+603978,深圳新星,成功,120,global-cache,global-cache,local-cache,105,
+001216,华瓷股份,成功,120,global-cache,global-cache,local-cache,105,
+001330,博纳影业,成功,120,global-cache,global-cache,local-cache,105,
+601811,新华文轩,成功,120,global-cache,global-cache,local-cache,108,
+603626,科森科技,成功,120,global-cache,global-cache,local-cache,105,
+600127,金健米业,成功,120,global-cache,global-cache,local-cache,105,
+601579,会稽山,成功,120,global-cache,global-cache,local-cache,105,
