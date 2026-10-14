@@ -1,17 +1,10 @@
 {
-  "status": "precheck_completed",
-  "trade_date": "2026-10-13",
-  "generated_at_cn": "2026-10-13T14:41:13.020131+08:00",
-  "target_trade_date": "2026-10-13",
-  "candidate_codes": [
-    "600903",
-    "603151"
-  ],
+  "status": "precheck_no_eligible_pool",
+  "trade_date": "2026-10-14",
+  "generated_at_cn": "2026-10-14T14:40:00.007389+08:00",
+  "target_trade_date": "2026-10-14",
+  "candidate_codes": [],
   "rolling_pool_version": "three-trading-day-v1",
-  "rolling_source_dates": [
-    "2026-10-12",
-    "2026-10-09",
-    "2026-10-08"
-  ],
-  "rolling_candidate_count": 2
+  "rolling_source_dates": [],
+  "rolling_candidate_count": 0
 }

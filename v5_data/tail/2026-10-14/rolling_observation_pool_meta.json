@@ -1,0 +1,9 @@
+{
+  "target_trade_date": "2026-10-14",
+  "rolling_pool_version": "three-trading-day-v1",
+  "rolling_source_days": 3,
+  "rolling_source_dates": [],
+  "rolling_final_candidate_count": 0,
+  "pool_available": false,
+  "pool_unavailable_reason": "近三个交易日没有可用观察池"
+}
