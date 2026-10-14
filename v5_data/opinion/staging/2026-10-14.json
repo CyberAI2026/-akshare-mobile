@@ -1,7 +1,7 @@
 {
   "source_date": "2026-10-14",
   "trade_date": "2026-10-14",
-  "updated_at_cn": "2026-10-14T20:35:48.756428+08:00",
+  "updated_at_cn": "2026-10-14T21:05:07.930624+08:00",
   "method": "incremental AI-verified quality pool; raw article bodies not persisted",
   "sources": [
     {
@@ -155,6 +155,21 @@
       ]
     },
     {
+      "article_id": "4e593a478e8b54f4",
+      "title": "2026.10.14复盘_黑絔丶_淘股吧",
+      "url": "https://www.tgb.cn/a/2vTrQ0PKMJD",
+      "read_count": 6,
+      "body_chars": 1886,
+      "body_sha256": "4e593a478e8b54f478831f1d92e91b554cc21f1fe18351bf192931bd38145963",
+      "published_at_cn": "2026-10-14T21:00:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "4fb7e74ad556749c",
       "title": "10.14复盘_绝对荔枝柚子_淘股吧",
       "url": "https://www.tgb.cn/a/2vThgKdxa1k",
@@ -215,6 +230,21 @@
       ]
     },
     {
+      "article_id": "628e72b906d3562a",
+      "title": "2026.10.14复盘_股界华英雄1995_淘股吧",
+      "url": "https://www.tgb.cn/a/2vT5HLM2q5A",
+      "read_count": 49,
+      "body_chars": 1548,
+      "body_sha256": "628e72b906d3562aa2a5b7ec5f3c96fedd15a73fd0e2bea3b222abf28d0b598d",
+      "published_at_cn": "2026-10-14T15:51:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "64ae1cb7064c86ce",
       "title": "10 月 14 日数据复盘_唐僧不吃糖_淘股吧",
       "url": "https://www.tgb.cn/a/2vTfm4WYqnc",
@@ -222,6 +252,21 @@
       "body_chars": 6382,
       "body_sha256": "64ae1cb7064c86ceb2e6dbdb2406d659c292abb4895e88d60af80269baa4a9e5",
       "published_at_cn": "2026-10-14T18:06:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "6954aaa66b4b9d04",
+      "title": "10.14修复预期_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2vSCZv75J3Q",
+      "read_count": 131,
+      "body_chars": 1901,
+      "body_sha256": "6954aaa66b4b9d04813f9aa0b92a109ee203098ba6f863a58bd95ea3f662201e",
+      "published_at_cn": "2026-10-14T09:09:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -252,6 +297,21 @@
       "body_chars": 2712,
       "body_sha256": "7408e37f8136260509b392d6648870611619d6a967cc0448f4da0fe015a74c4c",
       "published_at_cn": "2026-10-14T17:26:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "78090be42e2038c1",
+      "title": "20261014复盘_平和尤启_淘股吧",
+      "url": "https://www.tgb.cn/a/2vT3JxnnLoy",
+      "read_count": 40,
+      "body_chars": 1891,
+      "body_sha256": "78090be42e2038c1f4447b27adcf273fb01aa2803bfa45add688d8462f392632",
+      "published_at_cn": "2026-10-14T15:23:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -320,6 +380,21 @@
       ]
     },
     {
+      "article_id": "8da65e24c34d87d5",
+      "title": "10.14复盘_每天不重样_淘股吧",
+      "url": "https://www.tgb.cn/a/2vTle2Z8tvf",
+      "read_count": 3,
+      "body_chars": 1526,
+      "body_sha256": "8da65e24c34d87d59dfaf64325b807443056524348367b9f52eb0a040a6e0d5e",
+      "published_at_cn": "2026-10-14T19:28:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
       "article_id": "8f4e47f95ecd9512",
       "title": "10.14复盘_洛遇_淘股吧",
       "url": "https://www.tgb.cn/a/2vT4oun2hyi",
@@ -357,6 +432,21 @@
       "body_chars": 9891,
       "body_sha256": "a72cdbb46a889048261fa605dda9b3bd9729997ffcc101e5050b77f3f1daf6d5",
       "published_at_cn": "2026-10-14T16:35:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "b255724e218e6309",
+      "title": "10.14修复预期_熊猫韭菜_淘股吧",
+      "url": "https://www.tgb.cn/a/2vSCV9ivNku",
+      "read_count": 127,
+      "body_chars": 1901,
+      "body_sha256": "b255724e218e6309615a4582064e1c3990a60d11e2c8eb21c0173ee37f4cfa32",
+      "published_at_cn": "2026-10-14T09:08:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -417,6 +507,21 @@
       "body_chars": 1904,
       "body_sha256": "e6ae1378a808a541d6a6d3268f4ab4c06c1733e2d2526ca3c0a5d34bd310e5d6",
       "published_at_cn": "2026-10-14T12:16:00+08:00",
+      "quality_checks": [
+        "当天发表时间已核验",
+        "正文不少于600字",
+        "覆盖市场维度",
+        "覆盖板块/周期维度"
+      ]
+    },
+    {
+      "article_id": "e6eb4bf656e3fd20",
+      "title": "20261014操作记录_平和尤启_淘股吧",
+      "url": "https://www.tgb.cn/a/2vSIEsu667J",
+      "read_count": 63,
+      "body_chars": 2136,
+      "body_sha256": "e6eb4bf656e3fd20ffde997403e5288cc961852fc8dc17355cc37b4f629ef4e2",
+      "published_at_cn": "2026-10-14T10:28:00+08:00",
       "quality_checks": [
         "当天发表时间已核验",
         "正文不少于600字",
@@ -1286,6 +1391,125 @@
       ]
     },
     {
+      "article_id": "4e593a478e8b54f4",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧",
+        "修复"
+      ],
+      "market_summary": "作者认为指数缩量冲高回落、尚未站上五日线，但未创新低；情绪整体较差，传媒偏强而此前热门科技等方向继续承压。",
+      "sectors": [
+        {
+          "name": "油气",
+          "stance": "活跃",
+          "evidence": "作者称地缘因素推动油气板块涨幅靠前。"
+        },
+        {
+          "name": "港口",
+          "stance": "活跃",
+          "evidence": "作者认为港口与油气同受地缘因素带动。"
+        },
+        {
+          "name": "燃气",
+          "stance": "活跃",
+          "evidence": "作者认为燃气与油气同受地缘因素带动。"
+        },
+        {
+          "name": "文化传媒",
+          "stance": "加强",
+          "evidence": "出版、电影、文化传媒持续强势，并扩散至游戏。"
+        },
+        {
+          "name": "游戏",
+          "stance": "活跃",
+          "evidence": "作者称传媒强势进一步扩散到游戏相关。"
+        },
+        {
+          "name": "煤炭",
+          "stance": "活跃",
+          "evidence": "作者称煤炭相对活跃，存在冬季炒作周期预期。"
+        },
+        {
+          "name": "公路铁路运输",
+          "stance": "活跃",
+          "evidence": "龙江交通晋级二板，对板块有一定带动。"
+        },
+        {
+          "name": "风电",
+          "stance": "退潮",
+          "evidence": "作者称主要跌幅集中于前期涨幅较好的风电等方向。"
+        },
+        {
+          "name": "芯片",
+          "stance": "退潮",
+          "evidence": "作者称多数科技品种仍按惯性下跌。"
+        },
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者认为科技中相对较好的是PCB方向。"
+        },
+        {
+          "name": "冰雪产业",
+          "stance": "退潮",
+          "evidence": "作者认为题材预期不足，除少数个股外基本高开回落。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "慈文传媒",
+          "sector": "文化传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "新经典",
+          "sector": "文化传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "龙江交通",
+          "sector": "公路铁路运输",
+          "role": "核心"
+        },
+        {
+          "name": "冰山冷热",
+          "sector": "冰雪产业",
+          "role": "核心"
+        },
+        {
+          "name": "九阳股份",
+          "sector": "",
+          "role": "风险"
+        },
+        {
+          "name": "丽人丽妆",
+          "sector": "",
+          "role": "风险"
+        },
+        {
+          "name": "三特索道",
+          "sector": "冰雪产业",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数能否以十字星等方式确认3741附近底部并站上五日线",
+        "慈文传媒与新经典的补涨龙竞争结果",
+        "冰山冷热能否继续一字并带动冰雪产业"
+      ],
+      "numeric_claims": [
+        "作者认为底部大概在3741附近",
+        "慈文传媒和新经典处于4板竞争",
+        "龙江交通晋级2板",
+        "九阳股份8日涨幅达96.04%",
+        "九阳股份距离10日100%异动尚差一点"
+      ],
+      "quality_flags": [
+        "广告",
+        "明显情绪化"
+      ]
+    },
+    {
       "article_id": "4fb7e74ad556749c",
       "market_stance": "谨慎",
       "market_phase": [
@@ -1543,6 +1767,54 @@
       ]
     },
     {
+      "article_id": "628e72b906d3562a",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为昨日抢修复资金今日兑现，成交缩量且指数仍受5日线压制；情绪端未现极端核按钮，宜快进快出。",
+      "sectors": [
+        {
+          "name": "传媒",
+          "stance": "活跃",
+          "evidence": "作者识别传媒存在反核，龙版传媒盘中一度达日内约+8%。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "东百",
+          "sector": "",
+          "role": "不明确"
+        },
+        {
+          "name": "博纳",
+          "sector": "",
+          "role": "不明确"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数能否摆脱5日线压制",
+        "是否存在开新仓机会",
+        "传媒反核延续情况"
+      ],
+      "numeric_claims": [
+        "成交量萎缩2600亿元",
+        "全天成交额1.4万亿元",
+        "早盘断板池最低约-6%",
+        "龙版传媒11点10分左右日内最高约+8%",
+        "作者近期仓位约2至4成",
+        "作者预判博纳日内高度约4%至6%"
+      ],
+      "quality_flags": [
+        "无"
+      ]
+    },
+    {
       "article_id": "64ae1cb7064c86ce",
       "market_stance": "谨慎",
       "market_phase": [
@@ -1661,6 +1933,75 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "6954aaa66b4b9d04",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为若市场止跌，短期底部或形成，短线预期修复与补涨；但高位卡异动、传媒分歧及外部扰动仍需留意。",
+      "sectors": [
+        {
+          "name": "冰雪经济",
+          "stance": "活跃",
+          "evidence": "作者称其为新发酵方向，建议观察竞价强度。"
+        },
+        {
+          "name": "涨价",
+          "stance": "活跃",
+          "evidence": "作者将涨价视为加分项，并关注低位标的带动。"
+        },
+        {
+          "name": "传媒",
+          "stance": "分化",
+          "evidence": "作者称相关扰动增加传媒分歧，但可关注情绪核心低吸机会。"
+        },
+        {
+          "name": "医药",
+          "stance": "修复",
+          "evidence": "作者认为医药离修复不远。"
+        },
+        {
+          "name": "大科技",
+          "stance": "不明确",
+          "evidence": "作者认为需待大盘放量企稳或拉升后再观察。"
+        },
+        {
+          "name": "PCB",
+          "stance": "不明确",
+          "evidence": "作者仅提出在大盘放量企稳时观察反弹机会。"
+        },
+        {
+          "name": "脑机接口",
+          "stance": "不明确",
+          "evidence": "文中仅整理了相关技术消息，未给出盘面判断。"
+        },
+        {
+          "name": "华为芯片",
+          "stance": "不明确",
+          "evidence": "文中仅整理芯片量产消息，未给出盘面判断。"
+        },
+        {
+          "name": "MLCC",
+          "stance": "不明确",
+          "evidence": "文中仅整理涨价消息，未给出盘面判断。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "大盘能否止跌、放量企稳",
+        "冰雪经济竞价强度",
+        "PCB及大科技方向的反弹表现"
+      ],
+      "numeric_claims": [
+        "文中提及华为麒麟9050系列芯片",
+        "作者称医药方向尽量关注688标的"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
@@ -1802,6 +2143,77 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "78090be42e2038c1",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "分歧"
+      ],
+      "market_summary": "作者认为午后指数跳水、市场整体偏弱，但短线情绪相对指数存在背离；看好AI传媒延续，同时提示弱市不宜追高。",
+      "sectors": [
+        {
+          "name": "AI传媒",
+          "stance": "加强",
+          "evidence": "作者称板块强度在线，经典、慈文表现强势，并继续看好延续。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "分化",
+          "evidence": "作者称高位标的受盘中跳水影响，资金对异动限制保持谨慎。"
+        },
+        {
+          "name": "PCB",
+          "stance": "活跃",
+          "evidence": "作者提及澳弘近期借助PCB板块资金回流而反弹。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "经典",
+          "sector": "AI传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "慈文",
+          "sector": "AI传媒",
+          "role": "核心"
+        },
+        {
+          "name": "掌阅",
+          "sector": "AI传媒",
+          "role": "跟随"
+        },
+        {
+          "name": "实代",
+          "sector": "固态电池",
+          "role": "高关注"
+        },
+        {
+          "name": "九羊",
+          "sector": "固态电池",
+          "role": "高关注"
+        },
+        {
+          "name": "澳弘",
+          "sector": "PCB",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "经典、慈文能否继续竞争晋级5板",
+        "AI传媒中位股能否保持溢价",
+        "实代、九羊在异动限制下的涨幅控制及盘中强弱"
+      ],
+      "numeric_claims": [
+        "创业板、科创50跌幅均超过3%",
+        "两市超过4500家个股下跌",
+        "两市成交量缩量2600亿元",
+        "实代盘中最大跌幅超过2%，尾盘收涨2%"
+      ],
+      "quality_flags": [
+        "无"
       ]
     },
     {
@@ -2140,6 +2552,82 @@
       ]
     },
     {
+      "article_id": "8da65e24c34d87d5",
+      "market_stance": "谨慎",
+      "market_phase": [
+        "修复",
+        "分歧"
+      ],
+      "market_summary": "作者认为竞价情绪修复符合预期，但指数一路下跌导致人心涣散；弱市下关注冰雪新题材及科技次日修复机会。",
+      "sectors": [
+        {
+          "name": "冰雪",
+          "stance": "活跃",
+          "evidence": "作者称竞价后市场较看好该题材，并视其为新题材。"
+        },
+        {
+          "name": "电池",
+          "stance": "分化",
+          "evidence": "作者称电池已连续分歧2天。"
+        },
+        {
+          "name": "传媒",
+          "stance": "退潮",
+          "evidence": "作者认为传媒已没有可拉升的内容。"
+        },
+        {
+          "name": "科技",
+          "stance": "分化",
+          "evidence": "作者称科技近期呈现一天修复、一天大跌。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "时代",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "九阳",
+          "sector": "不明确",
+          "role": "高关注"
+        },
+        {
+          "name": "哈空调",
+          "sector": "冰雪",
+          "role": "核心"
+        },
+        {
+          "name": "雪人",
+          "sector": "冰雪",
+          "role": "高关注"
+        },
+        {
+          "name": "华瓷",
+          "sector": "科技",
+          "role": "高关注"
+        },
+        {
+          "name": "新华文轩",
+          "sector": "传媒",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "冰雪题材前排的冲高表现",
+        "科技方向是否出现修复",
+        "指数能否止跌并改善情绪"
+      ],
+      "numeric_claims": [
+        "电池连续分歧2天",
+        "九阳被作者看作9连阳预期",
+        "作者称以1-2方式参与冰雪题材"
+      ],
+      "quality_flags": [
+        "明显情绪化"
+      ]
+    },
+    {
       "article_id": "8f4e47f95ecd9512",
       "market_stance": "偏空",
       "market_phase": [
@@ -2410,6 +2898,56 @@
       "quality_flags": [
         "广告",
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "b255724e218e6309",
+      "market_stance": "偏多",
+      "market_phase": [
+        "修复"
+      ],
+      "market_summary": "作者认为昨日V拉较积极，若当日止跌则短期底部或形成；其主观预期短线进入修复与补涨，但仍需盘中确认。",
+      "sectors": [
+        {
+          "name": "冰雪经济",
+          "stance": "不明确",
+          "evidence": "作者称为新发酵方向，关注竞价强度。"
+        },
+        {
+          "name": "涨价",
+          "stance": "活跃",
+          "evidence": "作者将涨价视为加分项，关注低位个股带动。"
+        },
+        {
+          "name": "传媒",
+          "stance": "分化",
+          "evidence": "作者认为受龙版传媒影响增加分歧，但关注被动走弱核心的低吸机会。"
+        },
+        {
+          "name": "医药",
+          "stance": "修复",
+          "evidence": "作者认为医药离修复不远。"
+        },
+        {
+          "name": "PCB",
+          "stance": "不明确",
+          "evidence": "作者认为仅在大盘放量企稳或拉升时可观察反弹。"
+        },
+        {
+          "name": "大科技",
+          "stance": "不明确",
+          "evidence": "作者以大盘放量企稳或拉升为前提关注该方向。"
+        }
+      ],
+      "stocks": [],
+      "tomorrow_watch": [
+        "大盘能否止跌、放量企稳",
+        "冰雪经济竞价强度",
+        "传媒、医药修复及PCB反弹"
+      ],
+      "numeric_claims": [],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
@@ -2719,6 +3257,87 @@
       ],
       "quality_flags": [
         "明显情绪化"
+      ]
+    },
+    {
+      "article_id": "e6eb4bf656e3fd20",
+      "market_stance": "中性",
+      "market_phase": [
+        "修复",
+        "发酵"
+      ],
+      "market_summary": "作者认为指数偏弱但无恐慌杀跌、存在企稳迹象；短线情绪尚可，AI应用及传媒热度较高，期待放量突破改善炒作环境。",
+      "sectors": [
+        {
+          "name": "AI应用",
+          "stance": "加强",
+          "evidence": "作者称AI应用板块整体强度较好、热度在线。"
+        },
+        {
+          "name": "传媒",
+          "stance": "加强",
+          "evidence": "作者称传媒成为市场主线，新经典、慈文带动板块。"
+        },
+        {
+          "name": "固态电池",
+          "stance": "活跃",
+          "evidence": "作者关注时代电气的高位表现及异动规则。"
+        }
+      ],
+      "stocks": [
+        {
+          "name": "新经典",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "慈文传媒",
+          "sector": "传媒",
+          "role": "核心"
+        },
+        {
+          "name": "掌阅科技",
+          "sector": "传媒",
+          "role": "风险"
+        },
+        {
+          "name": "时代电气",
+          "sector": "固态电池",
+          "role": "高关注"
+        },
+        {
+          "name": "龙版传媒",
+          "sector": "传媒",
+          "role": "龙头"
+        },
+        {
+          "name": "金健米业",
+          "sector": "",
+          "role": "龙头"
+        },
+        {
+          "name": "中文在线",
+          "sector": "传媒",
+          "role": "高关注"
+        },
+        {
+          "name": "芒果超媒",
+          "sector": "传媒",
+          "role": "高关注"
+        }
+      ],
+      "tomorrow_watch": [
+        "指数能否放量拉升并向上突破",
+        "AI应用及传媒主线能否维持强度",
+        "掌阅科技能否继续涨停、时代电气的高位表现"
+      ],
+      "numeric_claims": [
+        "时代电气处于第8个交易日，距10日异动规则还剩2个交易日",
+        "作者称掌阅科技在6%位置试盘介入",
+        "新经典和慈文传媒晋级4板"
+      ],
+      "quality_flags": [
+        "广告"
       ]
     },
     {
