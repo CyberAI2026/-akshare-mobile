@@ -1,216 +1,248 @@
 {
   "status": "valid",
-  "generated_trade_date": "2026-10-13",
-  "target_trade_date": "2026-10-14",
-  "generated_at_cn": "2026-10-14T01:21:21.547486+08:00",
+  "generated_trade_date": "2026-10-14",
+  "target_trade_date": "2026-10-15",
+  "generated_at_cn": "2026-10-14T22:51:02.352429+08:00",
   "source_candidate_count": 1,
   "ai_candidate_count_after_active_trade_exclusion": 1,
   "excluded_active_trade_count": 0,
-  "observation_count": 0,
+  "observation_count": 1,
   "model": "gpt-5.6-terra",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
-  "source_run": "v5_data/runs/20261014_010533",
+  "source_run": "v5_data/runs/20261014_223757",
   "market_assessment": {
     "risk_level": "高",
-    "summary": "市场宽度当日修复，上涨2909家、净上涨424家，但主要指数近5日及20日仍偏弱，且全市场成交额较前日下降5.43%；市场环境为一般或偏弱。",
+    "summary": "市场处于一般或偏弱档位：当日上涨比例17.55%，净上涨家数-3518，成交额较前日下降20.13%；主要指数5日、20日表现均偏弱，个股观察需等待盘中承接验证。",
     "next_day_aggressiveness": "偏防守"
   },
   "sector_assessment": {
     "status": "正式可用",
-    "summary": "当日资金集中于元件、军工装备、通信设备等方向；邦基科技仅有农林牧渔行业映射，缺少同期板块行情及概念匹配，个股板块共振未核验。"
+    "summary": "煤炭开采加工当日上涨1.27%、净流入6.32亿元，3日、5日、10日、20日阶段涨幅分别为0.70%、3.44%、0.92%、2.92%，行业相对市场具备延续性；煤炭概念指数当日0.24%、5日0.38%，概念层面为震荡分化。"
   },
   "opinion_assessment": {
     "status": "可用",
-    "summary": "公开复盘观点偏谨慎，普遍将行情定位为急跌后的修复与分歧阶段而非反转确认；该文本观点不是行情事实，仅作风险提示。"
+    "summary": "公开复盘观点将煤炭/油气/能源红利视为弱市防御轮动的活跃方向，并提及郑州煤电；该结论属于文本观点聚合，不替代客观行情与个股结构验证。"
   },
   "opinion_context": {
     "status": "available",
-    "trade_date": "2026-10-13",
-    "article_count": 33,
+    "trade_date": "2026-10-14",
+    "article_count": 42,
     "daily_consensus": {
       "market_consensus": {
-        "stance": "谨慎",
+        "stance": "谨慎偏弱",
         "phase": [
-          "修复",
+          "退潮",
           "分歧",
-          "混沌"
+          "缩量"
         ],
-        "summary": "多数文章将低开后的回升界定为急跌、冰点或超跌后的结构性修复，而非趋势反转确认。市场放量但热点切换较快，高位连板空间压缩、接力分歧仍大；后续修复能否延续，主要取决于成交量、指数关键位置以及科技硬件等强势方向的承接。",
+        "summary": "多数文章将市场描述为缩量普跌或弱势震荡环境，认为此前修复的持续性不足，风险偏好偏低，资金集中于少数题材和防御方向。市场主线尚未形成广泛共振，连板、炸板及高位股反馈被多篇文章视为情绪观察重点；量能恢复、指数关键位置承接及科技权重止跌被视为修复确认条件。",
         "confidence": "高"
       },
       "market_disagreements": [
-        "对于指数阶段判断存在分歧：多数作者认为仍是修复初期或弱反弹，少数作者认为调整已经结束并可能开启较强反弹。",
-        "对于PCB、通信及算力硬件的性质存在分歧：部分作者视为业绩驱动的新主线或最强主动线，另一部分认为仅是超跌反弹、与指数绑定的局部修复。",
-        "对于传媒/AI应用的强度存在分歧：部分作者认为其仍是最强补涨线，更多作者强调前排抱团、后排掉队，板块内部明显分化。",
-        "对于冰雪经济的持续性存在分歧：多数文章认可其日内活跃和事件催化，但不少作者认为首日批量涨停后将面临次日淘汰赛，存在一日游风险。",
-        "对于银行等防御权重的判断不一：有观点认为其仍具韧性或趋势走强，也有观点认为资金已开始兑现、对指数的支撑可能减弱。"
+        "传媒/AI应用被较多文章视为当前最强或相对强势方向，但部分文章认为其已进入高位淘汰、后排掉队甚至阶段性退潮。",
+        "PCB在部分文章中被定义为业绩预增和涨价驱动的科技主线，但更多文章同时提示冲高回落、高位换手和仅核心股活跃，板块强度存在分歧。",
+        "冰雪经济被部分作者视为低位新题材和潜在主线，但也有文章认为其首板承接不足、后排回落，可能偏短期轮动。",
+        "关于指数位置，少数文章认为3760点至3740点附近可能构成短期底部并存在修复机会；更多文章认为在未放量、科技权重未止跌前，修复尚不能确认。",
+        "电池、消费及科技超跌方向是否具备修复条件存在分歧：部分作者关注超跌反弹预期，另一些作者仍将其界定为退潮或下跌中继。"
       ],
       "sector_consensus": [
         {
-          "sector": "PCB、覆铜板、通信及算力硬件",
-          "mention_count": 22,
-          "consensus": "多篇文章认为该方向是当日最具资金聚集度的修复线，受业绩预增、通信硬件及算力需求预期推动；但其能否从反弹演变为持续主线，仍需通过核心股承接、首板晋级和量能共振验证。",
-          "stance": "加强",
-          "representative_stocks": [
-            "超声电子",
-            "澳弘电子",
-            "金百泽",
-            "迅捷兴",
-            "中京电子"
-          ]
-        },
-        {
-          "sector": "冰雪经济、冰雪旅游及体育消费",
-          "mention_count": 18,
-          "consensus": "多篇文章认可其受冬季消费、冰雪季及相关活动预期催化而集中活跃，属于新发酵的轮动题材；共识同时认为首板较多、梯队和持续性仍待次日晋级验证。",
-          "stance": "活跃",
-          "representative_stocks": [
-            "冰山冷热",
-            "晶雪节能",
-            "雪人集团",
-            "长白山",
-            "大连圣亚"
-          ]
-        },
-        {
-          "sector": "电池、固态电池、锂电及电力设备",
-          "mention_count": 19,
-          "consensus": "多数文章认为该方向处于高位退潮或补跌阶段，资金撤离和高标负反馈较明显；少数观点保留核心股反包后带动回流的可能，但未形成主流判断。",
-          "stance": "退潮",
-          "representative_stocks": [
-            "时代万恒",
-            "紫竹高科",
-            "先导智能"
-          ]
-        },
-        {
-          "sector": "传媒、出版、短剧及AI应用",
-          "mention_count": 21,
-          "consensus": "多篇文章认为传媒方向仍有前排连板和补涨活口，但高位龙头停牌、部分个股走弱及后排承接不足，使板块呈现前排抱团与后排淘汰并存的格局。",
+          "sector": "传媒/AI应用/短剧游戏",
+          "mention_count": 39,
+          "consensus": "被广泛视为弱市中资金最集中的相对强势方向，涵盖AI漫剧、短剧、出版、游戏及AI内容等细分；但高位股与后排股分化明显，持续性仍需通过梯队承接和板块扩散验证。",
           "stance": "分化",
           "representative_stocks": [
             "慈文传媒",
             "新经典",
-            "龙版传媒",
-            "新华传媒"
+            "新华文轩",
+            "掌阅科技",
+            "龙版传媒"
           ]
         },
         {
-          "sector": "军工、航空航天及国防装备",
-          "mention_count": 11,
-          "consensus": "多篇文章将军工视为午后资金轮动的活跃方向，受到展会、事件或订单预期催化；但普遍未将其认定为明确主线，持续性仍需观察。",
+          "sector": "PCB/覆铜板",
+          "mention_count": 25,
+          "consensus": "业绩预增、材料升级及涨价预期使其成为科技方向中较受关注的活口，但多篇文章指出冲高回落、高位换手及权重科技走弱，板块尚未形成一致性走强。",
+          "stance": "分化",
+          "representative_stocks": [
+            "超声电子",
+            "澳弘电子",
+            "兴森科技",
+            "满坤科技"
+          ]
+        },
+        {
+          "sector": "煤炭/油气/能源红利",
+          "mention_count": 18,
+          "consensus": "在成长科技承压和市场风险偏好偏低的背景下，多篇文章认为资金向煤炭、油气、石油石化及红利资产避险轮动；其强度主要被归因于防御、冬储、煤价和油价等逻辑。",
           "stance": "活跃",
           "representative_stocks": [
-            "航发科技",
-            "国科军工",
-            "北方导航"
+            "陕西煤业",
+            "中国神华",
+            "郑州煤电",
+            "安泰集团",
+            "博迈科"
           ]
         },
         {
-          "sector": "化工、染料及涨价方向",
-          "mention_count": 11,
-          "consensus": "多篇文章观察到染料、分散染料及部分化工标的走强，涨价逻辑获得资金参与；但整体更多被视作轮动支线，梯队强度和持续性尚未形成充分共识。",
+          "sector": "冰雪经济",
+          "mention_count": 19,
+          "consensus": "作为低位新题材获得较多关注，出现连板梯队和事件催化预期；但对其持续性判断不一，普遍需观察核心股晋级、首板补充和后排承接。",
+          "stance": "分化",
+          "representative_stocks": [
+            "冰山冷热",
+            "龙江交通",
+            "哈空调",
+            "雪人集团",
+            "晶雪节能"
+          ]
+        },
+        {
+          "sector": "科技硬件/半导体/光通信/CPO",
+          "mention_count": 24,
+          "consensus": "多数文章认为半导体、光通信、算力硬件及相关科技权重仍承压，资金流出和大市值标的补跌拖累指数；PCB被部分文章视为其中相对独立的活跃分支。",
+          "stance": "退潮",
+          "representative_stocks": [
+            "中际旭创",
+            "新易盛",
+            "天孚通信",
+            "源杰科技"
+          ]
+        },
+        {
+          "sector": "风电设备/新能源",
+          "mention_count": 15,
+          "consensus": "风电设备及新能源链被多数文章列为调整明显或亏钱效应集中的方向，固态电池、电池、风电等细分虽偶有脉冲，但整体尚未获得转强共识。",
+          "stance": "退潮",
+          "representative_stocks": [
+            "大金重工",
+            "新强联",
+            "时代万恒",
+            "紫竹高科"
+          ]
+        },
+        {
+          "sector": "电池/固态电池",
+          "mention_count": 16,
+          "consensus": "多数观点认为该方向存在高位分歧、冲高回落和套牢盘压力，少数文章关注其超跌修复或核心股表现，因此尚未形成明确趋势判断。",
+          "stance": "分化",
+          "representative_stocks": [
+            "时代万恒",
+            "万里股份",
+            "丰元股份",
+            "九阳股份"
+          ]
+        },
+        {
+          "sector": "染料/化工涨价",
+          "mention_count": 9,
+          "consensus": "涨价与业绩预期被视为低位补涨线索，醋化股份等个股受到反复关注，但整体板块广度和持续性仍弱于传媒等主线。",
           "stance": "活跃",
           "representative_stocks": [
             "醋化股份",
-            "建新股份",
             "亚邦股份",
             "善水科技"
-          ]
-        },
-        {
-          "sector": "银行、石油及防御权重",
-          "mention_count": 8,
-          "consensus": "部分文章认为资金曾流向银行、石油等低估值防御方向以维护指数或规避波动；但对于其是否仍在加强存在分歧，已有文章提示银行盘中兑现和高位止盈。",
-          "stance": "分化",
-          "representative_stocks": [
-            "工商银行",
-            "中国银行",
-            "中国石油"
           ]
         }
       ],
       "stock_attention": [
         {
-          "stock": "超声电子",
-          "mention_count": 15,
-          "sectors": [
-            "PCB",
-            "覆铜板",
-            "通信",
-            "算力硬件"
-          ],
-          "roles": [
-            "核心",
-            "龙头",
-            "指数盘眼",
-            "高关注"
-          ]
-        },
-        {
           "stock": "慈文传媒",
-          "mention_count": 15,
+          "mention_count": 22,
           "sectors": [
-            "文化传媒",
+            "传媒",
+            "AI漫剧",
             "短剧",
             "AI应用"
           ],
           "roles": [
-            "核心",
             "龙头",
-            "高关注"
-          ]
-        },
-        {
-          "stock": "龙版传媒",
-          "mention_count": 14,
-          "sectors": [
-            "出版传媒",
-            "AI应用",
-            "AI漫剧"
-          ],
-          "roles": [
             "核心",
-            "龙头",
             "高关注"
           ]
         },
         {
           "stock": "新经典",
-          "mention_count": 10,
+          "mention_count": 21,
           "sectors": [
-            "出版传媒",
-            "文化传媒",
+            "传媒",
+            "出版",
+            "AI漫剧",
             "AI应用"
           ],
           "roles": [
+            "龙头",
             "核心",
-            "龙头"
-          ]
-        },
-        {
-          "stock": "时代万恒",
-          "mention_count": 10,
-          "sectors": [
-            "电池",
-            "固态电池",
-            "短线情绪"
-          ],
-          "roles": [
-            "核心",
-            "风险",
             "高关注"
           ]
         },
         {
-          "stock": "新华传媒",
-          "mention_count": 9,
+          "stock": "超声电子",
+          "mention_count": 17,
+          "sectors": [
+            "PCB",
+            "覆铜板"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注",
+            "风险"
+          ]
+        },
+        {
+          "stock": "冰山冷热",
+          "mention_count": 14,
+          "sectors": [
+            "冰雪经济"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注"
+          ]
+        },
+        {
+          "stock": "掌阅科技",
+          "mention_count": 13,
           "sectors": [
             "传媒",
-            "出版IP",
+            "AI应用",
+            "AI短剧",
+            "数字阅读"
+          ],
+          "roles": [
+            "核心",
+            "跟随",
+            "高关注",
+            "龙头"
+          ]
+        },
+        {
+          "stock": "新华文轩",
+          "mention_count": 12,
+          "sectors": [
+            "传媒",
+            "出版",
+            "AI漫剧",
             "AI应用"
           ],
           "roles": [
+            "龙头",
+            "核心",
+            "高关注"
+          ]
+        },
+        {
+          "stock": "龙版传媒",
+          "mention_count": 12,
+          "sectors": [
+            "传媒",
+            "AI应用",
+            "短剧"
+          ],
+          "roles": [
+            "核心",
             "龙头",
             "高关注",
             "风险"
@@ -218,24 +250,9 @@
         },
         {
           "stock": "澳弘电子",
-          "mention_count": 8,
+          "mention_count": 9,
           "sectors": [
-            "PCB",
-            "通信",
-            "元件"
-          ],
-          "roles": [
-            "高关注",
-            "风险",
-            "跟随"
-          ]
-        },
-        {
-          "stock": "冰山冷热",
-          "mention_count": 6,
-          "sectors": [
-            "冰雪经济",
-            "冰雪旅游"
+            "PCB"
           ],
           "roles": [
             "龙头",
@@ -244,12 +261,12 @@
           ]
         },
         {
-          "stock": "九阳股份",
-          "mention_count": 7,
+          "stock": "时代万恒",
+          "mention_count": 9,
           "sectors": [
-            "冰雪产业",
-            "大消费",
-            "短线情绪"
+            "电池",
+            "固态电池",
+            "龙头抱团"
           ],
           "roles": [
             "龙头",
@@ -259,145 +276,173 @@
           ]
         },
         {
-          "stock": "紫竹高科",
-          "mention_count": 6,
+          "stock": "大金重工",
+          "mention_count": 9,
           "sectors": [
-            "固态电池",
-            "电池"
+            "风电设备",
+            "风电"
           ],
           "roles": [
             "风险"
           ]
+        },
+        {
+          "stock": "中际旭创",
+          "mention_count": 9,
+          "sectors": [
+            "光通信",
+            "CPO",
+            "算力硬件"
+          ],
+          "roles": [
+            "风险"
+          ]
+        },
+        {
+          "stock": "醋化股份",
+          "mention_count": 8,
+          "sectors": [
+            "染料",
+            "化工",
+            "涨价题材"
+          ],
+          "roles": [
+            "龙头",
+            "核心",
+            "高关注"
+          ]
         }
       ],
       "tomorrow_consensus_watch": [
-        "成交额能否维持或进一步放大，多篇文章以约1.6万亿至1.7万亿元作为修复延续的重要观察区间，少数文章提出更高的2万亿以上门槛。",
-        "上证指数能否守住3741至3764附近支撑，并重新站稳3813至3830附近压力区域。",
-        "超声电子及PCB、通信方向能否获得竞价溢价、核心股承接和更多1进2晋级，以验证其是持续主线还是超跌反弹。",
-        "冰雪经济首日集体活跃后，冰山冷热、晶雪节能等代表股能否通过竞价和连板反馈确认持续性。",
-        "慈文传媒、新经典、龙版传媒等传媒前排能否维持强度，以及高位分歧是否继续向后排扩散。",
-        "电池、固态电池及电力设备的补跌压力是否继续，时代万恒、紫竹高科等高位股反馈是否影响整体短线情绪。",
-        "市场连板高度能否突破3板至4板压制，以及涨停、跌停和炸板数量是否改善。"
+        "两市成交额能否止跌回升，市场是否重新回到约1.5万亿元以上的成交水平。",
+        "上证指数在3740点至3760点附近的承接，以及能否收复3780点至3800点区域和5日线。",
+        "传媒/AI应用高位梯队的分歧承接、核心股晋级表现及后排股是否继续掉队。",
+        "PCB核心股能否获得承接并带动板块扩散，以及科技权重、半导体和光通信能否止跌。",
+        "冰雪经济核心股的晋级强度、首板补充及板块回流情况。",
+        "跌停、炸板数量、上涨家数及高位股负反馈能否改善。",
+        "煤炭、油气等防御方向在市场弱势背景下能否维持资金承接。",
+        "美国CPI等外部宏观数据及事件催化对风险偏好和市场量能的影响。"
       ],
       "limitations": [
-        "文本来自不同作者的盘中或盘后观点，统计的是观点出现频率，不代表真实资金流、基本面或未来市场走势。",
-        "部分文章带有情绪化、广告或强主观表述标签，已尽量以多篇重复出现的方向构建共识，但仍可能受作者风格影响。",
-        "行业名称存在交叉和口径不一致，例如PCB、通信、覆铜板、算力硬件在部分文章中被合并讨论，已按主题聚合处理。",
-        "个股提及次数为基于所给文本的近似聚合计数，同一股票在不同文章中可能被赋予不同题材归属和角色。",
-        "市场阶段结论主要反映短线复盘语境，不能替代对宏观、盈利、估值、监管及外部市场因素的完整分析。"
+        "素材包含多个时点、盘中与收盘口径的文章，部分观点可能对应不同交易阶段，不能简单视为同一时点的一致判断。",
+        "多篇文章对同一行情、同一数据和同一题材进行重复解读，mention_count反映文章提及频次，不等同于独立资金或机构数量。",
+        "原始文章普遍带有短线情绪、主观判断或营销化表达，已尽量以“作者认为”口径聚合，不构成客观事实认定。",
+        "部分股票名称使用简称或别称，已按语境归并；仍可能存在简称对应偏差。",
+        "行业分类存在交叉，例如传媒、AI应用、短剧、游戏和出版常被作者混合使用；本结果按主要叙事合并，不代表标准申万行业分类。",
+        "数值、支撑位、成交额阈值及异动规则均来自原文作者表述，未经独立核验。"
       ],
-      "article_count": 33,
+      "article_count": 42,
       "source_platform": "淘股吧公开复盘",
       "sample_status": "正式样本",
       "finalization": {
         "reason": "deadline_minimum_met",
-        "quality_article_count": 33,
+        "quality_article_count": 42,
         "minimum_quality_articles": 15,
-        "finalized_at_cn": "2026-10-13T22:17:13.974473+08:00",
-        "ai_quality_rejected_count": 10
+        "finalized_at_cn": "2026-10-14T22:05:35.345238+08:00",
+        "ai_quality_rejected_count": 6
       },
       "ths_concept_index": {
         "status": "ready",
-        "asof_date": "2026-10-13",
+        "asof_date": "2026-10-14",
         "items": [
-          {
-            "concept": "PCB概念",
-            "ths_code": "308832",
-            "asof_date": "2026-10-13",
-            "one_day_pct": 1.92,
-            "five_day_pct": -7.36,
-            "volume_ratio_5d": 1.05,
-            "state": "趋势偏弱但当日修复/震荡",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "算力租赁",
-            "ths_code": "309068",
-            "asof_date": "2026-10-13",
-            "one_day_pct": 0.72,
-            "five_day_pct": -2.39,
-            "volume_ratio_5d": 1.16,
-            "state": "趋势偏弱但当日修复/震荡",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "旅游概念",
-            "ths_code": "301223",
-            "asof_date": "2026-10-13",
-            "one_day_pct": 1.4,
-            "five_day_pct": 0.93,
-            "volume_ratio_5d": 1.08,
-            "state": "上涨加强",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "消费电子概念",
-            "ths_code": "308384",
-            "asof_date": "2026-10-13",
-            "one_day_pct": 0.63,
-            "five_day_pct": -6.62,
-            "volume_ratio_5d": 1.0,
-            "state": "趋势偏弱但当日修复/震荡",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "固态电池",
-            "ths_code": "308294",
-            "asof_date": "2026-10-13",
-            "one_day_pct": -1.25,
-            "five_day_pct": -2.48,
-            "volume_ratio_5d": 1.02,
-            "state": "退潮走弱",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "钒电池",
-            "ths_code": "301174",
-            "asof_date": "2026-10-13",
-            "one_day_pct": -0.41,
-            "five_day_pct": -0.18,
-            "volume_ratio_5d": 1.11,
-            "state": "震荡分化",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "锂电池概念",
-            "ths_code": "300733",
-            "asof_date": "2026-10-13",
-            "one_day_pct": -0.56,
-            "five_day_pct": -2.82,
-            "volume_ratio_5d": 1.02,
-            "state": "趋势偏弱但当日修复/震荡",
-            "source": "同花顺概念指数（AKShare）"
-          },
           {
             "concept": "AI应用",
             "ths_code": "309264",
-            "asof_date": "2026-10-13",
-            "one_day_pct": 0.55,
-            "five_day_pct": 0.36,
-            "volume_ratio_5d": 1.21,
-            "state": "震荡分化",
-            "source": "同花顺概念指数（AKShare）"
-          },
-          {
-            "concept": "文化传媒概念",
-            "ths_code": "300806",
-            "asof_date": "2026-10-13",
-            "one_day_pct": -1.52,
-            "five_day_pct": 0.99,
-            "volume_ratio_5d": 0.43,
-            "state": "震荡分化",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -1.12,
+            "five_day_pct": -0.23,
+            "volume_ratio_5d": 1.09,
+            "state": "退潮走弱",
             "source": "同花顺概念指数（AKShare）"
           },
           {
             "concept": "短剧游戏",
             "ths_code": "309093",
-            "asof_date": "2026-10-13",
-            "one_day_pct": 0.74,
-            "five_day_pct": 5.09,
-            "volume_ratio_5d": 1.39,
-            "state": "趋势偏强但当日分化",
+            "asof_date": "2026-10-14",
+            "one_day_pct": 1.39,
+            "five_day_pct": 7.62,
+            "volume_ratio_5d": 1.47,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "文化传媒概念",
+            "ths_code": "300806",
+            "asof_date": "2026-10-14",
+            "one_day_pct": 1.69,
+            "five_day_pct": 6.25,
+            "volume_ratio_5d": 0.87,
+            "state": "上涨加强",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "PCB概念",
+            "ths_code": "308832",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -1.87,
+            "five_day_pct": -6.91,
+            "volume_ratio_5d": 0.89,
+            "state": "退潮走弱",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "煤炭概念",
+            "ths_code": "308716",
+            "asof_date": "2026-10-14",
+            "one_day_pct": 0.24,
+            "five_day_pct": 0.38,
+            "volume_ratio_5d": 1.02,
+            "state": "震荡分化",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "第三代半导体",
+            "ths_code": "308700",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -2.8,
+            "five_day_pct": -8.79,
+            "volume_ratio_5d": 0.77,
+            "state": "退潮走弱",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "共封装光学(CPO)",
+            "ths_code": "309049",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -2.26,
+            "five_day_pct": -9.06,
+            "volume_ratio_5d": 0.89,
+            "state": "退潮走弱",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "风电",
+            "ths_code": "300200",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -2.04,
+            "five_day_pct": -3.65,
+            "volume_ratio_5d": 0.97,
+            "state": "退潮走弱",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "新能源汽车",
+            "ths_code": "300008",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -2.43,
+            "five_day_pct": -5.61,
+            "volume_ratio_5d": 0.85,
+            "state": "退潮走弱",
+            "source": "同花顺概念指数（AKShare）"
+          },
+          {
+            "concept": "固态电池",
+            "ths_code": "308294",
+            "asof_date": "2026-10-14",
+            "one_day_pct": -2.73,
+            "five_day_pct": -5.02,
+            "volume_ratio_5d": 0.8,
+            "state": "退潮走弱",
             "source": "同花顺概念指数（AKShare）"
           }
         ],
@@ -407,22 +452,26 @@
       }
     }
   },
-  "portfolio_note": "程序板块证据门禁后，正式观察池共0只（无）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。",
+  "portfolio_note": "程序板块证据门禁后，正式观察池共1只（600121）；仅供次日14:40-14:45尾盘确认，不是直接买入名单。 同期板块证据未核验、保留为条件观察：600121。",
   "second_start_evidence_version": "effective_breakout_v1.0",
   "market_pool_policy": {
     "market_regime": "一般或偏弱",
     "minimum": 0,
     "maximum": 5,
-    "上涨比例": 0.5219809797236676,
-    "成交额较前一日变化率": -0.05431153533567978,
+    "上涨比例": 0.1754889646509959,
+    "成交额较前一日变化率": -0.2013301331142894,
     "rule": "上涨比例>=60%且全市场成交额较前日放大>=5%时为较好/活跃，否则为一般或偏弱"
   },
   "pool_minimum_shortfall": 0,
   "sector_retreat_downgraded_codes": [],
   "sector_unverified_downgraded_codes": [],
-  "sector_unverified_conditional_codes": [],
+  "sector_unverified_conditional_codes": [
+    "600121"
+  ],
   "sector_divergence_conditional_codes": [],
   "pool_cap_trimmed_codes": [],
-  "pool_ranking_scores_70_30": {},
+  "pool_ranking_scores_70_30": {
+    "600121": 1.0
+  },
   "rule": "仅供次日14:40-14:45尾盘确认；不是盘后直接买入名单"
 }

@@ -1,6 +1,6 @@
 {
-  "status": "running",
-  "stage": "market_context_complete",
+  "status": "completed",
+  "stage": "completed",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
   "started_cn": "2026-10-14T22:37:57.840530+08:00",
@@ -81,5 +81,98 @@
     "concept_table_count": 4,
     "industry_table_count": 5,
     "scope_note": "仅使用已通过校验的板块类型；缺失板块不得推断"
-  }
+  },
+  "holding_review_summary": {
+    "position_count": 0,
+    "hold_count": 0,
+    "exit_count": 0,
+    "reduce_count": 0,
+    "data_error_count": 0
+  },
+  "completed_cn": "2026-10-14T22:51:02.355218+08:00",
+  "elapsed_minutes": 13.08,
+  "cache_summary": {
+    "25日": {
+      "命中或增量": 808,
+      "总数": 811,
+      "成功": 808
+    },
+    "120日": {
+      "命中或增量": 30,
+      "总数": 31,
+      "成功": 31
+    },
+    "250日": {
+      "命中或增量": 1,
+      "总数": 1,
+      "成功": 1
+    }
+  },
+  "python_final": "25日/120日不设数量目标；250日生命周期+AI口径门禁后最多50只，OpenAI最终最多10只",
+  "observation_pool_count": 1,
+  "target_trade_date": "2026-10-15",
+  "openai_model": "gpt-5.6-terra",
+  "market_assessment": {
+    "risk_level": "高",
+    "summary": "市场处于一般或偏弱档位：当日上涨比例17.55%，净上涨家数-3518，成交额较前日下降20.13%；主要指数5日、20日表现均偏弱，个股观察需等待盘中承接验证。",
+    "next_day_aggressiveness": "偏防守"
+  },
+  "high_attention_sector_market": {
+    "status": "available",
+    "groups": {
+      "高关注且涨幅靠前": [],
+      "高关注但活跃分化": [],
+      "高关注且观点退潮": [
+        {
+          "板块": "科技硬件/半导体/光通信/CPO",
+          "文章提及数": 24,
+          "观点状态": "退潮"
+        },
+        {
+          "板块": "风电设备/新能源",
+          "文章提及数": 15,
+          "观点状态": "退潮"
+        }
+      ],
+      "高关注但行情未核验": [
+        {
+          "板块": "传媒/AI应用/短剧游戏",
+          "文章提及数": 39,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "PCB/覆铜板",
+          "文章提及数": 25,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "冰雪经济",
+          "文章提及数": 19,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "煤炭/油气/能源红利",
+          "文章提及数": 18,
+          "观点状态": "活跃"
+        },
+        {
+          "板块": "电池/固态电池",
+          "文章提及数": 16,
+          "观点状态": "分化"
+        },
+        {
+          "板块": "染料/化工涨价",
+          "文章提及数": 9,
+          "观点状态": "活跃"
+        }
+      ]
+    },
+    "method": "高关注=文章提及次数；涨幅靠前=同类即时涨幅前25%且上涨；退潮=正文观点共识。两类证据分开显示。"
+  },
+  "stock_qa_25_success": 808,
+  "stock_qa_120_success": 31,
+  "stock_qa_250_success": 1,
+  "next_step": "次日14:40读取带日期锁的0~10只观察池，14:45再做最终0~5确认",
+  "pushplus_delivery_ok": true,
+  "pushplus_delivery_status": "request_accepted"
 }
