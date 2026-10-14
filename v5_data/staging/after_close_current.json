@@ -1,6 +1,6 @@
 {
   "status": "running",
-  "stage": "lifecycle250_complete",
+  "stage": "market_context_complete",
   "engine": "V5.3-auditable-market-sector-layer",
   "strategy": "research_v0.10-effective-breakout-multiroute+right-side+dynamic-pool",
   "started_cn": "2026-10-14T22:37:57.840530+08:00",
@@ -71,5 +71,15 @@
   "pre_ai_alignment_eliminated": 0,
   "pre_ai_capacity_eliminated": 0,
   "stage3_research_pool": 1,
-  "openai_candidate_cap": 50
+  "openai_candidate_cap": 50,
+  "sector_validation": {
+    "status": "部分可用",
+    "table_count": 9,
+    "failure_count": 1,
+    "warning_count": 3,
+    "ai_enabled": true,
+    "concept_table_count": 4,
+    "industry_table_count": 5,
+    "scope_note": "仅使用已通过校验的板块类型；缺失板块不得推断"
+  }
 }
