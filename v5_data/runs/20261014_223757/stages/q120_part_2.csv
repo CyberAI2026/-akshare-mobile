@@ -1,0 +1,9 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+600121,郑州煤电,成功,120,global-cache,global-cache,local-cache,105,
+688835,高凯技术,成功,31,sina,sina,deep-backfill,31,
+600192,长城电工,成功,120,global-cache,global-cache,local-cache,105,
+301550,斯菱智驱,成功,120,global-cache,global-cache,local-cache,105,
+601949,中国出版,成功,120,global-cache,global-cache,local-cache,105,
+605398,新炬网络,成功,120,global-cache,global-cache,local-cache,105,
+600693,东百集团,成功,120,global-cache,global-cache,local-cache,105,
+603533,掌阅科技,成功,120,global-cache,global-cache,local-cache,96,
