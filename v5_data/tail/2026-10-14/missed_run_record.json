@@ -1,0 +1,34 @@
+{
+  "status": "missed",
+  "trade_date": "2026-10-14",
+  "recorded_at_cn": "2026-10-14T14:45:43+08:00",
+  "watchdog_stage": "post-14:44-finalize-failure",
+  "main_sha_before_record": "cc63bf1af9b12d3f19883a7dd31b9acba95ac353",
+  "workflow_run": {
+    "id": 38522208560,
+    "url": "https://github.com/CyberAI2026/-akshare-mobile/actions/runs/38522208560",
+    "event": "workflow_dispatch",
+    "conclusion": "failure",
+    "validate": "success",
+    "precheck": "success",
+    "finalize": "failure",
+    "failure_alert": "success"
+  },
+  "failure": {
+    "occurred_at_cn": "2026-10-14T14:45:00+08:00",
+    "exception": "KeyError: '14:45确认分'",
+    "stage": "Complete 14:45 market and OpenAI decision",
+    "root_context": "近三个交易日没有可用观察池；confirmation_metrics produced no rows and attempted to sort an empty DataFrame by the absent 14:45确认分 column."
+  },
+  "side_effect_audit": {
+    "same_day_tail_openai_call": false,
+    "normal_tail_pushplus_request": false,
+    "failure_alert_pushplus_request": true,
+    "failure_alert_pushplus_code": 200,
+    "final_recommendation_generated": false
+  },
+  "recovery_policy": {
+    "retriggered": false,
+    "reason": "Failure occurred after the 14:44 recovery cutoff; close data must not be used to fabricate a tail signal."
+  }
+}
