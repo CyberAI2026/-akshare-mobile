@@ -1,0 +1,4 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+002388,新亚制程,成功,26,global-cache+sina,global-cache,per-stock-incremental,15,
+301689,电科思仪,成功,19,sina,sina,deep-backfill,19,
+600825,新华传媒,成功,26,global-cache+sina,global-cache,per-stock-incremental,18,
