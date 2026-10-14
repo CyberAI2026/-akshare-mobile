@@ -1,0 +1,9 @@
+﻿股票代码,股票名称,状态,交易日数,前复权源,未复权源,缓存模式,未复权匹配日,错误
+000993,闽东电力,成功,120,global-cache,global-cache,local-cache,105,
+601872,招商轮船,成功,120,global-cache,global-cache,local-cache,105,
+000823,超声电子,成功,120,global-cache,global-cache,local-cache,105,
+688655,迅捷兴,成功,120,global-cache,global-cache,local-cache,105,
+601595,上海电影,成功,120,global-cache,global-cache,local-cache,105,
+603466,风语筑,成功,120,global-cache,global-cache,local-cache,108,
+002815,崇达技术,成功,120,global-cache,global-cache,local-cache,105,
+601566,九牧王,成功,120,global-cache,global-cache,local-cache,105,
