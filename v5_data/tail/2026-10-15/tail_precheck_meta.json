@@ -1,0 +1,17 @@
+{
+  "status": "precheck_completed",
+  "trade_date": "2026-10-15",
+  "generated_at_cn": "2026-10-15T14:41:02.620017+08:00",
+  "target_trade_date": "2026-10-15",
+  "candidate_codes": [
+    "600121",
+    "603151"
+  ],
+  "rolling_pool_version": "three-trading-day-v1",
+  "rolling_source_dates": [
+    "2026-10-14",
+    "2026-10-13",
+    "2026-10-12"
+  ],
+  "rolling_candidate_count": 2
+}
