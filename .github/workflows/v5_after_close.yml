@@ -1,40 +1,9 @@
 name: V5 After-Close Research
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-    inputs:
-      batch_path:
-        description: 'Path to daily strong-stock batch CSV; leave empty to maintain existing master pool only'
-        required: false
-        default: ''
-        type: string
-      notify:
-        description: 'Send formal PushPlus delivery; disable for an idempotent strategy replay'
-        required: false
-        default: true
-        type: boolean
-  schedule:
-    # 17:32 and 18:02 Beijing time. The second cron is an idempotent safety
-    # net if GitHub delays or drops the first scheduled event.
-    - cron: '32 9 * * 1-5'
-    - cron: '2 10 * * 1-5'
-  push:
-    branches: [main]
-    paths:
-      - 'v5_data/inbox/daily_*.csv'
-      - 'research/after_close_stages.py'
-      - 'research/holding_exit.py'
-      - 'research/private_trade_ledger.py'
-      - 'research/recommendation_feedback.py'
-      - 'tests/test_after_close_stages.py'
-      - 'tests/test_holding_exit.py'
-      - 'tests/test_recommendation_feedback.py'
-      - 'v5_cli.py'
-      - '.github/workflows/v5_after_close.yml'
-      - '.github/workflows/v5_after_close_stage.yml'
-
 permissions:
   contents: write
 
@@ -44,6 +13,7 @@ concurrency:
 
 jobs:
   validate:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -83,7 +53,7 @@ jobs:
 
   initialize:
     needs: validate
-    if: needs.validate.outputs.run_pipeline == 'true'
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -114,54 +84,63 @@ jobs:
           fi
 
   screen-25d:
+    if: ${{ false }} # suspended by user request
     needs: initialize
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 25d
 
   screen-120d-shard-0:
+    if: ${{ false }} # suspended by user request
     needs: screen-25d
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 120d-shard-0
 
   screen-120d-shard-1:
+    if: ${{ false }} # suspended by user request
     needs: screen-120d-shard-0
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 120d-shard-1
 
   screen-120d-shard-2:
+    if: ${{ false }} # suspended by user request
     needs: screen-120d-shard-1
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 120d-shard-2
 
   screen-120d-shard-3:
+    if: ${{ false }} # suspended by user request
     needs: screen-120d-shard-2
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 120d-shard-3
 
   screen-120d-aggregate:
+    if: ${{ false }} # suspended by user request
     needs: screen-120d-shard-3
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 120d-aggregate
 
   lifecycle-250d:
+    if: ${{ false }} # suspended by user request
     needs: screen-120d-aggregate
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: 250d
 
   market-context:
+    if: ${{ false }} # suspended by user request
     needs: lifecycle-250d
     uses: ./.github/workflows/v5_after_close_stage.yml
     with:
       stage: market
 
   ai-finalize:
+    if: ${{ false }} # suspended by user request
     needs: market-context
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -193,6 +172,7 @@ jobs:
           retention-days: 14
 
   feedback-refresh:
+    if: ${{ false }} # suspended by user request
     needs: ai-finalize
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -229,7 +209,7 @@ jobs:
 
   failure-alert:
     needs: [validate, initialize, screen-25d, screen-120d-shard-0, screen-120d-shard-1, screen-120d-shard-2, screen-120d-shard-3, screen-120d-aggregate, lifecycle-250d, market-context, ai-finalize, feedback-refresh]
-    if: ${{ always() && github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.notify) && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

@@ -1,12 +1,9 @@
 name: V5 Market Opinion 21:30 Fallback
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
   workflow_dispatch:
-  schedule:
-    # Independent fallback for Beijing 21:30. Two-minute offset lets the primary
-    # scheduler enqueue first while still meeting the 21:30 retry checkpoint.
-    - cron: "32 13 * * 1-5"
-
 permissions:
   actions: read
   contents: write
@@ -17,6 +14,7 @@ concurrency:
 
 jobs:
   ensure-retry:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

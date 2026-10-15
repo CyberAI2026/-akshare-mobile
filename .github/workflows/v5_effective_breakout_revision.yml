@@ -1,18 +1,9 @@
 name: V5 Effective Breakout Revision
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
   workflow_dispatch:
-    inputs:
-      source_run:
-        description: "Completed 2026-09-21 run to revise without refetching"
-        required: true
-        default: "v5_data/runs/20260921_223444"
-        type: string
-  push:
-    branches: [main]
-    paths:
-      - "v5_data/control/requests/effective_breakout_revision_20260921.json"
-
 permissions:
   contents: write
 
@@ -22,6 +13,7 @@ concurrency:
 
 jobs:
   prepare:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -34,6 +26,7 @@ jobs:
       - run: python -m research.effective_breakout_revision prepare --source-run "${{ inputs.source_run || 'v5_data/runs/20260921_223444' }}"
 
   ai:
+    if: ${{ false }} # suspended by user request
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -51,6 +44,7 @@ jobs:
       - run: python -m research.effective_breakout_revision ai
 
   deliver:
+    if: ${{ false }} # suspended by user request
     needs: ai
     runs-on: ubuntu-latest
     timeout-minutes: 5

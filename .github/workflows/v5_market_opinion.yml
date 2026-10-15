@@ -1,31 +1,9 @@
 name: V5 Market Opinion Mining
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
   workflow_dispatch:
-    inputs:
-      scheduler_mode:
-        description: "Leave blank for manual recovery; external scheduler uses external_schedule"
-        required: false
-        type: string
-      source_date:
-        description: "Optional bounded source date for the external scheduler/manual recovery"
-        required: false
-        type: string
-  schedule:
-    # Beijing 20:30 starts collection. Re-evaluate every 10 minutes from
-    # 21:00 through 21:50; 22:00 releases all quality articles only if at least 15 exist.
-    - cron: "30 12 * * *"
-    - cron: "0-50/10 13 * * *"
-    - cron: "0 14 * * *"
-  push:
-    # Manual recovery commits may include [run-opinion] to execute the bounded pipeline.
-    branches: [main]
-    paths:
-      - "research/market_opinion_mining.py"
-      - "tests/test_market_opinion_mining.py"
-      - ".github/workflows/v5_market_opinion.yml"
-      - "v5_data/control/opinion_fallback_trigger.json"
-
 permissions:
   contents: write
 
@@ -35,6 +13,7 @@ concurrency:
 
 jobs:
   preflight:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -104,7 +83,7 @@ jobs:
 
   validate:
     needs: preflight
-    if: github.event_name == 'push' || needs.preflight.outputs.should_run == 'true'
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -121,7 +100,7 @@ jobs:
 
   concept-refresh:
     needs: [preflight, validate]
-    if: needs.validate.result == 'success' && github.event_name == 'push' && contains(github.event.head_commit.message, '[refresh-opinion-concepts]')
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -152,7 +131,7 @@ jobs:
 
   discover:
     needs: [preflight, validate]
-    if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -177,7 +156,7 @@ jobs:
 
   opinion-batches:
     needs: [preflight, validate, discover]
-    if: needs.preflight.outputs.should_run == 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -224,7 +203,7 @@ jobs:
 
   aggregate:
     needs: [preflight, discover, opinion-batches]
-    if: always() && needs.preflight.outputs.should_run == 'true' && needs.discover.result == 'success' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[run-opinion]'))
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -267,7 +246,7 @@ jobs:
 
   failure-alert:
     needs: [preflight, discover, opinion-batches, aggregate]
-    if: always() && needs.preflight.outputs.should_run == 'true' && (needs.discover.result == 'failure' || needs.aggregate.result == 'failure')
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

@@ -1,17 +1,15 @@
 name: V5 After-Close Reusable Stage
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
-  workflow_call:
-    inputs:
-      stage:
-        required: true
-        type: string
-
+  workflow_dispatch:
 permissions:
   contents: write
 
 jobs:
   run-stage:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:

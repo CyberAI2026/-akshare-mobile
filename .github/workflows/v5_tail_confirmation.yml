@@ -1,24 +1,9 @@
 name: V5 Tail Confirmation
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/v5_tail_confirmation.yml"
-      - "v5_cli.py"
-      - "research/holding_exit.py"
-      - "docs/HOLDING_EXIT_POLICY.md"
-      - "tests/test_tail_stages.py"
-      - "tests/test_holding_exit.py"
-      - "v5_data/control/tail_fallback_trigger.json"
-  schedule:
-    # Three staggered GitHub crons reduce silent scheduler misses.
-    # A completed same-day run is idempotently skipped, so OpenAI/PushPlus are not duplicated.
-    - cron: '32 6 * * 1-5'
-    - cron: '36 6 * * 1-5'
-    - cron: '40 6 * * 1-5'
-
 permissions:
   contents: write
 
@@ -28,6 +13,7 @@ concurrency:
 
 jobs:
   validate:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -44,7 +30,7 @@ jobs:
   precheck-1440:
     needs: validate
     # Ordinary code pushes validate only. A dedicated fallback-file commit is an authorized production trigger.
-    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[tail-fallback]')
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     # External dispatch may intentionally arrive a few minutes before the 14:32
     # safe window, and this stage then waits for the 14:40 sample.
@@ -76,6 +62,7 @@ jobs:
           retention-days: 14
 
   finalize-1445:
+    if: ${{ false }} # suspended by user request
     needs: precheck-1440
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -112,9 +99,7 @@ jobs:
     needs: [precheck-1440, finalize-1445]
     # A job-level timeout is reported as cancelled, so failure() alone silently
     # skipped the alert on 2026-09-17. Ordinary validation-only pushes stay quiet.
-    if: >-
-      ${{ always() && github.event_name != 'push' &&
-          (needs.precheck-1440.result != 'success' || needs.finalize-1445.result != 'success') }}
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

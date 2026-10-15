@@ -1,21 +1,9 @@
 name: V5 Market Opinion Delivery
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
   workflow_dispatch:
-    inputs:
-      source_date:
-        description: "Optional YYYY-MM-DD report source date"
-        required: false
-        type: string
-  push:
-    branches: [main]
-    paths:
-      - "v5_data/opinion/delivery_requests/**"
-  schedule:
-    # Redundant delivery checks after the mining runs; 22:10 is the final deadline check.
-    - cron: "5,25,45 13 * * *"
-    - cron: "10 14 * * *"
-
 permissions:
   contents: write
 
@@ -25,6 +13,7 @@ concurrency:
 
 jobs:
   deliver:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -108,7 +97,7 @@ jobs:
 
   failure-alert:
     needs: deliver
-    if: failure() && (github.event_name != 'schedule' || github.event.schedule == '10 14 * * *')
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

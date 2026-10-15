@@ -2,13 +2,10 @@ name: V5 After-Close AI Recovery
 
 # V5.6 recovery validates structured output, isolates deterministic tests from production secrets, re-applies the <=50 staged pre-AI gate, and resumes only the failed AI stage.
 
+# Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
+# All jobs are disabled; preserve implementation for audit/history.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/v5_after_close_ai_recovery.yml'
-
 permissions:
   contents: write
 
@@ -18,6 +15,7 @@ concurrency:
 
 jobs:
   recover-ai:
+    if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
