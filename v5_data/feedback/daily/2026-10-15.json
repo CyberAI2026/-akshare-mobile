@@ -1,0 +1,13 @@
+{
+  "asof": "2026-10-15",
+  "total_recommendations": 5,
+  "tracking": 0,
+  "actual_closed": 3,
+  "completed_d10": 2,
+  "due_cohorts": {
+    "D+3": [],
+    "D+5": [],
+    "D+10": []
+  },
+  "method": "真实交易一旦全部卖出即退出D+3/D+5/D+10名单；未卖出推荐仍按推荐日收盘锚点跟踪。"
+}
