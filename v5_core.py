@@ -1436,6 +1436,7 @@ def openai_analyze(
     max_output_tokens: int | None = None,
 ) -> str:
     """调用 Responses API。API 不继承聊天上下文，因此研究边界必须显式写入提示词。"""
+    raise RuntimeError("OpenAI API permanently disabled by explicit user request (2026-10-15); do not reactivate without approval.")
     key=os.getenv("OPENAI_API_KEY","").strip()
     if not key:
         raise RuntimeError("OPENAI_API_KEY 未配置；V5.1不会伪造AI观察池。")

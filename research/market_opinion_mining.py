@@ -633,6 +633,7 @@ def analyze_batch(client: OpenAI, model: str, articles: list[dict], batch_no: in
  }]
 }
 必须覆盖全部article_id。禁止输出输入中不存在的行情、板块和股票。"""
+    raise RuntimeError("OpenAI API permanently disabled by explicit user request (2026-10-15); do not reactivate without approval.")
     resp = client.responses.create(
         model=model,
         input=prompt + "\n输入JSON：\n" + json.dumps(payload, ensure_ascii=False),
@@ -660,6 +661,7 @@ def aggregate(client: OpenAI, model: str, mined: list[dict], source_rows: list[d
  "limitations":[""]
 }
 共识必须由多篇文章支持；少数意见列入分歧。不要把作者观点写成客观事实，不给出买卖建议。"""
+    raise RuntimeError("OpenAI API permanently disabled by explicit user request (2026-10-15); do not reactivate without approval.")
     resp = client.responses.create(
         model=model,
         input=prompt + "\n逐篇抽取JSON：\n" + json.dumps(mined, ensure_ascii=False),
@@ -848,6 +850,7 @@ def commit(message: str | None = None) -> None:
 
 
 def build_client(key: str) -> tuple[OpenAI, str]:
+    raise RuntimeError("OpenAI API permanently disabled by explicit user request (2026-10-15); do not reactivate without approval.")
     model=os.getenv("OPINION_OPENAI_MODEL",os.getenv("OPENAI_MODEL","gpt-5.6-terra"))
     client=OpenAI(api_key=key,timeout=OPENAI_TIMEOUT_SECONDS,max_retries=OPENAI_MAX_RETRIES)
     return client,model

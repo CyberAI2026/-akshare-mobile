@@ -589,6 +589,7 @@ def to_excel_bytes(sheets: dict[str,pd.DataFrame]) -> bytes:
 
 # ---------- OpenAI 分析（可选） ----------
 def openai_analyze(kind: str, payload: dict, model: str | None=None) -> str:
+    raise RuntimeError("OpenAI API permanently disabled by explicit user request (2026-10-15); do not reactivate without approval.")
     key=os.getenv("OPENAI_API_KEY","").strip()
     if not key:
         return "OPENAI_API_KEY 未配置；本次仅完成数据与机械排序。"
