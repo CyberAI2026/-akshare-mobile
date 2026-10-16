@@ -1,9 +1,8 @@
 name: V5 Long-Run Progress Watchdog
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "*/30 * * * *"
+# Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
+# No scheduled, push, or manual execution trigger remains.
+on: []
 
 permissions:
   actions: read
