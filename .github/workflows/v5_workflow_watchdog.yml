@@ -2,14 +2,15 @@ name: V5 Long-Run Progress Watchdog
 
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   actions: read
   contents: read
 
 jobs:
   inspect-progress:
+    if: ${{ false }} # disabled per user request
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
