@@ -12,7 +12,8 @@ enabled = true
 # The fifth expression is a routing grid for opinion mining/delivery. Worker code
 # accepts only 20:30, 21:00-21:50, 22:00, and 22:12 Shanghai; other grid ticks
 # are explicit no-ops. This stays within the Workers Free five-trigger limit.
-crons = ["26 6 * * 1-5", "31 6 * * 1-5", "35 6 * * 1-5", "38 6 * * 1-5", "0,10,12,20,30,40,50 12-14 * * *"]
+# External dispatch paused 2026-10-17 per user request; no tail/opinion/PushPlus cron triggers.
+crons = []
 
 [vars]
 GITHUB_REPOSITORY = "CyberAI2026/-akshare-mobile"
