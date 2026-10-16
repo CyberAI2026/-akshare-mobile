@@ -4,8 +4,8 @@ name: V5 After-Close Research
 # All jobs are disabled; preserve implementation for audit/history.
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   contents: write
 
@@ -54,6 +54,7 @@ jobs:
           echo "RUN_PIPELINE=$RUN_PIPELINE"
 
   initialize:
+    if: ${{ false }} # disabled per user request
     needs: validate
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
@@ -210,6 +211,7 @@ jobs:
           fi
 
   failure-alert:
+    if: ${{ false }} # disabled per user request
     needs: [validate, initialize, screen-25d, screen-120d-shard-0, screen-120d-shard-1, screen-120d-shard-2, screen-120d-shard-3, screen-120d-aggregate, lifecycle-250d, market-context, ai-finalize, feedback-refresh]
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
