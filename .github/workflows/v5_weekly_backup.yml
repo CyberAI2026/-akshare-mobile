@@ -2,8 +2,8 @@ name: V5 Weekly Master-Pool Backup
 
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   contents: write
 
@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   weekly-backup:
+    if: ${{ false }} # disabled per user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
