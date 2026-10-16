@@ -1,22 +1,8 @@
 name: V5 Daily Sector Membership Library
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "research/market_sector_context_fetch.py"
-      - "tests/test_sector_membership_library.py"
-      - ".github/workflows/research_market_sector_context.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "research/market_sector_context_fetch.py"
-      - "tests/test_sector_membership_library.py"
-      - ".github/workflows/research_market_sector_context.yml"
-  schedule:
-    # Weekdays 11:15 UTC = 19:15 Beijing time; the script skips non-trading days.
-    - cron: "15 11 * * 1-5"
+# Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
+# No scheduled, push, or manual execution trigger remains.
+on: []
 
 permissions:
   contents: write
