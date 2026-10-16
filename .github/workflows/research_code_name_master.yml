@@ -2,13 +2,14 @@ name: Research A-Share Code-Name Master
 
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   contents: write
 
 jobs:
   fetch-master:
+    if: ${{ false }} # disabled per user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
