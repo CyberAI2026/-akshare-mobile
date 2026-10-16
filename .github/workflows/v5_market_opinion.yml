@@ -4,8 +4,8 @@ name: V5 Market Opinion Mining
 # All jobs are disabled; preserve implementation for audit/history.
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   contents: write
 
@@ -84,6 +84,7 @@ jobs:
           REQUESTED_SOURCE_DATE: ${{ inputs.source_date }}
 
   validate:
+    if: ${{ false }} # disabled per user request
     needs: preflight
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
@@ -101,6 +102,7 @@ jobs:
           python -m unittest tests/test_market_opinion_mining.py
 
   concept-refresh:
+    if: ${{ false }} # disabled per user request
     needs: [preflight, validate]
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
@@ -132,6 +134,7 @@ jobs:
           retention-days: 14
 
   discover:
+    if: ${{ false }} # disabled per user request
     needs: [preflight, validate]
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
@@ -157,6 +160,7 @@ jobs:
           retention-days: 1
 
   opinion-batches:
+    if: ${{ false }} # disabled per user request
     needs: [preflight, validate, discover]
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
@@ -204,6 +208,7 @@ jobs:
           retention-days: 1
 
   aggregate:
+    if: ${{ false }} # disabled per user request
     needs: [preflight, discover, opinion-batches]
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
@@ -247,6 +252,7 @@ jobs:
           retention-days: 14
 
   failure-alert:
+    if: ${{ false }} # disabled per user request
     needs: [preflight, discover, opinion-batches, aggregate]
     if: ${{ false }} # suspended by user request
     runs-on: ubuntu-latest
