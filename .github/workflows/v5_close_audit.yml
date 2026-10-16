@@ -1,15 +1,8 @@
 name: V5 Tail-to-Close Breadth Audit
 
-on:
-  schedule:
-    # Staggered 15:07/15:17/15:27 retries; completed runs skip idempotently.
-    - cron: '7,17,27 7 * * 1-5'
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/v5_close_audit.yml'
-      - 'v5_data/control/close_audit_fallback_trigger.json'
+# Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
+# No scheduled, push, or manual execution trigger remains.
+on: []
 
 permissions:
   contents: write
