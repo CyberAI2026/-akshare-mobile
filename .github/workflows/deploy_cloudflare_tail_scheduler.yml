@@ -7,6 +7,11 @@ on:
         description: "Type DEPLOY to deploy the production scheduler"
         required: true
         type: string
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy_cloudflare_tail_scheduler.yml"
+      - "infrastructure/cloudflare-tail-scheduler/wrangler.toml"
 
 permissions:
   contents: read
@@ -17,7 +22,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ inputs.confirmation == 'DEPLOY' }}
+    if: ${{ github.event_name == 'push' || inputs.confirmation == 'DEPLOY' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
