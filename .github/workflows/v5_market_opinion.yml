@@ -2,8 +2,10 @@ name: V5 Market Opinion Mining
 
 # Suspended 2026-10-15 by explicit user request: no OpenAI API token usage.
 # All jobs are disabled; preserve implementation for audit/history.
-on:
-  workflow_dispatch:
+# Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
+# No scheduled, push, or manual execution trigger remains.
+on: []
+
 permissions:
   contents: write
 
