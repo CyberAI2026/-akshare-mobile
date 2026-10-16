@@ -2,8 +2,8 @@ name: V5 Daily Sector Membership Library
 
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   contents: write
 
@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   sector-membership-library:
+    if: ${{ false }} # disabled per user request
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -78,6 +79,7 @@ jobs:
           retention-days: 30
 
   sector-attribution:
+    if: ${{ false }} # disabled per user request
     needs: sector-membership-library
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
