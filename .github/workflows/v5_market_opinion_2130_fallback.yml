@@ -4,8 +4,8 @@ name: V5 Market Opinion 21:30 Fallback
 # All jobs are disabled; preserve implementation for audit/history.
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   actions: read
   contents: write
