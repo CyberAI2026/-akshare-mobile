@@ -1,14 +1,8 @@
 name: Research A-Share Code-Name Master
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "15 12 * * 1-5"
-  push:
-    branches: [main]
-    paths:
-      - "research/code_name_master_only.py"
-      - ".github/workflows/research_code_name_master.yml"
+# Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
+# No scheduled, push, or manual execution trigger remains.
+on: []
 
 permissions:
   contents: write
