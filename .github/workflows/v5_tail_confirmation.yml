@@ -4,8 +4,8 @@ name: V5 Tail Confirmation
 # All jobs are disabled; preserve implementation for audit/history.
 # Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
 # No scheduled, push, or manual execution trigger remains.
-on: []
-
+on:
+  workflow_dispatch:
 permissions:
   contents: write
 
@@ -30,6 +30,7 @@ jobs:
           python -m unittest tests/test_tail_stages.py tests/test_holding_exit.py tests/test_v5_data_layers.py tests/test_recommendation_feedback.py
 
   precheck-1440:
+    if: ${{ false }} # disabled per user request
     needs: validate
     # Ordinary code pushes validate only. A dedicated fallback-file commit is an authorized production trigger.
     if: ${{ false }} # suspended by user request
@@ -98,6 +99,7 @@ jobs:
           retention-days: 14
 
   failure-alert:
+    if: ${{ false }} # disabled per user request
     needs: [precheck-1440, finalize-1445]
     # A job-level timeout is reported as cancelled, so failure() alone silently
     # skipped the alert on 2026-09-17. Ordinary validation-only pushes stay quiet.
