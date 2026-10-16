@@ -1,10 +1,8 @@
 name: V5 Weekly Master-Pool Backup
 
-on:
-  workflow_dispatch:
-  schedule:
-    # Friday 09:30 UTC = Friday 17:30 China time. Backup timing is non-critical.
-    - cron: '30 9 * * 5'
+# Disabled 2026-10-17 by explicit user request; preserve workflow history and data.
+# No scheduled, push, or manual execution trigger remains.
+on: []
 
 permissions:
   contents: write
