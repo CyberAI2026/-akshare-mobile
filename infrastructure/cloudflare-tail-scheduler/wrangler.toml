@@ -13,6 +13,7 @@ enabled = true
 # accepts only 20:30, 21:00-21:50, 22:00, and 22:12 Shanghai; other grid ticks
 # are explicit no-ops. This stays within the Workers Free five-trigger limit.
 # External dispatch paused 2026-10-17 per user request; no tail/opinion/PushPlus cron triggers.
+# 2026-11-07: keep all stock schedules and WeChat notifications stopped.
 crons = []
 
 [vars]
